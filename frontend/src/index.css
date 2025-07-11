@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-blue: #005596; /* Lapis Lazuli - Primary brand color */
+  --color-accent-sky: #3fa9f5; /* Argentinian Blue - Accent / Links / Buttons */
+  --color-accent-teal: #00a6a6; /* Light Sea Green - Secondary accent */
+  --color-accent-coral: #ff6b6b; /* Light Red - Error / Alert / Destructive */
+  --color-primary-yellow: #ffd200; /* Gold - Highlight / Call-to-action */
+
+  --color-white: #ffffff; /* White - Text background / card surface */
+  --color-background: #f5f7fa; /* Anti-flash White - Page background */
+  --color-surface: #d9d9d9; /* Platinum - Input backgrounds / subtle UI elements */
+  --color-text-secondary: #5c5c5c; /* Davy's Gray - Secondary text */
+  --color-text-primary: #1c1c1e; /* Eerie Black - Primary text */
+}
+
+@theme-dark {
+  --color-primary-blue: #4AA8FF;        /* Brightened Blue - Primary brand color on dark bg */
+  --color-accent-sky: #6CCAFF;          /* Light Sky Blue - Link / Button hover / accents */
+  --color-accent-teal: #1BC7C7;         /* Cool Teal - Secondary accent / icons */
+  --color-accent-coral: #FF7A7A;        /* Soft Coral - Alerts / Errors / Badges */
+  --color-primary-yellow: #FFDB57;      /* Muted Gold - Highlights / Calls to action */
+
+  --color-white: #EDEDED;               /* Off-White - Primary text / icons on dark bg */
+  --color-background: #121212;          /* Rich Black - App background */
+  --color-surface: #1E1E1E;             /* Dark Gray - Cards / Containers */
+  --color-text-secondary: #A0A0A0;      /* Cool Gray - Subtext / Labels */
+  --color-text-primary: #F5F5F5;        /* Light Gray - Main readable text */
+}

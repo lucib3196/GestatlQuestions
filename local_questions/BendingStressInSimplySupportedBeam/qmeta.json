@@ -1,0 +1,30 @@
+{
+  "question_template": "A simply supported steel beam with a span of [[params.span]] [[params.unitsSpan]] carries a point load of [[params.load]] [[params.unitsForce]] at its center. If the beam has a rectangular cross-section of width [[params.width]] [[params.unitsDist]] and height [[params.height]] [[params.unitsDist]], what is the maximum bending stress in the beam? (Give your answer in [[params.unitsStress]] .)",
+  "image": "Hi world",
+  "qtype": "numeric",
+  "questionInputs": [
+    {
+      "qtype": "number",
+      "name": "maxBendingStress",
+      "label": "Maximum Bending Stress ($\\sigma_{max}$) = ",
+      "comparison": "sigfig",
+      "digits": 3,
+      "units": "[[params.unitsStress]]"
+    }
+  ],
+  "title": "BendingStressInSimplySupportedBeam",
+  "topic": [
+    "Structural Mechanics",
+    "Mechanics of Materials",
+    "Young's Modulus"
+  ],
+  "relevantCourses": ["ME 110", "ME 174"],
+  "tags": [
+    "Bending Stress",
+    "Simply Supported Beam",
+    "Point Load",
+    "Mechanical Engineering",
+    "Steel Structures"
+  ],
+  "isAdaptive": "True"
+}

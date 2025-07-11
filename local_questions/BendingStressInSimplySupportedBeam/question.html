@@ -1,0 +1,20 @@
+<pl-question-panel>
+  <p>
+    A simply supported steel beam with a span of [[params.span]]
+    [[params.unitsSpan]] carries a point load of [[params.load]]
+    [[params.unitsForce]] at its center.
+  </p>
+  <p>
+    If the beam has a rectangular cross-section of width [[params.width]]
+    [[params.unitsDist]] and height [[params.height]] [[params.unitsDist]], what
+    is the maximum bending stress in the beam?
+  </p>
+</pl-question-panel>
+
+<p>(Give your answer in MPa.)</p>
+<pl-number-input
+  answers-name="maxBendingStress"
+  comparison="sigfig"
+  digits="3"
+  label="Maximum Bending Stress ($ \sigma_{max} $) = "
+></pl-number-input>

@@ -1,0 +1,50 @@
+<pl-solution-panel>
+    <h2>Problem Statement</h2>
+    Consider a glass window with thickness $ [[params.thickness]] [[params.unitsDist]] $, outside surface temperature $ [[params.T_outside]] [[params.unitsTemperature]] $, and inside surface temperature $ [[params.T_inside]] [[params.unitsTemperature]] $.  Determine the heat loss through the window with height $ [[params.height]] [[params.unitsDist]] $ and width $ [[params.width]] [[params.unitsDist]] $. The thermal conductivity of glass is $ [[params.k]] [[params.unitsThermalConductivity]] $.
+</pl-solution-panel>
+
+<pl-hint level="1">
+    Given the thickness of the glass $ [[params.thickness]] [[params.unitsDist]] $, heights $ [[params.height]] [[params.unitsDist]] $ and $ [[params.width]] [[params.unitsDist]] $, and temperatures on both surfaces, the following properties are known:
+    - Outside temperature: $ [[params.T_outside]] [[params.unitsTemperature]] $
+    - Inside temperature: $ [[params.T_inside]] [[params.unitsTemperature]] $
+    - Thermal conductivity: $ [[params.k]] [[params.unitsThermalConductivity]] $
+</pl-hint>
+
+<pl-hint level="2">
+    To find the heat loss through the window, we can use Fourier's law of heat conduction:
+    $$ Q = rac{[[params.k]] [[params.unitsThermalConductivity]] 	imes ([[params.T_inside]] - [[params.T_outside]]) [[params.unitsTemperature]]}{[[params.thickness]] [[params.unitsDist]]} $$
+    where:
+    - $ Q $ is the heat loss in watts (W)
+    - $ [[params.intermediate_calculations.delta_T]] = [[params.T_inside]] - [[params.T_outside]] $ is the temperature difference between the inside and outside surfaces.
+</pl-hint>
+
+<pl-hint level="3">
+    First, calculate the area $ A $ of the window:
+    $$ A = [[params.height]] [[params.unitsDist]] \times [[params.width]] [[params.unitsDist]] $$
+    This gives us:
+    $$ A = [[params.height]] \times [[params.width]] = [[params.intermediate_calculations.area]] [[params.unitsDist]]^2 $$
+</pl-hint>
+
+<pl-hint level="4">
+    Now substitute the area expression back into the equation for $ Q $:
+    $$ Q = \frac{[[params.k]] [[params.unitsThermalConductivity]] \cdot ([[params.intermediate_calculations.delta_T]]) [[params.unitsTemperature]]}{[[params.thickness]] [[params.unitsDist]]} \cdot ([[params.intermediate_calculations.area]]) $$
+    This reflects the total heat loss through the window accounting for the area as well as the conductivity and temperature difference involved.
+</pl-hint>
+
+<pl-hint level="5">
+    Therefore, the heat loss through the window can be directly calculated by plugging in the known variables:
+    $$ Q = \frac{[[params.k]] \cdot ([[params.intermediate_calculations.delta_T]]) \cdot ([[params.intermediate_calculations.area]]) }{[[params.thickness]]} $$
+</pl-hint>
+
+<pl-hint level="6">
+    Finally, calculate the numeric value of $ Q $ by substituting the values for:
+    - Thermal conductivity $ [[params.k]] $ (in W/m·K)
+    - Temperature difference $ [[params.intermediate_calculations.delta_T]] $ (in K)
+    - Area $ [[params.intermediate_calculations.area]] $ (in m²)
+    - Thickness $ [[params.thickness]] $ (in m).
+    Ensure that if any units have to be converted (e.g., from cm to m), to do so before the calculation to maintain consistency throughout.
+</pl-hint>
+
+<pl-hint level="7">
+    The final result for heat loss $ Q $ will be in watts (W), which quantifies the rate of heat loss through the glass window.
+</pl-hint>

@@ -1,0 +1,74 @@
+[
+  {
+    "target_tag": "pl_symbolic_input",
+    "render_role": "input",
+    "mapping": [
+      {
+        "name": "form",
+        "attributes": {
+          "action": "",
+          "method": ""
+        },
+        "mapping": {}
+      },
+      {
+        "name": "fieldset",
+        "attributes": {
+          "class": "answers"
+        },
+        "mapping": {}
+      },
+      {
+        "name": "legend",
+        "attributes": {},
+        "mapping": {}
+      },
+      {
+        "name": "label",
+        "attributes": {
+          "for": "response"
+        },
+        "mapping": {}
+      },
+      {
+        "name": "input",
+        "attributes": {
+          "class": "pl-symbolic-input",
+          "type": "text",
+          "name": "response",
+          "size": "50"
+        },
+        "mapping": {}
+      }
+    ],
+    "example": ""
+  },
+  {
+    "target_tag": "pl_question_panel",
+    "render_role": "decorative",
+    "mapping": [
+      {
+        "name": "div",
+        "attributes": {
+          "class": "pl-question-panel"
+        },
+        "mapping": {}
+      }
+    ],
+    "example": ""
+  },
+  {
+    "target_tag": "pl_quest_prompt",
+    "render_role": "decorative",
+    "mapping": [
+      {
+        "name": "p",
+        "attributes": {
+          "class": "pl-quest-prompt"
+        },
+        "mapping": {}
+      }
+    ],
+    "example": ""
+  }
+]
