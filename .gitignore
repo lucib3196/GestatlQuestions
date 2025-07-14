@@ -1,3 +1,4 @@
-backend/config/*.json
+backend_api/config/*.json
 venv
 .env
+backend_api/firebase_cred.json
