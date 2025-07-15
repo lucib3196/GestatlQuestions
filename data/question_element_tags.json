@@ -1,0 +1,133 @@
+{
+  "descriptions": [
+    {
+      "name": "pl-question-panel",
+      "description": "A container element for displaying the question or problem statement in an assessment.",
+      "type": "question",
+      "returns": "none",
+      "attrs": [],
+      "sample": "<pl-question-panel>What is the acceleration of an object falling under gravity?</pl-question-panel>\n\nThis tag also acts as a container: you can include other valid HTML tags (such as headers, lists, or line breaks) inside the question panel. If you use these elements, they should have the class name 'pl-question-panel' for consistent styling."
+    },
+    {
+      "name": "pl-solution-panel",
+      "description": "A container for displaying the solution or explanation to a question, usually shown after the user submits their answer.",
+      "type": "solution",
+      "returns": "none",
+      "attrs": [],
+      "sample": "<pl-solution-panel>The acceleration due to gravity is approximately 9.8 m/s².</pl-solution-panel>"
+    },
+    {
+      "name": "pl-checkbox",
+      "description": "A checkbox-based input for multiple selection questions where users can select more than one answer.",
+      "type": "question",
+      "returns": "array<string>",
+      "attrs": [
+        {
+          "name": "answers-name",
+          "description": "The name used to group checkboxes for answer submission."
+        },
+        {
+          "name": "weight",
+          "description": "The score or value assigned to this checkbox option."
+        },
+        {
+          "name": "inline",
+          "description": "If present, displays checkboxes inline instead of stacked."
+        },
+        {
+          "name": "number-answers",
+          "description": "Total number of options to display (default: all)."
+        },
+        {
+          "name": "min-select",
+          "description": "Minimum number of answers required."
+        },
+        {
+          "name": "max-select",
+          "description": "Maximum number of answers allowed."
+        }
+      ],
+      "sample": "<pl-checkbox answers-name=\"vpos\" weight=\"1\">\n  <pl-answer name=\"ab\" description=\"Option A-B\" correct=\"true\">A-B</pl-answer>\n  <pl-answer name=\"bc\" description=\"Option B-C\" correct=\"true\">B-C</pl-answer>\n  <pl-answer name=\"cd\" description=\"Option C-D\">C-D</pl-answer>\n</pl-checkbox>"
+    },
+    {
+      "name": "pl-number-input",
+      "description": "A numeric input field for capturing numerical answers. Supports different grading methods and precision levels.",
+      "type": "question",
+      "returns": "number",
+      "attrs": [
+        {
+          "name": "answers-name",
+          "description": "The name used to identify the answer for submission."
+        },
+        {
+          "name": "id",
+          "description": "A unique identifier for the input element."
+        },
+        {
+          "name": "comparison",
+          "description": "Grading mode: 'exact', 'relabs', 'sigfig', or 'decdig'."
+        },
+        {
+          "name": "digits",
+          "description": "Expected number of decimal or significant digits."
+        },
+        {
+          "name": "label",
+          "description": "A label displayed next to the input field."
+        }
+      ],
+      "sample": "<pl-number-input answers-name=\"num1\" id=\"input1\" comparison=\"exact\" digits=\"2\" label=\"Enter a number\"></pl-number-input>"
+    },
+    {
+      "name": "pl-hint",
+      "description": "Displays a hint or clue to help the user answer the question. Can be revealed progressively based on level.",
+      "type": "solution",
+      "returns": "none",
+      "attrs": [
+        {
+          "name": "data-type",
+          "description": "Specifies the type of hint (e.g., 'text', 'number')."
+        },
+        {
+          "name": "level",
+          "description": "Indicates the order of the hint to be revealed."
+        }
+      ],
+      "sample": "<pl-hint data-type=\"text\" level=\"1\">Try breaking the problem into smaller parts.</pl-hint>"
+    },
+    {
+      "name": "pl-multiple-choice",
+      "description": "A component for single-answer multiple choice questions.",
+      "type": "question",
+      "returns": "string",
+      "attrs": [
+        {
+          "name": "answers-name",
+          "description": "The name used to identify the answer for submission."
+        },
+        {
+          "name": "inline",
+          "description": "If present, displays choices inline instead of stacked."
+        },
+        {
+          "name": "weight",
+          "description": "The score or value assigned to this choice."
+        }
+      ],
+      "sample": "<pl-multiple-choice answers-name=\"acc\" weight=\"1\">\n  <pl-answer correct=\"false\">positive</pl-answer>\n  <pl-answer correct=\"true\">negative</pl-answer>\n  <pl-answer correct=\"false\">zero</pl-answer>\n</pl-multiple-choice>"
+    },
+    {
+      "name": "pl-input-container",
+      "description": "A layout element used to group multiple input components together. Useful for multi-part questions that logically group inputs into sub-sections with shared context or labels.",
+      "type": "question",
+      "returns": "object<string, any>",
+      "attrs": [
+        {
+          "name": "section",
+          "description": "An optional identifier to label or distinguish each container group."
+        }
+      ],
+      "sample": "\n  <pl-question-panel>Part A: Enter force and distance.</pl-question-panel>\n <pl-input-container> <pl-number-input answers-name=\"force\" label=\"Force (N)\" />\n  <pl-number-input answers-name=\"distance\" label=\"Distance (m)\" />\n</pl-input-container>"
+    }
+  ]
+}

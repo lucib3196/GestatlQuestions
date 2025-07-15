@@ -1,0 +1,92 @@
+Input: I am interested in the following courses being i like thermodynamics  what classes would i take.
+Generated answer: At UCR, there are several courses related to thermodynamics that you might be interested in. Here are the relevant courses:
+
+1. **ME 100A - Thermodynamics**
+   - **Course Description:** This course introduces basic concepts and applications of thermodynamics relevant to mechanical engineering.
+   - **Topics Covered:** 
+     - Fundamental concepts of thermodynamics
+     - Work and energy principles
+     - The First Law of Thermodynamics
+     - Properties of pure substances and phase diagrams
+     - Control volume analysis
+     - Carnot cycle and its efficiency
+     - Refrigeration cycles and applications
+     - The Second Law of Thermodynamics
+     - Concepts of entropy
+     - Reversible versus irreversible processes
+   - **What You Can Expect to Learn:** Students will gain an understanding of the core principles of thermodynamics and be able to apply these concepts through various calculations and analyses, including power cycles and refrigeration systems.
+
+2. **ME 100B - Thermodynamics**
+   - **Course Description:** This is a continuation of ME 100A, diving deeper into thermodynamic principles.
+   - **Topics Covered:**
+     - Entropy production
+     - Cycle analysis (including Carnot and Rankine cycles)
+     - Vapor power systems
+     - Gas power systems
+     - Refrigeration and heat pump systems
+     - Equations of state
+     - Property relations for gases and liquids
+     - Ideal gas mixtures
+     - Psychrometrics
+     - Multicomponent systems
+     - Combustion and reacting mixtures
+   - **What You Can Expect to Learn:** Students will build upon their previous knowledge to analyze more complex thermodynamic systems and processes, understanding concepts like cycle efficiency and entropy in greater detail.
+
+3. **ME 135 - Transport Phenomena**
+   - **Course Description:** This course integrates thermodynamics with fluid mechanics and heat transfer.
+   - **Topics Covered:**
+     - Thermodynamics principles related to transport phenomena
+     - Fluid mechanics fundamentals
+     - Heat transfer mechanisms and calculations
+     - Psychrometry and humidity calculations
+     - Combustion processes and analysis
+     - Compressible flow concepts and applications
+     - Turbomachinery performance and design considerations
+   - **What You Can Expect to Learn:** Students will explore the interconnectedness of thermodynamics, fluid mechanics, and heat transfer, learning how these principles apply to real-world applications such as air conditioning and combustion systems.
+
+4. **ME 243 - Advanced Mechanical Engineering Thermodynamics**
+   - **Course Description:** This advanced course explores the statistical foundations of thermodynamics and its applications.
+   - **Topics Covered:**
+     - Statistical mechanics and its applications to thermodynamics  
+     - Entropy and its origins  
+     - Temperature scales and definitions  
+     - Phase equilibria and chemical equilibrium  
+     - Thermodynamic fluctuations  
+     - Nanoscale thermodynamics and its implications  
+     - Applications of thermodynamics in real-world systems
+   - **What You Can Expect to Learn:** Graduate-level students will delve into advanced topics in thermodynamics, learning to apply statistical mechanics principles and understand thermodynamic behaviors at the nanoscale.
+
+These courses will provide you with a comprehensive foundation in thermodynamics, applicable to various fields within engineering and applied sciences. 
+Input: What classes at UCR offer robotics based courses, additionally I am also interested in fluid dynamics courses what courses can I take
+Generated answer: At UCR, the following robotics-based courses are available:
+
+1. **Introduction to Robotics (ME 144)**: 
+   - This upper-level course surveys various components of robotics, including kinematics, dynamics, control strategies, sensors, vision, and programming. Students will gain hands-on experience through laboratory projects involving robot arms, vision systems, and mobile robots. 
+   - Key topics covered include:
+     - Overview of robot components and their functions
+     - Kinematics and dynamics of robotic systems
+     - Control strategies for robotic movements
+     - Applications of different types of sensors in robotics
+     - Fundamental computer vision techniques and image processing
+     - Programming principles related to robotic systems
+
+2. **Robotic Planning and Kinematics (ME 145)**:
+   - This course emphasizes motion planning and kinematics with a focus on geometric reasoning and computation. It explores configuration spaces, sampling methods, and planning algorithms. 
+   - Topics of study include:
+     - Configuration spaces and their significance in robotics
+     - Various sampling methods used in motion planning
+     - Planning algorithms such as A* and RRT
+     - Techniques for collision detection 
+     - Theoretical aspects of control in relation to motion planning
+
+3. **Advanced Robotics (ME 222)**:
+   - A graduate-level course that delves into more complex aspects of robotics such as navigation, sensor modeling, data processing, and motion planning. 
+   - This course covers advanced topics like:
+     - Robot navigation techniques
+     - Sensor modeling and data processing methods
+     - Localization and SLAM (Simultaneous Localization and Mapping)
+     - Image-based motion estimation and mapping techniques
+
+As for fluid dynamics courses, I don’t know based on the provided information. 
+Input: What does the course ME118A cover in UCR
+Generated answer: I don't know based on the provided information. 

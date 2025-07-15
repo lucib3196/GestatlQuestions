@@ -10,7 +10,6 @@ from langgraph.graph import StateGraph
 from pydantic import BaseModel
 import pandas as pd
 
-
 def save_graph_visualization(
     graph: StateGraph,
     filename: str = "Graph.png",
@@ -67,7 +66,7 @@ async def pdf_to_image_temp(
             page_img = f"{pdf_name}_page_{page_number + 1}.png"
             temp_path = os.path.join(tmpdir, page_img)
 
-            pix = page.get_pixmap()
+            pix = page.get_pixmap() # type: ignore
             pix.save(temp_path)
 
             if page_number == 0:
@@ -123,15 +122,15 @@ async def pdf_to_image_persistent(
             height = rect.height
             # Get the right hand cornder
             point = (width - 25, height - 25)
-            page.draw_circle(point, 25)
+            page.draw_circle(point, 25) # type: ignore
             font_size = 30
             point = fitz.Point(point[0], point[1])
-            page.insert_text(point=point, text=str(page_number), fontsize=font_size)
+            page.insert_text(point=point, text=str(page_number), fontsize=font_size) # type: ignore
 
         page_img = f"{pdf_name}_page_{page_number}.png"
         temp_path = os.path.join(folder_path, page_img)
 
-        pix = page.get_pixmap()
+        pix = page.get_pixmap() # type: ignore
         pix.save(temp_path)
         image_paths.append(temp_path)
 

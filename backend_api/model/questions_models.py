@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Union, Optional, Literal
-from ai_workspace.question_to_json.models import QuestionInput
+from ai_workspace.agents.question_to_json.models import QuestionInput
 
 
 class QuestionMeta(BaseModel):
@@ -18,7 +18,7 @@ class QuestionMetaNew(BaseModel):
     qtype: Optional[Literal["numeric", "multiple_choice"]] = Field(default=None)
     image: Optional[str] = Field(default=None)
     questionInputs: List[QuestionInput]
-    title: str
+    title:str
     topic: List[str]
     relevantCourses: List[str]
     tags: List[str]
