@@ -23,7 +23,7 @@ class MultipleChoiceInput(BaseQuestionInput):
     options: List[MultipleChoiceOptions]
 
 
-QuestionInput = Union[NumberInput]
+QuestionInput = Union[NumberInput, MultipleChoiceInput]
 
 
 class QuestionBase(BaseModel):
@@ -31,13 +31,26 @@ class QuestionBase(BaseModel):
     questionInputs: List[QuestionInput] = Field(
         ..., description="The inputs for the question ie what you are trying to solve"
     )
+    image: Optional[str] = Field("filename of the image")
 
 
 class QuestionPayload(BaseModel):
-    question_template: str
-    questionInputs: List[QuestionInput]
+    question: str
+    questionBase: List[QuestionBase]
     title: str
     topic: List[str]
     relevantCourses: List[str]
     tags: List[str]
     isAdaptive: Union[str, bool]
+    createdBy: Optional[str]
+
+
+# class QuestionPayload(BaseModel):
+#     question_template: str
+#     questionInputs: List[QuestionInput]
+#     title: str
+#     topic: List[str]
+#     relevantCourses: List[str]
+#     tags: List[str]
+#     isAdaptive: Union[str, bool]
+#     createdBy: Optional[str]

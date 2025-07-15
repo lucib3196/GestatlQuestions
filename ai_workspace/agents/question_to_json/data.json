@@ -1,0 +1,134 @@
+[
+  {
+    "question": "<pl-question-panel>\r\n    <pl-figure file-name=\"3dMoment1.png\"></pl-figure>\r\n   <p>Determine the moment about point O in (${{params.unitsForce}} {{params.unitsDist}}$) caused by the force $ \\mathbf{F} = {{params.force}}$ $ {{params.unitsForce}}$ acting on the beam.</p>\r\n   <p>Let the lengths $\\mathbf{L}_1 = {{params.l1}}$ $ {{params.unitsDist}} $, $\\mathbf{L}_2 = {{params.l2}}$ $ {{params.unitsDist}} $, $\\mathbf{L}_3 = {{params.l3}}$ $ {{params.unitsDist}} $</p>\r\n   <p>and $\\mathbf{V}_1 = {{params.v1}}$ $ {{params.unitsDist}} $, $\\mathbf{V}_2 = {{params.v2}}$ $ {{params.unitsDist}} $, $\\mathbf{V}_3 = {{params.v3}}$ $ {{params.unitsDist}} $</p>\r\n</pl-question-panel>\r\n\r\n<pl-number-input answers-name=\"momenti\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{i}$ =\"></pl-number-input>\r\n<pl-number-input answers-name=\"momentj\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{j}$ =\"></pl-number-input>\r\n<pl-number-input answers-name=\"momentk\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{k}$ =\"></pl-number-input>",
+    "payload": {
+      "question": "<pl-question-panel>\r\n    <pl-figure file-name=\"3dMoment1.png\"></pl-figure>\r\n   <p>Determine the moment about point O in (${{params.unitsForce}} {{params.unitsDist}}$) caused by the force $ \\mathbf{F} = {{params.force}}$ $ {{params.unitsForce}}$ acting on the beam.</p>\r\n   <p>Let the lengths $\\mathbf{L}_1 = {{params.l1}}$ $ {{params.unitsDist}} $, $\\mathbf{L}_2 = {{params.l2}}$ $ {{params.unitsDist}} $, $\\mathbf{L}_3 = {{params.l3}}$ $ {{params.unitsDist}} $</p>\r\n   <p>and $\\mathbf{V}_1 = {{params.v1}}$ $ {{params.unitsDist}} $, $\\mathbf{V}_2 = {{params.v2}}$ $ {{params.unitsDist}} $, $\\mathbf{V}_3 = {{params.v3}}$ $ {{params.unitsDist}} $</p>\r\n</pl-question-panel>\r\n\r\n<pl-number-input answers-name=\"momenti\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{i}$ =\"></pl-number-input>\r\n<pl-number-input answers-name=\"momentj\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{j}$ =\"></pl-number-input>\r\n<pl-number-input answers-name=\"momentk\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{k}$ =\"></pl-number-input>",
+      "questionBase": [
+        {
+          "question_template": "Determine the moment about point O in (${{params.unitsForce}} {{params.unitsDist}}$) caused by the force $ \\mathbf{F} = {{params.force}}$ $ {{params.unitsForce}}$ acting on the beam.",
+          "questionInputs": [
+            {
+              "name": "momenti",
+              "label": "Moment about point O $\u007f{i}$ =",
+              "qtype": "number",
+              "comparison": "sigfig",
+              "digits": 3,
+              "units": "{{params.unitsForce}} {{params.unitsDist}}"
+            },
+            {
+              "name": "momentj",
+              "label": "Moment about point O $\u007f{j}$ =",
+              "qtype": "number",
+              "comparison": "sigfig",
+              "digits": 3,
+              "units": "{{params.unitsForce}} {{params.unitsDist}}"
+            },
+            {
+              "name": "momentk",
+              "label": "Moment about point O $\u007f{k}$ =",
+              "qtype": "number",
+              "comparison": "sigfig",
+              "digits": 3,
+              "units": "{{params.unitsForce}} {{params.unitsDist}}"
+            }
+          ],
+          "image": "3dMoment1.png"
+        }
+      ],
+      "title": "3D moments",
+      "topic": ["3D moments"],
+      "relevantCourses": [],
+      "tags": ["Force anylisis", "Moment", "Vectors"],
+      "isAdaptive": "true",
+      "createdBy": "epere194@ucr.edu"
+    }
+  },
+  {
+    "question": "<pl-question-panel>\r\n    <pl-figure file-name=\"3dMoment2.png\"></pl-figure>\r\n    <p> Compute the moment about the point O in (${{params.unitsForce}} {{params.unitsDist}}$) as result of the force $ \\mathbf{F} = {{params.force}}$ $ {{params.unitsForce}}$ acting at the end of the beam.</p>\r\n    <p> Let the lengths $ \\mathbf{L}_1 = {{params.l1}}$ ${{params.unitsDist}} $,  $ \\mathbf{L}_2 = {{params.l2}}$ ${{params.unitsDist}} $, and $ \\mathbf{L}_3 = {{params.l3}}$ ${{params.unitsDist}} $ </p>\r\n</pl-question-panel>\r\n\r\n<pl-number-input answers-name=\"momenti\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{i}$ =\"></pl-number-input>\r\n<pl-number-input answers-name=\"momentj\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{j}$ =\"></pl-number-input>\r\n<pl-number-input answers-name=\"momentk\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{k}$ =\"></pl-number-input>",
+    "payload": {
+      "question": "<pl-question-panel>\r\n    <pl-figure file-name=\"3dMoment2.png\"></pl-figure>\r\n    <p> Compute the moment about the point O in (${{params.unitsForce}} {{params.unitsDist}}$) as result of the force $ \\mathbf{F} = {{params.force}}$ $ {{params.unitsForce}}$ acting at the end of the beam.</p>\r\n    <p> Let the lengths $ \\mathbf{L}_1 = {{params.l1}}$ ${{params.unitsDist}} $,  $ \\mathbf{L}_2 = {{params.l2}}$ ${{params.unitsDist}} $, and $ \\mathbf{L}_3 = {{params.l3}}$ ${{params.unitsDist}} $ </p>\r\n</pl-question-panel>\r\n\r\n<pl-number-input answers-name=\"momenti\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{i}$ =\"></pl-number-input>\r\n<pl-number-input answers-name=\"momentj\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{j}$ =\"></pl-number-input>\r\n<pl-number-input answers-name=\"momentk\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{k}$ =\"></pl-number-input>",
+      "questionBase": [
+        {
+          "question_template": "Compute the moment about the point O in (${{params.unitsForce}} {{params.unitsDist}}$) as a result of the force $ \\mathbf{F} = {{params.force}}$ $ {{params.unitsForce}}$ acting at the end of the beam.",
+          "questionInputs": [
+            {
+              "name": "momenti",
+              "label": "Moment about point O $\u007f{i}$ =",
+              "qtype": "number",
+              "comparison": "sigfig",
+              "digits": 3,
+              "units": "{{params.unitsForce}} {{params.unitsDist}}"
+            },
+            {
+              "name": "momentj",
+              "label": "Moment about point O $\u007f{j}$ =",
+              "qtype": "number",
+              "comparison": "sigfig",
+              "digits": 3,
+              "units": "{{params.unitsForce}} {{params.unitsDist}}"
+            },
+            {
+              "name": "momentk",
+              "label": "Moment about point O $\u007f{k}$ =",
+              "qtype": "number",
+              "comparison": "sigfig",
+              "digits": 3,
+              "units": "{{params.unitsForce}} {{params.unitsDist}}"
+            }
+          ],
+          "image": "3dMoment2.png"
+        }
+      ],
+      "title": "3D moments",
+      "topic": ["3D moments"],
+      "relevantCourses": [],
+      "tags": ["Force anylisis", "Moment", "Vectors"],
+      "isAdaptive": "true",
+      "createdBy": "epere194@ucr.edu"
+    }
+  },
+  {
+    "question": "<pl-question-panel>\r\n    <pl-figure file-name=\"3dMoment3.png\"></pl-figure>\r\n<p> Determine the resultant moment produced by the forces $\\mathbf{F}_R = {{params.forceR}}$ ${{params.unitsForce}} $ and $\\mathbf{F}_G = {{params.forceG}}$ ${{params.unitsForce}} $ about point O in (${{params.unitsForce}} {{params.unitsDist}}$).</p>\r\n<p> Let the lengths $ \\mathbf{L}_1 = {{params.l1}}$ ${{params.unitsDist}} $,  $ \\mathbf{L}_2 = {{params.l2}}$ ${{params.unitsDist}} $, and $ \\mathbf{L}_3 = {{params.l3}}$ ${{params.unitsDist}} $ </p>\r\n\r\n</pl-question-panel>\r\n\r\n<pl-number-input answers-name=\"momenti\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{i}$ =\"></pl-number-input>\r\n<pl-number-input answers-name=\"momentj\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{j}$ =\"></pl-number-input>\r\n<pl-number-input answers-name=\"momentk\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{k}$ =\"></pl-number-input>",
+    "payload": {
+      "question": "<pl-question-panel>\r\n    <pl-figure file-name=\"3dMoment3.png\"></pl-figure>\r\n<p> Determine the resultant moment produced by the forces $\\mathbf{F}_R = {{params.forceR}}$ ${{params.unitsForce}} $ and $\\mathbf{F}_G = {{params.forceG}}$ ${{params.unitsForce}} $ about point O in (${{params.unitsForce}} {{params.unitsDist}}$).</p>\r\n<p> Let the lengths $ \\mathbf{L}_1 = {{params.l1}}$ ${{params.unitsDist}} $,  $ \\mathbf{L}_2 = {{params.l2}}$ ${{params.unitsDist}} $, and $ \\mathbf{L}_3 = {{params.l3}}$ ${{params.unitsDist}} $ </p>\r\n\r\n</pl-question-panel>\r\n\r\n<pl-number-input answers-name=\"momenti\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{i}$ =\"></pl-number-input>\r\n<pl-number-input answers-name=\"momentj\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{j}$ =\"></pl-number-input>\r\n<pl-number-input answers-name=\"momentk\" comparison=\"sigfig\" digits=\"3\" label=\"Moment about point O $\\hat{k}$ =\"></pl-number-input>",
+      "questionBase": [
+        {
+          "question_template": "Determine the resultant moment produced by the forces \\(\\mathbf{F}_R = {{params.forceR}}\\) ${{params.unitsForce}} $ and \\(\\mathbf{F}_G = {{params.forceG}}\\) ${{params.unitsForce}} $ about point O in (${{params.unitsForce}} {{params.unitsDist}}$).",
+          "questionInputs": [
+            {
+              "name": "momenti",
+              "label": "Moment about point O \\(\\hat{i}\\) =",
+              "qtype": "number",
+              "comparison": "sigfig",
+              "digits": 3,
+              "units": null
+            },
+            {
+              "name": "momentj",
+              "label": "Moment about point O \\(\\hat{j}\\) =",
+              "qtype": "number",
+              "comparison": "sigfig",
+              "digits": 3,
+              "units": null
+            },
+            {
+              "name": "momentk",
+              "label": "Moment about point O \\(\\hat{k}\\) =",
+              "qtype": "number",
+              "comparison": "sigfig",
+              "digits": 3,
+              "units": null
+            }
+          ],
+          "image": "3dMoment3.png"
+        }
+      ],
+      "title": "3D moments",
+      "topic": ["3D moments"],
+      "relevantCourses": [],
+      "tags": ["Force anylisis", "Moment", "Vectors"],
+      "isAdaptive": "true",
+      "createdBy": "epere194@ucr.edu"
+    }
+  }
+]

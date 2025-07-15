@@ -1,0 +1,544 @@
+{
+  "courses": [
+    {
+      "course_name": "Introduction to Mechanical Engineering",
+      "course_id": "ME 002",
+      "full_description": "Course Description: An introduction to the field of mechanical engineering. Topics include the mechanical engineering profession; machine components; forces in structures and fluids; materials and stresses; thermal and energy systems; machine motion; and machine design.\n Course Topics: - Overview of the mechanical engineering profession\n- Introduction to machine components (gears, bearings, etc.)\n- Basic concepts of forces and equilibrium in structures\n- Principles of fluid mechanics and properties of fluids\n- Introduction to materials and their mechanical properties\n- Basics of stress and strain analysis\n- Fundamentals of thermal systems and energy transfer\n- Principles of machine motion (kinematics)\n- Basics of machine design and functionality\n Course Questions: 1. Given a set of machine components and their materials, calculate the stress experienced by each component under a specified load.\n2. Describe the principles of fluid mechanics and apply Bernoulli's equation to determine the velocity of fluid flow in a simple system.\n3. Analyze a basic mechanism to determine its motion characteristics (e.g., velocity and acceleration of different components) and design an improvement.",
+      "course_level": "lower"
+    },
+    {
+      "course_name": "How Things Work: the Principles Behind Technology",
+      "course_id": "ME 003",
+      "full_description": "Course Description: Introduces the basic physical principles of engineering systems from everyday life such as automobiles, computers, and household appliances. Topics include conservation laws and the physics and chemistry of engineering systems. Does not confer credit towards a degree in the Bourns College of Engineering.\n Course Topics: - Basic principles of mechanics (force, motion, energy)  \n- Conservation laws (conservation of energy, momentum)  \n- Introduction to thermodynamics  \n- Simple machines and mechanical advantage  \n- Basic electronics and electricity in household appliances  \n- Fundamental chemical principles related to engineering materials  \n- Applications of physics in everyday technology (e.g., automobiles, computers)\n Course Questions: 1. Calculate the mechanical advantages of different simple machines found within household appliances.  \n2. Explain how the principles of conservation of energy apply to a car engine.  \n3. Identify and describe the basic chemical reactions involved in the manufacturing processes of everyday materials.",
+      "course_level": "lower"
+    },
+    {
+      "course_name": "Energy and the Environment",
+      "course_id": "ME 004",
+      "full_description": "Course Description: Covers energy conservation, energy sources, market dynamics, and climate change. Addresses cultural, political, and social trends and their impact on the ecosystem. Discusses renewable and non-renewable energy sources. Technical background not required.\n Course Topics: - Energy conservation principles  \n- Overview of renewable energy sources (solar, wind, hydro, geothermal)  \n- Overview of non-renewable energy sources (coal, oil, natural gas, nuclear)  \n- Market dynamics of energy supply and demand  \n- Impact of energy choices on climate change  \n- Cultural, political, and social trends related to energy use  \n- Environmental impacts of various energy sources  \n- Basics of energy policy and regulation\n Course Questions: 1. Explain the differences between renewable and non-renewable energy sources. Which sources are considered renewable, and how do they impact the environment?  \n2. Provide a calculation for energy savings from implementing conservation techniques in a hypothetical household setting.  \n3. Discuss how market dynamics influence the cost and availability of energy sources, providing specific examples of cultural or political trends that could affect these dynamics.",
+      "course_level": "lower"
+    },
+    {
+      "course_name": "The Science of Mythbusting",
+      "course_id": "ME 005",
+      "full_description": "Course Description: Introduces the scientific method for non-science majors. Explores the application of scientific concepts to test the validity of myths and events from news stories, movies, and other popular media. Provides critical reasoning skills to interpret product claims, critique Web information, and understand new technologies.\n Course Topics: - Introduction to the Scientific Method\n- Critical Thinking and Reasoning Skills\n- Testing Myths and Claims\n- Analysis of News Stories and Media\n- Evaluation of Scientific Evidence\n- Understanding Product Claims\n- Recognizing Pseudoscience\n- Researching Current Technologies and Innovations\n Course Questions: 1. A popular myth claims that the 'Five-second rule' determines whether food dropped on the floor is still safe to eat. Use the scientific method to design an experiment to test this myth. What variables would you consider, and what would be your hypothesis?\n\n2. Evaluate the following claim: \"Drinking brown sugar water can boost your energy levels faster than a cup of coffee.\" What steps would you illustrate to investigate this claim scientifically, including the type of data you would collect?\n\n3. When reading online articles about health products, what key indicators would help you determine the credibility of the information? Outline a system for assessing whether an article is based on sound scientific evidence or pseudoscience.",
+      "course_level": "lower"
+    },
+    {
+      "course_name": "Engineering Graphics and Design",
+      "course_id": "ME 009",
+      "full_description": "Course Description: Covers graphical concepts and projective geometry relating to spatial visualization and communication in design. Includes technical sketching, computer-aided design with solid modeling, geometric dimensioning and tolerancing, and an introduction to the engineering design process.\n Course Topics: - Introduction to graphical concepts in engineering\n- Fundamentals of projective geometry\n- Techniques for technical sketching\n- Basics of computer-aided design (CAD)\n- Solid modeling principles\n- Geometric dimensioning and tolerancing (GD&T)\n- Overview of the engineering design process\n Course Questions: 1. Given a set of technical specifications, create a detailed technical sketch of a mechanical component.\n2. Using CAD software, model a simple mechanical part and apply appropriate geometric dimensioning and tolerancing.\n3. Explain the steps in the engineering design process when designing a new product.",
+      "course_level": "lower"
+    },
+    {
+      "course_name": "Statics",
+      "course_id": "ME 010",
+      "full_description": "Course Description: Covers equilibrium of coplanar force systems; analysis of frames and trusses; non-coplanar force systems; friction; and distributed loads.\n Course Topics: - Equilibrium of coplanar force systems  \n- Method of joints and method of sections in truss analysis  \n- Forces in frames and trusses  \n- Non-coplanar force systems  \n- Basics of friction and its effects on motion  \n- Analysis of beams and distributed loads  \n- Reaction forces at supports\n Course Questions: 1. A 2D truss structure is subjected to an external load. Calculate the forces in each member using the method of joints.  \n2. Identify the types and directions of reaction forces on a simply supported beam under a uniform distributed load.  \n3. A block is placed on an inclined plane. Determine the angle of inclination at which the block will begin to slide down the plane due to gravity, taking into account the coefficient of friction.",
+      "course_level": "lower"
+    },
+    {
+      "course_name": "Introduction to Engineering Computation",
+      "course_id": "ME 018A",
+      "full_description": "Course Description: Introduces the use of MATLAB in engineering computation. Covers scripts and functions, programming, input/output, two- and three-dimensional graphics, and elementary numerical analysis.\n Course Topics: - Introduction to MATLAB and its interface\n- Basic programming concepts (variables, data types, control structures)\n- Writing and using scripts and functions in MATLAB\n- Input and output operations in MATLAB\n- Creating two-dimensional graphs (scatter plots, line graphs)\n- Creating three-dimensional graphics\n- Basic concepts of numerical analysis (root finding, interpolation)\n Course Questions: 1. Write a MATLAB script that uses a loop to calculate the factorial of a given number. \n2. Given a set of data points, plot the points in a two-dimensional graph and fit a linear regression line using MATLAB.\n3. Create a function in MATLAB that computes the roots of a polynomial equation using numerical methods, and demonstrate its effectiveness with an example.",
+      "course_level": "lower"
+    },
+    {
+      "course_name": "Introduction to Computational Modeling in Mechanical Engineering",
+      "course_id": "ME 018B",
+      "full_description": "Course Description: Introduces concepts of computational modeling in mechanical engineering. Topics include formulation of models using vector analysis, linear algebra, differential and integral calculus, and both analytical and numerical solution techniques.\n Course Topics: - Introduction to Computational Modeling\n- Vector Analysis in Mechanical Systems\n- Linear Algebra Applications in Engineering\n- Differential Calculus for System Dynamics\n- Integral Calculus in Mechanical Applications\n- Analytical Solution Techniques (e.g., finite element analysis)\n- Numerical Solution Techniques (e.g., iterative methods, numerical integration)\n Course Questions: 1. Given a specific mechanical system, derive its governing equations using differential calculus and solve for the system's response using numerical methods.\n2. A rectangular beam is subjected to a uniform load; use vector analysis to formulate the equations of equilibrium and calculate the reactions at the supports.\n3. Explain the difference between analytical and numerical solution techniques, providing an example where numerical methods are preferred over analytical methods.",
+      "course_level": "lower"
+    },
+    {
+      "course_name": "Thermodynamics",
+      "course_id": "ME 100A",
+      "full_description": "Course Description: Introduces basic concepts and applications of thermodynamics relevant to mechanical engineering. Topics include work and energy, the first law, properties of pure substances, control volume analysis, Carnot cycle, refrigeration cycles, the second law, entropy, and reversible versus irreversible processes.\n Course Topics: - Fundamental concepts of thermodynamics\n- Work and energy principles\n- The First Law of Thermodynamics\n- Properties of pure substances and phase diagrams\n- Control volume analysis\n- Carnot cycle and its efficiency\n- Refrigeration cycles and applications\n- The Second Law of Thermodynamics\n- Concepts of entropy\n- Reversible versus irreversible processes\n Course Questions: 1. Calculate the work done during a thermodynamic process when a certain amount of gas expands against a constant external pressure of 1.5 atm in a piston-cylinder arrangement. \n2. Given the temperature and specific properties of a certain pure substance, determine its phase and sketch the corresponding phase diagram based on the Clausius-Clapeyron relation.\n3. Design a refrigeration cycle using R-134a as the refrigerant. Calculate the coefficient of performance (COP) and analyze the changes in enthalpy at each stage of the cycle.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Thermodynamics",
+      "course_id": "ME 100B",
+      "full_description": "Course Description: Continuation of ME 100A. Topics include entropy production, cycle analysis, vapor and gas power systems, refrigeration and heat pump systems, equations of state, property relations, ideal gas mixtures, psychrometrics, multicomponent systems, combustion, and reacting mixtures.\n Course Topics: - Entropy production\n- Cycle analysis (including Carnot and Rankine cycles)\n- Vapor power systems\n- Gas power systems\n- Refrigeration and heat pump systems\n- Equations of state\n- Property relations for gases and liquids\n- Ideal gas mixtures\n- Psychrometrics\n- Multicomponent systems\n- Combustion and reacting mixtures\n Course Questions: 1. Calculate the efficiency of a Carnot cycle operating between two temperature reservoirs at 500 K and 300 K.\n2. Explain the concept of entropy production in a thermodynamic system and provide a real-world example.\n3. Analyze a refrigerant cycle to determine the coefficient of performance (COP) based on given heat transfer rates and temperature conditions.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Dynamics",
+      "course_id": "ME 103",
+      "full_description": "Course Description: Covers kinematics and kinetics of particles and rigid bodies using vector methods. Topics include Newton’s laws, work-energy, impulse-momentum, and analysis of systems of particles and rigid bodies.\n Course Topics: - Kinematics of particles\n- Kinematics of rigid bodies\n- Kinetics of particles\n- Kinetics of rigid bodies\n- Newton's laws of motion\n- Work-energy principle\n- Impulse-momentum theorem\n- Analysis of systems of particles\n- Analysis of rigid body dynamics\n Course Questions: 1. Given a system of particles, calculate the resultant momentum before and after an impact and analyze the effects using the impulse-momentum theorem.\n2. A rigid body is subjected to a net external force; determine the acceleration of the center of mass and the angular acceleration using Newton's second law.\n3. Using the work-energy principle, evaluate the work done by a force on a particle in motion and calculate the change in kinetic energy under varying conditions.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Mechanics of Materials",
+      "course_id": "ME 110",
+      "full_description": "Course Description: Studies deformable bodies under axial, torsional, shear, and bending loads; combined stresses; and applications to structural design.\n Course Topics: - Introduction to Mechanics of Materials  \n- Stress and Strain Analysis  \n- Axial Loading and Deformation  \n- Shear and Bending Moments  \n- Torsion in Circular Shafts  \n- Combined Stresses  \n- Structural Design Applications  \n- Failure Theories and Safety Factors  \n- Material Properties and Selection  \n- Analysis of Beams and Columns under Various Load Conditions\n Course Questions: 1. Given a cantilever beam subjected to a point load at its free end, calculate the maximum bending stress and deflection at that point using the appropriate formulas.  \n2. For a circular shaft under torsion, derive the relationship between applied torque and shear stress in the material, and calculate the required diameter of a shaft that can withstand a given torque without exceeding the allowable shear stress.  \n3. Analyze a loaded structural frame for combined stresses, and determine whether the materials used meet the safety factor requirements based on the applied loads and allowable stress.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Fluid Mechanics",
+      "course_id": "ME 113",
+      "full_description": "Course Description: Introduces fluid mechanics principles. Topics include viscosity, fluid statics, Bernoulli and energy equations, control-volume analysis, differential equations of motion, turbulent pipe flow, and external flow lift and drag.\n Course Topics: - Viscosity and its measurement\n- Fluid statics and pressure variation\n- Bernoulli's equation and energy conservation\n- Control-volume analysis and applications\n- Differential equations of motion for fluid flow \n- Analysis of laminar vs turbulent flow \n- Flow around objects: lift and drag forces \n- Applications in engineering systems (piping, pumps, and turbines)\n Course Questions: 1. Calculate the pressure drop across a pipe that has a length of 50 meters, a diameter of 0.1 meters, and a flow rate of 0.2 m³/s, using the Darcy-Weisbach equation. \n2. A cylindrical storage tank filled with water has a height of 10 meters. Determine the force exerted by the water on the bottom of the tank. \n3. Consider a flat plate at zero angle of attack. Calculate the lift and drag forces acting on the plate in a high-speed fluid flow of 30 m/s with a viscosity of 0.001 Pa.s.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Introduction to Materials Science and Engineering",
+      "course_id": "ME 114",
+      "full_description": "Course Description: Covers classification of materials, atomic and crystal structure, defects, diffusion, mechanical properties, strengthening, fracture and fatigue, phase diagrams, ceramics, polymers, and composites.\n Course Topics: - Classification of materials (metals, ceramics, polymers, composites)\n- Atomic and crystal structure of materials\n- Defects in materials and their impact on properties\n- Diffusion processes in solids\n- Mechanical properties of materials (stress, strain, elasticity)\n- Strengthening mechanisms (work hardening, alloying, heat treatment)\n- Fracture mechanics and fatigue behavior\n- Phase diagrams and phase transformations in materials\n- Properties and applications of ceramics, polymers, and composites\n Course Questions: 1. Given the phase diagram for a specific binary alloy system, how would you determine the appropriate heat treatment process for optimizing its strength and ductility?\n2. Calculate the stress and strain experienced by a metal specimen subjected to tensile loading, and identify the points at which yielding and fracture occur.\n3. Design a simple experiment to observe and measure the impact of grain size on the toughness of a metal sample.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Heat Transfer",
+      "course_id": "ME 116A",
+      "full_description": "Course Description: Introduces steady and transient conduction, fins, two-dimensional conduction, forced and natural convection, radiation heat transfer, heat exchangers, and basics of mass transfer.\n Course Topics: - Steady and transient conduction\n- Fins and fin effectiveness\n- Two-dimensional conduction\n- Forced convection and natural convection\n- Radiation heat transfer\n- Heat exchanger design and analysis\n- Basic principles of mass transfer\n Course Questions: 1. Calculate the temperature distribution in a one-dimensional rod with constant thermal properties subjected to steady-state heat conduction conditions. \n2. Evaluate the heat transfer rate from a finned surface using the principles of forced convection.\n3. Design a heat exchanger for specified inlet and outlet temperatures and flow rates, with a focus on optimizing heat transfer efficiency.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Heat Transfer",
+      "course_id": "ME 116B",
+      "full_description": "Course Description: Covers analytical and numerical methods in heat transfer and fluid mechanics, including conduction, convection, radiation, boiling, condensation, phase change, mass transfer, multimode heat transfer, and thermal simulation.\n Course Topics: - Conduction in solids  \n- Convection in fluids  \n- Radiation heat transfer  \n- Boiling and condensation phenomena  \n- Phase change heat transfer  \n- Mass transfer principles  \n- Multimode heat transfer analysis  \n- Thermal simulation techniques\n Course Questions: 1. Calculate the heat transfer rate through a composite wall made of two different materials, given their thermal conductivities and thicknesses.  \n2. Design a heat exchanger using the principles of convection and conduction to optimize heat transfer between two fluids.  \n3. Simulate the transient temperature distribution in a solid using finite difference methods for heat conduction during a given time period.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Combustion and Energy Systems",
+      "course_id": "ME 117",
+      "full_description": "Course Description: Discusses premixed and diffusion flames, fuel-air thermochemistry, engine cycle analysis, combustion-driven engine design and operation, fluid mechanics of engine components, pollutant formation, and gas turbines.\n Course Topics: - Premixed and diffusion flames\n- Fuel-air thermochemistry\n- Engine cycle analysis\n- Combustion-driven engine design\n- Operation principles of combustion engines\n- Fluid mechanics related to engine components\n- Formation and control of pollutants\n- Analysis and design of gas turbines\n Course Questions: 1. Calculate the efficiency of a specific combustion engine cycle using the ideal gas law and given thermodynamic properties of the fuel used.\n2. Design a preliminary layout for a combustion-driven engine, specifying dimensions and materials for key components based on thermodynamic principles and fluid mechanics.\n3. Analyze the emissions profile of a gas turbine under varying operating conditions, identifying key factors influencing pollutant formation and suggesting modifications to improve efficiency and reduce emissions.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Mechanical Engineering Modeling and Analysis",
+      "course_id": "ME 118",
+      "full_description": "Course Description: Introduces data analysis and numerical modeling in MATLAB. Topics include statistics, sampling, curve fitting, interpolation, numerical differentiation/integration, and solving ordinary differential equations, culminating in a system modeling project.\n Course Topics: - Introduction to MATLAB for data analysis and numerical modeling\n- Statistics and sampling techniques\n- Curve fitting methods (linear and nonlinear)\n- Interpolation methods (Lagrange and spline interpolation)\n- Numerical differentiation techniques\n- Numerical integration techniques (Trapezoidal Rule, Simpson's Rule)\n- Solving ordinary differential equations (ODEs) using numerical methods\n- System modeling project\n Course Questions: 1. Given a set of experimental data, use MATLAB to perform polynomial curve fitting and calculate the coefficients of the best-fit polynomial.\n2. Solve the ordinary differential equation dy/dx = -3y with the initial condition y(0)=5, using numerical methods in MATLAB. \n3. Design a MATLAB script to implement numerical integration using the Trapezoidal Rule for a given function over a specified interval.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Linear Systems and Controls",
+      "course_id": "ME 120",
+      "full_description": "Course Description: Introduces modeling and analysis of dynamic systems across mechanical, thermal, electrical, and fluid domains. Covers state equations, equilibrium, linearization, stability, and time- and frequency-domain analysis.\n Course Topics: - Modeling of dynamic systems in mechanical, thermal, electrical, and fluid domains\n- State-space representation and state equations\n- Stability analysis methods including Routh-Hurwitz and Lyapunov stability\n- Linearization techniques for non-linear systems\n- Time-domain analysis, including transient and steady-state response\n- Frequency-domain analysis using Bode plots and Nyquist criteria\n- Control system design principles, including PID control and root locus methods\n Course Questions: 1. Given a mechanical system, derive the state-space representation and analyze its stability using the Routh-Hurwitz criterion. \n2. For a thermal system described by a first-order differential equation, determine the step response and the time constant. \n3. Using Bode plots, analyze the frequency response of a control system and determine its gain and phase margins.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Feedback Control",
+      "course_id": "ME 121",
+      "full_description": "Course Description: Covers analysis and design of feedback control systems using classical methods. Topics include block diagrams, time- and frequency-domain design, stability, root locus, Bode plots, and introductory state-space analysis.\n Course Topics: - Analysis of feedback control systems\n- Block diagram reduction\n- Time-domain response and design\n- Frequency-domain response and design\n- Stability analysis (Routh-Hurwitz criterion, Nyquist criterion)\n- Root locus techniques\n- Bode plots and frequency response\n- Introduction to state-space analysis\n Course Questions: 1. Given a feedback control system, determine the stability of the system using the Routh-Hurwitz criterion. \n2. Design a PID controller for a first-order system and sketch the Bode plot for the open-loop transfer function. \n3. Analyze the root locus of a specified transfer function and predict how the system response changes with varying gain.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Vibrations",
+      "course_id": "ME 122",
+      "full_description": "Course Description: Studies free and forced vibration of single and multiple degree-of-freedom systems, damping, resonance, normal modes, coupling, and energy methods.\n Course Topics: - Free vibration of single degree-of-freedom systems \n- Forced vibration analysis \n- Damping effects in mechanical systems \n- Resonance phenomena and its implications \n- Coupling in multi-degree-of-freedom systems \n- Normal modes and modal analysis \n- Energy methods in vibration analysis \n- Applications of vibrations in mechanical engineering\n Course Questions: 1. Calculate the natural frequency of a damped single degree-of-freedom system subjected to harmonic excitation. \n\n2. Given a three-degree-of-freedom system, determine its normal modes and frequencies using the mass-spring model. \n\n3. Analyze the response of a forced vibrating system and identify the resonance points using Bode plots.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Kinematic and Dynamic Analysis of Mechanisms",
+      "course_id": "ME 130",
+      "full_description": "Course Description: Explores kinematic analysis of planar mechanisms such as linkages, cams, and gear trains and introduces multibody dynamics concepts.\n Course Topics: - Kinematic analysis of planar mechanisms\n- Degrees of freedom and Gruebler's equation\n- Linkage design and analysis\n- Cams and cam profiles\n- Gear trains and their analysis\n- Forces and accelerations in mechanisms\n- Introduction to multibody dynamics\n- Dynamic analysis of mechanisms and systems\n Course Questions: 1. Given a specific planar mechanism, determine its degrees of freedom and classify its motion using Gruebler's equation.\n2. Design a cam profile that meets specific motion requirements and analyze its performance in a cam-follower system.\n3. Simulate the dynamic response of a multibody system under various loading conditions and interpret the results obtained.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Design of Mechanisms",
+      "course_id": "ME 131",
+      "full_description": "Course Description: Focuses on the design of planar, spherical, and spatial mechanisms using graphical and analytical methods and requires a computer-aided design project.\n Course Topics: - Fundamentals of mechanism design  \n- Graphical analysis of mechanisms  \n- Analytical methods for motion analysis  \n- Design of planar mechanisms (e.g., four-bar and slider-crank linkages)  \n- Spherical mechanisms and their applications  \n- Spatial mechanism design and motion analysis  \n- Computer-aided design (CAD) tools for mechanism modeling  \n- Kinematic chains and degrees of freedom  \n- Motion path generation and synthesis techniques\n Course Questions: 1. Given a specific motion input, calculate the output motion of a four-bar linkage using graphical and analytical methods.  \n2. Design a spherical mechanism to convert rotary motion into linear motion and outline the steps in your design process.  \n3. Develop a computer-aided design (CAD) model of a spatial mechanism and analyze its kinematic behavior under different conditions.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Introduction to Mechatronics",
+      "course_id": "ME 133",
+      "full_description": "Course Description: Introduces hardware, software, sensors, actuators, system modeling, and control for mechatronic systems. Topics include data acquisition, electronics, signal processing, PLCs, and microcontroller programming with MATLAB/Simulink.\n Course Topics: - Overview of Mechatronics and its components  \n- Sensors and actuators used in mechatronic systems  \n- System modeling and simulation techniques  \n- Control systems and feedback mechanisms  \n- Data acquisition methods and techniques  \n- Electronics fundamentals relevant to mechatronic systems  \n- Signal processing techniques for noise reduction  \n- Programming PLCs and microcontrollers  \n- MATLAB and Simulink applications for modeling and control  \n- Integration of software and hardware in mechatronic design.\n Course Questions: 1. Given a specific sensor and actuator configuration, design a simple control system using MATLAB/Simulink that successfully regulates the motion of a robotic arm.  \n2. Explain the role and function of a programmable logic controller (PLC) in a mechatronic system, and provide an example application.  \n3. Write a MATLAB script to analyze data from a mechatronic system, involving signal processing to filter noise from sensor output data.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Microstructural Transformations in Materials",
+      "course_id": "ME 134",
+      "full_description": "Course Description: Studies thermodynamics and kinetics governing liquid-solid and solid-solid microstructural transformations that control the properties of crystalline materials. Cross-listed with MSE 134.\n Course Topics: - Thermodynamics of phase transformations  \n- Kinetics of microstructural evolution  \n- Liquid-solid transformations  \n- Solid-solid transformations  \n- Role of temperature and pressure in phase changes  \n- Nucleation mechanisms and growth processes  \n- Properties of crystalline materials  \n- Applications of microstructural transformations in engineering materials\n Course Questions: 1. Calculate the change in Gibbs free energy for a solid-state phase transformation given specific temperature and pressure conditions.  \n2. Explain the role of nucleation and growth kinetics in microstructural transformation, providing examples of different crystalline materials.  \n3. Design an experimental procedure to study the solid-solid transformation in a specific material and predict the resulting microstructural evolution based on the thermodynamic principles discussed in class.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Transport Phenomena",
+      "course_id": "ME 135",
+      "full_description": "Course Description: Integrates thermodynamics, fluid mechanics, and heat transfer to cover psychrometry, combustion, compressible flow, turbomachinery, and combined momentum, heat, and mass transport.\n Course Topics: - Thermodynamics principles related to transport phenomena\n- Fluid mechanics fundamentals\n- Heat transfer mechanisms and calculations\n- Psychrometry and humidity calculations\n- Combustion processes and analysis\n- Compressible flow concepts and applications\n- Turbomachinery performance and design considerations\n- Combined transport phenomena of momentum, heat, and mass.\n Course Questions: 1. Explain the principles of compressible flow and calculate the Mach number for a given fluid scenario with specific temperatures and pressures.\n2. Design a basic psychrometric chart process for an air conditioning application, detailing the various stages of air processing.\n3. Analyze the heat transfer in a turbomachinery component and determine the efficiency of energy transfer based on given inlet and outlet conditions.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Environmental Impacts of Energy Production and Conversion",
+      "course_id": "ME 136",
+      "full_description": "Course Description: Applies thermodynamics, heat transfer, and fluid mechanics to evaluate environmental impacts of energy use. Topics include fossil-fuel pollution, turbulent pollutant transport, and design principles for pollution control equipment.\n Course Topics: - Thermodynamics in energy production  \n- Heat transfer principles in environmental applications  \n- Fluid mechanics related to pollutant transport  \n- Fossil fuel pollution impact and evaluation  \n- Turbulent flow theory and pollutant dispersion  \n- Design and analysis of pollution control equipment  \n- Environmental regulations and standards pertaining to energy production  \n- Renewable energy alternatives and their comparative impacts\n Course Questions: 1. Calculate the emissions of a specific fossil fuel energy production process using thermodynamic principles.  \n2. Design a pollution control system for a given industrial process and evaluate its effectiveness in reducing environmental impacts.  \n3. Analyze the turbulent flow of pollutants through a certain medium and predict their dispersion patterns under varying conditions.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Environmental Fluid Mechanics",
+      "course_id": "ME 137",
+      "full_description": "Course Description: Applies fluid mechanics to atmospheric and oceanic flows. Topics include hydrostatic and geostrophic balance, Coriolis effects, boundary layers, turbulence, and tracer and heat transport.\n Course Topics: - Hydrostatic balance\n- Geostrophic balance\n- Coriolis effects\n- Boundary layers in fluid flows\n- Turbulence and its impact on fluid dynamics\n- Tracer and heat transport in atmospheric and oceanic flows\n- Application of Reynolds number in boundary layer analysis\n- Interaction of wind and ocean currents\n Course Questions: 1. Given a set of atmospheric pressure measurements, calculate the hydrostatic balance at various altitudes and explain the implications for weather patterns. \n2. Describe how the Coriolis effect influences the direction of ocean currents in the northern vs. southern hemispheres. \n3. Design a simple experiment to measure turbulence in a water flow system and analyze the data to assess flow stability.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Transport Phenomena in Living Systems",
+      "course_id": "ME 138",
+      "full_description": "Course Description: Introduces conservation laws of mass, momentum, and energy applied to modeling complex biological systems, highlighting prediction and explanation of life processes.\n Course Topics: - Conservation laws of mass, momentum, and energy.\n- Modeling biological systems using fluid dynamics.\n- Transport processes in cells and tissues.\n- Heat transfer mechanisms in biological organisms.\n- Biochemical reaction rates and diffusion.\n- Biological applications of continuum mechanics.\n Course Questions: 1. Describe how the conservation of mass applies to nutrient transport in a biological cell, providing a mathematical model for the process.\n2. Given a set of biological parameters, calculate the momentum changes in the blood flow through an artery under varying pressure conditions.\n3. Design a laboratory experiment to measure the rate of heat transfer in a biological tissue during a simulated heating process and analyze the results.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Ship Theory",
+      "course_id": "ME 140",
+      "full_description": "Course Description: Covers hull form, static and dynamic stability, ship response to waves, grounding, flooding, 3-D numerical integration, and modeling curved surfaces for naval applications.\n Course Topics: - Hull Form Analysis\n- Static and Dynamic Stability\n- Ship Responses to Wave Forces\n- Grounding Mechanics\n- Flooding Scenarios and Their Effects\n- 3-D Numerical Integration Techniques\n- Modeling and Simulation of Curved Surfaces in Naval Design\n Course Questions: 1. Given a specific hull form, calculate the vessel's static resilience and discuss how it affects stability under different loading conditions.\n2. Analyze the impact of wave height and frequency on ship motion in rough seas, and propose design modifications to enhance seaworthiness.\n3. Develop a numerical model using computational methods to simulate the flooding of a compartment in a ship and evaluate the consequences on stability.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Introduction to Robotics",
+      "course_id": "ME 144",
+      "full_description": "Course Description: Surveys robot components, kinematics, dynamics, control strategies, sensors, vision, and programming. Includes laboratory projects on robot arms, vision, and mobile robots. Cross-listed with EE 144.\n Course Topics: - Overview of robot components and their functions\n- Kinematics of robotic systems\n- Dynamics of robotics and motion analysis\n- Control strategies for robotic movements\n- Types of sensors used in robotics including their applications\n- Computer vision techniques and image processing\n- Programming fundamentals for robot systems\n- Laboratory projects involving robot arms, vision systems, and mobile robots\n Course Questions: 1. Given a robot arm with specific joint angles, calculate the forward kinematics to determine the end-effector position in Cartesian coordinates.\n2. Design a simple control strategy to navigate a mobile robot through an obstacle course using sensor feedback. Describe the programming logic behind your solution.\n3. Analyze the dynamics of a robotic arm and determine the required torque needed at the joints to achieve a specific acceleration of the end-effector.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Robotic Planning and Kinematics",
+      "course_id": "ME 145",
+      "full_description": "Course Description: Covers motion planning and kinematics with emphasis on geometric reasoning and computation. Topics include configuration spaces, sampling methods, planning algorithms, and reference-frame kinematics. Cross-listed with EE 145.\n Course Topics: - Configuration Spaces and Their Importance in Robotics\n- Sampling Methods for Motion Planning\n- Planning Algorithms: A* Algorithm, RRT, PRM\n- Geometric Reasoning in Robotics\n- Kinematic Models and Reference Frames\n- Collision Detection Techniques\n- Robot Motion Planning Strategies\n- Control Theory Basics in Relation to Motion Planning\n Course Questions: 1. Given a specific configuration space, calculate the optimal path for a robot to navigate through obstacles using a planning algorithm of your choice. \n2. Explain the geometric reasoning behind the Rapidly-exploring Random Tree (RRT) algorithm and how it can be applied to motion planning problems.\n3. Design a simple robotic system that utilizes reference-frame kinematics to achieve a target position; provide a detailed description of your solution.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Finite Element Methods",
+      "course_id": "ME 153",
+      "full_description": "Course Description: Introduces weak form formulation, Galerkin method, mesh generation, data visualization, and programming of finite element codes for engineering applications.\n Course Topics: - Weak form formulation\n- Galerkin method\n- Mesh generation techniques\n- Data visualization for finite element analysis\n- Programming finite element codes\n- Engineering applications of finite element methods\n- Numerical error analysis and convergence\n- Boundary conditions and loading in finite element models\n Course Questions: 1. Given a complex engineering structure, use the Galerkin method to derive the weak form of the governing differential equations and perform a finite element analysis to predict stress distribution.\n2. Design a mesh for a given geometry utilizing appropriate refinement strategies, and analyze how mesh quality affects the accuracy of the finite element solution.\n3. Write a short program that implements basic finite element code for the analysis of a two-dimensional problem and visualize the results using suitable software tools.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Mechanical Behavior of Materials",
+      "course_id": "ME 156",
+      "full_description": "Course Description: Covers experimental techniques and theory for mechanical behavior of metals, ceramics, polymers, composites, and electronic materials, including deformation mechanisms, failure modes, and materials selection.\n Course Topics: - Deformation mechanisms of materials (metals, ceramics, polymers, composites)\n- Mechanical testing techniques (tensile, compressive, shear tests)\n- Stress-strain relationships and properties (yield strength, ultimate tensile strength, ductility)\n- Failure modes (fracture, fatigue, creep)\n- Materials selection criteria based on mechanical behavior\n- Impact of microstructure on material properties\n- Evaluation and prediction of material behavior under various loading conditions\n Course Questions: 1. Calculate the stress and strain in a metal sample subjected to tensile testing, and determine its yield strength and ultimate tensile strength based on the data provided.\n2. Analyze a provided stress-strain curve for a polymer and identify the key regions related to elastic, plastic, and failure behaviors.\n3. Design a composite material suitable for high-temperature applications and justify your choices based on mechanical behavior principles.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Experimental Techniques",
+      "course_id": "ME 170A",
+      "full_description": "Course Description: Introduces measurement and control principles, experiment design, dimensional and error analysis, data acquisition, filtering, statistical analysis, and technical reporting.\n Course Topics: - Measurement Principles\n- Control Systems\n- Experiment Design\n- Dimensional Analysis\n- Error Analysis\n- Data Acquisition Techniques\n- Filtering Techniques\n- Statistical Analysis methods\n- Technical Reporting\n Course Questions: 1. Given a set of experimental data with known uncertainties, calculate the total error for the measurement results and interpret its significance in the context of your findings.\n2. Design an experiment to investigate the relationship between temperature and pressure in a gas system, detailing the measurement techniques and instruments you would use.\n3. Analyze a data set using statistical methods to identify trends or anomalies, and summarize the findings in a formal technical report.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Experimental Techniques",
+      "course_id": "ME 170B",
+      "full_description": "Course Description: Provides advanced, project-oriented laboratory experiments to verify fluid, thermal, structural, thermodynamic, and electromechanical theories through measurement and analysis.\n Course Topics: - Fluid Mechanics and Dynamics\n- Heat Transfer Principles\n- Structural Analysis and Material Testing\n- Thermodynamic Cycles and Systems\n- Electromechanical Systems and Applications\n- Measurement Techniques and Experimental Design\n- Data Analysis and Interpretation in Engineering Experiments\n Course Questions: 1. Design an experiment to measure the thermal conductivity of a given material and discuss how the results validate or challenge existing theories of heat transfer.\n\n2. Given a fluid flow system, calculate the pressure drop across various components using measured flow rates and analyze the discrepancies with theoretical predictions.\n\n3. Develop a project that utilizes electromechanical systems to demonstrate the principles of thermodynamics, clearly explaining how the system operates in terms of energy transformations and efficiency.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Machine Design",
+      "course_id": "ME 174",
+      "full_description": "Course Description: Introduces strength-based design fundamentals including stiffness, deflection, static failure, and fatigue failure criteria.\n Course Topics: - Fundamentals of strength-based design \n- Stiffness and its implications in design \n- Deflection analysis in mechanical components \n- Static failure criteria and safety factors \n- Fatigue failure criteria and material selection \n- Real-world applications of machine design principles \n- Design considerations for durability and performance under operating conditions\n Course Questions: 1. Calculate the deflection of a cantilever beam subjected to a uniform load and determine the factor of safety against static failure criteria. \n2. Given a particular material, analyze its fatigue limit and how that impacts the design of a machine component subjected to cyclic loading. \n3. Evaluate a design for a mechanical component using stiffness and deflection principles to ensure it meets specified requirements under operational conditions.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Professional Topics in Engineering",
+      "course_id": "ME 175A",
+      "full_description": "Course Description: Covers technical communication, teamwork, project management, engineering economics, professional ethics, and CAD for senior-level mechanical engineers.\n Course Topics: - Technical Communication\n- Teamwork and Collaboration\n- Project Management Principles\n- Engineering Economics and Cost Analysis\n- Professional Ethics in Engineering\n- Computer-Aided Design (CAD) Applications\n- Industry Standards and Practices\n Course Questions: 1. How would you evaluate the cost-effectiveness of a proposed engineering project? Discuss the methods used in engineering economics to assess financial viability.\n2. Given a project scenario, create a project management plan that includes task assignments, timelines, and resource allocation, demonstrating the application of teamwork principles.\n3. Present a technical report on a recent engineering development, emphasizing the clarity and effectiveness of your technical communication skills.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Mechanical Engineering Design",
+      "course_id": "ME 175B",
+      "full_description": "Course Description: Guides students through problem definition, concept generation, and detailed design, emphasizing safety, reliability, manufacturing, and assembly considerations.\n Course Topics: - Problem definition in mechanical design\n- Concept generation techniques (brainstorming, morphological analysis, etc.)\n- Detailed design principles and methodologies\n- Safety factors and reliability in mechanical systems\n- Manufacturing processes relevant to mechanical design\n- Assembly considerations and techniques\n- Evaluation and selection of design concepts\n- Design for manufacturing and assembly (DFMA) principles\n Course Questions: 1. Given a set of performance specifications, outline a design for a mechanical component that incorporates safety and reliability features. Include a rationale for your design choices.\n2. Describe the process for generating and evaluating alternative design concepts for a mechanical system. How would you apply a systematic approach to ensure all design considerations are addressed?\n3. Create a detailed assembly plan for a mechanical assembly, identifying potential manufacturing issues and safety concerns that may arise during assembly.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Mechanical Engineering Design",
+      "course_id": "ME 175C",
+      "full_description": "Course Description: Students prototype, test, and evaluate a design initiated in ME 175B, studying prototyping techniques, design verification, and special design topics.\n Course Topics: - Prototyping techniques \n- Design verification methods \n- Evaluation of design performance \n- Special topics in mechanical design \n- Iterative design processes \n- Testing protocols \n- Materials selection for prototypes \n- Design analysis and optimization techniques\n Course Questions: 1. Given an initial design specification, develop a prototype of a mechanical component that meets the specified criteria. \n2. How can you assess the effectiveness of your design through testing? Propose a testing protocol.\n3. Discuss the importance of design verification in the engineering design process and outline a strategy to implement it in a project.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Technological Entrepreneurship",
+      "course_id": "ME 175D",
+      "full_description": "Course Description: Introduces business and management concepts for commercializing technology, including market analysis, strategy, finance, IP, ethics, and communication.\n Course Topics: - Market Analysis Techniques\n- Business Strategy Development\n- Financing Options for Technology Ventures\n- Intellectual Property Management\n- Ethical Considerations in Technological Entrepreneurship\n- Effective Communication Skills in Business\n Course Questions: 1. Given a hypothetical technology startup idea, create a market analysis report that identifies potential competitors and target customers.\n2. Develop a business strategy that includes at least three financing options for a new engineering product venture. \n3. Design a presentation that effectively communicates a technology commercialization plan, including IP considerations and ethical implications.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Sustainable Product Design",
+      "course_id": "ME 176",
+      "full_description": "Course Description: Covers life-cycle design, reliability, recyclability, materials selection, and manufacturing for sustainable products, with a redesign project to reduce environmental impact.\n Course Topics: - Life-cycle design principles  \n- Reliability assessment methods  \n- Materials selection criteria for sustainability  \n- Recyclability of products and materials  \n- Manufacturing processes for sustainable products  \n- Redesign strategies for reducing environmental impact  \n- Environmental regulations and standards for sustainable design\n Course Questions: 1. Describe the life-cycle assessment process for a sustainable product and discuss how it can influence design decisions. 2. Given a list of materials, identify which are more suitable for a sustainable product based on their recyclability and environmental impact. 3. Propose a redesign for an existing product aimed at minimizing its environmental footprint, detailing changes in materials, production methods, or product usage.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Optics and Lasers in Engineering",
+      "course_id": "ME 180",
+      "full_description": "Course Description: Focuses on optics and laser principles, interferometry, diffraction, laser-material interactions, and applications such as microscopy, spectroscopy, deformation analysis, and materials processing.\n Course Topics: - Principles of optics and laser technology\n- Interferometry techniques and applications\n- Diffraction phenomena and analysis\n- Laser-material interactions\n- Microscopy methods using laser technology\n- Spectroscopy and its engineering applications\n- Deformation analysis using laser measurements\n- Materials processing techniques involving lasers\n Course Questions: 1. Calculate the diffraction pattern produced by a single slit and analyze its intensity distribution.\n2. Describe the principle of interferometry and design an experiment to measure a small displacement using laser light.\n3. Explain the process of laser-material interaction and predict the outcomes of using different laser parameters on a specific material.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Special Studies",
+      "course_id": "ME 190",
+      "full_description": "Course Description: Individual study under faculty supervision to meet special curricular needs; culminates in a written report. Repeatable for credit.\n Course Topics: - Independent research methods in Mechanical Engineering\n- Technical report writing and presentation skills\n- Project management for engineering projects\n- Advanced topics in mechanical systems or relevant sub-fields\n- Supervisory engagement and mentorship in engineering studies\n Course Questions: 1. Design a detailed project plan for a mechanical system of your choice, including objectives, timelines, and resource requirements.\n2. Analyze a mechanical process using engineering principles, and present the findings in a comprehensive report format.\n3. Conduct a literature review on a recent technological advancement in mechanical engineering and propose a research idea based on your findings.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Research for Undergraduates",
+      "course_id": "ME 197",
+      "full_description": "Course Description: Directed undergraduate research in mechanical engineering culminating in a technical report. Repeatable for credit.\n Course Topics: - Directed Research Methodologies in Mechanical Engineering\n- Technical Report Writing and Presentation Skills \n- Experimental Design and Analysis\n- Project Management in Engineering Research\n- Critical Evaluation of Engineering Literature\n- Fundamentals of Mechanical Engineering Concepts and Applications\n- Work Ethics and Integrity in Research\n Course Questions: 1. Design a small-scale mechanical device or system and present a technical report detailing your research process, design decisions, and performance analysis. \n2. Analyze a previous research project in the field of mechanical engineering and critique its methodology and findings in a written report. \n3. Conduct experiments related to fluid dynamics and interpret the results to illustrate the underlying principles of the phenomena observed.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "R’course: Variable Topics",
+      "course_id": "ME 198",
+      "full_description": "Course Description: Student-facilitated course fostering leadership and curricular innovation; topics vary and emphasize experiential education. Repeatable as topics change.\n Course Topics: - Leadership in engineering projects\\n- Curricular innovation in mechanical engineering education\\n- Experiential learning and hands-on projects\\n- Team dynamics and collaboration in engineering\\n- Assessment and reflection on projects \\n- Current trends and technological advancements in mechanical engineering education\n Course Questions: Design a small-scale project that addresses a mechanical engineering problem in your community, detailing the engineering principles applied.\\n\\nCreate a presentation outlining the leadership qualities you demonstrated while leading a team during a project, and how those qualities influenced the outcome.\\n\\nAnalyzing a recent technological innovation in mechanical engineering, discuss its implications for future developments and how it promotes curricular innovation.",
+      "course_level": "upper"
+    },
+    {
+      "course_name": "Methods of Engineering Analysis",
+      "course_id": "ME 200",
+      "full_description": "Course Description: Covers linear algebra, vector spaces, eigenvalue problems, complex analysis, integral transforms, and analytical methods for differential equations in engineering applications.\n Course Topics: - Linear Algebra \n- Vector Spaces \n- Eigenvalue Problems \n- Complex Analysis \n- Integral Transforms \n- Analytical Methods for Differential Equations \n- Applications of Differential Equations in Engineering\n Course Questions: 1. Solve a given eigenvalue problem for a specified linear operator and interpret the physical significance of the eigenvalues and eigenvectors in an engineering context.  \n2. Apply Laplace transforms to solve a differential equation modeling an engineering system and analyze the system's response.  \n3. Use complex analysis to evaluate a contour integral related to a potential flow problem in fluid mechanics.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Computational Methods in Engineering",
+      "course_id": "ME 201",
+      "full_description": "Course Description: Explores numerical methods for nonlinear equations, linear systems, interpolation, integration, data statistics, model fitting, FFT, and differential equation solutions.\n Course Topics: - Numerical methods for nonlinear equations\n- Linear systems and matrix solutions\n- Interpolation methods (e.g., Lagrange and spline interpolation)\n- Numerical integration techniques (e.g., trapezoidal and Simpson's rule)\n- Statistical analysis and data fitting\n- Fast Fourier Transform (FFT) and its applications\n- Solutions to ordinary and partial differential equations (ODEs and PDEs)\n Course Questions: 1. Solve a nonlinear equation using the Newton-Raphson method and analyze the convergence rate. \n2. Given a dataset, perform linear regression for model fitting and interpret the results. \n3. Use the Fast Fourier Transform (FFT) to analyze the frequency components of a given time series signal.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Spectral Computational Methods",
+      "course_id": "ME 202",
+      "full_description": "Course Description: Covers Fourier analysis, eigenfunction expansions, spectral/Galerkin/tau/collocation methods, aliasing, stability, and applications to compressible and incompressible flows and reacting systems.\n Course Topics: - Fourier Analysis  \n- Eigenfunction Expansions  \n- Spectral Methods  \n- Galerkin Methods  \n- Tau Method  \n- Collocation Methods  \n- Aliasing in Numerical Methods  \n- Stability Analysis  \n- Applications to Compressible Flows  \n- Applications to Incompressible Flows  \n- Reacting Flow Complexities  \n- Numerical Techniques for Flow Analysis  \n- Error Analysis in Spectral Methods\n Course Questions: 1. Given a partial differential equation representing compressible flow, apply spectral methods to derive a solution and discuss stability conditions for the method used.  \n2. Analyze a reaction-diffusion system by expanding the solution in terms of eigenfunctions and illustrate the effect of aliasing on the numerical results.  \n3. Develop and implement a Galerkin method for an incompressible flow problem and compare the results with those obtained from a traditional finite difference method.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Design and Analysis of Engineering Experiments",
+      "course_id": "ME 203",
+      "full_description": "Course Description: Introduces experimental design, statistical tools, time and frequency-domain data analysis, machine learning, pattern recognition, and computational research tools.\n Course Topics: - Experimental Design Principles\n- Statistical Analysis Techniques\n- Time-domain Data Analysis\n- Frequency-domain Data Analysis\n- Machine Learning in Engineering\n- Pattern Recognition Methods\n- Computational Research Tools in Engineering\n Course Questions: 1. Develop a comprehensive design of an experiment to evaluate the impact of a specific variable on mechanical system performance, including statistical justification for sample sizes and methodologies.\n2. Analyze a given dataset of mechanical system performance using time-domain and frequency-domain analysis techniques. Present your findings through appropriate statistical methods.\n3. Create a machine learning model to predict outcomes based on experimental data, including model training, validation, and performance evaluation.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Sustainable Product Design",
+      "course_id": "ME 210",
+      "full_description": "Course Description: Graduate-level treatment of sustainable product design including life-cycle analysis, reliability, materials selection, and manufacturing, with an environmental impact redesign project.\n Course Topics: - Life-Cycle Analysis\n- Reliability Engineering\n- Sustainable Materials Selection\n- Sustainable Manufacturing Processes\n- Environmental Impact Assessment\n- Product Redesign for Sustainability\n- Waste Minimization Techniques\n- Energy Efficiency in Design\n- Eco-Design Principles\n- Regulatory Standards for Sustainable Products\n Course Questions: 1. Design and analyze a product using life-cycle assessment to determine its overall environmental impact from material selection to end-of-life disposal.\n2. Given a set of materials, apply the principles of reliability engineering to select the appropriate materials for a sustainable product in terms of cost, efficiency, and environmental footprint.\n3. Develop a redesign plan for an existing product that maximizes sustainability by minimizing waste and optimizing resource use during manufacturing.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Optimal Control and Estimation",
+      "course_id": "ME 220",
+      "full_description": "Course Description: Covers discrete-time optimal control, Riccati equations, optimal tracking, receding-horizon control, Kalman filtering, EKF, and UKF for linear systems. Cross-listed with EE 233.\n Course Topics: - Discrete-time optimal control\n- Riccati equations\n- Optimal tracking strategies\n- Receding-horizon control techniques\n- Kalman filtering methods\n- Extended Kalman Filter (EKF)\n- Unscented Kalman Filter (UKF)\n- Linear system analysis and control\n Course Questions: 1. Given a discrete-time linear system, design a receding-horizon controller to optimize a given performance criterion and discuss the implications of the chosen horizon length on system performance.\n\n2. Derive and solve the Riccati equation for a linear quadratic regulator (LQR) problem. What conditions would ensure stability of the closed-loop system?\n\n3. Implement a Kalman filter and an Extended Kalman Filter (EKF) for a non-linear system, and compare the estimation accuracy of both methods in a simulated environment.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Advanced Robotics",
+      "course_id": "ME 222",
+      "full_description": "Course Description: Studies robot navigation, sensor modeling, data processing, localization, SLAM, image-based motion estimation, mapping, and motion planning. Cross-listed with EE 245.\n Course Topics: - Robot Navigation\n- Sensor Modeling\n- Data Processing Techniques\n- Localization Methods\n- SLAM (Simultaneous Localization and Mapping)\n- Image-Based Motion Estimation\n- Mapping Techniques\n- Motion Planning Algorithms\n- Robot Perception and Decision Making\n Course Questions: 1. Given a specific set of sensor data, calculate the robot's position using filtering techniques for localization. \n2. Design an effective SLAM (Simultaneous Localization and Mapping) algorithm for a mobile robot operating in an unknown environment and outline the key steps involved. \n3. Analyze a motion planning scenario using a given algorithm (e.g., A*, RRT), and evaluate its efficiency in terms of computational resources and path optimality.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Secure and Reliable Control Systems",
+      "course_id": "ME 223",
+      "full_description": "Course Description: Introduces fault-tolerant and secure control, attack detectability, fault detection, analytical redundancy, unknown-input observers, statistical methods, and fault-tolerant control design.\n Course Topics: - Fault-tolerant control systems\n- Secure control strategies\n- Attack detectability in control systems\n- Fault detection mechanisms\n- Analytical redundancy principles\n- Unknown-input observers\n- Statistical methods for fault diagnosis\n- Design and implementation of fault-tolerant control designs\n Course Questions: 1. Given a system model, design a fault-tolerant control strategy that maintains system performance in the presence of defined faults.\n2. Explain how unknown-input observers can be utilized to improve the detectability of attacks in control systems. \n3. Analyze a given control system using statistical methods to assess the likelihood of fault presence and evaluate the resulting system behavior.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Computer-Aided Engineering Design",
+      "course_id": "ME 230",
+      "full_description": "Course Description: Covers interactive graphics, 3-D curve and surface representations, Bézier parameterization, optimization, and applications to CAD and mechanical system simulation.\n Course Topics: - Interactive graphics and visualization principles\n- 3-D curve and surface modeling techniques\n- Bézier curves and their parameterization\n- Optimization techniques in CAD design\n- Mechanical system simulation methodologies\n- Applications of CAD in engineering design and analysis\n Course Questions: 1. Given a set of control points, calculate the Bézier curve that represents the path through these points and determine the parameters for optimization in a CAD application.\n2. Explain the differences between different methods of 3-D surface representation in CAD and discuss the advantages and disadvantages of each method in terms of accuracy and computational efficiency.\n3. Develop a simulation of a mechanical system using software tools covered in the course, and analyze the system's performance under various input scenarios.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Pen-Based Computing",
+      "course_id": "ME 231",
+      "full_description": "Course Description: Explores ink segmentation, sketch parsing, shape recognition, context reasoning, error correction, and practical system issues for pen-based interfaces. Cross-listed with CS 233.\n Course Topics: - Ink segmentation techniques  \n- Sketch parsing algorithms  \n- Shape recognition and classification methods  \n- Context reasoning for enhancing user interface  \n- Error correction mechanisms in pen-based computing  \n- Practical considerations for system design and implementation  \n- User experience challenges in pen-based interfaces  \n- Analysis of existing pen-based computing systems\n Course Questions: 1. Given a set of pen strokes, implement a sketch parsing algorithm to identify and categorize the different shapes drawn by a user.  \n2. Design a system that incorporates context reasoning to improve the accuracy of shape recognition in pen-based computations. Evaluate its performance against a baseline method.  \n3. Analyze a case study on error correction in pen-based systems; propose enhancements to existing error correction methods and justify your choices based on user experience data.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Computational Design Tools",
+      "course_id": "ME 232",
+      "full_description": "Course Description: Introduces geometric modeling, numerical optimization, and AI techniques for engineering design, with programming projects combining symbolic and numerical methods.\n Course Topics: - Geometric modeling techniques\n- Numerical optimization methods\n- AI techniques in engineering design\n- Symbolic vs numerical approach in programming\n- Integration of design tools in project-based scenarios\n Course Questions: 1. Given a set of design constraints, use numerical optimization techniques to determine the optimal geometric configuration of a mechanical component.\n2. Develop a program that uses AI techniques to predict the performance of a product design based on input parameters and design choices.\n3. Create a symbolic model for a complex engineering system and implement numerical methods to analyze its behavior under various operating conditions.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Artificial Intelligence for Design",
+      "course_id": "ME 233",
+      "full_description": "Course Description: Applies AI—search, knowledge-based systems, machine learning, qualitative reasoning—to automate engineering design, covering theory and practical issues.\n Course Topics: - Introduction to Artificial Intelligence in Engineering Design\n- Search Algorithms in Design Automation\n- Knowledge-Based Systems and Expert Systems\n- Machine Learning Applications in Engineering Design\n- Qualitative Reasoning and Its Importance\n- Ethical Considerations in AI-Driven Design\n- Practical Issues in Implementing AI in Design Workflows\n- Case Studies of AI Use in Engineering Design Projects\n Course Questions: 1. Given a set of design parameters and constraints, use machine learning algorithms to predict the optimal design configuration. \n2. Discuss the role of qualitative reasoning in design automation and provide an example where it can be applied. \n3. Analyze a case study where a knowledge-based system was employed in an engineering design process, and propose enhancements using AI techniques.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Linear System Theory",
+      "course_id": "ME 235",
+      "full_description": "Course Description: Reviews linear algebra and presents state-space modeling, controllability, observability, realizations, and design via state feedback, pole placement, and observers. Cross-listed with EE 235.\n Course Topics: - State-space modeling\n- Controllability and observability\n- Linear algebra fundamentals\n- Realizations of linear systems\n- Design of state feedback controllers\n- Pole placement techniques\n- State observers and estimation\n Course Questions: 1. Given a state-space representation of a linear system, determine the controllability and observability of the system. \n2. Design a state feedback controller for a specified state-space system with desired pole placements. \n3. Create an observer for a given linear system and demonstrate how it can estimate the state variables.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "State and Parameter Estimation Theory",
+      "course_id": "ME 236",
+      "full_description": "Course Description: Covers statistical estimation, Fisher information, CRLB, least squares, ML, MAP estimators, Wiener and Kalman filtering, with applications in navigation and signal processing. Cross-listed with EE 236.\n Course Topics: - Statistical Estimation Theory\n- Fisher Information\n- Cramer-Rao Lower Bound (CRLB)\n- Least Squares Estimation\n- Maximum Likelihood (ML) Estimators\n- Maximum A Posteriori (MAP) Estimators\n- Wiener Filtering\n- Kalman Filtering\n- Applications in Navigation\n- Applications in Signal Processing\n Course Questions: 1. Derive the Cramer-Rao Lower Bound for an unbiased estimator given a sample from a normal distribution. \n2. Using a Kalman filter, estimate the position and velocity of a moving object based on noisy sensor measurements. \n3. Explain the differences and applications of Maximum Likelihood Estimation (MLE) versus Maximum A Posteriori (MAP) estimation in parameter estimation.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Nonlinear Systems and Control",
+      "course_id": "ME 237",
+      "full_description": "Course Description: Studies nonlinear differential equations, phase portraits, limit cycles, describing functions, Lyapunov stability, absolute stability criteria, averaging, and feedback linearization. Cross-listed with EE 237.\n Course Topics: - Nonlinear differential equations\n- Phase portraits and analysis of dynamical systems\n- Limit cycles and their significance in nonlinear systems\n- Describing functions and their application in stability analysis\n- Lyapunov stability theory\n- Absolute stability criteria\n- Methods of averaging in control design\n- Feedback linearization techniques\n Course Questions: 1. Given a nonlinear differential equation, determine the existence of limit cycles using phase portraits and stability criteria.\n2. Apply Lyapunov's direct method to establish stability for a specified nonlinear system. \n3. Using feedback linearization techniques, design a control input for a nonlinear system to achieve desired dynamic performance.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Linear Multivariable Control",
+      "course_id": "ME 238",
+      "full_description": "Course Description: Analyzes multivariable feedback systems, robustness, Q-parameterization, H-infinity design, and structured singular value methods. Cross-listed with EE 238.\n Course Topics: - Analysis of multivariable feedback systems\n- Robustness in control systems\n- Q-parameterization techniques\n- H-infinity control design\n- Structured singular value methods\n- Disturbance rejection in multivariable systems\n- Performance analysis and trade-offs in control design\n Course Questions: 1. Given a multivariable feedback system, calculate its structured singular value and determine system robustness in the presence of uncertainties.\n2. Using H-infinity methods, design a robust controller for a given multivariable system and analyze its performance in terms of disturbance rejection.\n3. Evaluate the performance of different Q-parameterizations for a specified control architecture and discuss the trade-offs involved.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Optimal Control",
+      "course_id": "ME 239",
+      "full_description": "Course Description: Presents stochastic optimal control, optimization principles, LQG control, certainty equivalence, Pontryagin minimum principle, HJB equation, and algebraic Riccati equation. Cross-listed with EE 239.\n Course Topics: - Stochastic Optimal Control\n- Linear Quadratic Gaussian (LQG) Control\n- Certainty Equivalence Principles\n- Pontryagin Minimum Principle\n- Hamilton-Jacobi-Bellman (HJB) Equation\n- Algebraic Riccati Equation\n- Optimization Principles in Control Systems\n- Applications of Optimal Control to Engineering Problems\n Course Questions: 1. Derive the algebraic Riccati equation for a given Linear Quadratic Gaussian (LQG) control problem and solve for the optimal feedback gain.\n2. Given a stochastic control problem, apply the Hamilton-Jacobi-Bellman (HJB) equation to find the optimal control law and justify your solution.\n3. Using the Pontryagin minimum principle, determine the necessary conditions for optimality in a nonlinear control system. Provide an example to illustrate your approach.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Fundamentals of Fluid Mechanics",
+      "course_id": "ME 240A",
+      "full_description": "Course Description: Introduces equations of motion, stress tensor, Navier-Stokes equations, boundary conditions, exact viscous solutions, vorticity dynamics, and boundary layers.\n Course Topics: - Equations of Motion\n- Stress Tensor in Fluid Mechanics\n- Navier-Stokes Equations and their Applications\n- Boundary Conditions in Fluid Flows\n- Exact Viscous Solutions and their Importance\n- Vorticity Dynamics in Fluid Mechanics\n- Boundary Layer Theory and its Applications\n Course Questions: 1. Derive the Navier-Stokes equations for a viscous incompressible fluid and explain the physical significance of each term. \n2. Calculate the velocity field for a fluid flow past a flat plate at different boundary conditions and discuss the implications for drag force. \n3. Analyze a given flow profile in terms of vorticity and identify regions of circulation within the flow field.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Fundamentals of Fluid Mechanics",
+      "course_id": "ME 240B",
+      "full_description": "Course Description: Covers inviscid flow, Euler and Bernoulli equations, potential flow, wing theory, flow stability, and turbulence introduction.\n Course Topics: - Inviscid flow analysis\n- Euler equations\n- Bernoulli's equation applications\n- Potential flow theory\n- Wing theory and aerodynamic lift\n- Flow stability criteria\n- Introduction to turbulence and transition\n Course Questions: 1. Calculate the pressure distribution over a symmetric airfoil using Bernoulli's principle in potential flow conditions.\n2. Analyze the stability of a flow field and identify factors that can lead to laminar-turbulent transition using relevant stability criteria.\n3. Derive and discuss the implications of the Euler equation for an inviscid flow scenario, considering a given flow field geometry.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Fundamentals of Heat and Mass Transfer",
+      "course_id": "ME 241A",
+      "full_description": "Course Description: Derives governing equations for conduction, convection, radiation, and species transport, emphasizing problem formulation and analytical/numerical solutions.\n Course Topics: - Governing equations of heat conduction\n- Principles of convection and the Nusselt number\n- Radiation heat transfer mechanisms\n- Species transport and diffusion equations\n- Analytical methods for solving heat transfer problems\n- Numerical methods and computational techniques in heat transfer analysis\n- Applications of heat and mass transfer in engineering systems\n Course Questions: 1. Calculate the heat transfer rate through a composite wall using Fourier's law of conduction, given specific material properties and thicknesses.\n2. Describe how the Nusselt number correlates to convection heat transfer and apply this understanding to calculate the heat transfer coefficient for a given fluid flow situation.\n3. Analyze the effects of varying temperature and pressure conditions on species transport within a system and predict concentration profiles based on given boundary conditions.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Transport Through Porous Media",
+      "course_id": "ME 241B",
+      "full_description": "Course Description: Examines flow, heat, and mass transfer mechanisms in multiphase porous media using current theoretical models.\n Course Topics: - Fundamentals of porous media flow\n- Darcy's Law and its applications in porous media\n- Governing equations for multiphase flow\n- Heat transfer mechanisms in porous media\n- Mass transfer considerations and diffusive effects\n- Theoretical modeling of porous media\n- Evaluation of effective properties in multiphase systems\n- Experimental methods for characterizing flow and heat transfer in porous media\n Course Questions: 1. Given a set of properties for a specific porous medium, calculate the Darcy velocity under steady-state flow conditions for a two-phase flow scenario. \n2. What are the primary factors affecting the effective permeability of a multiphase porous medium, and how can these be quantified? \n3. Design an experiment to measure the heat transfer characteristics in a saturated porous medium and outline the expected results based on theoretical models.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Electronic Cooling and Thermal Issues in Microelectronics",
+      "course_id": "ME 241C",
+      "full_description": "Course Description: Discusses thermal challenges in electronics, passive/active/hybrid cooling, computational modeling, and advanced techniques such as phase-change and heat pipes.\n Course Topics: - Thermal challenges in microelectronics\n- Passive cooling methods (e.g., heatsinks, thermal pads)\n- Active cooling methods (e.g., fans, liquid cooling systems)\n- Hybrid cooling techniques (combination of passive and active)\n- Computational modeling of thermal performance\n- Advanced cooling technologies (e.g., phase-change materials, heat pipes)\n- Heat transfer principles in microelectronics\n- Thermal simulation software and modeling techniques\n- Thermal management design considerations in electronic packaging\n Course Questions: 1. Given a set of specifications for a microprocessor, calculate the necessary cooling capacity required to maintain the chip below its maximum operating temperature. \n2. Describe the advantages and limitations of using heat pipes versus traditional cooling methods in high-performance computing applications.\n3. Design a thermal management system for a microelectronic device, incorporating passive and active cooling strategies, and justify your design choices based on performance simulations.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Turbulence in Fluids",
+      "course_id": "ME 242",
+      "full_description": "Course Description: Applies conservation laws to turbulent flows, covering tensor notation, statistical and spectral analysis, and closure techniques for complex turbulence modeling.\n Course Topics: - Conservation laws in fluid dynamics\n- Tensor notation and its application in fluid mechanics\n- Statistical analysis of turbulent flows\n- Spectral analysis methods for turbulence\n- Closure techniques for turbulence modeling\n- Reynolds-averaged Navier-Stokes (RANS) equations\n- Computational fluid dynamics (CFD) for turbulent flow simulation\n- Turbulence models (e.g., k-epsilon, LES, DNS) and their applications\n Course Questions: 1. Given a turbulent flow, use appropriate statistical methods to calculate the mean and fluctuating velocities and analyze the effects of various turbulence models. \n2. Explain and apply the Reynolds-averaged Navier-Stokes equations to predict turbulent flow behavior in a given scenario, detailing the necessary closure relationships. \n3. Conduct a computational fluid dynamics (CFD) simulation to investigate the onset of turbulence in a flow and compare the results with theoretical predictions and empirical data.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Advanced Mechanical Engineering Thermodynamics",
+      "course_id": "ME 243",
+      "full_description": "Course Description: Explores statistical foundations of thermodynamics, origins of entropy and temperature, phase and chemical equilibria, fluctuations, and nanoscale thermodynamics.\n Course Topics: - Statistical mechanics and its applications to thermodynamics  \n- Entropy and its origins  \n- Temperature scales and definitions  \n- Phase equilibria and chemical equilibrium  \n- Thermodynamic fluctuations  \n- Nanoscale thermodynamics and its implications  \n- Applications of thermodynamics in real-world systems\n Course Questions: 1. Derive the relationship between entropy and temperature for a system using statistical mechanics principles.  \n2. Calculate the phase equilibria of a binary system using the Gibbs phase rule and interpret the results.  \n3. Design an experiment to measure the fluctuations in a nanoscale system and discuss the implications for thermodynamic properties.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Nanoscale Heat Transfer and Energy Conversion",
+      "course_id": "ME 244",
+      "full_description": "Course Description: Studies energy transport at nanoscale involving electrons, phonons, photons, size effects, carrier coupling, and Boltzmann transport modeling.\n Course Topics: - Principles of nanoscale heat transfer\n- Energy transport mechanisms (electrons, phonons, and photons)\n- Boltzmann transport theory and applications\n- Size effects on thermal resistance and conduction\n- Phonon scattering mechanisms and their effects\n- Coupling of different energy carriers\n- Nanoscale thermoelectric materials and devices\n- Applications in energy conversion technologies\n Course Questions: 1. Given a material's thermal conductivity and the electron mean free path, calculate the effective thermal conductivity at the nanoscale using the Boltzmann transport equation. \n2. Design an experiment to measure the heat transfer rate in a nanoscale thermoelectric device and analyze the role of phonon scattering. \n3. Discuss the impact of size effects on energy conversion efficiency in nanoscale systems and propose optimizations based on carrier coupling phenomena.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Radiative Heat Transfer",
+      "course_id": "ME 245",
+      "full_description": "Course Description: Provides an in-depth study of radiative heat transfer phenomena, extending undergraduate radiation topics to advanced analytical and numerical methods.\n Course Topics: - Fundamental principles of radiative heat transfer\n- The Stefan-Boltzmann law and its applications\n- Emissivity and absorptivity of materials\n- Radiative heat exchange in enclosures\n- Participating media and their radiative properties\n- Numerical methods for radiative heat transfer analysis\n- Monte Carlo methods in radiative transfer\n- Analytical techniques for solving radiative transfer equations\n- Applications of radiative heat transfer in engineering and technology\n Course Questions: 1. In a given heat exchange scenario, calculate the radiative heat transfer between two surfaces using the Stefan-Boltzmann law and discuss the impact of emissivity on the results. \n2. Describe the radiative properties of participating media and solve for the radiative heat transfer in a non-grey gas participating in radiation transfer. \n3. Compare the performance of analytical vs. numerical methods for solving radiative heat transfer problems and provide an example where numerical simulation is necessary.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Computational Fluid Dynamics with Applications",
+      "course_id": "ME 246",
+      "full_description": "Course Description: Introduces finite difference, finite volume, finite element, and spectral methods for reacting/non-reacting flows, with stability and convergence analysis and CFD software projects.\n Course Topics: - Finite Difference Methods \n- Finite Volume Methods \n- Finite Element Methods \n- Spectral Methods \n- Stability Analysis \n- Convergence Analysis \n- Reacting and Non-Reacting Flow Simulation \n- CFD Software Project Implementation \n- Numerical Method Comparisons \n- Mesh Generation and Sensitivity Analysis\n Course Questions: 1. Given a specific flow field, calculate the pressure distribution using finite volume methods and validate the results with analytical solutions. \n2. Design a CFD project to simulate a reacting flow in a combustion chamber, detailing the choice of numerical method and parameters used for stability analysis. \n3. Conduct a convergence analysis on a given mesh for the spectral method and interpret the results in terms of accuracy and computational efficiency.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Internal Combustion Engines",
+      "course_id": "ME 248",
+      "full_description": "Course Description: Covers engine types, design parameters, fuel-air thermochemistry, cycles, spark/compression ignition, performance, and emissions.\n Course Topics: - Types of Internal Combustion Engines (Otto, Diesel, Wankel, etc.)  \n- Design Parameters and Their Impact on Engine Performance  \n- Fuel-Air Thermochemistry  \n- Combustion Cycles: Otto and Diesel  \n- Spark Ignition vs. Compression Ignition  \n- Performance Metrics: Horsepower, Torque, Thermal Efficiency  \n- Emission Standards and Control Technologies  \n- Advanced Topics: Alternative Fuels, Combustion Modeling, and Simulation Techniques\n Course Questions: 1. Given a specific fuel type, calculate the stoichiometric air-fuel ratio and evaluate its impact on engine performance under various operating conditions.  \n2. Analyze the Otto and Diesel cycles to determine their efficiency and performance characteristics based on different modifications in thermodynamic parameters.  \n3. Conduct a lab experiment to measure the emissions produced by a specific internal combustion engine and suggest improvements to reduce harmful emissions while maintaining performance.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Seminar in Mechanical Engineering",
+      "course_id": "ME 250",
+      "full_description": "Course Description: Weekly seminars on current mechanical engineering research presented by students, faculty, and invited experts. Repeatable for credit.\n Course Topics: - Current trends in mechanical engineering research\n- Methods of conducting and presenting research in mechanical engineering\n- Critical evaluation of research publications\n- Interdisciplinary applications of mechanical engineering\n- Innovations and advancements in mechanical engineering fields (e.g., materials science, robotics, thermodynamics)\n Course Questions: 1. Critique a recent mechanical engineering research paper and present your findings to the class, highlighting its significance and potential future developments.\n2. Develop a research proposal based on a current challenge in mechanical engineering, outlining your methodology and expected outcomes.\n3. Analyze a case study of a recent innovation in mechanical engineering, discussing its impact on the industry and potential areas for further research.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Transport Processes in the Atmospheric Boundary Layer",
+      "course_id": "ME 255",
+      "full_description": "Course Description: Examines heat, mass, and momentum transport in the atmospheric boundary layer, including surface energy balance, similarity theory, and pollutant dispersion.\n Course Topics: - Transport processes in the atmospheric boundary layer  \n- Heat transfer mechanisms (conduction, convection, radiation)  \n- Mass transfer and diffusion processes  \n- Momentum transport and turbulent flow dynamics  \n- Surface energy balance and its components  \n- Similarity theory and its applications in boundary layer meteorology  \n- Pollutant dispersion models and methodologies  \n- Effects of vegetation and urban structures on boundary layer dynamics  \n- Numerical simulation techniques for boundary layer processes  \n- Field measurement and experimental methods in boundary layer research\n Course Questions: 1. Calculate the surface energy balance for a given set of atmospheric conditions and evaluate the impact on heat transport in the boundary layer.\n2. Describe how similarity theory can be applied to predict wind profiles and temperature gradients in the atmospheric boundary layer.\n3. Design a study to assess pollutant dispersion in an urban environment, considering the influences of wind speed, atmospheric stability, and surface roughness.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Theory of Elasticity",
+      "course_id": "ME 261",
+      "full_description": "Course Description: Introduces tensor formulation, strain, equations of motion, constitutive relations, plane stress/strain problems, and variational principles in elasticity.\n Course Topics: - Introduction to tensor calculus and its application in elasticity\n- Formulation of strain and stress tensors\n- Equations of motion for elastic bodies\n- Constitutive relations in elasticity (e.g., Hooke's Law)\n- Plane stress and plane strain problems\n- Variational principles and their applications in elasticity analysis\n- Numerical methods in elasticity, such as finite element analysis (FEA)\n Course Questions: 1. Calculate the strain state in a two-dimensional plane stress problem given a specific stress state. 2. Given a loading condition, derive the governing equations of motion for an elastic solid using tensor notation. 3. Apply the principle of virtual work to determine the displacement field of a given elastic body under specified boundary conditions.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Mechanics and Physics of Materials",
+      "course_id": "ME 266",
+      "full_description": "Course Description: Covers structure-property relationships, mechanical/thermal/electrical/magnetic behavior, phase transformations, and brittle-to-ductile transitions. Cross-listed with MSE 208.\n Course Topics: - Structure-property relationships in materials\n- Mechanical properties of materials: elasticity, plasticity, and toughness\n- Thermal properties and heat treatments of materials\n- Electrical conductivity and semiconductor behavior\n- Magnetic properties and applications in materials science\n- Phase transformations and their thermodynamics\n- Analysis of brittle-to-ductile transitions\n- Advanced material characterization techniques\n Course Questions: 1. Given a material's phase diagram, calculate the temperature and pressure conditions necessary to achieve a specific phase transformation.\n2. Explain the mechanisms behind brittle-to-ductile transition in materials and describe how temperature affects this transition.\n3. Calculate the electrical conductivity of a composite material made from two different conductive materials, ensuring to account for their volume fractions and individual conductivities.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Finite Element Methods in Solid Mechanics",
+      "course_id": "ME 267",
+      "full_description": "Course Description: Presents Galerkin and energy methods for finite elements, static/dynamic analysis, multiphysics coupling, and automatic mesh generation.\n Course Topics: - Galerkin methods in finite element analysis \n- Energy methods in solid mechanics \n- Static analysis of mechanical structures \n- Dynamic analysis and vibration of systems \n- Multiphysics coupling in finite element models \n- Methods for automatic mesh generation \n- Applications of finite element methods to real-world engineering problems\n Course Questions: 1. Given a complex mechanical structure, apply the Galerkin method to create a finite element model and predict its static response under load. \n2. Design an automatic mesh generation algorithm suitable for a multiphysics simulation problem. \n3. Analyze a dynamic system using energy methods to determine the natural frequency of vibration and evaluate the impact of damping on system behavior.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Introduction to Microelectromechanical Systems",
+      "course_id": "ME 270",
+      "full_description": "Course Description: Introduces MEMS design and fabrication, micromachining, material properties, transduction, sensors/actuators, microfluidics, packaging, reliability, and metrology. Cross-listed with MSE 238.\n Course Topics: - MEMS Design Principles\n- Fabrication Techniques in MEMS\n- Micromachining Processes\n- Material Properties Relevant to MEMS\n- Transduction Mechanisms (e.g., capacitive, piezoelectric)\n- Sensor and Actuator Design\n- Microfluidics and its Applications\n- Packaging Techniques for MEMS Devices\n- Reliability Assessment of MEMS\n- Metrology in Microfabrication\n Course Questions: 1. Calculate the performance metrics for a MEMS accelerometer considering its sensitivity and noise characteristics in a given application.\n2. Design a basic microfluidic device for drug delivery and analyze its efficiency based on fluid dynamics principles.\n3. Evaluate the reliability of a specific MEMS device after subjecting it to various material fatigue tests and environmental conditions.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Therapeutic Biomedical Microdevices",
+      "course_id": "ME 271",
+      "full_description": "Course Description: Covers microdevice fabrication for biomedical therapy, biocompatibility, and applications in cardiovascular, drug delivery, neuroprosthetic, and cellular engineering.\n Course Topics: - Microdevice fabrication techniques \n- Biocompatibility of materials \n- Applications of microdevices in cardiovascular engineering \n- Drug delivery systems \n- Neuroprosthetics \n- Cellular engineering and tissue scaffolding \n- Regulatory considerations for biomedical devices \n- Experimental design in microdevice testing and application\n Course Questions: 1. Design a microdevice for targeted drug delivery, including considerations for biocompatibility and practical applications in a specific therapeutic area. \n2. Analyze the fabrication techniques used to create microdevices for neuroprosthetic applications and discuss their advantages and disadvantages. \n3. Evaluate a recent research article on cardiovascular microdevices, summarizing the key contributions and potential impacts on biomedical therapy.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Nanoscale Science and Engineering",
+      "course_id": "ME 272",
+      "full_description": "Course Description: Overviews nanometer-scale fabrication (lithography, self-assembly), and properties of nanoparticles, nanotubes, nanowires, biomolecules, and nanocomposites. Cross-listed with MSE 248.\n Course Topics: - Nanometer-scale fabrication techniques (Lithography, Self-assembly) \n- Properties and applications of nanoparticles \n- Structural characteristics of nanotubes and nanowires \n- Behavior and functions of biomolecules at the nanoscale \n- Fabrication and functionality of nanocomposites \n- Characterization methods for nanoscale materials \n- Theoretical models governing nanoscale phenomena \n- Safety and ethical considerations in nanotechnology\n Course Questions: 1. Describe the principles and techniques involved in nanometer-scale fabrication methods such as lithography and self-assembly, and evaluate their advantages and limitations in practical applications. \n\n2. Given a specific nanoparticle size and composition, calculate its surface area-to-volume ratio and discuss how this affects its properties and potential applications. \n\n3. Design a simple experiment to synthesize a nanocomposite using nanoparticles and assess its structural and functional properties using appropriate characterization techniques.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Principles and Designs of Micro Transducers",
+      "course_id": "ME 273",
+      "full_description": "Course Description: Explores physical principles and design of mechanical, thermal, electrical, magnetic, optical, chemical, and biological micro-scale sensors and actuators.\n Course Topics: - Fundamentals of micro-transducers: mechanical, thermal, electrical, magnetic, optical, chemical, biological\n- Design principles of micro-scale sensors and actuators\n- Physical principles affecting transducer performance\n- Materials selection for micro-transducers\n- Manufacturing processes for micro-scale device fabrication\n- Characterization and testing of micro-scale sensors and actuators\n- Integration of micro-transducers in systems and applications\n- Advances in micro-scale sensor technology and future trends\n Course Questions: 1. Design a micro-scale actuator based on thermoelectric principles to control the temperature in a localized area. Discuss the materials and methods you would use.\n2. Given a micro-scale sensor design, calculate the sensitivity and response time based on the physical principles governing its operation. \n3. Develop a project proposal for a new type of micro-scale optical sensor for environmental monitoring, including intended applications, design considerations, and potential challenges.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Plasma-Aided Manufacturing and Materials Processing",
+      "course_id": "ME 274",
+      "full_description": "Course Description: Covers plasma physics, diagnostics, and use of plasmas for materials processing, including nanostructured material fabrication.\n Course Topics: - Fundamentals of plasma physics\n- Plasma diagnostics techniques\n- Plasma generation methods\n- Materials processing techniques using plasmas\n- Nanostructured material fabrication processes\n- Applications of plasmas in manufacturing\n- Challenges and limitations of plasma-aided manufacturing\n- Case studies of plasma processing in industry\n Course Questions: 1. Describe the basic principles of plasma physics and how they apply to the manufacturing process of nanostructured materials.\n2. Given a set of plasma diagnostics data, analyze and interpret the results to determine the suitability of the plasma for a specific materials processing application.\n3. Design an experiment utilizing plasma techniques to fabricate a nanostructured material, including proposed methods, expected outcomes, and potential challenges.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Imperfections in Solids",
+      "course_id": "ME 278",
+      "full_description": "Course Description: Studies crystal defects, dislocation theory, stacking faults, twins, thin-film mechanics, and multilayer structures. Cross-listed with MSE 218.\n Course Topics: - Crystal defects and their classifications\n- Dislocation theory and its applications\n- Stacking faults and their effects on material behavior\n- Twin boundaries in crystalline solids\n- Mechanics of thin films and multilayer structures\n- Mechanical properties influenced by crystallographic imperfections\n- Techniques for characterizing defects in solids (e.g., electron microscopy, X-ray diffraction)\n Course Questions: 1. Given a crystal structure, calculate the energy associated with a specific type of dislocation under applied stress using the dislocation theory equations.\n2. Explain how the presence of stacking faults influences the mechanical properties of a material; provide examples of materials where stacking faults play a critical role.\n3. Design an experiment to analyze the mechanical response of a thin-film structure under tensile stress and determine the effect of layer thickness on fracture toughness.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Directed Studies",
+      "course_id": "ME 290",
+      "full_description": "Course Description: Individual study of selected mechanical engineering topics under faculty supervision. Repeatable for credit.\n Course Topics: - Advanced mechanics of materials\n- Computational fluid dynamics\n- Finite element analysis\n- Thermodynamics and energy systems\n- Robotics and automation technologies\n- Advanced manufacturing techniques\n- Materials science and engineering\n- Engineering ethics and professional practice\n- Research methodologies in mechanical engineering\n- Project management in engineering\n Course Questions: Develop a research proposal that explores an emerging topic in mechanical engineering, including literature review, methodology, and expected outcomes.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Directed Research",
+      "course_id": "ME 297",
+      "full_description": "Course Description: Faculty-supervised research on selected mechanical engineering problems. Repeatable for credit.\n Course Topics: - Research methodologies in mechanical engineering\n- Finite Element Analysis (FEA)\n- Computational Fluid Dynamics (CFD)\n- Experimental design and validation\n- Advanced materials and manufacturing processes\n- Control systems and automation in mechanical applications\n- Current trends in robotics and mechanical systems\n- Sustainability and environmental impact in mechanical engineering research\n Course Questions: 1. Design and implement a finite element analysis to evaluate stress distribution in a mechanical component under dynamic loading conditions.\n2. Develop a novel mechanical system or process based on current research trends in mechanical engineering, including a proposal for experimental validation.\n3. Critically analyze a recent academic paper in mechanical engineering, summarizing the methodology, findings, and implications for future research.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Individual Internship",
+      "course_id": "ME 298I",
+      "full_description": "Course Description: Professional apprenticeship in mechanical engineering with academic oversight, including written work. Repeatable for credit.\n Course Topics: - Advanced mechanical design principles\n- Application of engineering theory in professional settings\n- Role of internships in mechanical engineering education\n- Professional ethics in engineering practice\n- Communication and documentation of engineering projects\n- Collaboration with multidisciplinary teams\n- Problem-solving in real-world engineering scenarios\n Course Questions: 1. Describe a project you worked on during your internship that demonstrates your ability to apply advanced mechanical engineering principles in a professional setting.\n2. Given a set of mechanical design specifications, outline the steps you would take to create a prototype and conduct relevant tests to analyze its performance.\n3. How would you integrate feedback from a mentor into your work to enhance your understanding and application of engineering theory during your internship?",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Research for the Thesis or Dissertation",
+      "course_id": "ME 299",
+      "full_description": "Course Description: Research toward the M.S. thesis or Ph.D. dissertation in mechanical engineering. Repeatable for credit.\n Course Topics: - Advanced research methodologies in mechanical engineering  \n- Literature review and analysis in engineering research  \n- Proposal writing and dissertation planning  \n- Data collection and analysis techniques  \n- Ethical considerations in engineering research  \n- Presentation and communication of research findings  \n- Collaboration and interdisciplinary approaches in mechanical engineering research  \n- Statistical methods and tools for engineering research\n Course Questions: 1. Develop a detailed research proposal outlining the objectives, methodology, and expected outcomes for your thesis or dissertation project.  \n2. Analyze recent literature in your chosen mechanical engineering field to identify knowledge gaps and formulate your research questions based on these gaps.  \n3. Conduct a simulation-based case study related to your research topic, documenting your methodology and results in adherence to academic standards.",
+      "course_level": "graduate"
+    },
+    {
+      "course_name": "Apprentice Teaching",
+      "course_id": "ME 302",
+      "full_description": "Course Description: Covers effective teaching methods, examination preparation/grading, and student interaction for TAs in mechanical engineering courses. Required each teaching quarter.\n Course Topics: - Effective Teaching Methods \n- Strategies for Examination Preparation \n- Grading Techniques and Rubric Development \n- Student Interaction and Engagement Techniques \n- Addressing Common Misconceptions in Engineering \n- Active Learning Strategies \n- Use of Educational Technology in Teaching Engineering \n- Peer Instruction and Collaborative Learning Techniques\n Course Questions: 1. Design a rubric for grading a mechanical engineering exam that effectively evaluates conceptual understanding and application of the material. \n2. Create a lesson plan for a 50-minute class on a fundamental topic in mechanical engineering that includes interactive elements to engage students. \n3. Develop a strategy for addressing common misconceptions in a mechanical engineering subject during a tutorial session.",
+      "course_level": "graduate"
+    }
+  ]
+}
