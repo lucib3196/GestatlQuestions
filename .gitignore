@@ -2,3 +2,4 @@
 venv
 .env
 /backend_api/firebase_cred.json"backend_api/config/firebase_cred.json" 
+/local_questions

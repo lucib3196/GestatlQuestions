@@ -1,6 +1,6 @@
 // NewQuestion.tsx
-import { useEffect, useState, useCallback, useContext, } from "react";
-import type { FormEvent, ReactNode } from "react"
+import { useEffect, useState, useCallback, useContext } from "react";
+import type { FormEvent, ReactNode } from "react";
 import api from "../../api";
 import type { QuestionMetadata, QuestionParams } from "../../types/types";
 import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
@@ -16,7 +16,7 @@ import formatTemplateWithParams from "./../../utils/formatQuestion";
 import { NumberInputDynamic } from "./NumberInput";
 import { MultipleChoiceInput } from "./MultipleChoiceInput";
 import type { QuestionInput } from "../../types/types";
-
+import { MathJax } from "better-react-mathjax";
 
 function renderQuestionInputs(
     inputs: QuestionInput[],
@@ -54,62 +54,142 @@ function renderQuestionInputs(
     });
 }
 
-/**
- * Renders new-format question with interactive inputs.
- */
+
 export function NewQuestion() {
     const { selectedQuestion } = useContext(RunningQuestionSettingsContext);
     const { codeRunningSettings } = useContext(QuestionSettingsContext);
 
     const [question, setQuestion] = useState<QuestionMetadata | null>(null);
     const [params, setParams] = useState<QuestionParams | null>(null);
-    const [formattedQuestion, setFormattedQuestion] = useState<string>("");
-    const [formattedInputs, setFormattedInputs] = useState<ReactNode>(null);
+    const [formattedQuestion, setFormattedQuestion] = useState<string[]>([]);
+    const [formattedInputs, setFormattedInputs] = useState<ReactNode[] | null>(
+        null
+    );
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [error, SetError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const roundValues = true;
 
-    // Load question & initial params
+    const handleError = useCallback((msg: string, err?: unknown) => {
+        console.error(msg, err);
+        SetError(true),
+            setErrorMessage(msg);
+    }, [])
+
+    // Fetch the question 
     useEffect(() => {
         if (!selectedQuestion) return;
+        const controller = new AbortController();
+
+        // Reset all the states when question changes
+        SetError(false);
+        setErrorMessage("");
+        setIsSubmitted(false);
+        setQuestion(null);
+        setParams(null);
+        setFormattedQuestion([]);
+        setFormattedInputs([]);
 
         (async () => {
             try {
-                const [qr, pr] = await Promise.all([
-                    api.get(`/local_questions/get_question_newformat/${selectedQuestion}`),
-                    api.get(`/local_questions/get_server_data/${selectedQuestion}/${codeRunningSettings}`),
-                ]);
-
+                const response = await api.get(
+                    `/local_questions/get_question_newformat/${selectedQuestion}`
+                );
                 const qData: QuestionMetadata =
-                    typeof qr.data === "string" ? JSON.parse(qr.data) : qr.data;
-                const pData = pr.data.quiz_response;
-
+                    typeof response.data === "string"
+                        ? JSON.parse(response.data)
+                        : response.data;
                 setQuestion(qData);
-                setParams(pData);
-                setIsSubmitted(false);
-            } catch (err) {
-                console.error("Failed loading new question", err);
+            } catch (e: any) {
+                if (e.name === "CanceledError") return;
+                handleError("Could not get question data", e);
             }
         })();
-    }, [selectedQuestion, codeRunningSettings]);
+        return () => controller.abort();
+    }, [selectedQuestion, handleError])
 
-    // Format question and inputs when data or submission state changes
+    // Get the paras if the question is adaptive
+
     useEffect(() => {
-        if (!question || !params) return;
+        const isAdaptive = question && (question.isAdaptive === true || question.isAdaptive === "true");
+        if (!isAdaptive) return;
+        const controller = new AbortController();
 
-        // update units if necessary
-        question.questionInputs.forEach((input) => {
-            if (input.qtype === "number" && typeof input.units === "string") {
-                input.units = formatTemplateWithParams(input.units, params);
+        (async () => {
+            try {
+                const res = await api.get(
+                    `/local_questions/get_server_data/${encodeURIComponent(selectedQuestion)}/${encodeURIComponent(codeRunningSettings)}`,
+                    { signal: controller.signal }
+                );
+                const pData = res.data?.quiz_response ?? null;
+
+                if (pData == null) {
+                    const raw = res.data?.error;
+                    const msg = typeof raw === "object" ? JSON.stringify(raw) : String(raw ?? "Unknown error");
+                    handleError(msg);
+                    return;
+                }
+                setParams(pData);
+            } catch (e: any) {
+                if (e.name === "CanceledError") return;
+                handleError("Could not generate question data", e);
             }
+        })();
+
+        return () => controller.abort();
+
+
+    }, [question, selectedQuestion, codeRunningSettings, handleError])
+
+
+    useEffect(() => {
+        if (!question) return;
+
+        // Make a copy to preven overwritting 
+        const clonedRenderingData = question.rendering_data.map(r => ({
+            ...r,
+            questionInputs: r.questionInputs.map(inp => ({ ...inp }))
+        }))
+
+        // Where to store 
+        const qStrings: string[] = [];
+        const inputs: ReactNode[] = [];
+
+        const isAdaptive = question && (question.isAdaptive === true || question.isAdaptive === "true");
+        if (!isAdaptive) {
+            clonedRenderingData.forEach(rd => {
+                qStrings.push(rd.question_template);
+                console.log(rd.questionInputs)
+            });
+            setFormattedQuestion(qStrings)
+            setFormattedInputs([])
+            return
+        }
+
+        if (!params) return;
+
+        // update Inputs 
+        clonedRenderingData.forEach(rd => {
+            rd.questionInputs.forEach(input => {
+                if (input.qtype === "number" && typeof input.units === "string") {
+                    input.units = formatTemplateWithParams(input.units, params)
+                }
+            })
+        })
+
+
+
+        clonedRenderingData.forEach(rd => {
+            qStrings.push(formatTemplateWithParams(rd.question_template, params, roundValues));
+            inputs.push(
+                renderQuestionInputs(rd.questionInputs, params.correct_answers, isSubmitted)
+            );
         });
 
-        setFormattedQuestion(
-            formatTemplateWithParams(question.question_template, params, roundValues)
-        );
-        setFormattedInputs(
-            renderQuestionInputs(question.questionInputs, params.correct_answers, isSubmitted)
-        );
-    }, [question, params, isSubmitted]);
+        setFormattedQuestion(qStrings);
+        setFormattedInputs(inputs);
+
+    }, [question, params, selectedQuestion, isSubmitted])
 
     const handleSubmit = useCallback((e: FormEvent) => {
         e.preventDefault();
@@ -138,20 +218,45 @@ export function NewQuestion() {
         return <div>Loading question…</div>;
     }
 
+    function format() {
+        if (!formattedQuestion || !formattedInputs || !question) return null;
+        return formattedQuestion.map((formattedQ, idx) => (
+            <>
+                <MathJax>
+                    <QuestionPanel
+                        key={idx}
+                        question={formattedQ || ""}
+                        image={question.rendering_data[idx]?.image}
+                    />
+                    {formattedInputs[idx]}
+                </MathJax>
+            </>
+        ));
+    }
+
+    if (error === true) {
+        return (
+            <div className="w-full max-w-3xl mx-auto my-8 p-6 rounded-lg bg-red-100 border border-red-400 text-red-800 font-semibold text-center shadow">
+                {errorMessage}
+            </div>
+        );
+    }
+
     return (
         <div className="w-full max-w-6xl bg-white shadow-lg p-9 rounded-lg">
             <QuestionInfo qmetadata={question} />
-
-            {/* Only render panel when we have at least an empty string */}
-            <QuestionPanel question={formattedQuestion || ""} image={question.image} />
-
+            {format()}
             <form onSubmit={handleSubmit}>
-                {formattedInputs}
-
                 <div className="flex justify-end gap-4 mt-6">
-                    <SubmitAnswerButton disabled={isSubmitted} onClick={() => handleSubmit} />
+                    <SubmitAnswerButton
+                        disabled={isSubmitted}
+                        onClick={() => handleSubmit}
+                    />
                     <ResetQuestionButton onClick={handleReset} disabled={!isSubmitted} />
-                    <GenerateNewVariantButton onClick={handleGenerateVariant} disabled={false} />
+                    <GenerateNewVariantButton
+                        onClick={handleGenerateVariant}
+                        disabled={false}
+                    />
                 </div>
             </form>
         </div>

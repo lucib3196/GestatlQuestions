@@ -33,7 +33,7 @@ class InputState(BaseModel):
 class IntermediateState(BaseModel):
     question: str
     info_json: dict
-    qmeta: List[QuestionBase]
+    qmeta: Optional[List[QuestionBase]]  # Optional to supress warning
 
 
 class FinalState(BaseModel):
@@ -54,20 +54,23 @@ def update_metadata(state: IntermediateState) -> FinalState:
 
     # Extract fields
     title = data.get("title", "Untitled")
-    topic = data.get("topic", [])
+    topic = data.get("topics", [])
     tags = data.get("tags", [])
     isAdaptive = data.get("isAdaptive", "false")
     createdBy = data.get("createdBy", "")
+    relevant_courses = data.get("relevant_courses", [])
 
     if isinstance(topic, str):
         topic = topic.split(",")
+    if isinstance(relevant_courses, str):
+        relevant_courses = relevant_courses.split(",")
 
     payload = QuestionPayload(
         question=state.question,
-        questionBase=state.qmeta,
+        questionBase=state.qmeta,  # type: ignore
         title=title,
         topic=topic,
-        relevantCourses=[],
+        relevantCourses=relevant_courses,
         tags=tags,
         isAdaptive=isAdaptive,
         createdBy=createdBy,

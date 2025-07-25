@@ -1,5 +1,6 @@
 
 import type { QuestionMetadata } from "../../types/types";
+import { MathJax } from "better-react-mathjax";
 import Pill from "../Pill";
 
 export function QuestionInfo({ qmetadata }: { qmetadata: QuestionMetadata }) {
@@ -61,9 +62,8 @@ type QuestionPanelProps = {
 
 export function QuestionPanel({ question, image }: QuestionPanelProps) {
     if (!question) return null;
-
     return (
-        <div className="flex flex-col items-center rounded-2xl shadow-lg p-10 px-8 my-10 text-center bg-white border border-gray-200 hover:shadow-xl transition-shadow duration-200 space-y-6">
+        <div className="flex flex-col items-center rounded-2xl max-w-9/10 shadow-lg p-10 px-8 my-10 text-center bg-white border border-gray-200 hover:shadow-xl transition-shadow duration-200 space-y-6">
             {/* Question Text */}
             <p className="text-lg text-gray-800 whitespace-pre-line">{question}</p>
 

@@ -12,7 +12,7 @@ export type QuestionData = {
 
 export type MultipleChoiceOption = {
   name: string;
-  isCorrect: string|boolean;
+  isCorrect: string | boolean;
 };
 
 type BaseQuestionInput = {
@@ -43,15 +43,19 @@ type CheckboxInput = BaseQuestionInput & {
 
 export type QuestionInput = NumberInput | MultipleChoiceInput | CheckboxInput;
 
-export type QuestionMetadata = {
+export type QuestionRender = {
   question_template: string;
-  image?: string;
   questionInputs: QuestionInput[];
+  image?: string;
+};
+export type QuestionMetadata = {
+  rendering_data: QuestionRender[];
   title: string;
   topic: string[];
   relevantCourses: string[];
   tags: string[];
   isAdaptive: string | boolean;
+  createdBy?: string;
 };
 
 // Old structure to be changed later

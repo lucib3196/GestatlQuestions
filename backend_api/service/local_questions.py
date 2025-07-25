@@ -52,7 +52,10 @@ def filter_questions_new(qfilter: dict):
             attr = getattr(q, key)
 
             if isinstance(attr, list):
-                if value not in attr:
+
+                if any(value.lower() == a.lower() for a in attr):
+                    return True
+                else:
                     return False
             else:
                 if str(attr).lower() != str(value).lower():
@@ -136,6 +139,45 @@ def run_server(
         raise RuntimeError(f"Could not run the server file at {server_path}: {e}")
 
 
+async def get_question_files(question_title: str):
+    try:
+        question_path = get_question_by_title(question_title)
+    except NotADirectoryError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    files = [f.name for f in question_path.iterdir() if f.is_file()]
+
+    # check if there are any images
+    question_images_path = question_path / "clientFilesQuestion"
+
+    if question_images_path.exists():
+        images = [
+            Path("clientFilesQuestion") / f.name
+            for f in question_images_path.iterdir()
+            if f.is_file()
+        ]
+        files.extend([str(img) for img in images])
+    return files
+
+
+async def get_file(question_title: str, filename: str):
+    try:
+        question_path = get_question_by_title(question_title)
+    except NotADirectoryError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    filepath = question_path / str(filename)
+    if filepath.exists():
+        content = filepath.read_text()
+        if isinstance(content, dict):
+            content = json.loads(content)
+        return content
+    else:
+        raise HTTPException(
+            status_code=400, detail="Something went wrong reading the file content"
+        )
+
+
 def get_question_html(question_title: str) -> str:
     try:
         question_path = get_question_by_title(question_title)
@@ -164,3 +206,22 @@ def get_question_newformat(question_title: str):
                 detail=f"Question {question_title} not found or not formatted for new render",
             )
     return question_filename.read_text()
+
+
+def update_file(question_title: str, filename: str, newcontent: str):
+    try:
+        question_path = get_question_by_title(question_title)
+    except NotADirectoryError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # Handle content type
+    if isinstance(newcontent, dict):
+        newcontent = json.dumps(newcontent)
+    filepath = question_path / str(filename)
+    if filepath.exists():
+        filepath.write_text(newcontent, encoding="utf-8")
+        return {"detail": "File updated successfully"}
+    else:
+        raise HTTPException(
+            status_code=400, detail="Failed to update file. File does not exist"
+        )

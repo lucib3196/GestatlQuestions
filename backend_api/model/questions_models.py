@@ -13,14 +13,21 @@ class QuestionMeta(BaseModel):
     isAdaptive: Union[str, bool]
 
 
-class QuestionMetaNew(BaseModel):
+class QuestionRender(BaseModel):
     question_template: str
-    qtype: Optional[Literal["numeric", "multiple_choice"]] = Field(default=None)
-    image: Optional[str] = Field(default=None)
     questionInputs: List[QuestionInput]
-    title:str
+    image: Optional[str]
+
+
+class QuestionMetaNew(BaseModel):
+    rendering_data: List[QuestionRender]
+    qtype: Optional[Literal["numeric", "multiple_choice"]] = Field(default=None)
+    title: str
     topic: List[str]
     relevantCourses: List[str]
     tags: List[str]
     prereqs: Optional[List[str]] = []
     isAdaptive: Union[str, bool]
+    createdBy: Optional[str]
+    language: Optional[List[str]] = []
+    ai_generated: Optional[bool] = None

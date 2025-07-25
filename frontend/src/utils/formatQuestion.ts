@@ -26,6 +26,7 @@ export function replaceParameters(
     }
 
     const placeholder = `[[${prefix}.${key}]]`;
+    const legacyPlaceholder = `{{${prefix}.${key}}}`;
 
     const replacement =
       rounding && typeof value === "number" && sigfigs
@@ -36,6 +37,11 @@ export function replaceParameters(
       placeholder,
       String(replacement)
     );
+
+    updatedTemplate = updatedTemplate.replaceAll(
+      legacyPlaceholder,
+      String(replacement)
+    );
   }
 
   return updatedTemplate;
@@ -43,7 +49,7 @@ export function replaceParameters(
 
 function formatTemplateWithParams(
   template: string,
-  params: QuestionParams,
+  params: QuestionParams| {},
   round = false
 ): string {
   const requiredKeys = ["params", "correct_answers"] as const;
@@ -74,7 +80,5 @@ function formatTemplateWithParams(
 
   return templateCopy;
 }
-
-
 
 export default formatTemplateWithParams;

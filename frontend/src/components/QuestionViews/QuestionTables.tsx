@@ -88,9 +88,8 @@ export function QuestionTable({ Questions }: QuestionTableProps) {
                 <TableCell>
                   <div
                     onClick={() => handleQuestionClick(question.title)}
-                    className={`flex items-center gap-2 font-medium text-base cursor-pointer hover:text-red-600 hover:font-extrabold ${
-                      selectedQuestion === question.title ? "text-red-600 font-extrabold" : "text-indigo-900"
-                    }`}
+                    className={`flex items-center gap-2 font-medium text-base cursor-pointer hover:text-red-600 hover:font-extrabold ${selectedQuestion === question.title ? "text-red-600 font-extrabold" : "text-indigo-900"
+                      }`}
                   >
                     {question.title}
                   </div>

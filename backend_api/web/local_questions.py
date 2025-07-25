@@ -20,6 +20,8 @@ class QuestionFilter(BaseModel):
     prereqs: Optional[str] = None
 
     title: Optional[str] = None
+    ai_generated: Optional[bool] = None
+    language: Optional[str] = None
 
 
 class UniqueValueCount(BaseModel):
@@ -80,3 +82,28 @@ async def get_question_newformat(title: str):
 
     question_data["image"] = image_url
     return question_data
+
+
+@router.get("/get_question_files/{title}")
+async def get_question_files(title: str):
+    return await service.get_question_files(title)
+
+
+@router.get("/get_question_file/{title}/{filename}")
+async def get_question_file(title: str, filename: str):
+    return await service.get_file(title, filename)
+
+
+class UpdateFile(BaseModel):
+    title: str
+    filename: str
+    newcontent: str
+
+
+@router.post("/update_file/")
+async def update_file(file_update: UpdateFile):
+    return service.update_file(
+        question_title=file_update.title,
+        filename=file_update.filename,
+        newcontent=file_update.newcontent,
+    )

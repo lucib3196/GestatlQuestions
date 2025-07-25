@@ -14,6 +14,10 @@ class NumberInput(BaseQuestionInput):
     units: Optional[str] = None
 
 
+class NumberInputStatic(NumberInput):
+    correct_answer: int | float
+
+
 class MultipleChoiceOptions(BaseModel):
     name: str
     isCorrect: bool
@@ -23,7 +27,7 @@ class MultipleChoiceInput(BaseQuestionInput):
     options: List[MultipleChoiceOptions]
 
 
-QuestionInput = Union[NumberInput, MultipleChoiceInput]
+QuestionInput = Union[NumberInput, MultipleChoiceInput, NumberInputStatic]
 
 
 class QuestionBase(BaseModel):

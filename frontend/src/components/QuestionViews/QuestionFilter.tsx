@@ -86,24 +86,22 @@ export function QuestionFilter() {
                     disabled={!questionType || showAllQuestions}
                     sx={{ minWidth: 180 }}
                 >
-                    <InputLabel id="adaptive-label">
-                        <span className="flex items-center gap-2 font-medium text-base text-indigo-900">
-                            Is Adaptive
-                        </span>
+                    <InputLabel id="is-adaptive-label">
+                        isAdaptive
                     </InputLabel>
-                    <Select labelId="adaptive-label" onChange={handleAdaptiveChange} label="Is Adaptive" >
-                        <MenuItem value="false">
-                            <span className="flex items-center gap-2 font-medium text-base text-indigo-900">
-                                False
-                            </span>
-                        </MenuItem>
-                        <MenuItem value="true">
-                            <span className="flex items-center gap-2 font-medium text-base text-indigo-900">
-                                True
-                            </span>
-                        </MenuItem>
+
+                    <Select
+                        labelId="is-adaptive-label"
+                        id="is-adaptive-select"
+                        value={isAdaptive}
+                        onChange={handleAdaptiveChange}
+                        label="isAdaptive"
+                    >
+                        <MenuItem value="false">False</MenuItem>
+                        <MenuItem value="true">True</MenuItem>
                     </Select>
                 </FormControl>
+
                 <div className="flex self-center  items-center justify-center">
                     <QuestionSettings />
 

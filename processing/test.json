@@ -1,0 +1,40 @@
+{
+  "rendering_data": [
+    {
+      "question_template": "Determine the moment about point O in ({{params.unitsForce}} {{params.unitsDist}}) caused by the force $ \\mathbf{F} = {{params.force}}$ $ {{params.unitsForce}}$ acting on the beam.",
+      "questionInputs": [
+        {
+          "name": "momenti",
+          "label": "Moment about point O \\hat{i} =",
+          "qtype": "number",
+          "comparison": "sigfig",
+          "digits": 3,
+          "units": "{{params.unitsForce}} {{params.unitsDist}}"
+        },
+        {
+          "name": "momentj",
+          "label": "Moment about point O \\hat{j} =",
+          "qtype": "number",
+          "comparison": "sigfig",
+          "digits": 3,
+          "units": "{{params.unitsForce}} {{params.unitsDist}}"
+        },
+        {
+          "name": "momentk",
+          "label": "Moment about point O \\hat{k} =",
+          "qtype": "number",
+          "comparison": "sigfig",
+          "digits": 3,
+          "units": "{{params.unitsForce}} {{params.unitsDist}}"
+        }
+      ],
+      "image": "3dMoment1.png"
+    }
+  ],
+  "title": "3D moments",
+  "topic": ["Static Equilibrium", " Distributed Forces"],
+  "relevantCourses": ["ME 010", " ME 103"],
+  "tags": ["Force anylisis", "Moment", "Vectors"],
+  "isAdaptive": "true",
+  "createdBy": "epere194@ucr.edu"
+}
