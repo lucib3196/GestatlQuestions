@@ -25,7 +25,7 @@ import { MathJaxContext } from "better-react-mathjax";
 import QuestionProvider from "./context/QuestionFilterContext";
 import QuestionSettingsProvider from "./context/GeneralSettingsContext";
 import RunningQuestionProvider from "./context/RunningQuestionContext";
-import MainQuestionView from "./pages/MainQuestionView";
+import NavBar from "./components/NavBar";
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {
@@ -41,8 +41,10 @@ function App() {
       <QuestionProvider >
         <QuestionSettingsProvider>
           <RunningQuestionProvider>
+
             {/* Main Content */}
-            <MainQuestionView />
+            <NavBar />
+
             {/* End of Main Content */}
           </RunningQuestionProvider>
         </QuestionSettingsProvider>

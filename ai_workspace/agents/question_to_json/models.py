@@ -49,12 +49,5 @@ class QuestionPayload(BaseModel):
     createdBy: Optional[str]
 
 
-# class QuestionPayload(BaseModel):
-#     question_template: str
-#     questionInputs: List[QuestionInput]
-#     title: str
-#     topic: List[str]
-#     relevantCourses: List[str]
-#     tags: List[str]
-#     isAdaptive: Union[str, bool]
-#     createdBy: Optional[str]
+class Solution(BaseModel):
+    solution_hint: List[str]

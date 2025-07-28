@@ -4,16 +4,46 @@ from .models import QuestionBase
 
 langsmith_client = Client()
 prompt = langsmith_client.pull_prompt("question_input_analysis")
-q_input = r"""<pl-question-panel>
-    <p> Consider a glass window with thickness $ [[params.thickness]] [[params.unitsDist]] $, outside surface temperature $ [[params.T_outside]] [[params.unitsTemperature]] $, and inside surface temperature $ [[params.T_inside]] [[params.unitsTemperature]] $.  
-    Determine the heat loss through the window with height $ [[params.height]] [[params.unitsDist]] $ and width $ [[params.width]] [[params.unitsDist]] $. Thermal conductivity of glass is $ [[params.k]] [[params.unitsThermalConductivity]] $.</p>
-   
-</pl-question-panel>
 
-<pl-number-input answers-name="heatLoss" comparison="sigfig" digits="3" label="Heat Loss [[params.unitHeat]] = "></pl-number-input>
-"""
 
-model = ChatOpenAI(model="gpt-4o-mini").with_structured_output(QuestionBase)
+from pydantic import BaseModel
+from typing import List
+
+
+class Response(BaseModel):
+    questionBase: List[QuestionBase]
+
+
+model = ChatOpenAI(model="gpt-4o-mini").with_structured_output(Response)
 chain = prompt | model
-response = chain.invoke({"question": q_input})
-print(response)
+
+
+if __name__ == "__main__":
+    q_input = r"""<<pl-question-panel>
+    <p>A robotics competition involves programming an autonomous robot to complete a series of tasks:</p>
+    <p>Part 1: The robot must travel a distance of [[params.distance]] [[params.unitsDist]] in a straight line. Enter the minimum time (in seconds) required if its maximum speed is [[params.maxSpeed]] [[params.unitsSpeed]].</p>
+    <p>Calculate the time taken after substituting the values.</p>
+    </pl-question-panel>
+    <pl-number-input answers-name="time" comparison="exact" digits="2" label="Minimum time (in seconds)"></pl-number-input>
+
+    <pl-question-panel>
+    <p>Part 2: The robot must pick up an object and place it in one of three bins. Which bin should the robot choose if the object is metallic?</p>
+    <ul>
+        <li>A) Red bin (plastic)</li>
+        <li>B) Blue bin (metal)</li>
+        <li>C) Green bin (paper)</li>
+    </ul>
+    </pl-question-panel>
+    <pl-multiple-choice answers-name="bin_choice" weight="1">
+    <pl-answer correct="false">Red bin (plastic)</pl-answer>
+    <pl-answer correct="true">Blue bin (metal)</pl-answer>
+    <pl-answer correct="false">Green bin (paper)</pl-answer>
+    </pl-multiple-choice>
+
+    <pl-question-panel>
+    <p>Part 3: After sorting, the robot must rotate [[params.angle]] degrees to face the next task. Enter the angle (in degrees) the robot must turn if it starts facing north and needs to face east.</p>
+    </pl-question-panel>
+    <pl-number-input answers-name="rotation_angle" comparison="exact" digits="0" label="Angle (in degrees)"></pl-number-input>
+    """
+    response = chain.invoke({"question": q_input})
+    print(response)
