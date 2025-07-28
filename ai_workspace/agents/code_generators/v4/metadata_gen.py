@@ -28,7 +28,7 @@ class MetadataInput(BaseModel):
 
 
 class MetadataState(BaseModel):
-    question: str
+    question: str = Field(default="")
     title: str = Field(default="")
     topic: List[str] = Field(default=[])
     relevantCourses: List[str] = Field(default=[])

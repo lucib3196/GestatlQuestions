@@ -1,6 +1,10 @@
 from pydantic import BaseModel, Field
 from typing import List, Union, Optional, Literal
-from ai_workspace.agents.question_to_json.models import QuestionInput
+from ai_workspace.agents.question_to_json.models import (
+    QuestionInput,
+    Solution,
+    QuestionBase,
+)
 
 
 class QuestionMeta(BaseModel):
@@ -13,21 +17,16 @@ class QuestionMeta(BaseModel):
     isAdaptive: Union[str, bool]
 
 
-class QuestionRender(BaseModel):
-    question_template: str
-    questionInputs: List[QuestionInput]
-    image: Optional[str]
-
-
 class QuestionMetaNew(BaseModel):
-    rendering_data: List[QuestionRender]
-    qtype: Optional[Literal["numeric", "multiple_choice"]] = Field(default=None)
+    rendering_data: List[QuestionBase]
+    solution_render: Optional[Solution] = None
+    qtype: Optional[List[Literal["numeric", "multiple_choice"]]] = Field(default=None)
     title: str
     topic: List[str]
     relevantCourses: List[str]
-    tags: List[str]
+    tags: Optional[List[str]] = []
     prereqs: Optional[List[str]] = []
     isAdaptive: Union[str, bool]
-    createdBy: Optional[str]
+    createdBy: Optional[str] = ""
     language: Optional[List[str]] = []
     ai_generated: Optional[bool] = None

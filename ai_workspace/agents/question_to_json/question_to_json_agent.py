@@ -1,17 +1,20 @@
 from langchain_openai import ChatOpenAI
 from langsmith import Client
 from .models import QuestionBase
+from typing import Literal
+from pydantic import BaseModel, Field
+from typing import List
+
 
 langsmith_client = Client()
 prompt = langsmith_client.pull_prompt("question_input_analysis")
 
 
-from pydantic import BaseModel
-from typing import List
-
-
 class Response(BaseModel):
     questionBase: List[QuestionBase]
+    qtype: List[Literal["multiple-choice", "numeric"]] = Field(
+        description="The type of inputs the question has can be multiple"
+    )
 
 
 model = ChatOpenAI(model="gpt-4o-mini").with_structured_output(Response)

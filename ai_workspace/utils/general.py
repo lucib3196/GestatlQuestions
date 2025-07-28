@@ -29,6 +29,8 @@ def save_graph_visualization(
 
         save_dir = base_path or os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(save_dir, filename)
+        
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         with open(file_path, "wb") as file:
             file.write(image_bytes)
