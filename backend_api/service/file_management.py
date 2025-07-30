@@ -48,3 +48,6 @@ async def upload_folder(files: List[UploadFile]):
         with open(filepath, "wb") as f:
             f.write(contents)
     return {"message": f"Uploaded {len(files)} files successfully"}
+
+
+

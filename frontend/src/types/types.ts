@@ -43,11 +43,21 @@ type CheckboxInput = BaseQuestionInput & {
 
 export type QuestionInput = NumberInput | MultipleChoiceInput | CheckboxInput;
 
+export type SolutionHint = {
+  step: string;
+};
+
+export type Solution = {
+  solution_hint: SolutionHint[];
+};
+
 export type QuestionRender = {
   question_template: string;
   questionInputs: QuestionInput[];
   image?: string;
+  solution_render?: Solution;
 };
+
 export type QuestionMetadata = {
   rendering_data: QuestionRender[];
   title: string;

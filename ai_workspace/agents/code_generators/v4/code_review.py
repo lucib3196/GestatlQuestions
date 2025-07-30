@@ -20,6 +20,7 @@ class CodeOutput(BaseModel):
 class IndividualFileReview(BaseModel):
     file_name: str
     approach: str
+    context: str
 
 
 class CodeReview(BaseModel):
@@ -35,7 +36,8 @@ class CodeReview(BaseModel):
         ..., description="The approach of what needs to be modified in the code"
     )
     files_to_modify: List[IndividualFileReview] = Field(
-        ..., description="The name of the files you want to modify and the approach"
+        ...,
+        description="The name of the files you want to modify and the approach include all relevant context associated with the extraction",
     )
 
 
@@ -111,6 +113,11 @@ Structure your answer as follows:
 2. List of required imports and variables for compatibility.
 3. Improved code block(s) for dynamic content, intermediate steps, and conversions, ensuring the server files maintain the 'params' and 'correct_answers' structure and all intermediate values are within 'params'.
 4. For the question_html and solution_html files, ensure they use the parameters from the server files and demonstrate all steps using the [[params.value]] convention for dynamic placeholders.
+
+
+Additionally for each code change for the file also include relevatn context for what you need to know to do the change. This can include extracting the datastructure params to ensure that 
+you are making the adequete changes. Finally for files such as the solution guide and the question file do not mention anything about the backend
+code ie the server.js or server.py files as this is purely for student views. 
 """,
         ),
         ("human", "{input}"),

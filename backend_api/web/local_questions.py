@@ -6,6 +6,8 @@ from backend_api.model.questions_models import QuestionMeta, QuestionMetaNew
 from fastapi.responses import HTMLResponse, JSONResponse
 from pathlib import Path
 import json
+from fastapi import UploadFile, File
+
 
 router = APIRouter(prefix="/local_questions")
 
@@ -107,3 +109,16 @@ async def update_file(file_update: UpdateFile):
         filename=file_update.filename,
         newcontent=file_update.newcontent,
     )
+
+
+@router.post("/create_file/")
+async def create_file(file: UpdateFile):
+    return await service.create_file(
+        question_title=file.title,
+        filename=file.filename,
+    )
+
+
+@router.post("/upload_file/{question_title}")
+async def upload_file(file: UploadFile, question_title: str):
+    return await service.upload_question_file(file, question_title)

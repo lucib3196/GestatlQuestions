@@ -11,7 +11,7 @@ import type { QuestionMetadata } from "../../types/types";
 
 function LocalQuestionsView() {
     const [questionData, setQuestionData] = useState<QuestionInfoJson[] | QuestionMetadata[]>([]);
-    const { isAdaptive, showAllQuestions } = useContext(QuestionFilterContext);
+    const { isAdaptive, showAllQuestions, isAIGen } = useContext(QuestionFilterContext);
     const { renderingSettings, codeRunningSettings } = useContext(QuestionSettingsContext);
 
 
@@ -34,18 +34,21 @@ function LocalQuestionsView() {
         }
     }
 
+    console.log("Ai generated", typeof isAIGen)
+
     let filter;
     if (showAllQuestions) {
         filter = {};
     } else {
         filter = {
-            isAdaptive: isAdaptive,
-            language: codeRunningSettings
+            isAdaptive: isAdaptive.toString().toLowerCase() == "true",
+            language: isAdaptive.toString().toLowerCase() == "true" ? codeRunningSettings : null,
+            ai_generated: isAIGen.toString().toLowerCase() == "true"
         };
     }
     useEffect(() => {
         fetchFilteredQuestions(filter);
-    }, [isAdaptive, showAllQuestions, renderingSettings, codeRunningSettings]);
+    }, [isAdaptive, showAllQuestions, renderingSettings, codeRunningSettings, isAIGen]);
 
     return <QuestionTable Questions={questionData}></QuestionTable>;
 }

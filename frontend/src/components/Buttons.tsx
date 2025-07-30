@@ -1,6 +1,6 @@
 type SubmitAnswerButtonProps = {
     onClick: () => void;
-    disabled: boolean
+    disabled?: boolean
 };
 
 export function SubmitAnswerButton({ onClick, disabled = false }: SubmitAnswerButtonProps) {
@@ -8,7 +8,7 @@ export function SubmitAnswerButton({ onClick, disabled = false }: SubmitAnswerBu
         <button
             onClick={onClick}
             disabled={disabled}
-            className={`inline-flex items-center justify-center px-6 py-2 rounded-lg font-semibold border shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
+            className={`inline-flex h-full items-center justify-center px-6 py-2 rounded-lg font-semibold border shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
         ${disabled
                     ? "bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed"
                     : "bg-primary-blue text-white border-primary-blue hover:bg-accent-sky hover:text-black hover:border-accent-sky focus:ring-accent-sky"
@@ -66,7 +66,7 @@ export function SaveCodeButton({ onClick, disabled }: SubmitAnswerButtonProps) {
     )
 }
 
-export function AddFileButton({ onClick, disabled }: SubmitAnswerButtonProps) {
+export function CreateFileButton({ onClick, disabled }: SubmitAnswerButtonProps) {
     return (
         <button
             onClick={onClick}
@@ -76,13 +76,13 @@ export function AddFileButton({ onClick, disabled }: SubmitAnswerButtonProps) {
                     : "bg-primary-blue text-white border-primary-blue hover:bg-accent-sky hover:text-black hover:border-accent-sky focus:ring-accent-sky"
                 }`}
         >
-            Add File
+            Create <br />File
         </button>
     )
 }
 
 
-export function CreateNewFileButton({ onClick, disabled }: SubmitAnswerButtonProps) {
+export function UploadFileButton({ onClick, disabled }: SubmitAnswerButtonProps) {
     return (
         <button
             onClick={onClick}
@@ -93,7 +93,32 @@ export function CreateNewFileButton({ onClick, disabled }: SubmitAnswerButtonPro
                     : "bg-green-600 text-white border-green-600 hover:bg-green-700 hover:text-white hover:border-green-700 focus:ring-green-400"
                 }`}
         >
-            Create <br />New File
+            Upload <br />File
+        </button>
+    )
+}
+
+
+type ShowSolutionButtonProps = {
+    onClick: () => void;
+    disabled: boolean,
+    showSolution: boolean
+};
+
+export function ShowSolutionStep({ onClick, disabled, showSolution }: ShowSolutionButtonProps) {
+    return (
+        <button
+            onClick={onClick}
+            disabled={disabled}
+            className={`inline-flex items-center justify-center px-6 py-2 rounded-lg font-semibold border shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
+        ${disabled
+                    ? "bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed"
+                    : "bg-green-600 text-white border-green-600 hover:bg-green-700 hover:text-white hover:border-green-700 focus:ring-green-400"
+                }`}
+        >
+
+            {!showSolution ? <div>Show  <br></br> Solution </div> : <div>Hide Solution</div>}
+
         </button>
     )
 }

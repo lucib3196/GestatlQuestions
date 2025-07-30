@@ -225,3 +225,53 @@ def update_file(question_title: str, filename: str, newcontent: str):
         raise HTTPException(
             status_code=400, detail="Failed to update file. File does not exist"
         )
+
+
+async def create_file(question_title: str, filename: str):
+    """
+    Creates a new empty file under the given question's directory.
+    Raises an error if the file already exists or if the question path is invalid.
+    """
+    try:
+        question_path = get_question_by_title(question_title)  # Should return a Path
+    except NotADirectoryError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    filepath = question_path / filename
+
+    if filepath.exists():
+        raise HTTPException(status_code=409, detail="File already exists")
+
+    filepath.write_text("")
+    return {"detail": "File added"}
+
+
+from .file_management import validate_file
+from fastapi import UploadFile
+
+
+async def upload_question_file(file: UploadFile, question_title: str):
+
+    try:
+        question_path = get_question_by_title(question_title)  # Should return a Path
+    except NotADirectoryError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    try:
+        await validate_file(file)
+
+        filename = file.filename
+        content = await file.read()
+
+        if file.content_type == "image/jpeg":
+            image_path = question_path / "clientFilesQuestion" / str(filename)
+            image_path.parent.mkdir(parents=True, exist_ok=True)
+
+            image_path.write_bytes(content)
+        else:
+            filepath = question_path / str(filename)
+            filepath.write_bytes(content)
+        return {"detail": "File uploaded successfully", "filename": filename}
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=e)

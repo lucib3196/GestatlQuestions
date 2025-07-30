@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from typing import Annotated
 from pydantic import BaseModel
-import backend_api.service.authentication as auth_serv
+import backend_api.service.firebase_auth as auth_serv
 
 router = APIRouter(prefix="/auth")
 

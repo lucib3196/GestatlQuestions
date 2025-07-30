@@ -14,7 +14,7 @@ import QuestionSettings from "./QuestionSettings";
 
 export function QuestionFilter() {
     const [questionType, setQuestionType] = useState("MultipleChoice");
-    const { isAdaptive, setIsAdaptive, setShowAllQuestions, showAllQuestions } =
+    const { isAdaptive, setIsAdaptive, setShowAllQuestions, showAllQuestions, isAIGen, setIsAIGen } =
         useContext(QuestionFilterContext);
 
     const handleQuestionTypeChange = (event: SelectChangeEvent) => {
@@ -29,14 +29,17 @@ export function QuestionFilter() {
         setShowAllQuestions((prev) => !prev);
     };
 
+    const handleAIGen = (event: any) => {
+        setIsAIGen(event.target.value)
+    }
+
     return (
-        <div className="flex flex-col flex-wrap justify-center items-center w-full max-w-2xl space-y-8 bg-white rounded-lg shadow-md p-8 mt-10">
+        <div className="flex flex-col flex-wrap justify-center items-center w-full max-w-5xl space-y-8 bg-white rounded-lg shadow-md p-8 mt-10">
             {/* Header */}
             <h1 className="font-bold text-3xl text-indigo-800 mb-4 flex items-center gap-2">
                 Gestalt Questions
             </h1>
             <hr className="border-3 border-indigo-300 w-full" />
-
 
             {/* Start of the filter mechanisms */}
             <div
@@ -86,9 +89,7 @@ export function QuestionFilter() {
                     disabled={!questionType || showAllQuestions}
                     sx={{ minWidth: 180 }}
                 >
-                    <InputLabel id="is-adaptive-label">
-                        isAdaptive
-                    </InputLabel>
+                    <InputLabel id="is-adaptive-label">isAdaptive</InputLabel>
 
                     <Select
                         labelId="is-adaptive-label"
@@ -102,13 +103,29 @@ export function QuestionFilter() {
                     </Select>
                 </FormControl>
 
+                <FormControl
+                    variant="outlined"
+                    disabled={!questionType || showAllQuestions}
+                    sx={{ minWidth: 180 }}
+                >
+                    <InputLabel id="is-ai-gen-label">AIGenerated</InputLabel>
+
+                    <Select
+                        labelId="is-ai-gen-label"
+                        id="is-ai-gen-select"
+                        value={isAIGen}
+                        onChange={handleAIGen}
+                        label="AIGenerated"
+                    >
+                        <MenuItem value="false">False</MenuItem>
+                        <MenuItem value="true">True</MenuItem>
+                    </Select>
+                </FormControl>
+
                 <div className="flex self-center  items-center justify-center">
                     <QuestionSettings />
-
                 </div>
-
             </div>
-
         </div>
     );
 }

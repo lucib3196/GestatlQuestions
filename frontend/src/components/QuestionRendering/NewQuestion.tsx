@@ -1,28 +1,46 @@
 // NewQuestion.tsx
 import { useEffect, useState, useCallback, useContext } from "react";
 import type { FormEvent, ReactNode } from "react";
+
 import api from "../../api";
-import type { QuestionMetadata, QuestionParams } from "../../types/types";
+
+// Types
+import type {
+    QuestionMetadata,
+    QuestionParams,
+    QuestionInput,
+} from "../../types/types";
+
+// Contexts
 import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
 import { QuestionSettingsContext } from "../../context/GeneralSettingsContext";
-import { QuestionInfo } from "./QuestionPanel";
-import { QuestionPanel } from "./QuestionPanel";
+
+// Components
+import { QuestionPanel, QuestionInfo } from "./QuestionPanel";
+import { NumberInputDynamic } from "./NumberInput";
+import { MultipleChoiceInput } from "./MultipleChoiceInput";
+import { SolutionPanel } from "./SolutionPanel";
 import {
     SubmitAnswerButton,
     ResetQuestionButton,
     GenerateNewVariantButton,
+    ShowSolutionStep,
 } from "../Buttons";
-import formatTemplateWithParams from "./../../utils/formatQuestion";
-import { NumberInputDynamic } from "./NumberInput";
-import { MultipleChoiceInput } from "./MultipleChoiceInput";
-import type { QuestionInput } from "../../types/types";
+
+// Utilities
+import formatTemplateWithParams from "../../utils/formatQuestion";
+
+// Libraries
 import { MathJax } from "better-react-mathjax";
+
+
 
 function renderQuestionInputs(
     inputs: QuestionInput[],
     correctAnswers: Record<string, any>,
     isSubmitted: boolean
 ) {
+    console.log("Inside render", inputs)
     return inputs.map((value) => {
         switch (value.qtype) {
             case "number":
@@ -65,6 +83,8 @@ export function NewQuestion() {
     const [formattedInputs, setFormattedInputs] = useState<ReactNode[] | null>(
         null
     );
+    const [showSolution, setShowSolution] = useState(false)
+    const [formattedSolution, setFormattedSolution] = useState<string[] | null>(null)
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [error, SetError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -77,6 +97,7 @@ export function NewQuestion() {
     }, [])
 
     // Fetch the question 
+    // This contains all the metadata for the question including the  question template and its solution 
     useEffect(() => {
         if (!selectedQuestion) return;
         const controller = new AbortController();
@@ -100,6 +121,7 @@ export function NewQuestion() {
                         ? JSON.parse(response.data)
                         : response.data;
                 setQuestion(qData);
+                console.log(qData)
             } catch (e: any) {
                 if (e.name === "CanceledError") return;
                 handleError("Could not get question data", e);
@@ -108,21 +130,23 @@ export function NewQuestion() {
         return () => controller.abort();
     }, [selectedQuestion, handleError])
 
-    // Get the paras if the question is adaptive
-
+    // Fetches and runs the generate files if the question is adaptive either javascript or python depeonding on the settings
     useEffect(() => {
-        const isAdaptive = question && (question.isAdaptive === true || question.isAdaptive === "true");
+        const isAdaptive = question && (
+            question.isAdaptive === true ||
+            (typeof question.isAdaptive === "string" && question.isAdaptive.toLowerCase() === "true")
+        );
         if (!isAdaptive) return;
         const controller = new AbortController();
+
 
         (async () => {
             try {
                 const res = await api.get(
-                    `/local_questions/get_server_data/${encodeURIComponent(selectedQuestion)}/${encodeURIComponent(codeRunningSettings)}`,
+                    `/local_questions/get_server_data/${encodeURIComponent(selectedQuestion as string)}/${encodeURIComponent(codeRunningSettings)}`,
                     { signal: controller.signal }
                 );
                 const pData = res.data?.quiz_response ?? null;
-
                 if (pData == null) {
                     const raw = res.data?.error;
                     const msg = typeof raw === "object" ? JSON.stringify(raw) : String(raw ?? "Unknown error");
@@ -137,8 +161,6 @@ export function NewQuestion() {
         })();
 
         return () => controller.abort();
-
-
     }, [question, selectedQuestion, codeRunningSettings, handleError])
 
 
@@ -151,41 +173,58 @@ export function NewQuestion() {
             questionInputs: r.questionInputs.map(inp => ({ ...inp }))
         }))
 
+
         // Where to store 
         const qStrings: string[] = [];
         const inputs: ReactNode[] = [];
+        const solutionString: string[] = []
 
-        const isAdaptive = question && (question.isAdaptive === true || question.isAdaptive === "true");
+        const isAdaptive = question && (
+            question.isAdaptive === true ||
+            (typeof question.isAdaptive === "string" && question.isAdaptive.toLowerCase() === "true")
+        );
+
         if (!isAdaptive) {
             clonedRenderingData.forEach(rd => {
                 qStrings.push(rd.question_template);
-                console.log(rd.questionInputs)
+                inputs.push(renderQuestionInputs(rd.questionInputs, {}, isSubmitted))
             });
             setFormattedQuestion(qStrings)
-            setFormattedInputs([])
+            setFormattedInputs(inputs)
             return
         }
 
-        if (!params) return;
+        if (!params) {
+            console.log("params is empty")
+            return
+        };
 
-        // update Inputs 
+        // update Inputs if numeric 
         clonedRenderingData.forEach(rd => {
             rd.questionInputs.forEach(input => {
                 if (input.qtype === "number" && typeof input.units === "string") {
+
                     input.units = formatTemplateWithParams(input.units, params)
+                    input.label = formatTemplateWithParams(input.label, params)
                 }
             })
         })
 
-
-
+        // Handles the rendering of the question template and the inputs, this is done 
+        // For each instance 
         clonedRenderingData.forEach(rd => {
             qStrings.push(formatTemplateWithParams(rd.question_template, params, roundValues));
             inputs.push(
                 renderQuestionInputs(rd.questionInputs, params.correct_answers, isSubmitted)
             );
+            rd.solution_render?.solution_hint.forEach((hint) => {
+                solutionString.push(formatTemplateWithParams(hint, params, roundValues))
+            })
         });
 
+
+
+        setFormattedSolution(solutionString)
         setFormattedQuestion(qStrings);
         setFormattedInputs(inputs);
 
@@ -229,6 +268,7 @@ export function NewQuestion() {
                         image={question.rendering_data[idx]?.image}
                     />
                     {formattedInputs[idx]}
+                    {formattedSolution && showSolution && <SolutionPanel solution={formattedSolution}></SolutionPanel>}
                 </MathJax>
             </>
         ));
@@ -246,19 +286,24 @@ export function NewQuestion() {
         <div className="w-full max-w-6xl bg-white shadow-lg p-9 rounded-lg">
             <QuestionInfo qmetadata={question} />
             {format()}
-            <form onSubmit={handleSubmit}>
-                <div className="flex justify-end gap-4 mt-6">
+            <div className="flex justify-end gap-4 mt-6">
+                {formattedSolution && <ShowSolutionStep
+                    onClick={() => setShowSolution((prev) => !prev)}
+                    disabled={false}
+                    showSolution={showSolution}
+                />}
+                <form onSubmit={handleSubmit}>
                     <SubmitAnswerButton
                         disabled={isSubmitted}
                         onClick={() => handleSubmit}
                     />
-                    <ResetQuestionButton onClick={handleReset} disabled={!isSubmitted} />
-                    <GenerateNewVariantButton
-                        onClick={handleGenerateVariant}
-                        disabled={false}
-                    />
-                </div>
-            </form>
+                </form>
+                <ResetQuestionButton onClick={handleReset} disabled={!isSubmitted} />
+                <GenerateNewVariantButton
+                    onClick={handleGenerateVariant}
+                    disabled={false}
+                />
+            </div>
         </div>
     );
 }

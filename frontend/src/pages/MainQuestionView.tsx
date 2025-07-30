@@ -14,7 +14,7 @@ function MainQuestionView() {
 
     return (
         <div className="flex flex-col items-center w-full min-h-screen bg-gray-50 py-8">
-            <div className="w-full max-w-4xl flex flex-col  items-center justify-center">
+            <div className="w-full max-w-6xl flex flex-col  items-center justify-center">
                 <QuestionFilter />
                 <LocalQuestionsView />
             </div>
@@ -34,6 +34,7 @@ function MainQuestionView() {
                         >
                             Submit Review
                         </button>
+
                     </div>
                     <div className="w-full">
                         <PanelGroup autoSaveId="conditional" direction="horizontal">

@@ -2,6 +2,7 @@ import type { QuestionParams } from "../types/types";
 import { roundToSigFigs } from "./mathHelpers";
 export function checkObject(obj: Object, errorMessage: string) {
   if (typeof obj !== "object" || obj === null || Array.isArray(obj)) {
+    console.log(errorMessage)
     throw new TypeError(errorMessage);
   }
 }
@@ -38,6 +39,8 @@ export function replaceParameters(
       String(replacement)
     );
 
+    console.log("about to replace",placeholder, String(replacement))
+
     updatedTemplate = updatedTemplate.replaceAll(
       legacyPlaceholder,
       String(replacement)
@@ -60,6 +63,7 @@ function formatTemplateWithParams(
   );
 
   let templateCopy = template;
+
 
   for (const key of requiredKeys) {
     const paramGroup = params[key];
