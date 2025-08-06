@@ -27,7 +27,7 @@ import QuestionSettingsProvider from "./context/GeneralSettingsContext";
 import RunningQuestionProvider from "./context/RunningQuestionContext";
 import { AuthProvider } from "./context/AuthContext";
 import NavBar from "./components/NavBar";
-import LoginPage from "./components/auth/Login";
+import LoginPage from "./components/Auth/Login";
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {
@@ -48,8 +48,6 @@ function App() {
 
               {/* Main Content */}
               <NavBar />
-              <LoginPage />
-
               {/* End of Main Content */}
             </RunningQuestionProvider>
           </QuestionSettingsProvider>

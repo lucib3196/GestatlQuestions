@@ -1,128 +1,155 @@
-import React, { useContext, useState } from "react";
-import api from "../../api";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import LogInForm from "./LogInForm";
+import { CloseButton } from "../CloseButton";
+import SignUpForm from "./SignUpForm";
 
-async function handleLogin(username: string, password: string): Promise<boolean> {
-    try {
-        const formData = new URLSearchParams();
-        formData.append("username", username);
-        formData.append("password", password);
-
-        const response = await api.post("/auth/login", formData.toString(), {
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-        });
-
-        const data = response.data;
-        localStorage.setItem("access_token", data.access_token);
-        return true;
-    } catch (error) {
-        console.error("Login error:", error);
-        return false;
-    }
-}
-
-function LogInForm() {
-
-    const [username, setUserName] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
-
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const success = await handleLogin(username, password)
-        console.log(success);
-    };
+function UserLoggedIn(): React.ReactNode {
+    const { logout, message } = useContext(AuthContext);
     return (
-        <form
-            className="flex grow w-full flex-col space-y-10 h-full"
-            onSubmit={handleSubmit}
-        >
-            <div>
-                <label htmlFor="username" className="block text-sm font-medium text-black">
-                    UserName
-                </label>
-                <div className="mt-2">
-                    <input
-                        id="username"
-                        name="username"
-                        type="text"
-                        placeholder="User Name"
-                        required
-                        value={username}
-                        onChange={(e) => setUserName(e.target.value)}
-                        className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-black outline-1 outline-black placeholder:text-gray-500 focus:outline-2 focus:outline-indigo-500 sm:text-sm"
-                    />
-                </div>
-            </div>
-
-            <div>
-                <div className="flex items-center justify-between">
-                    <label htmlFor="password" className="block text-sm font-medium text-black">
-                        Password
-                    </label>
-                    <div className="text-sm">
-                        <a href="#" className="font-semibold text-indigo-400 hover:text-indigo-300">
-                            Forgot password?
-                        </a>
-                    </div>
-                </div>
-                <div className="mt-2">
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        autoComplete="current-password"
-                        className="block w-full rounded-md bg-white/50 px-3 py-1.5 text-base text-black outline-1 outline-black placeholder:text-gray-500 focus:outline-2 focus:outline-indigo-500 sm:text-sm"
-                    />
-                </div>
-            </div>
-
-            <div>
-                <button
-                    type="submit"
-                    className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-                >
-                    Sign in
-                </button>
-            </div>
-        </form>
+        <div className="self-start space-y-2 text-black">
+            <p className="text-lg ">Thanks for logging in</p>
+            <h1 className="font-bold text-2xl">Username: {message?.username}</h1>
+            <p
+                className="text-blue-500 hover:text-blue-700 hover:font-bold cursor-pointer"
+                onClick={logout}
+            >
+                Log Out?
+            </p>
+        </div>
     );
 }
 
 
-type LoggedInProps = {
-    username: string;
+function PromptUser() {
+    const [errorMessage, setErrorMessage] = useState("");
+    const [signUp, setSignUp] = useState(false);
+    const [signUpSuccess, setSignUpSuccess] = useState(false);
+
+    const handleSignUpSuccess = () => {
+        setSignUp(false);
+        setSignUpSuccess(true);
+        setErrorMessage(""); // clear any leftover errors
+    };
+
+    if (!signUp) {
+        return (
+            <>
+                <h2 className="mt-10 text-center text-2xl font-bold tracking-tight text-black my-2">
+                    Log in to Your Account
+                </h2>
+
+                {signUpSuccess && (
+                    <p className="text-green-600 text-sm text-center my-2">
+                        ✅ Sign-up successful! Please log in.
+                    </p>
+                )}
+
+                {errorMessage && (
+                    <p className="text-red-500 text-sm text-center my-2">
+                        {errorMessage}
+                    </p>
+                )}
+
+                <LogInForm setErrorMessage={setErrorMessage} />
+
+                <div className="flex justify-start items-center mt-4">
+                    <p className="text-xl text-black">
+                        Don’t have an account?{" "}
+                        <span
+                            onClick={() => {
+                                setSignUp(true);
+                                setSignUpSuccess(false); // reset success message
+                            }}
+                            className="text-blue-500 hover:text-blue-700 hover:font-bold cursor-pointer"
+                        >
+                            Sign Up
+                        </span>
+                    </p>
+                </div>
+            </>
+        );
+    }
+
+    return (
+        <>
+            <h2 className="mt-10 text-center text-2xl font-bold tracking-tight text-black my-2">
+                Sign Up
+            </h2>
+
+            {errorMessage && (
+                <p className="text-red-500 text-sm text-center my-2">
+                    {errorMessage}
+                </p>
+            )}
+
+            <SignUpForm
+                setErrorMessage={setErrorMessage}
+                onSuccess={handleSignUpSuccess} // 👈 pass success handler
+            />
+        </>
+    );
+}
+
+
+type ModalProps = {
+    setShowModal: (visible: boolean) => void;
+    children: React.ReactNode;
 };
 
-function LoggedIn({ username }: LoggedInProps): React.ReactNode {
+function LogInContainer({
+    setShowModal,
+    children,
+}: ModalProps): React.ReactNode {
+    const modalRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (
+                modalRef.current &&
+                !modalRef.current.contains(event.target as Node)
+            ) {
+                setShowModal(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [setShowModal]);
+
     return (
-        <div className="self-start space-y-2">
-            <p className="text-lg ">Thanks for logging in</p>
-            <h1 className="font-bold text-2xl">Username: {username}</h1>
-        </div>
-    );
-}
-
-
-function LoginPage() {
-    const { isLoggedIn, message } = useContext(AuthContext);
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-lg p-8 max-w-1/2 min-w-2/5 min-h-1/2 max-h-3/4 flex flex-col justify-start px-6 py-12 lg:px-8">
-                <div className="flex flex-col grow w-full h-full justify-evenly px-10">
-                    {(isLoggedIn && message) ? <LoggedIn username={message.username}></LoggedIn> : <> <h2 className="mt-10 text-center text-2xl font-bold tracking-tight text-black">
-                        Log in to Your Account
-                    </h2>
-                        <LogInForm /> </>}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-gray-100 w-full max-w-3xl h-auto max-h-[90vh] rounded-lg shadow-2xl overflow-y-auto p-6 sm:p-8">
+                <div className="flex flex-col space-y-4">
+                    <div className="flex justify-end">
+                        <CloseButton onClick={() => setShowModal(false)} />
+                    </div>
+                    <div className="w-full">
+                        {children}
+                    </div>
                 </div>
             </div>
         </div>
     );
 }
 
-export default LoginPage;
+type LogInPageProps = {
+    showModal: boolean;
+    setShowModal: (visible: boolean) => void;
+};
+
+function LogInPage({ showModal, setShowModal }: LogInPageProps): React.ReactNode {
+    const { isLoggedIn } = useContext(AuthContext);
+
+    return (
+        <>
+            {showModal && (
+                <LogInContainer setShowModal={setShowModal}>
+                    {isLoggedIn ? <UserLoggedIn /> : <PromptUser />}
+                </LogInContainer>
+            )}
+        </>
+    );
+}
+export default LogInPage;

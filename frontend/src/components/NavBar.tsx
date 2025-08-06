@@ -8,54 +8,77 @@ import {
   MenuItems,
 } from "@headlessui/react";
 
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link,
-} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import TextGenerator from "./CodeGenerators/TextGenerator";
 
 import MainQuestionView from "../pages/MainQuestionView";
 import type React from "react";
 import ImageGenerator from "./CodeGenerators/ImageGenerator";
-
+import { AuthContext } from "../context/AuthContext";
+import LogInPage from "./Auth/Login";
+import { useContext } from "react";
 type dropDownItem = {
-  name: string,
-  href: string,
-  element: React.ReactNode,
-}
+  name: string;
+  href: string;
+  element: React.ReactNode;
+};
 type navigationType = {
   name: string;
   href: string;
-  element?: React.ReactNode
+  element?: React.ReactNode;
   current: boolean;
-  dropdown?: boolean
-  dropdownItems?: dropDownItem[]
-}
+  dropdown?: boolean;
+  dropdownItems?: dropDownItem[];
+  requiresAccount: boolean
+};
+import { useState } from "react";
 const navigation: navigationType[] = [
-  { name: "Questions", href: "/questions", element: <MainQuestionView />, current: false },
   {
-    name: "Generators", href: "/generators", current: false, dropdown: true, dropdownItems: [
-      { name: "Text", href: "/generators/text_generator", element: <TextGenerator /> },
-      { name: "ImageUpload", href: "/generators/image_generator", element: <ImageGenerator /> },
-    ]
+    name: "Questions",
+    href: "/questions",
+    element: <MainQuestionView />,
+    current: false,
+    requiresAccount: false
+  },
+  {
+    name: "Generators",
+    href: "/generators",
+    current: false,
+    requiresAccount: true,
+    dropdown: true,
+    dropdownItems: [
+      {
+        name: "Text",
+        href: "/generators/text_generator",
+        element: <TextGenerator />,
+      },
+      {
+        name: "ImageUpload",
+        href: "/generators/image_generator",
+        element: <ImageGenerator />,
+      },
+    ],
   },
 ];
 
-
 function handleRoutes(navigation: navigationType[]) {
-  return (navigation.map((nav) =>
-    nav.dropdown
-      ? nav.dropdownItems?.map((dI) => <Route path={dI.href} element={dI.element}></Route>)
-      : <Route path={nav.href} element={nav.element}></Route>
-  ))
+  return navigation.map((nav) =>
+    nav.dropdown ? (
+      nav.dropdownItems?.map((dI) => (
+        <Route path={dI.href} element={dI.element}></Route>
+      ))
+    ) : (
+      <Route path={nav.href} element={nav.element}></Route>
+    )
+  );
 }
 
-
 function NavBar() {
+  const { isLoggedIn, logout } = useContext(AuthContext);
+  const [showLogin, setShowLogin] = useState(false);
+
   return (
     <Router>
       <Disclosure as="nav" className="bg-gray-800">
@@ -65,8 +88,14 @@ function NavBar() {
             <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
               <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
                 <span className="sr-only">Open main menu</span>
-                <Bars3Icon className="block h-6 w-6 group-data-open:hidden" aria-hidden="true" />
-                <XMarkIcon className="hidden h-6 w-6 group-data-open:block" aria-hidden="true" />
+                <Bars3Icon
+                  className="block h-6 w-6 group-data-open:hidden"
+                  aria-hidden="true"
+                />
+                <XMarkIcon
+                  className="hidden h-6 w-6 group-data-open:block"
+                  aria-hidden="true"
+                />
               </DisclosureButton>
             </div>
 
@@ -81,13 +110,16 @@ function NavBar() {
                           <span>{item.name}</span>
                           <ChevronDownIcon className="h-4 w-4 fill-white/60" />
                         </MenuButton>
-                        <MenuItems transition
-                          anchor="bottom" className=" flex flex-col justify-center items-center mt-2 w-40 rounded-xl border border-white/20 bg-gray-800 p-1 text-white text-sm shadow-lg ring-1 ring-black/5 focus:outline-none">
+                        <MenuItems
+                          transition
+                          anchor="bottom"
+                          className=" flex flex-col justify-center items-center mt-2 w-40 rounded-xl border border-white/20 bg-gray-800 p-1 text-white text-sm shadow-lg ring-1 ring-black/5 focus:outline-none"
+                        >
                           {item.dropdownItems?.map((ditem) => (
                             <MenuItem key={ditem.name}>
                               <Link
                                 to={ditem.href}
-                                className="block px-3 py-2 rounded-md hover:bg-white/10"
+                                className={`block px-3 py-2 rounded-md hover:bg-white/10 `}
                               >
                                 {ditem.name}
                               </Link>
@@ -107,11 +139,16 @@ function NavBar() {
                     )
                   )}
                 </div>
-
-
               </div>
               <div className="flex ml-auto text-white items-center justify-center">
-                Log In
+                {isLoggedIn ? (
+                  <p className="hover:text-bold hover:text-xl  transition delay-150 duration-300 ease-in-out " onClick={logout}>
+                    Log Out
+                  </p>
+                ) : (
+                  <p className="hover:text-bold hover:text-xl transition delay-150 duration-300 ease-in-out " onClick={() => setShowLogin(true)}>Log In</p>
+                )}
+                <LogInPage showModal={showLogin} setShowModal={setShowLogin} />
               </div>
             </div>
           </div>
@@ -120,9 +157,10 @@ function NavBar() {
         <DisclosurePanel className="sm:hidden">
           <div className="space-y-1 px-2 pt-2 pb-3">
             {navigation.map((item) => (
-              <DisclosureButton key={item.name} as={Link} to={item.href} >
+              <DisclosureButton key={item.name} as={Link} to={item.href}>
                 <span
-                  className={'block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white'
+                  className={
+                    "block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
                   }
                 >
                   {item.name}
@@ -133,11 +171,9 @@ function NavBar() {
         </DisclosurePanel>
       </Disclosure>
 
-      <Routes>
-        {handleRoutes(navigation)}
-      </Routes>
+      <Routes>{handleRoutes(navigation)}</Routes>
     </Router>
   );
 }
 
-export default NavBar
+export default NavBar;
