@@ -1,25 +1,86 @@
-from fastapi import APIRouter, Depends
-from typing import Annotated
-from pydantic import BaseModel
-import backend_api.service.firebase_auth as auth_serv
+# ========================
+# Standard Library Imports
+# ========================
+from typing import Union, Annotated
 
-router = APIRouter(prefix="/auth")
+# ===============
+# FastAPI Imports
+# ===============
+from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
+# ===========================
+# SQLAlchemy / SQLModel Tools
+# ===========================
+from sqlalchemy.orm import Session
+
+# ======================
+# Third-Party Libraries
+# ======================
+from passlib.context import CryptContext
+from starlette import status
+
+# =====================
+# Project-Specific Code
+# =====================
+from backend_api.core.config import settings
+from backend_api.core.logging import logger
+from backend_api.data.database import get_session, SessionDep
+from backend_api.model import users as users_model
+from backend_api.model import token as token_model
+from backend_api.service import user as service
+
+# ==================
+# Router Declaration
+# ==================
+router = APIRouter(
+    prefix="/auth",
+    tags=["auth"],
+)
+
+# =====================
+# Auth Security Schemes
+# =====================
+bcrypt = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/login")
 
 
-class User(BaseModel):
-    display_name: str
-    email: str
-    password: str
+# =================
+# Route: /signup
+# =================
+@router.post(
+    "/signup",
+    status_code=status.HTTP_201_CREATED,
+    response_model=Union[users_model.User, users_model.UserRead],
+)
+async def create_user(
+    user_create: users_model.UserCreate,
+    session: SessionDep,
+) -> Union[users_model.User, users_model.UserRead]:
+    return await service.add_user(user_create, session)  # type: ignore
 
 
-@router.post("/create_user")
-async def create_user(user: User):
-    return auth_serv.create_user_firebase(user.display_name, user.email, user.password)
+# =================
+# Route: /login
+# =================
+@router.post(
+    "/login",
+    status_code=status.HTTP_202_ACCEPTED,
+    response_model=token_model.Token,
+)
+async def login_user(
+    token: Annotated[OAuth2PasswordRequestForm, Depends()],
+    session: Session = Depends(get_session),
+) -> token_model.Token:
+    return await service.login_for_access_token(token, session)  # type: ignore
 
 
-@router.get("/userid")
-async def get_userid(
-    user: Annotated[dict, Depends(auth_serv.get_firebase_user_from_token)],
-):
-    return {"id": user["uid"]}
-
+# ========================
+# Route: /current_user
+# ========================
+@router.get("/current_user")
+async def get_current_user(
+    token: Annotated[str, Depends(oauth2_bearer)],
+    session: SessionDep,
+) -> users_model.UserRead:
+    return await service.get_current_user(token, session)

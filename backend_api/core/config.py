@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"  # Authentication protocol
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30  # how long session info is retained
     DATABASE_URI: Optional[str] = None
+    AUTH_URL : str  = "/auth/login"
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod

@@ -4,8 +4,10 @@ import LocalQuestionsView from '../components/QuestionViews/LocalQuestions';
 import RenderAdaptiveQuestion from '../components/QuestionRendering/RenderAdaptiveQuestion';
 import { RunningQuestionSettingsContext } from '../context/RunningQuestionContext';
 import { useContext, useState } from 'react';
+
 import { Panel, PanelGroup } from "react-resizable-panels";
 import QuestionCodeEditor from '../components/CodeEditor/QuestionCodeEditor';
+
 
 
 function MainQuestionView() {
@@ -55,6 +57,7 @@ function MainQuestionView() {
                     </div>
                 </div>
             )}
+          
         </div>
         // 
 

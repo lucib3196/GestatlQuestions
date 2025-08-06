@@ -45,6 +45,16 @@ const navigation: navigationType[] = [
   },
 ];
 
+
+function handleRoutes(navigation: navigationType[]) {
+  return (navigation.map((nav) =>
+    nav.dropdown
+      ? nav.dropdownItems?.map((dI) => <Route path={dI.href} element={dI.element}></Route>)
+      : <Route path={nav.href} element={nav.element}></Route>
+  ))
+}
+
+
 function NavBar() {
   return (
     <Router>
@@ -97,6 +107,11 @@ function NavBar() {
                     )
                   )}
                 </div>
+
+
+              </div>
+              <div className="flex ml-auto text-white items-center justify-center">
+                Log In
               </div>
             </div>
           </div>
@@ -119,10 +134,7 @@ function NavBar() {
       </Disclosure>
 
       <Routes>
-        <Route path="/questions" element={<MainQuestionView />} />
-        <Route path="/generators/text_generator" element={<TextGenerator />} />
-        <Route path="/generators/image_generator" element={<ImageGenerator />} />
-        {/* <Route path="*" element={<NotFound />} */}
+        {handleRoutes(navigation)}
       </Routes>
     </Router>
   );

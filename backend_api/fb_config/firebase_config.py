@@ -8,7 +8,7 @@ load_dotenv()
 
 
 try:
-    cred = credentials.Certificate("backend_api/config/firebase_cred.json")
+    cred = credentials.Certificate("backend_api/fb_config/firebase_cred.json")
 except Exception as e:
     raise ValueError(f"Credential file path not found {e}")
 

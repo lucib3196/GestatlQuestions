@@ -1,25 +1,30 @@
-import logging
+import os
 import uuid
+import uvicorn
+
 from contextlib import asynccontextmanager
+from typing import Annotated
+
 from fastapi import FastAPI, HTTPException, UploadFile, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
 
 from pydantic import BaseModel
-
 from firebase_admin import storage
 
-from typing import Annotated
-
 from .fb_config import db
+from fastapi.openapi.utils import get_openapi
+
+# Internal imports
+from backend_api.core.config import settings
+from backend_api.data.database import create_db_and_tables
 
 # Routers
 from backend_api.web.authentication import router
 from backend_api.web.file_management import router as file_router
 from backend_api.web.local_questions import router as local_question_router
 from backend_api.web.code_generator import router as code_generator_router
-from backend_api.data.database import create_db_and_tables
 from backend_api.web.user import router as user_route
 
 
@@ -30,32 +35,72 @@ async def on_startup(app: FastAPI):
     create_db_and_tables()
     yield
 
+def get_application():
+    app = FastAPI(title=settings.PROJECT_NAME, lifespan=on_startup)
 
-# Routers
-app = FastAPI(lifespan=on_startup)
-routes = [router, code_generator_router, file_router, local_question_router, user_route]
-for r in routes:
-    app.include_router(r)
+    # Add routes
+    routes = [
+        router,
+        code_generator_router,
+        file_router,
+        local_question_router,
+        user_route,
+    ]
+    for r in routes:
+        app.include_router(r)
 
-# Origins add more as needed
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            str(origin) for origin in settings.BACKEND_CORS_ORIGINS
+        ],  # allow specific frontend origins
+        allow_credentials=True,  # allow cookies, Authorization headers
+        allow_methods=["*"],  # allow all HTTP methods (GET, POST, etc.)
+        allow_headers=["*"],  # allow all headers (including Authorization)
+    )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,  # allow specific frontend origins
-    allow_credentials=True,  # allow cookies, Authorization headers
-    allow_methods=["*"],  # allow all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],  # allow all headers (including Authorization)
-)
-# Create a static mount for images
-app.mount(
-    "/local_questions",
-    StaticFiles(directory="local_questions"),
-    name="local_questions",
-)
+    # Create a static mount for images
+    app.mount(
+        "/local_questions",
+        StaticFiles(directory="local_questions"),
+        name="local_questions",
+    )
+
+    # Define a custom OpenAPI schema that uses your token URL at /auth/login
+    def custom_openapi():
+        if app.openapi_schema:
+            return app.openapi_schema
+        openapi_schema = get_openapi(
+            title=app.title,
+            version="1.0.0",  # Update version as needed
+            description="API documentation with OAuth2 security",
+            routes=app.routes,
+        )
+        openapi_schema["components"]["securitySchemes"] = {
+            "OAuth2PasswordBearer": {
+                "type": "oauth2",
+                "flows": {
+                    "password": {
+                        "tokenUrl": settings.AUTH_URL,  
+                        "scopes": {},
+                    }
+                },
+            }
+        }
+        app.openapi_schema = openapi_schema
+        return app.openapi_schema
+
+    app.openapi = custom_openapi
+
+    return app
+
+
+app = get_application()
+
+
+@app.get("/")
+def test_connection():
+    return {"status": "ok"}
 
 
 # Authentication
@@ -150,3 +195,16 @@ async def create_upload_file(file: UploadFile):
     blob.upload_from_string(content, content_type=file.content_type)  # type: ignore
     print("✅ File uploaded!")
     return {"filename": file.filename}
+
+
+def main():
+    uvicorn.run(
+        "backend_api.main:app",
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 8000)),
+        reload=True,
+    )
+
+
+if __name__ == "__main__":
+    main()
