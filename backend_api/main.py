@@ -26,6 +26,7 @@ from backend_api.web.file_management import router as file_router
 from backend_api.web.local_questions import router as local_question_router
 from backend_api.web.code_generator import router as code_generator_router
 from backend_api.web.user import router as user_route
+from backend_api.web.db_questions import router as db_question_router
 
 
 # Define startup activity
@@ -34,6 +35,7 @@ from backend_api.web.user import router as user_route
 async def on_startup(app: FastAPI):
     create_db_and_tables()
     yield
+
 
 def get_application():
     app = FastAPI(title=settings.PROJECT_NAME, lifespan=on_startup)
@@ -45,6 +47,7 @@ def get_application():
         file_router,
         local_question_router,
         user_route,
+        db_question_router,
     ]
     for r in routes:
         app.include_router(r)
@@ -81,7 +84,7 @@ def get_application():
                 "type": "oauth2",
                 "flows": {
                     "password": {
-                        "tokenUrl": settings.AUTH_URL,  
+                        "tokenUrl": settings.AUTH_URL,
                         "scopes": {},
                     }
                 },

@@ -1,6 +1,17 @@
-from sqlmodel import Field, SQLModel
+from __future__ import annotations
+from enum import Enum
+from typing import Optional, List
+from uuid import UUID
+
 from sqlalchemy import Column, Integer, String
-from typing import Optional
+from sqlmodel import SQLModel, Field, Relationship
+
+
+class UserRole(str, Enum):
+    ADMIN = "admin"
+    TEACHER = "teacher"
+    DEVELOPER = "moderator"
+    USER = "user"
 
 
 class UserBase(SQLModel):
@@ -15,7 +26,7 @@ class UserCreate(UserBase):
 
 
 class UserRead(UserBase):
-    suceess: bool
+    success: bool
 
 
 class User(UserBase, table=True):
@@ -25,7 +36,15 @@ class User(UserBase, table=True):
             Integer, primary_key=True, index=True, unique=True, autoincrement=True
         ),
     )
-    username: str = Field(sa_column=Column(Integer, unique=True, index=True))
+    username: str = Field(sa_column=Column(String, unique=True, index=True))
     password: str = Field(sa_column=Column(String))
     fullname: Optional[str] = Field(default=None, sa_column=Column(String))
     email: Optional[str] = Field(default=None, sa_column=Column(String))
+
+    # Roles
+    role: UserRole = Field(default=UserRole.USER, sa_column=Column(String))
+
+    # Relationships
+    questions: List["Question"] = Relationship(  # type: ignore
+        back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )

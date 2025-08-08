@@ -10,6 +10,9 @@ from pydantic import ValidationError
 
 # Loads up directory and get all the questions
 local_questions = Path.cwd() / "./local_questions"
+if not local_questions.exists():
+    local_questions.mkdir()
+
 questions = [f for f in local_questions.iterdir() if f.is_dir]
 
 
