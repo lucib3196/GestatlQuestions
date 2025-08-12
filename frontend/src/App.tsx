@@ -26,8 +26,9 @@ import QuestionProvider from "./context/QuestionFilterContext";
 import QuestionSettingsProvider from "./context/GeneralSettingsContext";
 import RunningQuestionProvider from "./context/RunningQuestionContext";
 import { AuthProvider } from "./context/AuthContext";
+import { QuestionDBProvider } from "./context/QuestionContext";
 import NavBar from "./components/NavBar";
-import LoginPage from "./components/Auth/Login";
+import { ToastContainer } from "react-toastify";
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {
@@ -35,25 +36,29 @@ const config = {
     displayMath: [["$$", "$$"]],
   },
 };
-
+import QuestionFilterDB from "./components/QuestionViews/QuestionFilterDB";
 
 function App() {
 
   return (
     <AuthProvider >
-      <MathJaxContext version={3} config={config}>
-        <QuestionProvider >
-          <QuestionSettingsProvider>
-            <RunningQuestionProvider>
+      <QuestionDBProvider>
+        <MathJaxContext version={3} config={config}>
+          <QuestionProvider >
+            <QuestionSettingsProvider>
+              <RunningQuestionProvider>
 
-              {/* Main Content */}
-              <NavBar />
-              {/* End of Main Content */}
-            </RunningQuestionProvider>
-          </QuestionSettingsProvider>
-        </QuestionProvider>
+                {/* Main Content */}
+                <NavBar />
+                <ToastContainer />
+                <QuestionFilterDB />
+                {/* End of Main Content */}
+              </RunningQuestionProvider>
+            </QuestionSettingsProvider>
+          </QuestionProvider>
 
-      </MathJaxContext>
+        </MathJaxContext>
+      </QuestionDBProvider>
     </AuthProvider>
   );
 }

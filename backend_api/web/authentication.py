@@ -84,3 +84,8 @@ async def get_current_user(
     session: SessionDep,
 ) -> users_model.UserRead:
     return await service.get_current_user(token, session)
+
+
+@router.get("/get_all_users/{limit}/{offset}")
+async def get_all_users(session: SessionDep, limit: int, offset: int):
+    return await service.get_all_users(session=session, offset=offset, limit=limit)

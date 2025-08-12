@@ -1,20 +1,26 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "main_tag_replacer",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "question_rendering.load_configuration"
-        },
-        {
-            "name": "tag_replacer",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "question_rendering.tag_replacer"
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "main_tag_replacer",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "question_rendering.load_configuration"
+    },
+    {
+      "name": "tag_replacer",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "question_rendering.tag_replacer"
+    },
+    {
+      "name": "v5/image",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "ai_workspace.agents.code_generators.v5.extract_question_image"
+    }
+  ]
 }

@@ -14,6 +14,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 # SQLAlchemy / SQLModel
+from sqlalchemy.exc import IntegrityError
 
 # Third-party
 from jose import JWTError
@@ -32,6 +33,7 @@ from backend_api.core.logging import logger
 from backend_api.data.database import SessionDep
 from backend_api.model import users as users_model
 from backend_api.model import token as token_model
+from typing import Optional
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
@@ -48,7 +50,9 @@ async def create_user(user: User, session: SessionDep) -> User:
 
 
 async def add_user(
-    user_create: Annotated[OAuth2PasswordRequestForm, Depends()], session: SessionDep
+    user_create: Annotated[OAuth2PasswordRequestForm, Depends()],
+    session: SessionDep,
+    role: users_model.UserRole = users_model.UserRole.USER,
 ) -> users_model.User | users_model.UserRead:
     try:
         existing_user = session.exec(
@@ -59,9 +63,16 @@ async def add_user(
         if not existing_user:
             user_create.password = encrypt_password(user_create.password)
             db_user = users_model.User.model_validate(user_create)
-            # Add user
+            # Add user and assign role
+            db_user.role = role
             await create_user(db_user, session)
-            return users_model.UserRead(username=db_user.username, suceess=True)
+            return users_model.UserRead(
+                username=db_user.username, success=True, role=role
+            )
+    except IntegrityError as e:
+        session.rollback()
+        if "user.email" in str(e.orig):
+            raise HTTPException(status_code=409, detail="Email already registered")
     except Exception as e:
         logger.error(e)
         raise HTTPException(
@@ -100,7 +111,6 @@ async def login_for_access_token(
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_bearer)], session: SessionDep
 ) -> users_model.UserRead:
-    logger.info("This is the token", token)
     try:
         payload = decode_token(token)
         username = payload.get("sub")
@@ -128,15 +138,39 @@ async def get_current_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
-    return users_model.UserRead(username=user.username, suceess=True)
+    return users_model.UserRead(username=user.username, email=user.email, success=True)
 
 
-async def get_users(
+async def get_all_users(
     session: SessionDep, offset: int = 0, limit: Annotated[int, Query(le=100)] = 100
 ) -> Sequence[User]:
     result = session.exec(select(User).offset(offset).limit(limit))
     users = result.all()
     return users
+
+
+async def get_user_by_name(
+    username: Optional[str], email: Optional[str], session: SessionDep
+):
+    if username is None and email is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Provide either 'username' or 'email'.",
+        )
+
+    result = None  # ✅ initialize
+
+    if username is not None:
+        result = session.exec(select(User).where(User.username == username)).first()
+    elif email is not None:
+        result = session.exec(select(User).where(User.email == email)).first()
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found."
+        )
+
+    return result.id
 
 
 async def get_user(session: SessionDep, id: int):

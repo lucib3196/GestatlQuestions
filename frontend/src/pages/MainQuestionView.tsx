@@ -1,5 +1,5 @@
 
-import { QuestionFilter } from './../components/QuestionViews/QuestionFilter';
+import { QuestionFilter } from '../components/QuestionViews/QuestionFilterLocal';
 import LocalQuestionsView from '../components/QuestionViews/LocalQuestions';
 import RenderAdaptiveQuestion from '../components/QuestionRendering/RenderAdaptiveQuestion';
 import { RunningQuestionSettingsContext } from '../context/RunningQuestionContext';

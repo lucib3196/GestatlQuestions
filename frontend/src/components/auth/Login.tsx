@@ -141,7 +141,7 @@ type LogInPageProps = {
 
 function LogInPage({ showModal, setShowModal }: LogInPageProps): React.ReactNode {
     const { isLoggedIn } = useContext(AuthContext);
-
+    console.log("Status", isLoggedIn)
     return (
         <>
             {showModal && (

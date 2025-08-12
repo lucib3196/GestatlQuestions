@@ -78,3 +78,15 @@ export type QuestionInfoJson = {
   prereqs: string[];
   isAdaptive: string | boolean;
 };
+
+export type QuestionDB = {
+  id: string;
+  user_id: number;
+  qtype: string[];
+  title: string;
+  topic: string[];
+  isAdaptive: string | boolean;
+  createdBy: string;
+  language: string[];
+  ai_generated: string[];
+};

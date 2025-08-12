@@ -65,7 +65,7 @@ def process_output_local(data: Union[CodeGenOutputState, dict]):
         json.dump(to_serializable(data.qmeta), f, indent=2)
         
         
-        
+
 
 
 

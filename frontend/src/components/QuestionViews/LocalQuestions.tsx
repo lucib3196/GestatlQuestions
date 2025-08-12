@@ -8,7 +8,6 @@ import type { QuestionMetadata } from "../../types/types";
 
 
 
-
 function LocalQuestionsView() {
     const [questionData, setQuestionData] = useState<QuestionInfoJson[] | QuestionMetadata[]>([]);
     const { isAdaptive, showAllQuestions, isAIGen } = useContext(QuestionFilterContext);
@@ -34,7 +33,6 @@ function LocalQuestionsView() {
         }
     }
 
-    console.log("Ai generated", typeof isAIGen)
 
     let filter;
     if (showAllQuestions) {

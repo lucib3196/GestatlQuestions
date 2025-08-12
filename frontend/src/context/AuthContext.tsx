@@ -5,6 +5,7 @@ import api from "../api";
 
 type LoggedInMessage = {
     username: string,
+    email?: string,
     success: string | boolean
 }
 
@@ -58,14 +59,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             });
 
             const data = response.data;
+            console.log(data)
+            console.log("This is the login data", data)
             localStorage.setItem("access_token", data.access_token);
+            setMessage({ username: data.username, email: data.email, success: true });
             setLoggedIn(true)
-            setMessage({ username: data.username, success: true });
             return true
         } catch (error) {
             console.error("Login error:", error);
             setLoggedIn(false)
             setMessage(null)
+            setLoggedIn(false)
             return false
         }
     }
@@ -110,6 +114,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                         Authorization: `Bearer ${token}`,
                     },
                 });
+
+                console.log("Checking Auth ", response)
 
                 setMessage(response.data)
                 setLoggedIn(true);

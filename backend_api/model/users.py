@@ -1,10 +1,14 @@
 from __future__ import annotations
 from enum import Enum
-from typing import Optional, List
-from uuid import UUID
+from typing import Optional, List, TYPE_CHECKING
+from uuid import UUID, uuid4
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlmodel import SQLModel, Field, Relationship
+
+if TYPE_CHECKING:
+    from .questions_models import Question
 
 
 class UserRole(str, Enum):
@@ -16,6 +20,7 @@ class UserRole(str, Enum):
 
 class UserBase(SQLModel):
     username: str
+    role: UserRole = Field(default=UserRole.USER)
     fullname: Optional[str] = None
     email: Optional[str] = None
     disabled: Optional[bool] = None
@@ -29,7 +34,7 @@ class UserRead(UserBase):
     success: bool
 
 
-class User(UserBase, table=True):
+class User(SQLModel, table=True):
     id: Optional[int] = Field(
         default=None,
         sa_column=Column(
@@ -39,12 +44,6 @@ class User(UserBase, table=True):
     username: str = Field(sa_column=Column(String, unique=True, index=True))
     password: str = Field(sa_column=Column(String))
     fullname: Optional[str] = Field(default=None, sa_column=Column(String))
-    email: Optional[str] = Field(default=None, sa_column=Column(String))
+    email: Optional[str] = Field(default=None, sa_column=Column(String, unique=True))
 
-    # Roles
-    role: UserRole = Field(default=UserRole.USER, sa_column=Column(String))
-
-    # Relationships
-    questions: List["Question"] = Relationship(  # type: ignore
-        back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
-    )
+    role: str = Field(default="user", sa_column=Column(String))
