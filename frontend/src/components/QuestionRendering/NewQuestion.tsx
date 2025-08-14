@@ -40,7 +40,6 @@ function renderQuestionInputs(
     correctAnswers: Record<string, any>,
     isSubmitted: boolean
 ) {
-    console.log("Inside render", inputs)
     return inputs.map((value) => {
         switch (value.qtype) {
             case "number":
@@ -113,9 +112,11 @@ export function NewQuestion() {
 
         (async () => {
             try {
+
                 const response = await api.get(
-                    `/local_questions/get_question_newformat/${selectedQuestion}`
+                    `/db_questions/get_question/qmeta/${encodeURIComponent(selectedQuestion as string)}`
                 );
+                console.log("Data", response.data)
                 const qData: QuestionMetadata =
                     typeof response.data === "string"
                         ? JSON.parse(response.data)
@@ -142,13 +143,14 @@ export function NewQuestion() {
 
         (async () => {
             try {
-                const res = await api.get(
-                    `/local_questions/get_server_data/${encodeURIComponent(selectedQuestion as string)}/${encodeURIComponent(codeRunningSettings)}`,
+                const res = await api.post(
+                    `/db_questions/run_server/${encodeURIComponent(selectedQuestion as string)}/${encodeURIComponent(codeRunningSettings)}`,
                     { signal: controller.signal }
                 );
+
                 const pData = res.data?.quiz_response ?? null;
                 if (pData == null) {
-                    const raw = res.data?.error;
+                    const raw = res.data?.error || res.data?.quiz_response.error;
                     const msg = typeof raw === "object" ? JSON.stringify(raw) : String(raw ?? "Unknown error");
                     handleError(msg);
                     return;
@@ -166,6 +168,8 @@ export function NewQuestion() {
 
     useEffect(() => {
         if (!question) return;
+
+        console.log("This is the question", question)
 
         // Make a copy to preven overwritting 
         const clonedRenderingData = question.rendering_data.map(r => ({
@@ -244,7 +248,7 @@ export function NewQuestion() {
 
         try {
             const { data } = await api.get(
-                `/local_questions/get_server_data/${selectedQuestion}/${codeRunningSettings}`
+                `/db_questions/run_server/${encodeURIComponent(selectedQuestion as string)}/${encodeURIComponent(codeRunningSettings)}`
             );
             setParams(data.quiz_response);
             setIsSubmitted(false);

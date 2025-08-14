@@ -44,7 +44,6 @@ graph = StateGraph(
     output_schema=IntermediateState,
 )
 graph.add_node("extract_question", extract_question)  # type: ignore
-
 graph.add_edge(START, "extract_question")
 graph.add_edge("extract_question", END)
 
@@ -75,7 +74,7 @@ if __name__ == "__main__":
             r"ai_workspace\agents\code_generators\v5\outputs\extract_question_image_output.json",
             "w",
         ) as f:
-            json.dump(to_serializable(results), f)
+            json.dump(to_serializable(results), f, indent=3)
             logger.debug("Saved Output")
 
     asyncio.run(main())

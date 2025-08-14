@@ -4,7 +4,7 @@ import LocalQuestionsView from '../components/QuestionViews/LocalQuestions';
 import RenderAdaptiveQuestion from '../components/QuestionRendering/RenderAdaptiveQuestion';
 import { RunningQuestionSettingsContext } from '../context/RunningQuestionContext';
 import { useContext, useState } from 'react';
-
+import QuestionFilterDB from '../components/QuestionViews/QuestionFilterDB';
 import { Panel, PanelGroup } from "react-resizable-panels";
 import QuestionCodeEditor from '../components/CodeEditor/QuestionCodeEditor';
 
@@ -17,8 +17,8 @@ function MainQuestionView() {
     return (
         <div className="flex flex-col items-center w-full min-h-screen bg-gray-50 py-8">
             <div className="w-full max-w-6xl flex flex-col  items-center justify-center">
-                <QuestionFilter />
-                <LocalQuestionsView />
+                <QuestionFilterDB />
+                
             </div>
 
             {selectedQuestion && (

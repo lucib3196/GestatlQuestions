@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 
 // Context
 import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
-
+import { useCallback } from "react";
 // Components
 import CodeEditor from "./CodeEditor";
 import CreateFileModal from "./CreateFileModal";
@@ -20,7 +20,6 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import type { SelectChangeEvent } from "@mui/material/Select";
 
-
 type CodeFileDropDownProps = {
     fileNames: string[];
     selectedFile: string;
@@ -28,7 +27,16 @@ type CodeFileDropDownProps = {
 };
 
 
-function CodeFileDropDown({ fileNames, selectedFile, setSelectedFile }: CodeFileDropDownProps) {
+function toStringSafe(value: any) {
+    if (value == null) return "";
+    if (typeof value === "string") return value;
+    return JSON.stringify(value)
+}
+function CodeFileDropDown({
+    fileNames,
+    selectedFile,
+    setSelectedFile,
+}: CodeFileDropDownProps) {
     const handleFileChange = (event: SelectChangeEvent) => {
         setSelectedFile(event.target.value as string);
     };
@@ -45,18 +53,22 @@ function CodeFileDropDown({ fileNames, selectedFile, setSelectedFile }: CodeFile
                 sx={{ backgroundColor: "background.paper" }}
             >
                 {fileNames.map((val) => (
-                    <MenuItem key={val} value={val}>{val}</MenuItem>
+                    <MenuItem key={val} value={val}>
+                        {val}
+                    </MenuItem>
                 ))}
             </Select>
         </FormControl>
     );
 }
 
-
-
-
+type FileData = {
+    filename: string;
+    content: string;
+};
 function QuestionCodeEditor() {
     const { selectedQuestion } = useContext(RunningQuestionSettingsContext);
+    const [filesData, setFileData] = useState<FileData[]>([]);
 
     const [fileNames, setFileNames] = useState<string[]>([]);
     const [selectedFile, setSelectedFile] = useState<string>("");
@@ -64,27 +76,70 @@ function QuestionCodeEditor() {
     const [showAddFile, setShowAddFile] = useState(false);
     const [uploadFile, setUploadFile] = useState(false);
 
-    const fetchFileNames = async () => {
-        try {
-            const res = await api.get(`/local_questions/get_question_files/${selectedQuestion}`);
-            setFileNames(res.data);
-        } catch (err) {
-            console.error("Failed to fetch file names:", err);
-        }
-    };
+    const fetchFiles = useCallback(
+        async (id: string) => {
+            try {
+                const res = await api.get(
+                    `/db_questions/get_question_files/${encodeURIComponent(id)}`
+                );
+                setFileData(Array.isArray(res.data) ? res.data : []);
+            } catch (err) {
+                console.error("Failed to fetch file names:", err);
+                setFileData([]);
+            }
+        },
+        [api]
+    );
 
-    const fetchFileContent = async (filename: string) => {
+    useEffect(() => {
+        const id = String(selectedQuestion ?? "").trim();
+        if (!id) {
+            setFileData([]);
+            return;
+        }
+        fetchFiles(id);
+    }, [selectedQuestion, fetchFiles]);
+
+    useEffect(() => {
+        const names = (filesData ?? [])
+            .map((f) => (typeof f?.filename === "string" ? f.filename : null))
+            .filter(Boolean) as string[];
+        setFileNames(names);
+    }, [filesData]);
+
+    useEffect(() => {
+        if (fileNames.length > 0) {
+            setSelectedFile(fileNames[0]);
+        }
+    }, [fileNames]);
+
+    const fetchFileContent = (filename: string) => {
         try {
-            const res = await api.get(`/local_questions/get_question_file/${selectedQuestion}/${filename}`);
-            setFileContent(res.data);
+            const match = filesData?.find((f) => f.filename === filename);
+            console.log("This is the match", match)
+            if (!match) {
+                console.warn(`File not found: ${filename}`);
+                setFileContent("");
+                return;
+            }
+            setFileContent(toStringSafe(match.content) ?? "");
+
         } catch (err) {
             console.error("Failed to fetch file content:", err);
         }
     };
+    useEffect(() => {
+        if (selectedFile) {
+            fetchFileContent(selectedFile);
+        } else {
+            setFileContent("");
+        }
+    }, [selectedFile]);
+
 
     const saveCode = async () => {
         try {
-            await api.post("/local_questions/update_file/", {
+            await api.post("/db_questions/update_file/", {
                 title: selectedQuestion,
                 filename: selectedFile,
                 newcontent: fileContent,
@@ -94,26 +149,10 @@ function QuestionCodeEditor() {
         }
     };
 
-    useEffect(() => {
-        fetchFileNames();
-    }, [selectedQuestion]);
 
-    useEffect(() => {
-        if (fileNames.length > 0) {
-            setSelectedFile(fileNames[0]);
-        }
-    }, [fileNames]);
-
-    useEffect(() => {
-        if (selectedFile) {
-            fetchFileContent(selectedFile);
-        } else {
-            setFileContent("");
-        }
-    }, [selectedFile]);
-
-    const getLanguage = () => selectedFile?.split(".").pop() || "";
-
+    const getLanguage = () =>
+        selectedFile?.split(/[_\.]/).pop() || "";
+    console.log(fileContent)
     return (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <CodeFileDropDown

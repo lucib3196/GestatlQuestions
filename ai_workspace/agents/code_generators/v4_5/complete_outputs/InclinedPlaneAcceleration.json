@@ -1,0 +1,167 @@
+{
+    "question_payload": {
+        "question": "A block of mass $m_1$ rests on an incline of angle $\\theta = 20^\\circ$. The coefficients of static and kinetic friction are $\\mu_s = 0.8$ and $\\mu_k = 0.5$. It is connected via a massless string over a massless and frictionless pulley. Block $m_2$ has mass 2 kg. If $m_1 = 1.5kg$, what's the magnitude of the acceleration of the $m_2$ (in m/s^2)?",
+        "params": [
+            {
+                "name": "m_1",
+                "value": "1.5",
+                "units": "kg"
+            },
+            {
+                "name": "m_2",
+                "value": "2",
+                "units": "kg"
+            },
+            {
+                "name": "\\theta",
+                "value": "20",
+                "units": "°"
+            },
+            {
+                "name": "\\mu_s",
+                "value": "0.8",
+                "units": null
+            },
+            {
+                "name": "\\mu_k",
+                "value": "0.5",
+                "units": null
+            },
+            {
+                "name": "string",
+                "value": "massless",
+                "units": null
+            },
+            {
+                "name": "pulley",
+                "value": "massless and frictionless",
+                "units": null
+            }
+        ],
+        "correct_answers": null,
+        "source": null,
+        "requires_external_data": false,
+        "requires_image": true,
+        "completeness": true,
+        "additional_information": "Diagram shows incline, pulley, and the connected blocks — relevant for directions of forces and setup but no extra numerical data in the figure.",
+        "solution": {
+            "solution": [
+                {
+                    "section_title": "Step 1: Compute $F_2$ as written",
+                    "description": "$F_2 = m_2 g = 19.62$",
+                    "subsections": []
+                },
+                {
+                    "section_title": "Step 2: Compute $F_1$ as written",
+                    "description": "$F_1 = m_1 g \\sin\\theta = 5.032$",
+                    "subsections": []
+                },
+                {
+                    "section_title": "Step 3: Compare forces",
+                    "description": "Noted in the work: $F_2 > F_1$. The friction force acts against $F_2$.",
+                    "subsections": []
+                },
+                {
+                    "section_title": "Step 4: Newton's 2nd law statement",
+                    "description": "$\\Sigma F = ma = F_{net}$",
+                    "subsections": []
+                },
+                {
+                    "section_title": "Step 5: Expression for acceleration (boxed)",
+                    "description": "$a = \\displaystyle\\frac{F_{net}}{m} = \\frac{-m_1 g \\cos\\theta \\mu_k - m_1 g \\sin\\theta + m_2 g}{m_1 + m_2}$",
+                    "subsections": []
+                },
+                {
+                    "section_title": "Step 6: Variable definitions (as written)",
+                    "description": "From the notes: $m_1 =$ mass Block 1; $m_2 =$ mass Block 2; $g =$ gravity; $\\mu_k =$ kinetic friction coefficient.",
+                    "subsections": []
+                }
+            ],
+            "source": "image_extraction"
+        }
+    },
+    "metadata": {
+        "question": "A block of mass $m_1$ rests on an incline of angle $\\theta = 20^\\circ$. The coefficients of static and kinetic friction are $\\mu_s = 0.8$ and $\\mu_k = 0.5$. It is connected via a massless string over a massless and frictionless pulley. Block $m_2$ has mass 2 kg. If $m_1 = 1.5kg$, what's the magnitude of the acceleration of the $m_2$ (in m/s^2)?",
+        "title": "InclinedPlaneAcceleration",
+        "topic": [
+            "Newton's Second Law of Motion",
+            "Static Equilibrium"
+        ],
+        "relevantCourses": [],
+        "isAdaptive": "True"
+    },
+    "files": {
+        "question_html": "<pl-question-panel>\n  <p>A block of mass <strong>[[params.m1]] kg</strong> rests on an incline of angle <strong>[[params.theta]] = [[params.angle]]&deg;</strong>. The coefficients of static and kinetic friction are <strong>[[params.mu_s]]</strong> and <strong>[[params.mu_k]]</strong>. It is connected via a massless string over a massless and frictionless pulley. Block <strong>[[params.m2]] kg</strong> is hanging vertically. If block <strong>[[params.m1]]</strong> has mass <strong>[[params.m1]] kg</strong>, what's the magnitude of the acceleration of block <strong>[[params.m2]]</strong> (in m/s²)? Please note that mass is measured in kg and angle in degrees.</p>\n</pl-question-panel>\n\n<pl-input-container>\n  <pl-number-input answers-name=\"accel\" comparison=\"sigfig\" digits=\"3\" label=\"Acceleration of block m_2 (in m/s²)\"></pl-number-input>\n</pl-input-container>",
+        "server_js": "const math = require('mathjs');\n\nconst generate = (usePredefinedValues = 0) => {\n    // Predefined values for testing\n    const predefinedValues = {\n        m1_mass: 5, // mass of block 1 in kg\n        m2_mass: 10, // mass of block 2 in kg\n        theta: 30, // angle in degrees\n        mu_s: 0.5, // static friction coefficient\n        mu_k: 0.3 // kinetic friction coefficient\n    };\n\n    // 1. Dynamic Parameter Selection\n    const angle = usePredefinedValues ? predefinedValues.theta : math.randomInt(15, 46); // Random angle between 15 and 45 degrees\n    const m1 = usePredefinedValues ? predefinedValues.m1_mass : math.randomInt(1, 11); // Random m1 mass between 1 and 10 kg\n    const m2 = usePredefinedValues ? predefinedValues.m2_mass : math.randomInt(5, 21); // Random m2 mass between 5 and 20 kg\n    const mu_s = usePredefinedValues ? predefinedValues.mu_s : math.round(math.random() * 1, 2); // Random mu_s between 0 and 1\n    const mu_k = usePredefinedValues ? predefinedValues.mu_k : math.round(math.random() * 1, 2); // Random mu_k \n\n    // 2. Solution Synthesis\n    const g = 9.81; // Gravity in m/s²\n    const thetaRad = math.unit(angle, 'deg').toNumber('rad'); // Convert angle to radians\n\n    // Calculate forces\n    const F2 = m2 * g; // Force due to weight of block 2 (F2 = m2 * g)\n    const F1 = m1 * g * math.sin(thetaRad); // Force due to weight component of block 1 along incline (F1 = m1 * g * sin(theta))\n    const F_friction = mu_k * m1 * g * math.cos(thetaRad); // Frictional force (F_friction = mu_k * m1 * g * cos(theta))\n\n    // Applying Newton's second law \n    const F_net = F2 - (F1 + F_friction); // Net force acting on m2\n    const acceleration = F_net / (m1 + m2); // a = F_net / (m1 + m2)\n    \n    // Return the structured data\n    return {\n        params: {\n            m1: m1,\n            m2: m2,\n            theta: angle,\n            angle: angle,\n            mu_s: mu_s,\n            mu_k: mu_k,\n            m1_mass: m1,\n            m2_mass: m2,\n            intermediate: {\n                thetaRad: math.round(thetaRad, 3),\n                F1: math.round(F1, 3),\n                F_friction: math.round(F_friction, 3),\n                F_net: math.round(F_net, 3)\n            }\n        },\n        correct_answers: {\n            accel: math.round(acceleration, 3) // Round to 3 decimal places\n        },\n        nDigits: 3,\n        sigfigs: 3\n    };\n};\n\nmodule.exports = { generate };",
+        "server_py": "import math\nimport random\n\ndef generate(use_predefined_values=0):\n    # Predefined values for testing\n    predefined_values = [\n        {'m1': 5.0, 'm2': 10.0, 'theta': 30, 'mu_s': 0.4, 'mu_k': 0.3},\n        {'m1': 3.0, 'm2': 8.0, 'theta': 45, 'mu_s': 0.5, 'mu_k': 0.4},\n        {'m1': 4.0, 'm2': 12.0, 'theta': 60, 'mu_s': 0.6, 'mu_k': 0.5},\n        {'m1': 6.0, 'm2': 15.0, 'theta': 20, 'mu_s': 0.2, 'mu_k': 0.1},\n        {'m1': 2.0, 'm2': 5.0, 'theta': 15, 'mu_s': 0.3, 'mu_k': 0.2},\n    ]\n    \n    if use_predefined_values:\n        values = random.choice(predefined_values)\n    else:\n        # Random generation of values within reasonable ranges\n        values = {\n            'm1': random.uniform(2.0, 10.0),  # mass m1 in kg\n            'm2': random.uniform(5.0, 20.0),  # mass m2 in kg\n            'theta': random.uniform(0, 90),     # angle in degrees\n            'mu_s': random.uniform(0.1, 0.6),   # static friction coefficient\n            'mu_k': random.uniform(0.1, 0.6)    # kinetic friction coefficient\n        }\n    \n    # Extract values\n    m1 = values['m1']\n    m2 = values['m2']\n    theta = math.radians(values['theta'])  # convert to radians\n    mu_k = values['mu_k']\n    g = 9.81  # acceleration due to gravity in m/s²\n    \n    # Step 1: Compute forces\n    F1 = m1 * g * math.sin(theta)\n    F2 = m2 * g\n    F_friction = mu_k * m1 * g * math.cos(theta)\n\n    # Step 2: Net force on m1 (the block on the incline)\n    F_net = F2 - (F1 + F_friction)\n    \n    # Step 3: Total mass for acceleration calculation\n    total_mass = m1 + m2 \n\n    # Step 4: Calculate acceleration of m2\n    a = F_net / total_mass if total_mass > 0 else 0  # Handle edge case safely\n    \n    return {\n        'params': {\n            'm1': round(m1, 3),\n            'm2': round(m2, 3),\n            'theta': round(math.degrees(theta), 2),\n            'angle': round(math.degrees(theta), 2),\n            'mu_s': round(mu_k, 2),\n            'mu_k': round(mu_k, 2),\n            'm1_mass': round(m1, 3),  # properly name individual masses\n            'm2_mass': round(m2, 3),  \n            'intermediate': {\n                'F1': round(F1, 3),  # Intermediate values for transparency\n                'F2': round(F2, 3),\n                'F_friction': round(F_friction, 3),\n                'F_net': round(F_net, 3),\n            }\n        },\n        'correct_answers': {\n            'accel': round(a, 3),\n        },\n        'nDigits': 3,  # Decimal places.\n        'sigfigs': 3   # Significant figures.\n    }",
+        "solution_html": "<pl-solution-panel>\n  <p>To find the magnitude of the acceleration of block <strong>[[params.m2]]</strong>, we need to analyze the forces acting on both blocks.</p>\n\n  <h3>Known Variables</h3>\n  <ul>\n    <li>Mass of Block 1: <strong>[[params.m1]] kg</strong></li>\n    <li>Mass of Block 2: <strong>[[params.m2]] kg</strong></li>\n    <li>Angle of incline: <strong>[[params.angle]]&deg;</strong></li>\n    <li>Coefficient of kinetic friction: <strong>[[params.mu_k]]</strong></li>\n    <li>Acceleration due to gravity: <strong>g \\approx 9.81 m/s<sup>2</sup></strong></li>\n  </ul>\n  \n  <h3>Governing Equations</h3>\n  <p>The forces acting on Block 2 and Block 1 can be analyzed using the following equations:</p>\n  <p>For Block 2 (falling down):\n  <strong>F_2 = [[params.m2]] g</strong></p>\n  <p>For Block 1 (on the incline):\n  <strong>F_1 = [[params.m1]] g \\sin([[params.intermediate.thetaRad]]) + f_{friction}</strong></p>\n  \n  <h3>Step-by-Step Solution Process</h3>\n  <p>Step 1: Calculate the weight of Block 2:\n  $$F_2 = [[params.m2]] \\times g = [[params.m2]] \\times 9.81$$</p>\n  \n  <p>Step 2: Calculate the forces acting on Block 1:\n  - The force due to gravity acting down the incline:\n  <strong>F_1 = [[params.m1]] \\times 9.81 \\times \\sin([[params.intermediate.thetaRad]])</strong>\n  \n  - The frictional force acting against the motion:\n  <strong>f_{friction} = [[params.mu_k]] \\times N</strong> where <strong>N = [[params.m1]] \\times 9.81 \\times \\cos([[params.intermediate.thetaRad]])</strong>\n  \n  <p>Putting these together, we have:</p>\n  $$F_1 = [[params.m1]] \\times 9.81 \\times \\sin([[params.intermediate.thetaRad]]) + [[params.mu_k]] \\times ([[params.m1]] \\times 9.81 \\times \\cos([[params.intermediate.thetaRad]]))$$</p>\n  \n  <p>Step 3: Calculate frictional force:\n  <strong>F_friction = [[params.mu_k]] \\times ([[params.m1]] \\times 9.81 \\times \\cos([[params.intermediate.thetaRad]])) = [[params.intermediate.F_friction]]</strong>\n  </p>\n  <p>Step 4: Compare forces to find net force:\n  <strong>F_{net} = F_2 - F_1</strong> (since F_2 > F_1)\n  </p>\n  <p>Step 5: Apply Newton’s second law:</p>\n  $$F_{net} = ([[params.m1]] + [[params.m2]]) a$$\n  \n  <p>Step 6: Expression for acceleration:\n  $$a = \\frac{F_{net}}{([[params.m1]] + [[params.m2]])} = \\frac{F_2 - F_1}{[[params.m1]] + [[params.m2]]}$$</p>\n  \n  <p>Finally, substituting the expressions from the previous steps, we can determine the acceleration of block 2, which is:</p>\n  $$a = \\frac{[[params.m2]] \\times 9.81 - \\left([[params.m1]] \\times 9.81 \\times \\sin([[params.intermediate.thetaRad]]) + [[params.intermediate.F_friction]\\right)}{[[params.m1]] + [[params.m2]]}$$\n  \n  <h3>Final Result:</h3>\n  <p>The magnitude of the acceleration of block <strong>m_2</strong> is thus calculated as:\n  $$a = ... \\text{m/s}^2$$</p>\n</pl-solution-panel>",
+        "metadata": {
+            "question": "A block of mass $m_1$ rests on an incline of angle $\\theta = 20^\\circ$. The coefficients of static and kinetic friction are $\\mu_s = 0.8$ and $\\mu_k = 0.5$. It is connected via a massless string over a massless and frictionless pulley. Block $m_2$ has mass 2 kg. If $m_1 = 1.5kg$, what's the magnitude of the acceleration of the $m_2$ (in m/s^2)?",
+            "title": "InclinedPlaneAcceleration",
+            "topic": [
+                "Newton's Second Law of Motion",
+                "Static Equilibrium"
+            ],
+            "relevantCourses": [],
+            "isAdaptive": "True"
+        }
+    },
+    "q_metadata": {
+        "question": "A block of mass $m_1$ rests on an incline of angle $\\theta = 20^\\circ$. The coefficients of static and kinetic friction are $\\mu_s = 0.8$ and $\\mu_k = 0.5$. It is connected via a massless string over a massless and frictionless pulley. Block $m_2$ has mass 2 kg. If $m_1 = 1.5kg$, what's the magnitude of the acceleration of the $m_2$ (in m/s^2)?",
+        "title": "InclinedPlaneAcceleration",
+        "topic": [
+            "Newton's Second Law of Motion",
+            "Static Equilibrium"
+        ],
+        "relevantCourses": [],
+        "isAdaptive": "True"
+    },
+    "initial": {},
+    "qmeta": {
+        "rendering_data": [
+            {
+                "question_template": "A block of mass [[params.m1]] kg rests on an incline of angle [[params.theta]] = [[params.angle]]°. The coefficients of static and kinetic friction are [[params.mu_s]] and [[params.mu_k]]. It is connected via a massless string over a massless and frictionless pulley. Block [[params.m2]] kg is hanging vertically. If block [[params.m1]] has mass [[params.m1]] kg, what's the magnitude of the acceleration of block [[params.m2]] (in m/s²)? Please note that mass is measured in kg and angle in degrees.",
+                "questionInputs": [
+                    {
+                        "name": "accel",
+                        "label": "Acceleration of block m_2 (in m/s²)",
+                        "qtype": "number",
+                        "comparison": "sigfig",
+                        "digits": 3,
+                        "units": "m/s²"
+                    }
+                ],
+                "image": null
+            }
+        ],
+        "solution_render": {
+            "solution_hint": [
+                "Start by calculating the weight of Block 2 using gravitational force.",
+                "Calculate the forces acting on Block 1, including gravitational force down the incline and frictional force.",
+                "Determine the frictional force separately.",
+                "Find the net force acting on the system by comparing forces on both blocks.",
+                "Apply Newton’s second law to express net force in terms of acceleration.",
+                "Substitute all known expressions into the formula for acceleration.",
+                "Finally, present the resulting equation for acceleration clearly."
+            ]
+        },
+        "qtype": [
+            "numeric"
+        ],
+        "title": "InclinedPlaneAcceleration",
+        "topic": [
+            "Newton's Second Law of Motion",
+            "Static Equilibrium"
+        ],
+        "relevantCourses": [],
+        "tags": [],
+        "prereqs": [],
+        "isAdaptive": "True",
+        "createdBy": "",
+        "language": [
+            "javascript",
+            "python"
+        ],
+        "ai_generated": true
+    }
+}

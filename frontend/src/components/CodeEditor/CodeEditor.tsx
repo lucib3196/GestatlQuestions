@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import type { OnChange } from '@monaco-editor/react';
 
@@ -17,6 +17,8 @@ interface CodeEditorProps {
 const languageMap: Record<string, string> = {
     js: 'javascript',
     py: 'python',
+    json: "json",
+    html: "html"
 };
 
 const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -38,20 +40,36 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         },
         [onChange]
     );
+    const editorRef = useRef(null);
+
+    function handleEditorDidMount(editor, monaco) {
+        editorRef.current = editor;
+    }
+    function formatCode() {
+        if (editorRef.current) {
+            editorRef.current.getAction("editor.action.formatDocument").run();
+        }
+    }
 
     return (
-        <Editor
-            height={height}
-            language={resolvedLanguage}
-            value={content}
-            onChange={handleEditorChange}
-            options={{
-                automaticLayout: true,       // reflow on container resize
-                minimap: { enabled: false }, // hide minimap by default
-                fontSize: 14,
-                lineNumbers: 'on',
-            }}
-        />
+        <>
+            <button onClick={formatCode}>Format Code</button>
+            <Editor
+                height={height}
+                language={resolvedLanguage}
+                value={content}
+
+                onChange={handleEditorChange}
+                options={{
+                    automaticLayout: true,
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    lineNumbers: 'on',
+                }}
+
+                onMount={handleEditorDidMount}
+            />
+        </>
     );
 };
 

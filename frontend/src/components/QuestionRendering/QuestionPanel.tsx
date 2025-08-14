@@ -5,6 +5,7 @@ import Pill from "../Pill";
 
 export function QuestionInfo({ qmetadata }: { qmetadata: QuestionMetadata }) {
     const { title, topic, relevantCourses, isAdaptive } = qmetadata;
+    console.log("inside question info", title)
 
     return (
         <div className="flex flex-col w-full max-w-3xl p-4 rounded-md  bg-white space-y-3">
@@ -16,7 +17,7 @@ export function QuestionInfo({ qmetadata }: { qmetadata: QuestionMetadata }) {
                 <div className="flex flex-row items-start gap-x-4">
                     <p className="min-w-[150px] text-lg font-bold text-gray-700">Topics:</p>
                     <div className="flex flex-wrap gap-2">
-                        {topic.map((t, i) => (
+                        {(topic ?? []).map((t, i) => (
                             <Pill key={i} content={t} />
                         ))}
                     </div>
@@ -26,7 +27,7 @@ export function QuestionInfo({ qmetadata }: { qmetadata: QuestionMetadata }) {
                 <div className="flex flex-row items-start gap-x-4">
                     <p className="min-w-[150px] text-lg font-bold text-gray-700">Relevant Courses:</p>
                     <div className="flex flex-wrap gap-2">
-                        {relevantCourses.map((course, i) => (
+                        {(relevantCourses??[]).map((course, i) => (
                             <Pill
                                 key={i}
                                 content={course}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import type { QuestionDB } from "../../types/types";
 
 import {
@@ -19,6 +19,8 @@ type QuestionTableProsp = {
     results: QuestionDB[];
 };
 
+import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
+
 type CheckedQuestion = {
     idx: string; // The idx of the question
     title: string;
@@ -28,8 +30,7 @@ type CheckedQuestion = {
 export function QuestionTable({ results }: QuestionTableProsp) {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-
-    const [selectedQuestion, setSelectedQuestion] = useState("");
+    const { selectedQuestion, setSelectedQuestion } = useContext(RunningQuestionSettingsContext)
 
     const [checkedQuestion, setCheckedQuestion] = useState<CheckedQuestion[]>([]);
 
@@ -44,8 +45,7 @@ export function QuestionTable({ results }: QuestionTableProsp) {
     };
 
     const handleQuestionClick = (title: string) => {
-        console.log("Question Clicked", title);
-        setSelectedQuestion(title);
+        setSelectedQuestion((prev) => (prev === title ? null : title));
     };
 
     const handleCheckBoxClick = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -172,11 +172,12 @@ export function QuestionTable({ results }: QuestionTableProsp) {
                                     {/* Title of the Question */}
                                     <TableCell>
                                         <div
-                                            onClick={() => handleQuestionClick(question.title)}
-                                            className={`flex items-center gap-2 font-medium text-base cursor-pointer hover:text-red-600 hover:font-extrabold ${selectedQuestion === question.title
+                                            onClick={() => handleQuestionClick(question.id)}
+                                            className={`flex items-center gap-2 font-medium text-base cursor-pointer hover:text-red-600 hover:font-extrabold ${selectedQuestion === question.id
                                                 ? "text-red-600 font-extrabold"
                                                 : "text-indigo-900"
                                                 }`}
+
                                         >
                                             {question.title}
                                         </div>

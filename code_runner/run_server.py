@@ -1,4 +1,4 @@
-from .run_js import run_js
+from .run_js import run_js, execute_javascript
 from .run_py import run_generate_py
 from code_runner.models import CodeRunResponse
 import os
@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Union
 
 
-def run_generate(path: Union[str, Path]) -> CodeRunResponse:
-    generator = {"server.js": run_js, "server.py": run_generate_py}
+def run_generate(path: Union[str, Path], isTesting: bool = False) -> CodeRunResponse:
+    generator = {"server.js": execute_javascript, "server.py": run_generate_py}
 
     # Check that the file exists
     if not os.path.isfile(path):
@@ -20,7 +20,7 @@ def run_generate(path: Union[str, Path]) -> CodeRunResponse:
     base_name = os.path.basename(path)
     try:
         if base_name in generator:
-            result: CodeRunResponse = generator[base_name](str(path))
+            result: CodeRunResponse = generator[base_name](str(path), isTesting)
             return result
         else:
             return CodeRunResponse(

@@ -36,7 +36,7 @@ const config = {
     displayMath: [["$$", "$$"]],
   },
 };
-import QuestionFilterDB from "./components/QuestionViews/QuestionFilterDB";
+
 
 function App() {
 
@@ -51,7 +51,6 @@ function App() {
                 {/* Main Content */}
                 <NavBar />
                 <ToastContainer />
-                <QuestionFilterDB />
                 {/* End of Main Content */}
               </RunningQuestionProvider>
             </QuestionSettingsProvider>

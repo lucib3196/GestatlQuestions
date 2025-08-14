@@ -10,8 +10,20 @@ from uuid import UUID
 from fastapi import HTTPException
 from starlette import status
 from sqlalchemy.exc import SQLAlchemyError
+from json import JSONDecodeError
+from pydantic import ValidationError
 
 
+# Utils
+def get_question_id_UUID(question_id) -> UUID:
+    try:
+        question_uuid = UUID(question_id)
+        return question_uuid
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid UUID format")
+
+
+# Most Generic
 async def add_question(question: Question, session: SessionDep):
     session.add(question)
     session.commit()
@@ -26,6 +38,57 @@ async def add_file(file_obj: File, session: SessionDep):
     session.commit()
     session.refresh(file_obj)
     return file_obj
+
+
+# Getting Methods
+async def get_question_qmeta(question_id: str, session: SessionDep):
+    question_uuid = get_question_id_UUID(question_id)
+    result = session.exec(
+        select(File)
+        .where(File.question_id == question_uuid)
+        .where(File.filename == "qmeta.json")
+    ).first()
+
+    # Checking to see if there is any content
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Question has no qmeta"
+        )
+    if result.content is None or (
+        isinstance(result.content, str) and not result.content.strip()
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="qmeta.json exists but has no content.",
+        )
+
+    try:
+        raw: Union[dict, list]
+        if isinstance(result.content, (dict, list)):
+            raw = result.content
+        elif isinstance(result.content, str):
+            raw = json.loads(result.content)
+        else:
+            # Unexpected type (e.g., bytes)
+            raise HTTPException(
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail=f"Unsupported content type for qmeta.json: {type(result.content).__name__}",
+            )
+    except JSONDecodeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Invalid JSON in qmeta.json: {e.msg} at pos {e.pos}",
+        )
+    try:
+        qmeta = QuestionMetaNew(**raw)  # type: ignore
+    except ValidationError as e:
+        # Return Pydantic errors cleanly
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"message": "qmeta failed validation", "errors": e.errors()},
+        )
+
+    return qmeta
 
 
 async def add_question_and_files(
@@ -86,3 +149,48 @@ async def delete_question(question_id: UUID, session: SessionDep):
         raise HTTPException(status_code=500, detail="Could not delete question") from e
 
     return {"detail": f"Question '{title}' deleted", "id": str(question_id)}
+
+
+async def update_file(
+    question_id: str,
+    filename: str,
+    newcontent: Union[str, dict, list],
+    session: SessionDep,
+):
+    """Update a file's content for a given question. Returns the updated row."""
+    if not filename or not filename.strip():
+        raise HTTPException(status_code=400, detail="Filename is required")
+    question_uuid = get_question_id_UUID(question_id)
+
+    # Fetch the content
+    file_obj = session.exec(
+        select(File).where(
+            (File.question_id == question_uuid) & (File.filename == filename.strip())
+        )
+    ).first()
+
+    if file_obj is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="File not present in question",
+        )
+
+    if isinstance(newcontent, (dict, list)):
+        newcontent = json.dumps(newcontent, ensure_ascii=False)
+
+    # Make changes
+    file_obj.content = newcontent
+    # Commit & refresh the *object*, not the value
+    try:
+        session.commit()
+        session.refresh(file_obj)
+    except Exception as exc:
+        session.rollback()
+        raise HTTPException(status_code=500, detail="Failed to update file") from exc
+
+    return {
+        "detail": "updated",
+        "filename": file_obj.filename,
+        "new_content": newcontent,
+        "question_id": str(file_obj.question_id),
+    }

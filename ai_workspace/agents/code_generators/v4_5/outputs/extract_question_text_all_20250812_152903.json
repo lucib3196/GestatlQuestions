@@ -1,0 +1,29 @@
+[
+  {
+    "id": "ball_d_equals_vt_with_answer",
+    "input": "A ball travels at a constant speed of 10 m/s for a total time of 20 s. How much distance did the ball cover? The correct answer for the question is given by the equation d = v t, so for this question the answer will be 200 m.",
+    "chunks": [
+      {
+        "text": "A ball travels at a constant speed of 10 m/s for a total time of 20 s. How much distance did the ball cover? The correct answer for the question is given by the equation d = v t, so for this question the answer will be 200 m."
+      }
+    ]
+  },
+  {
+    "id": "car_distance_parameters_only",
+    "input": "A car travels at speed v = 20 m/s for time t = 5 s. Compute the distance traveled.",
+    "chunks": [
+      {
+        "text": "A car travels at speed v = 20 m/s for time t = 5 s. Compute the distance traveled."
+      }
+    ]
+  },
+  {
+    "id": "incline_symbols_units",
+    "input": "A block of mass m = 2 kg is on an incline of 30°. The friction coefficient is μ = 0.2. Use g = 9.81 m/s^2. Find the acceleration.",
+    "chunks": [
+      {
+        "text": "A block of mass m = 2 kg is on an incline of 30°. The friction coefficient is μ = 0.2. Use g = 9.81 m/s^2. Find the acceleration."
+      }
+    ]
+  }
+]

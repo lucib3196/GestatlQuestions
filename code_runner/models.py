@@ -6,6 +6,7 @@ class QuizData(BaseModel):
     params: Dict[str, Any]
     correct_answers: Dict[str, Any]
     intermediate: Optional[Dict[str, Any]] = None
+    test_results: Optional[Dict[str, Any]] = None
     nDigits: int = 3
     sigfigs: int = 3
 

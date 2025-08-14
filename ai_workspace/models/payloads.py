@@ -95,3 +95,16 @@ class Question(BaseModel):
             if self.solution
             else ""
         )
+
+    @property
+    def format_params(self) -> str:
+        lines = []
+        for param in self.params or []:
+            result = param.format_expected()
+            if result is not None:
+                lines.append(str(result + f" Value Type: Question Parameter"))
+        for ans in self.correct_answers or []:
+            result = ans.format_expected()
+            if result is not None:
+                lines.append(str(result + f" Value Type: Correct Answer"))
+        return "\n\n".join(lines)

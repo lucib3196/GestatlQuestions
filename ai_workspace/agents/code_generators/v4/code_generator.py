@@ -17,7 +17,7 @@ from ai_workspace.utils import to_serializable, save_graph_visualization
 # ────────────────────────────────────────────────────────────────────────────────
 # Constants
 # ────────────────────────────────────────────────────────────────────────────────
-FASTLLM = "gpt-4o-mini"
+FASTLLM = "gpt-5-mini"
 LONGCONTEXTLLM = "o3-mini-2025-01-31"
 
 fast_llm = ChatOpenAI(model=FASTLLM)
@@ -128,6 +128,11 @@ def generate_server_js_file(state: CodeGenState) -> CodeGenState:
         question_html=question_html,
         solution_guide=state.question_payload.solution_as_str,
         isAdaptive=state.is_adaptive,
+        test_parameters=(
+            state.question_payload.format_params
+            if state.question_payload.correct_answers
+            else None
+        ),
     )
     result = js_chain.invoke(js_input)
     updated_files = FilesData(server_js=result.get("server_file", ""))
@@ -143,6 +148,11 @@ def generate_server_py_file(state: CodeGenState) -> CodeGenState:
         question_html=question_html,
         solution_guide=state.question_payload.solution_as_str,
         isAdaptive=state.is_adaptive,
+        test_parameters=(
+            state.question_payload.format_params
+            if state.question_payload.correct_answers
+            else None
+        ),
     )
     result = py_chain.invoke(py_input)
     updated_files = FilesData(server_py=result.get("server_file", ""))

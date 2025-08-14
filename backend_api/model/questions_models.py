@@ -72,7 +72,7 @@ class Question(SQLModel, table=True):
     topic: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     isAdaptive: Optional[Union[str, bool]] = Field(default=None, sa_column=Column(JSON))
     createdBy: Optional[str] = Field(default=None)
-    language: Optional[Literal["python", "javascript"]] = Field(
+    language: Optional[List[Literal["python", "javascript"]]] = Field(
         default=None, sa_column=Column(JSON)
     )
     ai_generated: Optional[bool] = Field(default=None)
@@ -85,7 +85,7 @@ class QuestionDict(TypedDict, total=False):
     title: str
     qtype: str
     topic: str
-    isAdaptive: Union[str,bool]
+    isAdaptive: Union[str, bool]
     language: List[str]
     createdBy: str
     ai_generated: bool
