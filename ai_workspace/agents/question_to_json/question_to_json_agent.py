@@ -7,7 +7,7 @@ from typing import List
 
 
 langsmith_client = Client()
-prompt = langsmith_client.pull_prompt("question_input_analysis")
+prompt = langsmith_client.pull_prompt("new_question_render")
 
 
 class Response(BaseModel):
@@ -16,9 +16,7 @@ class Response(BaseModel):
         description="The type of inputs the question has can be multiple"
     )
 
-
-model = ChatOpenAI(model="gpt-4o-mini").with_structured_output(Response)
-chain = prompt | model
+chain = prompt | ChatOpenAI(model="gpt-4o-mini").with_structured_output(Response)
 
 
 if __name__ == "__main__":
@@ -48,5 +46,5 @@ if __name__ == "__main__":
     </pl-question-panel>
     <pl-number-input answers-name="rotation_angle" comparison="exact" digits="0" label="Angle (in degrees)"></pl-number-input>
     """
-    response = chain.invoke({"question": q_input})
+    response = chain.invoke({"question": q_input, "solution": None})
     print(response)

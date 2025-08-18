@@ -4,6 +4,7 @@ import json5
 from pydantic import ValidationError
 from code_runner.models import CodeRunResponse, QuizData
 from starlette import status
+from .utils import normalize_path
 
 
 def run_js(path: str) -> CodeRunResponse:
@@ -98,20 +99,16 @@ import execjs
 
 
 def execute_javascript(path: Union[str, Path], isTesting: bool = False):
-    print("this is the path", path)
     # Handle Case where file is Empty
-    if path is None or (
-        not (isinstance(path, str) and not path.strip())
-        and not (isinstance(path, Path))
-    ):
+    try:
+        file_path = normalize_path(path)
+    except ValueError as e:
         return CodeRunResponse(
             success=False,
-            error="No file argument provided for JavaScript execution.",
+            error="No file argument provided for JavaScript execution.{e}",
             quiz_response=None,
             http_status_code=status.HTTP_400_BAD_REQUEST,
         )
-    # Convert the path
-    file_path = Path(path) if isinstance(path, str) else path
 
     # File Validation
     if not file_path.exists():
@@ -197,11 +194,9 @@ def execute_javascript(path: Union[str, Path], isTesting: bool = False):
             http_status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         )
 
-    arg = 2 if isTesting else 0
-
     # Execute the code
     try:
-        result = ctx.call("generate", arg)
+        result = ctx.call("generate", 2) if isTesting else ctx.call("generate")
     except execjs.ProgramError as e:
         # Runtime error inside JS (thrown exception)
         return CodeRunResponse(

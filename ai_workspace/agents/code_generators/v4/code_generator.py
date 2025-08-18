@@ -125,6 +125,7 @@ def generate_server_js_file(state: CodeGenState) -> CodeGenState:
     """
     question_html = extract_question_html(state.files)
     js_input = ServerStateInput(
+        original_question=state.question_payload.question,
         question_html=question_html,
         solution_guide=state.question_payload.solution_as_str,
         isAdaptive=state.is_adaptive,
@@ -145,6 +146,7 @@ def generate_server_py_file(state: CodeGenState) -> CodeGenState:
     """
     question_html = extract_question_html(state.files)
     py_input = ServerStateInput(
+        original_question=state.question_payload.question,
         question_html=question_html,
         solution_guide=state.question_payload.solution_as_str,
         isAdaptive=state.is_adaptive,

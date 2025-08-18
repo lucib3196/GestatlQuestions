@@ -36,6 +36,7 @@ class QuestionBase(BaseModel):
         ..., description="The inputs for the question ie what you are trying to solve"
     )
     image: Optional[str] = Field("filename of the image")
+    solution_render: Optional["Solution"] = None
 
 
 class QuestionPayload(BaseModel):

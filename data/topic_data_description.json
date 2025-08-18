@@ -751,6 +751,16 @@
         "Chemical Engineering",
         "Energy Engineering"
       ]
+    },
+    {
+      "name": "Thermodynamics",
+      "description": "Focuses on the principles governing heat transfer and temperature conversion between different scales, including converting Kelvin to Celsius.",
+      "discipline": [
+        "Mechanical Engineering",
+        "Chemical Engineering",
+        "Physics",
+        "Environmental Engineering"
+      ]
     }
   ]
 }

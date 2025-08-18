@@ -1,11 +1,13 @@
-from typing import Any
 import importlib.util
-from code_runner.models import QuizData, CodeRunResponse
+import inspect
+import types
+from typing import Any
+
 from pydantic import ValidationError
 from starlette import status
-import types
-from pathlib import Path
-import inspect
+
+from code_runner.models import CodeRunResponse, QuizData
+from .utils import normalize_path
 
 
 def import_module_from_path(path: str, module_name: str = "generate") -> Any:
@@ -40,14 +42,15 @@ def run_generate_py(path: str, isTesting: bool = False) -> "CodeRunResponse":
     Validate the final payload against QuizData.
     """
     # ---- Path validation ----
-    if path is None or (isinstance(path, str) and not path.strip()):
+    try:
+        p = normalize_path(path)
+    except ValueError as e:
         return CodeRunResponse(
             success=False,
-            error="No file path provided for Python execution.",
+            error="No file argument provided for JavaScript execution.{e}",
             quiz_response=None,
             http_status_code=status.HTTP_400_BAD_REQUEST,
         )
-    p = Path(path)
     if not p.exists():
         return CodeRunResponse(
             success=False,

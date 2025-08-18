@@ -1,5 +1,7 @@
 import type { QuestionParams } from "../types/types";
 import { roundToSigFigs } from "./mathHelpers";
+
+
 export function checkObject(obj: Object, errorMessage: string) {
   if (typeof obj !== "object" || obj === null || Array.isArray(obj)) {
     console.log(errorMessage)
@@ -39,7 +41,6 @@ export function replaceParameters(
       String(replacement)
     );
 
-    console.log("about to replace",placeholder, String(replacement))
 
     updatedTemplate = updatedTemplate.replaceAll(
       legacyPlaceholder,

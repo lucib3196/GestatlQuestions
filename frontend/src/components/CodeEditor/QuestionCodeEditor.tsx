@@ -10,7 +10,7 @@ import { SaveCodeButton, CreateFileButton, UploadFileButton } from "../Buttons";
 import { UploadFileModal } from "./UploadFileModal";
 // API
 import api from "../../api";
-
+import { toast } from 'react-toastify';
 // MUI Components
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -116,7 +116,6 @@ function QuestionCodeEditor() {
     const fetchFileContent = (filename: string) => {
         try {
             const match = filesData?.find((f) => f.filename === filename);
-            console.log("This is the match", match)
             if (!match) {
                 console.warn(`File not found: ${filename}`);
                 setFileContent("");
@@ -144,8 +143,10 @@ function QuestionCodeEditor() {
                 filename: selectedFile,
                 newcontent: fileContent,
             });
+
+            toast.success("Code Saved Succesfully")
         } catch (err) {
-            console.error("Failed to save file:", err);
+            toast.error("Code Not Saved")
         }
     };
 

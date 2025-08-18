@@ -15,6 +15,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 # SQLAlchemy / SQLModel
 from sqlalchemy.exc import IntegrityError
+from backend_api.core.logging import logger
 
 # Third-party
 from jose import JWTError
@@ -111,6 +112,7 @@ async def login_for_access_token(
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_bearer)], session: SessionDep
 ) -> users_model.UserRead:
+
     try:
         payload = decode_token(token)
         username = payload.get("sub")

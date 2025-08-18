@@ -48,9 +48,9 @@ class Question(BaseModel):
         description="A fully formed question. It should be complete and clearly stated.",
     )
     params: Optional[List[ParamBase]] = Field(
-        description="A parameter found in the question text"
+        description="A parameter found in the question text", default=None
     )
-    correct_answers: Optional[List[ParamBase]]
+    correct_answers: Optional[List[ParamBase]] = None
     source: Optional[Union[str, int]] = Field(
         None,
         title="Source",
@@ -76,7 +76,7 @@ class Question(BaseModel):
         title="Additional instructions for code generation",
         description="Additional instructiosn for code generation",
     )
-    solution: Optional[Solution]
+    solution: Optional[Solution] = None
 
     @property
     def as_str(self) -> str:

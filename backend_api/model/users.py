@@ -1,11 +1,9 @@
 from __future__ import annotations
 from enum import Enum
-from typing import Optional, List, TYPE_CHECKING
-from uuid import UUID, uuid4
+from typing import Optional, TYPE_CHECKING
 
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import Column, Integer, String
+from sqlmodel import SQLModel, Field
 
 if TYPE_CHECKING:
     from .questions_models import Question

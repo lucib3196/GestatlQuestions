@@ -1,24 +1,22 @@
 from __future__ import annotations
 
+from typing import List, Optional, Union, Literal, TypedDict
 from uuid import UUID, uuid4
-from typing import List, Optional, Union, Literal
-
-from sqlalchemy import JSON, Column
+from ai_workspace.agents.question_to_json.models import QuestionBase, Solution
+from sqlalchemy import Boolean, JSON, Column, text
+from sqlalchemy.orm import (
+    relationship as sa_relationship,
+)
 from sqlmodel import SQLModel, Field, Relationship
 from pydantic import BaseModel, Field as PydanticField
-from ai_workspace.agents.question_to_json.models import (
-    QuestionInput,
-    Solution,
-    QuestionBase,
-)
-from typing import TypedDict
+
+# ----- Pydantic models -----
 
 
 class CodeLanguage(BaseModel):
     language: Literal["python", "javascript"]
 
 
-# Pydantic models
 class QuestionMeta(BaseModel):
     question: str
     title: str
@@ -30,23 +28,24 @@ class QuestionMeta(BaseModel):
 
 
 class QuestionMetaNew(BaseModel):
-    rendering_data: List[QuestionBase]
-    solution_render: Optional[Solution] = None
+    rendering_data: List["QuestionBase"]  # keep your import if you use it
     qtype: Optional[List[Literal["numeric", "multiple_choice"]]] = PydanticField(
         default=None
     )
     title: str
     topic: List[str]
     relevantCourses: List[str]
-    tags: Optional[List[str]] = []
-    prereqs: Optional[List[str]] = []
+    tags: Optional[List[str]] = PydanticField(default_factory=list)
+    prereqs: Optional[List[str]] = PydanticField(default_factory=list)
     isAdaptive: Union[str, bool]
     createdBy: Optional[str] = ""
     language: Optional[List[Literal["python", "javascript"]]] = None
     ai_generated: Optional[bool] = None
 
 
-# SQLModel tables
+# ----- SQLModel tables -----
+
+
 class File(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     filename: str
@@ -54,33 +53,61 @@ class File(SQLModel, table=True):
     question_id: UUID = Field(foreign_key="question.id")
 
 
+# Association table for many-to-many
+class QuestionTopic(SQLModel, table=True):
+    question_id: UUID = Field(foreign_key="question.id", primary_key=True, index=True)
+    topic_id: UUID = Field(foreign_key="topic.id", primary_key=True, index=True)
+
+
 class Question(SQLModel, table=True):
-    id: UUID = Field(
-        default_factory=uuid4,
-        primary_key=True,
-        index=True,
-        nullable=False,
-        sa_column_kwargs={"unique": True},
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
+
+    title: Optional[str] = None
+    ai_generated: Optional[bool] = None
+
+    # SQLite default TRUE -> "1" ; Postgres -> "true"
+    isAdaptive: bool = Field(
+        default=True,
+        sa_column=Column(Boolean, nullable=False, server_default=text("1")),
     )
 
-    user_id: Optional[int] = Field(foreign_key="user.id")
-
-    qtype: Optional[List[Literal["numeric", "multiple_choice"]]] = Field(
-        default=None, sa_column=Column(JSON)
-    )
-    title: Optional[str] = Field(default=None)
-    topic: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-    isAdaptive: Optional[Union[str, bool]] = Field(default=None, sa_column=Column(JSON))
-    createdBy: Optional[str] = Field(default=None)
     language: Optional[List[Literal["python", "javascript"]]] = Field(
         default=None, sa_column=Column(JSON)
     )
-    ai_generated: Optional[bool] = Field(default=None)
+    qtype: Optional[List[Literal["numeric", "multiple_choice"]]] = Field(
+        default=None, sa_column=Column(JSON)
+    )
+
+    createdBy: Optional[str] = None
+    user_id: Optional[int] = Field(foreign_key="user.id")
+
+    topics: list["Topic"] = Relationship(
+        sa_relationship=sa_relationship(
+            "Topic",
+            secondary=QuestionTopic.__table__,  # type: ignore
+            back_populates="questions",
+        )
+    )
 
 
-# Probably Redundant But It Should Work meant for filtering
+class Topic(SQLModel, table=True):
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    name: str = Field(index=True, unique=True)
+
+    questions: list["Question"] = Relationship(
+        sa_relationship=sa_relationship(
+            "Question",
+            secondary=QuestionTopic.__table__,  # type: ignore
+            back_populates="topics",
+        )
+    )
+
+
+# (Optional) helper type for filters
 class QuestionDict(TypedDict, total=False):
-    id: int
+    id: UUID
     user_id: int
     title: str
     qtype: str

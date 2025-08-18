@@ -53,6 +53,7 @@ q_retriever_py = SemanticExamplesCSV(
 # State and Function Definitions
 # ────────────────────────────────────────────────────────────────────────────────
 class State(BaseModel):
+    original_question: str
     question_html: str
     solution_guide: Optional[str] = None
     isAdaptive: bool = True
@@ -154,7 +155,11 @@ def generate_test_js(state: State):
         CodeResponse, include_raw=True
     )
     result = chain.invoke(
-        {"question": state.server_file, "parameters": state.test_parameters}
+        {
+            "original_question": state.original_question,
+            "question": state.server_file,
+            "parameters": state.test_parameters,
+        }
     )
     ai_message = result["raw"]
     structured = parse_structured(CodeResponse, ai_message)
@@ -167,7 +172,11 @@ def generate_test_py(state: State):
         CodeResponse, include_raw=True
     )
     result = chain.invoke(
-        {"question": state.server_file, "parameters": state.test_parameters}
+        {
+            "original_question": state.original_question,
+            "question": state.server_file,
+            "parameters": state.test_parameters,
+        }
     )
     ai_message = result["raw"]
     structured = parse_structured(CodeResponse, ai_message)

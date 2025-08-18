@@ -15,6 +15,7 @@ import {
 
 import { QuestionSettingsContext } from "../../context/GeneralSettingsContext";
 
+
 const modalStyle = {
     position: "absolute" as const,
     top: "50%",
@@ -27,7 +28,7 @@ const modalStyle = {
     p: 4,
 };
 
-export default function QuestionSettings() {
+export default function QuestionSettings(className: any = "") {
     const [showSettings, setShowSettings] = useState<boolean>(false);
     const [showRenderingInfo, setShowRenderingInfo] = useState<boolean>(false);
     const [showCodeRunningInfo, setShowCodeRunningInfo] = useState<boolean>(false);
@@ -39,7 +40,7 @@ export default function QuestionSettings() {
     } = useContext(QuestionSettingsContext);
 
     return (
-        <div>
+        <div className={className}>
             {/* Settings Icon */}
             <IconButton onClick={() => setShowSettings(true)}>
                 <IoIosSettings size={28} />

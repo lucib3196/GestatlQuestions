@@ -43,12 +43,10 @@ type CheckboxInput = BaseQuestionInput & {
 
 export type QuestionInput = NumberInput | MultipleChoiceInput | CheckboxInput;
 
-export type SolutionHint = {
-  step: string;
-};
+
 
 export type Solution = {
-  solution_hint: SolutionHint[];
+  solution_hint: string[];
 };
 
 export type QuestionRender = {

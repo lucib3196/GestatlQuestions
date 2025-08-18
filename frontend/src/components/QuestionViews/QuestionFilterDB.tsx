@@ -9,30 +9,41 @@ import {
 import { FormControlLabel } from "@mui/material";
 import { useQuestionContext } from "../../context/QuestionContext";
 import { useDebounce } from "@uidotdev/usehooks";
-import React from "react";
+import React, { useContext, useState } from "react";
 import api from "../../api";
 import type { QuestionDB } from "../../types/types";
-import { QuestionTable } from "./QuestionTablesDB";
+import { QuestionTable } from "../QuestionTable/QuestionTablesDB";
+import QuestionSettings from "./QuestionSettings";
+import { RunningQuestionSettingsContext } from './../../context/RunningQuestionContext';
 
-import { useState } from "react";
 const FilterHeader = () => {
     return (
-        <>
-            <h1 className="font-bold text-3xl text-indigo-800 mb-4 flex items-center text-center gap-2">
-                Gestalt Questions
-            </h1>
-            <hr className="border-3 border-indigo-300 w-full" />
-        </>
-    )
-}
+        <header className="w-full">
+            <div className="flex items-center justify-between gap-3">
+                <h1 className="font-bold text-indigo-800 text-2xl md:text-3xl">
+                    Gestalt Questions
+                </h1>
+
+                {/* Wrap to control alignment without relying on justify-self */}
+                <div className="ml-auto">
+                    <QuestionSettings />
+                </div>
+            </div>
+
+            {/* Divider */}
+            <div className="mt-3 h-2 w-full bg-indigo-300/70" />
+        </header>
+    );
+};
 
 const QuestionFilterDB = () => {
-    const ctx = useQuestionContext()
-    const [searchTerm, setSearchTerm] = useState<string>("js");
+    const ctx = useQuestionContext();
+    const [searchTerm, setSearchTerm] = useState<string>("");
     const [results, setResults] = useState<QuestionDB[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
     const [questionType, setQuestionType] = useState("MultipleChoice");
+    const { codeRunningSettings } = useContext(RunningQuestionSettingsContext)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
@@ -41,11 +52,11 @@ const QuestionFilterDB = () => {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        const qTitle = formData.get("question_title")
-        setSearchTerm(typeof qTitle === "string" ? qTitle : "")
+        const qTitle = formData.get("question_title");
+        setSearchTerm(typeof qTitle === "string" ? qTitle : "");
         e.currentTarget.reset();
         e.currentTarget.focus();
-    }
+    };
 
     React.useEffect(() => {
         const searchQuestions = async () => {
@@ -53,26 +64,30 @@ const QuestionFilterDB = () => {
 
             setIsSearching(true);
             try {
-                const data = await api.post("/db_questions/filter_question", !ctx.showAllQuestions ? {
-                    "title": debouncedSearchTerm,
-                    "qtype": ctx.qtype[0],
-                    "isAdaptive": ctx.isAdaptive ? "true" : "false",
-                } : {})
-                retrievedQuestions = data.data || []
-                setIsSearching(false)
-                setResults(retrievedQuestions)
+                const data = await api.post(
+                    "/db_questions/filter_question",
+                    !ctx.showAllQuestions
+                        ? {
+                            title: debouncedSearchTerm,
+                            qtype: ctx.qtype[0],
+                            isAdaptive: ctx.isAdaptive as boolean,
+                        }
+                        : {}
+                );
+                retrievedQuestions = data.data || [];
+                setIsSearching(false);
+                setResults(retrievedQuestions);
             } catch (error) {
-                console.log(error)
+                console.log(error);
             }
-
         };
 
-        searchQuestions()
-    }, [debouncedSearchTerm, ctx.isAdaptive, ctx.qtype, ctx.showAllQuestions])
+        searchQuestions();
+    }, [debouncedSearchTerm, ctx.isAdaptive, ctx.qtype, ctx.showAllQuestions]);
 
     return (
         <>
-            <div className="mt-10 w-full max-w-6/10 rounded-lg bg-white p-8 shadow-md">
+            <div className=" flex flex-wrap  flex-col  mt-10 w-full max-w-8/10 rounded-lg bg-white p-8 shadow-md">
                 <FilterHeader />
 
                 <form
@@ -81,8 +96,8 @@ const QuestionFilterDB = () => {
                 >
                     {/* Show All */}
                     {/*  */}
-                    <div className="flex justify-center gap-x-10 mx-2 items-center ">
-                        <FormControl className="grow basis-full min-w-[180px]">
+                    <div className="flex flex-wrap flex-row gap-y-4 w-full justify-center gap-x-2 mx-2 items-center ">
+                        <FormControl className="flex-[1_1_10rem] min-w-48 max-w-xl">
                             <FormControlLabel
                                 control={
                                     <Checkbox
@@ -99,7 +114,7 @@ const QuestionFilterDB = () => {
                         </FormControl>
 
                         {/* Question Type */}
-                        <FormControl className=" grow basis-full min-w-[180px]">
+                        <FormControl className=" flex-[1_1_10rem] min-w-48 max-w-xl">
                             <InputLabel id="question-type-label">
                                 <span className="text-base font-medium text-indigo-900">
                                     Question Type
@@ -108,7 +123,9 @@ const QuestionFilterDB = () => {
                             <Select
                                 labelId="question-type-label"
                                 value={questionType}
-                                onChange={(e: SelectChangeEvent) => setQuestionType(e.target.value)}
+                                onChange={(e: SelectChangeEvent) =>
+                                    setQuestionType(e.target.value)
+                                }
                                 label="Question Type"
                                 disabled={ctx.showAllQuestions}
                             >
@@ -127,7 +144,7 @@ const QuestionFilterDB = () => {
 
                         {/* isAdaptive */}
                         <FormControl
-                            className="grow basis-full min-w-[180px]"
+                            className="flex-[1_1_10rem] min-w-48 max-w-xl"
                             disabled={!questionType || ctx.showAllQuestions}
                         >
                             <InputLabel id="is-adaptive-label">isAdaptive</InputLabel>
@@ -142,9 +159,7 @@ const QuestionFilterDB = () => {
                                 <MenuItem value="true">True</MenuItem>
                             </Select>
                         </FormControl>
-
                     </div>
-
 
                     {/* Search row (takes remaining width, wraps to new line on small screens) */}
                     <div className="flex grow basis-full w-6/10 items-center gap-3">
@@ -155,7 +170,10 @@ const QuestionFilterDB = () => {
                             onChange={handleChange}
                             disabled={ctx.showAllQuestions}
                             placeholder="Question Title"
-                            className={`w-full flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 ${ctx.showAllQuestions ? "bg-gray-300 hover:cursor-not-allowed" : ""}`}
+                            className={`w-full flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 ${ctx.showAllQuestions
+                                ? "bg-gray-300 hover:cursor-not-allowed"
+                                : ""
+                                }`}
                         />
                         <button
                             type="submit"
@@ -169,6 +187,6 @@ const QuestionFilterDB = () => {
             </div>
             <QuestionTable results={results} />
         </>
-    )
-}
-export default QuestionFilterDB
+    );
+};
+export default QuestionFilterDB;

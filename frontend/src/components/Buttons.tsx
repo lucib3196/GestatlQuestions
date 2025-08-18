@@ -1,5 +1,5 @@
 type SubmitAnswerButtonProps = {
-    onClick: () => void;
+    onClick?: () => void;
     disabled?: boolean
 };
 
