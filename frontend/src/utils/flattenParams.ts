@@ -25,6 +25,7 @@ type Options = {
 };
 
 import { roundToSigFigs } from "./mathHelpers";
+
 function flattenParams(
   obj: unknown,
   prefix = "",
@@ -55,7 +56,6 @@ function flattenParams(
   //   Iterates throught the object and replaces the parameters by recursively calling it
   if (obj && typeof obj === "object") {
     for (const k of Object.keys(obj)) {
-      // Type guard to ensure obj is an object with string keys
       if (typeof obj === "object" && obj !== null && k in obj) {
         // Use type assertion to access property
         let v = (obj as Record<string, any>)[k];

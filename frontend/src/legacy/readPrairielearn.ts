@@ -115,7 +115,22 @@ export const processPrairielearnTags = (
   // pl-hint (collect solutionsStrings)
   $("pl-hint").each((_, el) => {
     const res = plutil.pl_hint($, qdata, el);
+    console.log("This is the current res", res)
+
     solutionsStrings[res.level] = res.htmlString;
+    formattedSolution = Object.entries(solutionsStrings)
+      .map(([k, v]) => `<div class='pl-hint'>${v}</div>`)
+      .join("");
+    $(el).remove(); // if hints are collected elsewhere
+  });
+
+
+  $("pl-solution-hint").each((_, el) => {
+    const res = plutil.pl_hint($, qdata, el);
+    if (!res.level){
+
+    }
+    solutionsStrings[res.level] =res.htmlString;
     formattedSolution = Object.entries(solutionsStrings)
       .map(([k, v]) => `<div class='pl-hint'>${v}</div>`)
       .join("");

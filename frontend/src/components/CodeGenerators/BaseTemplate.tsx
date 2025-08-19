@@ -85,7 +85,7 @@ const ModGenerators: React.FC<ModGeneratorProps> = ({
     examples,
     inputComponent
 }) => (
-    <div className="flex flex-col items-center my-6 mx-auto border border-gray-200 rounded-2xl max-w-3xl min-w-[350px] p-8 bg-white shadow-lg">
+    <div className="flex flex-col items-center my-6 mx-auto border border-gray-200 rounded-2xl max-w-7/10 min-w-[350px] p-8 bg-white shadow-lg">
         <ModInfo title={title} subtitle={subtitle} />
         <div className="w-full mt-4 flex flex-col">
             <ModExample examples={examples} />

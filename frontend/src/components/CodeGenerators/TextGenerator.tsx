@@ -1,71 +1,164 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ModGenerators from "./BaseTemplate";
 import PopUpHelp from "../PopUpHelp";
 import api from "../../api";
-import { toast } from 'react-toastify';
-import { useState } from "react";
+import { toast } from "react-toastify";
+import { AddQuestionInput } from "./AddQuestionInput";
 
 // Examples for the input container
 const examples = [
     {
         name: "Projectile Motion",
-        text: "A ball is thrown horizontally from the top of a 50-meter high building with an initial speed of 15 meters per second. Assuming there is no air resistance, calculate the time it takes for the ball to reach the ground.",
+        text:
+            "A ball is thrown horizontally from the top of a 50-meter high building with an initial speed of 15 meters per second. Assuming there is no air resistance, calculate the time it takes for the ball to reach the ground.",
     },
     {
         name: "Spring Oscillation",
-        text: "A mass-spring system oscillates with a period of 2 seconds. If the spring constant is 100 N/m, calculate the mass attached to the spring. Assume the motion is simple harmonic.",
+        text:
+            "A mass-spring system oscillates with a period of 2 seconds. If the spring constant is 100 N/m, calculate the mass attached to the spring. Assume the motion is simple harmonic.",
     },
     {
         name: "Pressure Calculation",
-        text: "A force of 200 Newtons is applied perpendicular to a circular cross-sectional area with a radius of 0.1 meters. Calculate the pressure exerted on the area.",
+        text:
+            "A force of 200 Newtons is applied perpendicular to a circular cross-sectional area with a radius of 0.1 meters. Calculate the pressure exerted on the area.",
     },
 ];
 
 type QuestionData = {
-    question: string[];
-    question_title: string;
+    question: string;
+    question_title?: string;
 };
-const InputForm: React.FC = () => {
-    // Wether the title is going to be ai generated
-    const [isDefault, setIsDefault] = useState(false)
-    const [formData, setFormData] = useState<QuestionData>({
-        question: [],
-        question_title: "",
-    });
 
-    // Generic for loading and and other utilities
+type QuestionInputProps = {
+    i: number;
+    formData: QuestionData[];
+    setFormData: React.Dispatch<React.SetStateAction<QuestionData[]>>;
+};
+
+const QuestionInput: React.FC<QuestionInputProps> = ({ i, formData, setFormData }) => {
+    const [isDefault, setIsDefault] = useState(false);
+    const item = formData[i] ?? ({} as QuestionData);
+
+    const handleChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+            const { name, value } = e.target;
+            setFormData((prev) => {
+                const next = [...prev];
+                const current = next[i] ?? ({} as QuestionData);
+                next[i] = { ...current, [name]: value };
+                return next;
+            });
+        },
+        [i, setFormData]
+    );
+
+    return (
+        <div className="space-y-4">
+            {/* Folder Name */}
+            <div className="space-y-2">
+                <label htmlFor={`question_title_${i}`} className="block text-sm font-semibold text-gray-800">
+                    Folder Name
+                </label>
+
+                <div className="flex items-start gap-3">
+                    <input
+                        type="text"
+                        name="question_title"
+                        id={`question_title_${i}`}
+                        className={`flex-1 w-full rounded-md border px-3 py-2 text-gray-900 placeholder:text-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDefault ? "bg-gray-200" : ""
+                            }`}
+                        value={item.question_title ?? ""}
+                        onChange={handleChange}
+                        placeholder="Enter a folder name"
+                        disabled={isDefault}
+                        required={!isDefault}
+                        aria-describedby={`question_title_help_${i}`}
+                    />
+
+                    <div className="flex items-center gap-2">
+                        <input
+                            id={`use_default_title_${i}`}
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked={isDefault}
+                            onChange={() => setIsDefault((prev) => !prev)}
+                        />
+                        <label htmlFor={`use_default_title_${i}`} className="select-none text-sm text-gray-800">
+                            Use AI-generated title
+                        </label>
+                        {/* <PopUpHelp message="Let the system generate a clear, concise folder name for you." /> */}
+                    </div>
+                </div>
+
+                <p id={`question_title_help_${i}`} className="sr-only">
+                    Provide a descriptive folder name or check the box to use an AI-generated title.
+                </p>
+            </div>
+
+            {/* Question */}
+            <div className="space-y-2">
+                <label
+                    htmlFor={`questionTextArea_${i}`}
+                    className="flex items-center gap-2 text-sm font-semibold text-gray-800"
+                >
+                    Enter Question
+                    <PopUpHelp message="Works best with one question at a time (numerical or multiple choice)." />
+                </label>
+                <textarea
+                    name="question"
+                    id={`questionTextArea_${i}`}
+                    className="min-h-[110px] w-full rounded-md border px-3 py-2 text-gray-900 placeholder:text-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={item.question ?? ""}
+                    onChange={handleChange}
+                    placeholder="Type your question here…"
+                    required
+                />
+            </div>
+        </div>
+    );
+};
+
+const InputForm: React.FC = () => {
+    const [count, setCount] = useState(1);
+    const handleCountChange = useCallback((next: number) => setCount(next), []);
+
+    const [formData, setFormData] = useState<QuestionData[]>([{ question: "", question_title: "" }]);
     const [loading, setLoading] = useState<boolean>(false);
 
-
-
-    const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-    const handleQuestionChange = (
-        e: React.ChangeEvent<HTMLTextAreaElement>,
-        index: number
-    ) => {
-        const updatedQuestions = [...formData.question];
-        updatedQuestions[index] = e.target.value;
-        setFormData({ ...formData, question: updatedQuestions });
-    };
+    // Keep formData length in sync with count
+    useEffect(() => {
+        setFormData((prev) => {
+            if (prev.length === count) return prev;
+            if (prev.length < count) {
+                const add = Array.from({ length: count - prev.length }, () => ({ question: "", question_title: "" }));
+                return [...prev, ...add];
+            }
+            return prev.slice(0, count);
+        });
+    }, [count]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
 
-        // Get access token must be logged in to use the generator
         try {
             const token = localStorage.getItem("access_token");
             if (!token) {
-                toast.error("Error: Must Be Logged In")
+                toast.error("Error: Must be logged in");
                 return;
             }
-            const res = await api.post(
-                "/codegenerator/v4/text_gen",   // make sure this matches your FastAPI route
-                formData,                       // send JSON if your backend expects JSON
+
+
+            const payload = formData.map(({ question, question_title }) => ({
+                question,
+                ...(question_title?.trim() ? { question_title } : {}),
+            }));
+
+            console.log("This is the payload", payload)
+
+            await api.post(
+                "/codegenerator/v4/text_gen/",
+                { data: payload },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -73,111 +166,76 @@ const InputForm: React.FC = () => {
                     },
                 }
             );
-            toast.success("Generated Succesfully")
-        } catch (error) {
-            toast.error(`Unexpected Error ${error}`)
+
+            toast.success("Generated successfully");
+        } catch (error: any) {
+            const msg = error?.response?.data?.detail ?? error?.message ?? "Unexpected error";
+            toast.error(String(msg));
         } finally {
             setLoading(false);
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <span className="animate-pulse font-semibold text-blue-600">Loading…</span>
+            </div>
+        );
+    }
+
     return (
-        <div className="w-full max-w-xl mx-auto mt-8">
-
-            {loading ? (
-                <div className="flex items-center justify-center py-12">
-                    <span className="text-blue-600 font-semibold animate-pulse">Loading…</span>
+        <div className="mx-auto max-w-full px-4 py-8">
+            {/* Header / controls */}
+            <div className="mb-4 flex items-center justify-between">
+                <h1 className="text-xl font-semibold text-gray-900">Create Questions</h1>
+                <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700">
+                        {count} {count === 1 ? "question" : "questions"}
+                    </span>
+                    <AddQuestionInput value={count} onChange={handleCountChange} />
                 </div>
-            ) : (
-                <form
-                    onSubmit={handleSubmit}
-                    className="bg-white border border-gray-200 shadow-sm rounded-lg p-6 space-y-6"
-                >
-                    {/* Folder Name */}
-                    <div className="space-y-2">
-                        <label htmlFor="question_title" className="block text-sm font-semibold text-gray-800">
-                            Folder Name
-                        </label>
+            </div>
 
-                        <div className="flex items-start gap-3">
-                            <input
-                                type="text"
-                                name="question_title"
-                                id="question_title"
-                                className={`flex-1 shadow-sm border rounded-md w-full px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDefault ? "bg-gray-200" : ""}`}
-                                value={formData.question_title}
-                                onChange={handleChange}
-                                placeholder="Enter a folder name"
-                                disabled={isDefault}
-                                required={!isDefault}
-                                aria-describedby="package_help"
-                            />
-
-                            <div className="flex items-center gap-2">
-                                <input
-                                    id="use_default_title"
-                                    type="checkbox"
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                    checked={isDefault}
-                                    onChange={() => setIsDefault((prev) => !prev)}
-                                />
-                                <label htmlFor="use_default_title" className="text-sm text-gray-800 select-none">
-                                    Use AI-generated title
-                                </label>
-                                <PopUpHelp message="Let the system generate a clear, concise folder name for you." />
-                            </div>
-                        </div>
-
-                        <p id="package_help" className="text-xs text-gray-500">
-                            Choose a name to save the question (defaults to AI generated if checked).
-                        </p>
-
-
-                    </div>
-
-                    {/* Question */}
-                    <div className="space-y-2">
-                        <label
-                            htmlFor="questionTextArea"
-                            className="flex items-center gap-2 text-sm font-semibold text-gray-800"
+            <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Question cards */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    {Array.from({ length: count }, (_, i) => (
+                        <div
+                            key={i}
+                            className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm ring-1 ring-black/5 transition hover:shadow-md"
                         >
-                            Enter Question
-                            <PopUpHelp message="Works best with one question at a time (numerical or multiple choice)." />
-                        </label>
-                        <textarea
-                            name="question"
-                            id="questionTextArea"
-                            className="shadow-sm border rounded-md w-full px-3 py-2 min-h-[110px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            value={formData.question[0] || ""}
-                            onChange={(e) => handleQuestionChange(e, 0)}
-                            placeholder="Type your question here…"
-                            required
-                        />
-                    </div>
+                            <div className="mb-3 flex items-center justify-between">
+                                <span className="text-sm font-medium text-gray-600">Question {i + 1}</span>
+                                <span className="rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700">#{i + 1}</span>
+                            </div>
 
-                    {/* Submit */}
+                            <QuestionInput i={i} formData={formData} setFormData={setFormData} />
+                        </div>
+                    ))}
+                </div>
+
+                {/* Submit */}
+                <div className="pt-2">
                     <button
                         type="submit"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                        className="inline-flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm ring-1 ring-indigo-500/30 transition hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         Submit
                     </button>
-                </form>
-            )}
+                </div>
+            </form>
         </div>
-
     );
 };
 
 export default function TextGenerator() {
     return (
-        <>
-            <ModGenerators
-                title="Text Generator"
-                subtitle="Creates dynamic educational modules based on input"
-                examples={examples}
-                inputComponent={<InputForm />}
-            />
-        </>
+        <ModGenerators
+            title="Text Generator"
+            subtitle="Creates dynamic educational modules based on input"
+            examples={examples}
+            inputComponent={<InputForm />}
+        />
     );
 }
