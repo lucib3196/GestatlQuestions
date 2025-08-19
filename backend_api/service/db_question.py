@@ -1,40 +1,58 @@
+# =========================
+# Imports
+# =========================
+
 # Standard library
 import json
 from json import JSONDecodeError
-from typing import Union, List, Optional, TypedDict
+from typing import List, Optional, TypedDict, Union, Literal
 from uuid import UUID
+from pathlib import Path
 
 # Third-party
 from fastapi import HTTPException
 from pydantic import ValidationError
-from sqlalchemy import or_, and_
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy import and_, or_
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 from starlette import status
+import tempfile
 
 # Local
 from backend_api.core.logging import logger
 from backend_api.data.database import SessionDep
 from backend_api.model.questions_models import (
-    Question,
     File,
+    Question,
     QuestionDict,
     QuestionMetaNew,
     Topic,
 )
+from code_runner.run_server import run_generate
 
 
+# =========================
 # Utils
+# =========================
+
+
 def get_question_id_UUID(question_id) -> UUID:
+    """Validate and convert a question_id to UUID or raise HTTP 400."""
     try:
-        question_uuid = UUID(question_id)
-        return question_uuid
+        if isinstance(question_id, UUID):
+            return question_id
+        else:
+            return UUID(question_id)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid UUID format")
 
 
-# Most Generic
+# =========================
+# Create (Most Generic)
+# =========================
+
+
 async def add_question(question: Question, session: SessionDep):
     session.add(question)
     session.commit()
@@ -58,6 +76,31 @@ async def add_topic(topic: Topic, session: SessionDep):
     return topic
 
 
+# =========================
+# Read
+# =========================
+
+
+async def get_question_file(
+    question_id: Union[str, UUID], filename: str, session: SessionDep
+):
+
+    question_id = get_question_id_UUID(question_id)
+
+    results = session.exec(
+        select(File)
+        .where(File.question_id == question_id)
+        .where(File.filename == filename)
+    ).first()
+
+    if not results:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No File {filename} for Question",
+        )
+    return results
+
+
 async def get_all_files(question_id: UUID, session: SessionDep):
     results = session.exec(select(File).where(File.question_id == question_id)).all()
     if not results:
@@ -67,11 +110,126 @@ async def get_all_files(question_id: UUID, session: SessionDep):
     return results
 
 
+async def get_question_topics(session: SessionDep, question_id: str) -> list[str]:
+    """Return list of topic names for a question."""
+    qid: UUID = get_question_id_UUID(question_id)
+
+    stmt = (
+        select(Question)
+        .options(selectinload(Question.topics))  # eager-load topics # type: ignore
+        .where(Question.id == qid)
+    )
+    question = session.exec(stmt).first()
+    if not question:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Question not found"
+        )
+
+    return [t.name for t in question.topics]  # or return question.topics
+
+
+async def get_question_qmeta(question_id: str, session: SessionDep):
+    """Fetch and validate qmeta.json for a question, returning QuestionMetaNew."""
+    question_uuid = get_question_id_UUID(question_id)
+
+    result = session.exec(
+        select(File)
+        .where(File.question_id == question_uuid)
+        .where(File.filename == "qmeta.json")
+    ).first()
+
+    # Checking to see if there is any content
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Question has no qmeta"
+        )
+    if result.content is None or (
+        isinstance(result.content, str) and not result.content.strip()
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="qmeta.json exists but has no content.",
+        )
+
+    try:
+        raw: Union[dict, list]
+        if isinstance(result.content, (dict, list)):
+            raw = result.content
+        elif isinstance(result.content, str):
+            raw = json.loads(result.content)
+        else:
+            # Unexpected type (e.g., bytes)
+            raise HTTPException(
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail=f"Unsupported content type for qmeta.json: {type(result.content).__name__}",
+            )
+    except JSONDecodeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Invalid JSON in qmeta.json: {e.msg} at pos {e.pos}",
+        )
+
+    try:
+        qmeta = QuestionMetaNew(**raw)  # type: ignore
+    except ValidationError as e:
+        # Return Pydantic errors cleanly
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"message": "qmeta failed validation", "errors": e.errors()},
+        )
+
+    return qmeta
+
+
+async def get_all_questions(
+    session: SessionDep,
+    offset: int = 0,
+    limit: int = 100,
+):
+    results = session.exec(select(Question).offset(offset).limit(limit)).all()
+    return results
+
+
+async def filter_questions(session: SessionDep, qfilter: QuestionDict):
+    """Apply dynamic filters to Question based on qfilter."""
+    filters = []
+    for key, value in qfilter.items():
+        logger.debug("Filter: %s = %r", key, value)
+
+        col = getattr(Question, key, None)
+        if not col or value in (None, "", []):
+            continue
+
+        # For not full search just alike
+        if key == "title":
+            vals = value if isinstance(value, (list, tuple, set)) else [value]
+            filters.append(or_(*[Question.title.ilike(f"%{v}%") for v in vals if v]))  # type: ignore
+            continue
+
+        # handle cases where there is a list
+        if isinstance(value, (list, tuple, set)):
+            filters.append(or_(*[col == v for v in value]))
+            logger.debug("Value %s", value)
+        else:
+            filters.append(col == value)
+
+    stmt = select(Question)
+    if filters:
+        stmt = stmt.where(*filters)  # AND across keys, OR within each key
+    return session.exec(stmt).all()
+
+
+# =========================
+# Update
+# =========================
+
+
 async def add_topic_to_question(
     question_id: str,
     topic_name: str,
     session: SessionDep,
 ) -> Question:
+    """Attach a Topic (creating if necessary) to a Question."""
     # normalize inputs
     name = (topic_name or "").strip()
     if not name:
@@ -124,144 +282,6 @@ async def add_topic_to_question(
     return question
 
 
-async def get_question_topics(session: SessionDep, question_id: str) -> list[str]:
-    qid: UUID = get_question_id_UUID(question_id)
-
-    stmt = (
-        select(Question)
-        .options(selectinload(Question.topics))  # eager-load topics # type: ignore
-        .where(Question.id == qid)
-    )
-    question = session.exec(stmt).first()
-    if not question:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Question not found"
-        )
-
-    return [t.name for t in question.topics]  # or return question.topics
-
-
-# Getting Methods
-async def get_question_qmeta(question_id: str, session: SessionDep):
-    question_uuid = get_question_id_UUID(question_id)
-    result = session.exec(
-        select(File)
-        .where(File.question_id == question_uuid)
-        .where(File.filename == "qmeta.json")
-    ).first()
-
-    # Checking to see if there is any content
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Question has no qmeta"
-        )
-    if result.content is None or (
-        isinstance(result.content, str) and not result.content.strip()
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="qmeta.json exists but has no content.",
-        )
-
-    try:
-        raw: Union[dict, list]
-        if isinstance(result.content, (dict, list)):
-            raw = result.content
-        elif isinstance(result.content, str):
-            raw = json.loads(result.content)
-        else:
-            # Unexpected type (e.g., bytes)
-            raise HTTPException(
-                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=f"Unsupported content type for qmeta.json: {type(result.content).__name__}",
-            )
-    except JSONDecodeError as e:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Invalid JSON in qmeta.json: {e.msg} at pos {e.pos}",
-        )
-    try:
-        qmeta = QuestionMetaNew(**raw)  # type: ignore
-    except ValidationError as e:
-        # Return Pydantic errors cleanly
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"message": "qmeta failed validation", "errors": e.errors()},
-        )
-
-    return qmeta
-
-
-async def add_question_and_files(
-    question: Question, files: dict[str, Union[str, dict]], session: SessionDep
-) -> Question:
-    question = await add_question(question, session)
-    for filename, contents in files.items():
-        if isinstance(contents, (dict, list)):
-            contents = json.dumps(contents)
-
-            file_obj = File(
-                filename=filename, content=contents, question_id=question.id
-            )
-
-            await add_file(file_obj, session)
-    return question
-
-
-async def get_all_questions(
-    session: SessionDep,
-    offset: int = 0,
-    limit: int = 100,
-):
-    results = session.exec(select(Question).offset(offset).limit(limit)).all()
-    return results
-
-
-async def filter_questions(session: SessionDep, qfilter: QuestionDict):
-    filters = []
-    for key, value in qfilter.items():
-        logger.debug("Filter: %s = %r", key, value)
-
-        col = getattr(Question, key, None)
-        if not col or value in (None, "", []):
-            continue
-
-        # For not full search just alike
-        if key == "title":
-            vals = value if isinstance(value, (list, tuple, set)) else [value]
-            filters.append(or_(*[Question.title.ilike(f"%{v}%") for v in vals if v]))  # type: ignore
-            continue
-        # handle cases where there is a list
-        if isinstance(value, (list, tuple, set)):
-            filters.append(or_(*[col == v for v in value]))
-            logger.debug("Value %s", value)
-        else:
-            filters.append(col == value)
-
-    stmt = select(Question)
-    if filters:
-        stmt = stmt.where(*filters)  # AND across keys, OR within each key
-    return session.exec(stmt).all()
-
-
-async def delete_question(question_id: str | UUID, session: SessionDep):
-    question_uuid = get_question_id_UUID(question_id)
-    result = session.exec(select(Question).where(Question.id == question_uuid)).first()
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Question not found"
-        )
-    title = result.title
-    try:
-        session.delete(result)
-        session.commit()
-    except SQLAlchemyError as e:
-        session.rollback()
-        raise HTTPException(status_code=500, detail="Could not delete question") from e
-
-    return {"detail": f"Question '{title}' deleted", "id": str(question_id)}
-
-
 async def update_file(
     question_id: str,
     filename: str,
@@ -271,6 +291,7 @@ async def update_file(
     """Update a file's content for a given question. Returns the updated row."""
     if not filename or not filename.strip():
         raise HTTPException(status_code=400, detail="Filename is required")
+
     question_uuid = get_question_id_UUID(question_id)
 
     # Fetch the content
@@ -291,6 +312,7 @@ async def update_file(
 
     # Make changes
     file_obj.content = newcontent
+
     # Commit & refresh the *object*, not the value
     try:
         session.commit()
@@ -305,3 +327,110 @@ async def update_file(
         "new_content": newcontent,
         "question_id": str(file_obj.question_id),
     }
+
+
+# =========================
+# Delete
+# =========================
+
+
+async def delete_question(question_id: str | UUID, session: SessionDep):
+    """Delete a question by id."""
+    question_uuid = get_question_id_UUID(question_id)
+    result = session.exec(select(Question).where(Question.id == question_uuid)).first()
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Question not found"
+        )
+
+    title = result.title
+    try:
+        session.delete(result)
+        session.commit()
+    except SQLAlchemyError as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail="Could not delete question") from e
+
+    return {"detail": f"Question '{title}' deleted", "id": str(question_id)}
+
+
+# =========================
+# Composite Ops
+# =========================
+
+
+async def add_question_and_files(
+    question: Question, files: dict[str, Union[str, dict]], session: SessionDep
+) -> Question:
+    """Create a question and (conditionally) add files."""
+    question = await add_question(question, session)
+    for filename, contents in files.items():
+        if isinstance(contents, (dict, list)):
+            contents = json.dumps(contents)
+
+            file_obj = File(
+                filename=filename, content=contents, question_id=question.id
+            )
+
+            await add_file(file_obj, session)
+    return question
+
+
+# Running Questions
+async def run_server(
+    question_id: Union[str, UUID],
+    code_language: Literal["python", "javascript"],
+    session: SessionDep,
+):
+    mapping_db = {"python": "server_py", "javascript": "server_js"}
+    mapping_filename = {"python": "server.py", "javascript": "server.js"}
+
+    if (isinstance, str):
+        question_id = get_question_id_UUID(question_id)
+
+    # Validate language
+    if code_language not in mapping_db:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Unsupported code language"
+        )
+    server_file = await get_question_file(
+        question_id, mapping_db[code_language], session
+    )
+    server_content = server_file.content
+    if server_content is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Server file content is empty"
+        )
+    if isinstance(server_content, (dict, list)):
+        try:
+            server_content = json.dumps(server_content)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to serialize server content: {e}",
+            )
+    elif not isinstance(server_content, str):
+        server_content = str(server_content)
+    # Write to a temp file and execute
+    try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            file_path = Path(tmpdir) / mapping_filename[code_language]
+            file_path.write_text(server_content, encoding="utf-8")
+            logger.debug("Executing server code at %s", file_path)
+
+            try:
+                output = run_generate(str(file_path), isTesting=False)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Execution error: {e}",
+                )
+
+            return output
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error: {e}",
+        )

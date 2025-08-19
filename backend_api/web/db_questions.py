@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import tempfile
 from pathlib import Path
-from typing import Any, List, Literal
+from typing import Any, List, Literal, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -50,9 +50,16 @@ async def get_question_qmeta(
     return await service.get_question_qmeta(question_id, session)
 
 
+@router.get("/get_question/{question_id}/file/{filename}")
+async def get_question_file(
+    question_id: str, filename: str, session=Depends(get_session)
+):
+    return await service.get_question_file(question_id, filename, session)
+
+
 @router.post("/run_server/{question_id}/{code_language}")
 async def run_server(
-    question_id: UUID,
+    question_id: Union[str, UUID],
     code_language: Literal["python", "javascript"],
     session=Depends(get_session),
 ):
@@ -60,69 +67,7 @@ async def run_server(
     Load stored server code for the given question & language, write to a temp file,
     run via `run_generate`, and return the result.
     """
-    mapping_db = {"python": "server_py", "javascript": "server_js"}
-    mapping_filename = {"python": "server.py", "javascript": "server.js"}
-
-    # Validate language
-    if code_language not in mapping_db:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Unsupported code language"
-        )
-
-    # Fetch the file row
-    stmt = (
-        select(File)
-        .where(File.question_id == question_id)
-        .where(File.filename == mapping_db[code_language])
-    )
-    row = session.exec(stmt).first()
-    if row is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Server file not found for the given question/language",
-        )
-
-    # Normalize content to a string
-    content = row.content
-    if content is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Server file content is empty"
-        )
-
-    if isinstance(content, (dict, list)):
-        try:
-            content = json.dumps(content)
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to serialize server content: {e}",
-            )
-    elif not isinstance(content, str):
-        content = str(content)
-
-    # Write to a temp file and execute
-    try:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            file_path = Path(tmpdir) / mapping_filename[code_language]
-            file_path.write_text(content, encoding="utf-8")
-            logger.debug("Executing server code at %s", file_path)
-
-            try:
-                output = run_generate(str(file_path), isTesting=False)
-            except Exception as e:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=f"Execution error: {e}",
-                )
-
-            return output
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error: {e}",
-        )
+    return await coreDb_service.run_server(question_id, code_language, session)
 
 
 # ------------------------- Run Test (kept & implemented) ------------------------- #
