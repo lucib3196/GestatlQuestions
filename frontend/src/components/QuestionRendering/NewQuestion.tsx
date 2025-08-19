@@ -9,7 +9,8 @@ import { useQuestionMeta } from "./utils/fetchQuestionMetadata";
 import { useAdaptiveParams } from "./utils/useAdaptiveParams";
 import useQuestionRender from "./utils/useQuestionRender";
 
-import { QuestionPanel, QuestionInfo } from "./QuestionPanel";
+import { QuestionPanel } from "./QuestionPanel";
+import QuestionInfo from "./QuestionInfo";
 import { SolutionPanel } from "./SolutionPanel";
 import {
     SubmitAnswerButton,
@@ -84,7 +85,7 @@ export function NewQuestion() {
     }, [refetchQmeta, refetchParams]);
 
 
-    
+
 
     // Loading / Error states
     if (qLoading) return <div>Loading question…</div>;

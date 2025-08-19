@@ -106,7 +106,7 @@ function NavBar() {
                   {navigation.map((item) =>
                     item.dropdown ? (
                       <Menu key={item.name}>
-                        <MenuButton className="flex items-center text-white space-x-1">
+                        <MenuButton className="flex items-center text text-lg text-white space-x-1">
                           <span>{item.name}</span>
                           <ChevronDownIcon className="h-4 w-4 fill-white/60" />
                         </MenuButton>
@@ -119,7 +119,7 @@ function NavBar() {
                             <MenuItem key={ditem.name}>
                               <Link
                                 to={ditem.href}
-                                className={`block px-3 py-2 rounded-md hover:bg-white/10 `}
+                                className={`block px-3 py-2 rounded-md hover:bg-white/10 text-white`}
                               >
                                 {ditem.name}
                               </Link>
@@ -160,7 +160,7 @@ function NavBar() {
               <DisclosureButton key={item.name} as={Link} to={item.href}>
                 <span
                   className={
-                    "block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                    "block text-white rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
                   }
                 >
                   {item.name}

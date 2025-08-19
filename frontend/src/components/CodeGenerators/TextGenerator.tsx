@@ -3,7 +3,7 @@ import ModGenerators from "./BaseTemplate";
 import PopUpHelp from "../PopUpHelp";
 import api from "../../api";
 import { toast } from 'react-toastify';
-import { useState} from "react";
+import { useState } from "react";
 
 // Examples for the input container
 const examples = [

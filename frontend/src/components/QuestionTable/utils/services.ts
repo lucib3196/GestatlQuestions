@@ -67,7 +67,7 @@ export async function deleteQuestions(ids: string[]): Promise<void> {
   await Promise.all(
     ids.map((id) =>
       api.post("/db_questions/delete_question", null, {
-        params: { download_args: id },
+        params: { question_id: id },
       })
     )
   );

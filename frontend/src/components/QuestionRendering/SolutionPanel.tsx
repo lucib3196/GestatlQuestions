@@ -1,7 +1,10 @@
 import { MathJax } from "better-react-mathjax";
 import type { ReactNode } from "react";
 import Markdown from "react-markdown";
-
+import remarkBreaks from 'remark-breaks'
+import remarkGfm from 'remark-gfm'
+import rehypeRaw from "rehype-raw";
+import rehypeMathjax from "rehype-mathjax";
 type SolutionPanelProps = {
     title?: string;
     subtitle?: string;
@@ -10,6 +13,8 @@ type SolutionPanelProps = {
 
 export function SolutionPanel({ title = "Solution", subtitle, solution }: SolutionPanelProps) {
     if (!solution?.length) return null;
+
+    console.log("This is the solutio", solution)
 
     return (
         <section className="mx-auto my-10 w-full max-w-3xl rounded-2xl border border-gray-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
@@ -29,24 +34,27 @@ export function SolutionPanel({ title = "Solution", subtitle, solution }: Soluti
                         </div>
 
                         {/* Content */}
-                        <MathJax>
-                            <div className="min-w-0 flex-1">
+
+                        <div className="min-w-0 flex-1">
+                            <MathJax>
                                 <div className="prose prose-indigo max-w-none text-gray-800">
                                     {typeof value === "string" ? (
                                         // supports **bold**, _italics_, `code`, lists, etc.
-                                        <Markdown
+                                        <Markdown remarkPlugins={[remarkGfm, remarkBreaks]}
+                                            rehypePlugins={[rehypeRaw, rehypeMathjax]}
                                             components={{
                                                 p: ({ children }) => <p className="m-0 whitespace-pre-line">{children}</p>,
                                             }}
                                         >
-                                            {value}
+                                            {value.trim()}
                                         </Markdown>
                                     ) : (
                                         value
                                     )}
                                 </div>
-                            </div>
-                        </MathJax>
+                            </MathJax>
+                        </div>
+
                     </li>
                 ))}
             </ol>
