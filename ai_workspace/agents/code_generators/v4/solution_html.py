@@ -19,7 +19,7 @@ client = Client()
 # ────────────────────────────────────────────────────────────────────────────────
 # Constants
 # ────────────────────────────────────────────────────────────────────────────────
-FASTLLM = "gpt-4o-mini"
+FASTLLM = "gpt-5-mini"
 LONGCONTEXTLLM = "o3-mini-2025-01-31"
 TAG_VECTOR_STORE_PATH = r"ai_workspace\vectorstores\QUESTIONTAG_VS"
 QUESTION_VECTOR_STORE_PATH = r"ai_workspace\vectorstores\QUESTIONMOD_VS"
@@ -288,8 +288,8 @@ workflow.add_node("clean_up_file", clean_up_file)
 workflow.add_edge(START, "generate_search_queries")
 workflow.add_edge("generate_search_queries", "retrieve_tag_info")
 workflow.add_edge("retrieve_tag_info", "generate_solution_file")
-workflow.add_edge("generate_solution_file", "clean_up_file")
-workflow.add_edge("clean_up_file", END)
+workflow.add_edge("generate_solution_file", END)
+# workflow.add_edge("clean_up_file", END)
 
 app = workflow.compile()
 

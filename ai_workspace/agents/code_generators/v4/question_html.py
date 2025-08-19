@@ -304,13 +304,12 @@ workflow = StateGraph(State)
 workflow.add_node("generate_search_queries", generate_queries)
 workflow.add_node("retrieve_tag_info", retrieve_tag_info)
 workflow.add_node("generate_question_file", generate_question_file)
-workflow.add_node("clean_up_file", clean_up_file)
+# workflow.add_node("clean_up_file", clean_up_file)
 
 workflow.add_edge(START, "generate_search_queries")
 workflow.add_edge("generate_search_queries", "retrieve_tag_info")
 workflow.add_edge("retrieve_tag_info", "generate_question_file")
-workflow.add_edge("generate_question_file", "clean_up_file")
-workflow.add_edge("clean_up_file", END)
+workflow.add_edge("generate_question_file", END)
 app = workflow.compile()
 
 

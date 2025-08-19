@@ -23,7 +23,7 @@ LONGCONTEXTLLM = "o3-mini-2025-01-31"
 fast_llm = ChatOpenAI(model=FASTLLM)
 long_context = ChatOpenAI(model=LONGCONTEXTLLM)
 
-MAX_ITERATIONS = 3
+MAX_ITERATIONS = 0
 
 
 # Helper

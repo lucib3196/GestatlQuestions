@@ -7,6 +7,7 @@ import os
 import shutil
 import tempfile
 from typing import List, Optional
+from fastapi import Body
 
 # Third-party
 from fastapi import (
@@ -46,13 +47,13 @@ router = APIRouter(prefix="/codegenerator")
 
 # Loads up directory and get all the questions
 class TextGenV4Input(BaseModel):
-    question: List[str]
-    question_title: Optional[str]
+    question_title: Optional[str] = None
+    question: str
 
 
-@router.post("/v4/text_gen/")  # response_model=CodeGenOutputState)
+@router.post("/v4/text_gen/")
 async def generate_question_v4(
-    data: TextGenV4Input,
+    data: List[TextGenV4Input] = Body(..., embed=True),
     current_user=Depends(user.get_current_user),
     session=Depends(get_session),
 ):
@@ -62,22 +63,38 @@ async def generate_question_v4(
         session=session,
     )
     if not user_id:
-        return HTTPException(
-            status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Must be logged in to use generation",
         )
 
-    results = await text_gen.ainvoke(InputState(text=data.question[0]))
-    state = IntermediateState.model_validate(results)
-    raw_list = state.code_results or []
-    code_results = raw_list if isinstance(raw_list, list) else [raw_list]
-    tasks = [
-        generated_code_repository.add_generated_db(
-            cr, user_id=user_id, title=data.question_title, session=session
-        )
-        for cr in code_results
-    ]
-    questions = await asyncio.gather(*tasks)
+    # 1) Run all extractions concurrently
+    extraction_results = await asyncio.gather(
+        *(text_gen.ainvoke(InputState(text=item.question)) for item in data)
+    )
+
+    # 2) Validate/normalize, collect DB-save tasks
+    save_tasks = []
+    for i, res in enumerate(extraction_results):
+        state = IntermediateState.model_validate(res)
+        raw_list = state.code_results or []
+        code_results = raw_list if isinstance(raw_list, list) else [raw_list]
+
+        title = (
+            data[i].question_title or ""
+        )  # may be None; pass through or set a default
+        for cr in code_results:
+            save_tasks.append(
+                generated_code_repository.add_generated_db(
+                    cr,
+                    user_id=user_id,
+                    title=title,
+                    session=session,
+                )
+            )
+
+    # 3) Save everything concurrently and return
+    questions = await asyncio.gather(*save_tasks)
     return questions
 
 
@@ -87,14 +104,13 @@ async def generate_question_image_v4(
     session=Depends(get_session),
     current_user=Depends(user.get_current_user),
 ):
-    logger.debug("This is the current user",current_user)
+    logger.debug("This is the current user", current_user)
     # Validate user data
     user_id = await user.get_user_by_name(
         username=current_user.username,
         email=current_user.email,
         session=session,
     )
-    
 
     if not user_id:
         return HTTPException(

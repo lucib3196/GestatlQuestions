@@ -17,7 +17,7 @@ client = Client()
 # ────────────────────────────────────────────────────────────────────────────────
 # Constants
 # ────────────────────────────────────────────────────────────────────────────────
-FASTLLM = "gpt-4o-mini"
+FASTLLM = "gpt-5-mini"
 LONGCONTEXTLLM = "o3-mini-2025-01-31"
 QUESTION_VECTOR_STORE_PATH = r"ai_workspace\vectorstores\QUESTIONMOD_VS"
 N_SEARCH_QUERIES = 3
