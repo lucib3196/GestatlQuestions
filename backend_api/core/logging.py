@@ -17,8 +17,8 @@ if not logger.handlers:
 logger.debug("Logger configured")
 
 
-# if __name__ == "__main__":
-#     logger.info("Info logging test")
-#     logger.warning("Warning logging test")
-#     logger.error("Error logging test")
-#     logger.exception(Exception("Exception logging test"))
+if __name__ == "__main__":
+    logger.info("Info logging test")
+    logger.warning("Warning logging test")
+    logger.error("Error logging test")
+    logger.exception(Exception("Exception logging test"))

@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"  # Authentication protocol
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30  # how long session info is retained
     DATABASE_URI: Optional[str] = None
-    AUTH_URL : str  = "/auth/login"
+    AUTH_URL: str = "/auth/login"
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
@@ -43,6 +43,8 @@ settings = Settings(
     BACKEND_CORS_ORIGINS=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://127.0.0.1:5172",
+        "http://localhost:5172",
     ],
     SECRET_KEY="secret_key_need_to_change",
 )

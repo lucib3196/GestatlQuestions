@@ -270,7 +270,7 @@ def route_solution_generation(state: CodeGenState) -> str:
     """
     Determines the next step after generating solution HTML.
     """
-    return "adaptive_code_review" if bool(state.is_adaptive) else END
+    return "adaptive_code_review" if bool(state.is_adaptive) else "finalize_package"
 
 
 def decide_to_modify(state: CodeGenState) -> str:

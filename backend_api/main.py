@@ -148,56 +148,6 @@ class Assign(BaseModel):
     reviewer_id: str
 
 
-# @app.post("/questions/", response_model=dict)
-# async def create_question(q: Question):
-#     bucket = storage.bucket()
-#     blob = bucket.blob("question.html")
-#     blob.upload_from_string("some content")
-#     qid = str(uuid.uuid4())
-#     blob.make_public()
-
-#     doc = {
-#         "id": qid,
-#         "title": q.title,
-#         "files": {"filename": "question.html", "url": blob.public_url},
-#         "content_url": q.content_url,
-#         "status": "unassigned",
-#         "assigned_to": None,
-#         "versions": [],
-#     }
-#     db.collection("questions").document(qid).set(doc)
-#     return {"id": qid, "status": "unassigned"}
-
-
-# @app.post("/questions/{qid}/edit")
-# async def edit_questions(qid: str):
-#     doc_ref = db.collection("questions").document(qid)
-#     doc = doc_ref.get()
-#     if not doc.exists:
-#         raise HTTPException(404, "Question not Found")
-#     data = doc
-#     print(data)
-#     return {"files": data}
-
-
-# @app.post("/questions/{qid}/assing")
-# async def assign_question(qid: str, a: Assign):
-#     doc_ref = db.collection("questions").document(qid)
-#     doc = doc_ref.get()
-#     if not doc.exists:
-#         raise HTTPException(404, "Question not Found")
-#     doc_ref.update({"assigned_to": a.reviewer_id, "status": "assigned"})
-#     return {"id": qid, "assigned_to": a.reviewer_id}
-
-
-# @app.post("/upload_file")
-# async def create_upload_file(file: UploadFile):
-#     bucket = storage.bucket()
-#     blob = bucket.blob(f"folder/{file.filename}")
-#     content = await file.read()
-#     blob.upload_from_string(content, content_type=file.content_type)  # type: ignore
-#     print("✅ File uploaded!")
-#     return {"filename": file.filename}
 
 
 def main():

@@ -105,7 +105,7 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = generate_token(username=token.username)
-    logger.info("Login Complete", access_token)
+    logger.info("Login Complete %s", access_token)
     return token_model.Token(access_token=access_token, token_type="bearer")
 
 
