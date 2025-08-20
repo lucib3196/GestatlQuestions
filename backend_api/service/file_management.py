@@ -30,10 +30,13 @@ async def validate_file(file: UploadFile) -> UploadFile:
     return file
 
 
-async def upload_file(file: UploadFile):
+async def upload_file(files: List[UploadFile]):
+    data = {}
     try:
-        file = await validate_file(file)
-        return {file: file.filename}
+        for f in files:
+            f = await validate_file(f)
+            data[f.filename] = "ok"
+        return data
     except Exception as e:
         raise HTTPException(status_code=400, detail=e)
 
@@ -48,6 +51,3 @@ async def upload_folder(files: List[UploadFile]):
         with open(filepath, "wb") as f:
             f.write(contents)
     return {"message": f"Uploaded {len(files)} files successfully"}
-
-
-

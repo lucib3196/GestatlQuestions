@@ -6,9 +6,9 @@ from backend_api.service import file_management as file_service
 router = APIRouter(prefix="/file")
 
 
-@router.post("/upload_file")
-async def upload_file(file: UploadFile):
-    return await file_service.upload_file(file)
+@router.post("/upload_files")
+async def upload_file(files: List[UploadFile]):
+    return await file_service.upload_file(files)
 
 
 @router.post("/upload_folder")

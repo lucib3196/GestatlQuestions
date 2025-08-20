@@ -22,12 +22,12 @@ export function UploadFileModal({ setShowModal }: UploadFileModalProps) {
 
         const formData = new FormData();
         for (let i = 0; i < fileList.length; i++) {
-            formData.append("file", fileList[i]);
+            formData.append("files", fileList[i]);
         }
 
         try {
             const response = await api.post(
-                `/local_questions/upload_file/${selectedQuestion}`,
+                `/file/upload_file`,
                 formData,
                 {
                     headers: {

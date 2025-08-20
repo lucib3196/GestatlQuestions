@@ -1,18 +1,13 @@
-from __future__ import annotations
-
 from typing import List, Optional, Union, Literal, TypedDict
 from uuid import UUID, uuid4
 from ai_workspace.agents.question_to_json.models import QuestionBase, Solution
 from sqlalchemy import Boolean, JSON, Column, text
-from sqlalchemy.orm import (
-    relationship as sa_relationship,
-)
+
 from sqlmodel import SQLModel, Field, Relationship
 from pydantic import BaseModel, Field as PydanticField
 
+
 # ----- Pydantic models -----
-
-
 class CodeLanguage(BaseModel):
     language: Literal["python", "javascript"]
 
@@ -54,54 +49,93 @@ class File(SQLModel, table=True):
 
 
 # Association table for many-to-many
-class QuestionTopic(SQLModel, table=True):
+class QuestionTopicLink(SQLModel, table=True):
+    __tablename__ = "question_topic_link"  # type: ignore
     question_id: UUID = Field(foreign_key="question.id", primary_key=True, index=True)
     topic_id: UUID = Field(foreign_key="topic.id", primary_key=True, index=True)
 
 
+class QuestionLanguageLink(SQLModel, table=True):
+    __tablename__ = "question_language_link"  # type: ignore
+    question_id: UUID = Field(foreign_key="question.id", primary_key=True, index=True)
+    language_id: UUID = Field(foreign_key="language.id", primary_key=True, index=True)
+
+
+class QuestionQTypeLink(SQLModel, table=True):
+    __tablename__ = "question_qtype_link"  # type: ignore
+    question_id: UUID = Field(foreign_key="question.id", primary_key=True, index=True)
+    qtype_id: UUID = Field(foreign_key="qtype.id", primary_key=True, index=True)
+
+
+# -------------Modesl--------------
+
+
 class Question(SQLModel, table=True):
+    __tablename__ = "question"  # type: ignore
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
 
     title: Optional[str] = None
     ai_generated: Optional[bool] = None
 
-    # SQLite default TRUE -> "1" ; Postgres -> "true"
     isAdaptive: bool = Field(
         default=True,
         sa_column=Column(Boolean, nullable=False, server_default=text("1")),
     )
 
-    language: Optional[List[Literal["python", "javascript"]]] = Field(
-        default=None, sa_column=Column(JSON)
-    )
-    qtype: Optional[List[Literal["numeric", "multiple_choice"]]] = Field(
-        default=None, sa_column=Column(JSON)
-    )
-
     createdBy: Optional[str] = None
     user_id: Optional[int] = Field(foreign_key="user.id")
 
-    topics: list["Topic"] = Relationship(
-        sa_relationship=sa_relationship(
-            "Topic",
-            secondary=QuestionTopic.__table__,  # type: ignore
-            back_populates="questions",
-        )
+    # Relationships
+    topics: List["Topic"] = Relationship(
+        back_populates="questions",
+        link_model=QuestionTopicLink,
+    )
+
+    languages: List["Language"] = Relationship(
+        back_populates="questions",
+        link_model=QuestionLanguageLink,
+    )
+
+    qtypes: List["QType"] = Relationship(
+        back_populates="questions",
+        link_model=QuestionQTypeLink,
     )
 
 
 class Topic(SQLModel, table=True):
+    __tablename__ = "topic"  # type: ignore
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     name: str = Field(index=True, unique=True)
 
-    questions: list["Question"] = Relationship(
-        sa_relationship=sa_relationship(
-            "Question",
-            secondary=QuestionTopic.__table__,  # type: ignore
-            back_populates="topics",
-        )
+    questions: List["Question"] = Relationship(
+        back_populates="topics",
+        link_model=QuestionTopicLink,
+    )
+
+
+class Language(SQLModel, table=True):
+    __tablename__ = "language"  # type: ignore
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    name: str = Field(index=True, unique=True)
+
+    questions: List["Question"] = Relationship(
+        back_populates="languages",
+        link_model=QuestionLanguageLink,
+    )
+
+
+class QType(SQLModel, table=True):
+    __tablename__ = "qtype"  # type: ignore
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    name: str = Field(index=True, unique=True)
+
+    questions: List["Question"] = Relationship(
+        back_populates="qtypes",
+        link_model=QuestionQTypeLink,
     )
 
 

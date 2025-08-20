@@ -342,15 +342,20 @@ async def delete_question(question_id: str | UUID, session: SessionDep):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Question not found"
         )
-
+    file_results = session.exec(
+        select(File).where(File.question_id == question_uuid)
+    ).all()
     title = result.title
     try:
         session.delete(result)
+        if file_results:
+            for f in file_results:
+                session.delete(f)
+
         session.commit()
     except SQLAlchemyError as e:
         session.rollback()
         raise HTTPException(status_code=500, detail="Could not delete question") from e
-
     return {"detail": f"Question '{title}' deleted", "id": str(question_id)}
 
 

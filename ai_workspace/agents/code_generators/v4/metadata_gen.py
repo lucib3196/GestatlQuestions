@@ -60,7 +60,7 @@ def classify_question(state: MetadataInput) -> MetadataState:
 
 def classify_question_topic(state: MetadataInput) -> MetadataState:
     topics = topic_classifier.invoke({"question": state.question})  # type: ignore
-    return {"topic": topics.get("topic_classification_result").topics}  # type: ignore
+    return {"topic": topics.get("topic_classification_result", []).topics}  # type: ignore
 
 
 def classify_question_courses(state: MetadataInput) -> MetadataState:

@@ -17,12 +17,7 @@ function CreateFileModal({ showModal }: CreateFileProps) {
     const { selectedQuestion } = useContext(RunningQuestionSettingsContext)
     const handleSubmit = async () => {
         try {
-            const response = await api.post("/local_questions/create_file/", {
-                title: selectedQuestion,
-                filename: fileName,
-                newcontent: ""
-            });
-            console.log(response.data);
+            console.log("Submitted File")
             showModal(false); // Optionally close modal on success
         } catch (error) {
             console.error("Error creating file:", error);

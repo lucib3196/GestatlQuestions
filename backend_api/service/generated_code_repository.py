@@ -1,11 +1,8 @@
 # Standard library
-import json
 from typing import Any, Optional
 
 # Third-party
 from fastapi import HTTPException
-from sqlalchemy.exc import IntegrityError
-from sqlmodel import select
 from starlette import status
 
 # Local
@@ -14,9 +11,15 @@ from ai_workspace.agents.code_generators.v4_5.main_text import (
 )
 from ai_workspace.utils import to_serializable
 from backend_api.data.database import SessionDep
-from backend_api.model.questions_models import File, Question, Topic
+from backend_api.model.questions_models import File, Question
 from backend_api.service import db_question as core_db
-from backend_api.utils.utils import _normalize_topic_name, to_bool
+from backend_api.utils.utils import normalize_name, to_bool
+from backend_api.service import (
+    get_or_create_language,
+    get_or_create_Qtype,
+    get_or_create_topic,
+)
+from typing import Any
 
 
 async def add_generated_db(
@@ -30,10 +33,8 @@ async def add_generated_db(
 
     question_obj = Question(
         user_id=user_id,
-        qtype=cr.qmeta.qtype,
         title=title or cr.qmeta.title,
         isAdaptive=is_adaptive,
-        language=cr.qmeta.language,
         ai_generated=True,
     )
 
@@ -66,31 +67,36 @@ async def add_generated_db(
 
     # Add topics
     raw_topics = cr.qmeta.topic or []
-    norm_names = {n for n in (_normalize_topic_name(t) for t in raw_topics) if n}
-    if norm_names:
-        existing = session.exec(select(Topic).where(Topic.name.in_(norm_names))).all()  # type: ignore
-        by_name = {t.name: t for t in existing}
+    norm_topics = {n for n in (normalize_name(t) for t in raw_topics) if n}
+    if getattr(question, "topics", None) is None:
+        question.topics = []
+    if norm_topics:
+        for n in norm_topics:
+            topic, existing = await get_or_create_topic(session, n)
+            question.topics.append(topic)
 
-        # Gets topics that are not yet in the database
-        missing = [n for n in norm_names if n not in by_name]
-        for name in missing:
-            t = Topic(name=name)
-            session.add(t)
-            try:
-                session.flush()  # get ID without full commit
-            except IntegrityError:
-                session.rollback()
-                t = session.exec(select(Topic).where(Topic.name == name)).one()
-            by_name[name] = t
-        if getattr(question, "topics", None) is None:
-            question.topics = []
+    # Add the languages
+    raw_langauges = cr.qmeta.language or []
+    norm_languages = {n for n in (normalize_name(l) for l in raw_langauges) if n}
+    if getattr(question, "languages", None) is None:
+        question.languages = []
+    if norm_languages:
+        for l in norm_languages:
+            language, existing = await get_or_create_language(session, l)
+            question.languages.append(language)
 
-        existing_ids = {t.id for t in question.topics}
-        to_add = [t for t in by_name.values() if t.id not in existing_ids]
-        if to_add:
-            question.topics.extend(to_add)
-            session.add(question)
+    raw_qtypes = cr.qmeta.qtype or []
+    norm_qtypes = {n for n in (normalize_name(l) for l in raw_qtypes) if n}
 
+    # Add qtypes
+    if getattr(question, "qtypes", None) is None:
+        question.qtypes = []
+    if norm_qtypes:
+        for n in norm_qtypes:
+            qtype, existing = await get_or_create_Qtype(session, n)
+            question.qtypes.append(qtype)
+
+    session.add(question)
     session.commit()
-    session.refresh(question, attribute_names=["topics"])
+    session.refresh(question)
     return question

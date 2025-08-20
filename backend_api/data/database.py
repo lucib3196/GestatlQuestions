@@ -2,7 +2,7 @@ import os
 from typing import Generator,Annotated
 from fastapi import Depends
 from sqlmodel import SQLModel, Session, create_engine
-from sqlmodel.ext.asyncio.session import AsyncSession
+
 
 
 # SetUp

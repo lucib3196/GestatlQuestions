@@ -21,7 +21,7 @@ def to_bool(v: Any, *, default: bool | None = None) -> bool:
             return False
     raise ValueError(f"Cannot interpret {v!r} as boolean")
 
-def _normalize_topic_name(name: Optional[str]) -> Optional[str]:
+def normalize_name(name: Optional[str]) -> Optional[str]:
     if not name:
         return None
     s = name.strip()

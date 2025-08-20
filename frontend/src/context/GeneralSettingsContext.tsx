@@ -13,14 +13,14 @@ type GeneralSettingsContextType = {
 
 // Create context with default values
 export const QuestionSettingsContext = createContext<GeneralSettingsContextType>({
-    renderingSettings: "new",
+    renderingSettings: "legacy",
     setRenderingSettings: () => { },
     codeRunningSettings: "javascript",
     setCodeRunningSettings: () => { },
 });
 
 const QuestionSettingsProvider = ({ children }: { children: React.ReactNode }) => {
-    const [renderingSettings, setRenderingSettings] = useState<RenderingType>("new");
+    const [renderingSettings, setRenderingSettings] = useState<RenderingType>("legacy");
     const [codeRunningSettings, setCodeRunningSettings] = useState<CodeRunningType>("javascript");
 
     return (

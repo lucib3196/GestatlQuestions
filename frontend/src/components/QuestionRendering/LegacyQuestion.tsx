@@ -23,8 +23,6 @@ import {
     ShowSolutionStep,
 } from "../Buttons";
 import showCorrectAnswer from "./utils/formatCorrectAnswersLegacy";
-import Markdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
 
 type ChoiceParams = { fracQuestions: [number, number] };
 const CHOICE_PARAMS: ChoiceParams = { fracQuestions: [1.0, 1.0] };
@@ -49,14 +47,21 @@ export function LegacyQuestion() {
         reset: refetchQmeta,
     } = useQuestionMeta(selectedQuestion);
 
-    const isAdaptive = useMemo(() => trueish(question?.isAdaptive), [question?.isAdaptive]);
+    const isAdaptive = useMemo(
+        () => trueish(question?.isAdaptive),
+        [question?.isAdaptive]
+    );
 
     const {
         params,
         loading: pLoading,
         error: pError,
         reset: refetchParams,
-    } = useAdaptiveParams(selectedQuestion ?? null, codeRunningSettings, isAdaptive);
+    } = useAdaptiveParams(
+        selectedQuestion ?? null,
+        codeRunningSettings,
+        isAdaptive
+    );
 
     // Build HTML + solution when inputs change
     useEffect(() => {
@@ -76,16 +81,12 @@ export function LegacyQuestion() {
                 const replacedQ = applyPlaceHolders(rawHtml, params);
                 const replacedS = applyPlaceHolders(rawSolution, params);
 
-                console.log("This is the replaced params", replacedS)
-
-                // Feed both params and correct_answers to the PL processor
-
                 const [{ htmlString: qStr }, { solutionsStrings: sStr }] = [
                     processPrairielearnTags(replacedQ, params, "", "", CHOICE_PARAMS),
                     processPrairielearnTags(replacedS, params, "", "", CHOICE_PARAMS),
                 ];
 
-                console.log("This is the solution", Object.values(sStr ?? {}))
+                console.log("This is the solution", Object.values(sStr ?? {}));
 
                 if (!ignore) {
                     setQuestionHtml(qStr);
@@ -138,11 +139,12 @@ export function LegacyQuestion() {
     }, [refetchParams]);
 
     // Loading
-    if (qLoading && !question) {
+    if ((qLoading && !question) || (isAdaptive && !params)) {
         return (
             <div className="max-w-5xl mx-auto my-8 px-4">
                 <div className="space-y-3">
                     <div className="h-4 w-1/2 rounded bg-slate-200 animate-pulse" />
+                    Loading
                     <div className="h-24 w-full rounded bg-slate-200 animate-pulse" />
                 </div>
             </div>
@@ -173,17 +175,26 @@ export function LegacyQuestion() {
                         {/* Alerts */}
                         <div className="mt-3 space-y-2">
                             {pLoading && (
-                                <div className="rounded-lg border border-blue-200 bg-blue-50 text-blue-900 p-3 text-sm" aria-live="polite">
+                                <div
+                                    className="rounded-lg border border-blue-200 bg-blue-50 text-blue-900 p-3 text-sm"
+                                    aria-live="polite"
+                                >
                                     Loading parameters…
                                 </div>
                             )}
                             {pError && (
-                                <div className="rounded-lg border border-amber-200 bg-amber-50 text-amber-900 p-3 text-sm" aria-live="polite">
+                                <div
+                                    className="rounded-lg border border-amber-200 bg-amber-50 text-amber-900 p-3 text-sm"
+                                    aria-live="polite"
+                                >
                                     Parameters failed to load; showing last known values.
                                 </div>
                             )}
                             {variantError && (
-                                <div className="rounded-lg border border-red-200 bg-red-50 text-red-900 p-3 text-sm" aria-live="polite">
+                                <div
+                                    className="rounded-lg border border-red-200 bg-red-50 text-red-900 p-3 text-sm"
+                                    aria-live="polite"
+                                >
                                     {variantError}
                                 </div>
                             )}
@@ -199,7 +210,9 @@ export function LegacyQuestion() {
                         <div className="mt-6 bg-white border border-slate-200 rounded-xl shadow-sm p-4">
                             <div className="flex flex-wrap items-center gap-3 justify-center">
                                 <form onSubmit={handleSubmit}>
-                                    <SubmitAnswerButton disabled={isSubmitted || pLoading || variantLoading} />
+                                    <SubmitAnswerButton
+                                        disabled={isSubmitted || pLoading || variantLoading}
+                                    />
                                 </form>
 
                                 <ResetQuestionButton
