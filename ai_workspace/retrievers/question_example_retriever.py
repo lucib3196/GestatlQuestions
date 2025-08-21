@@ -4,7 +4,7 @@ from langchain_community.vectorstores import FAISS
 from typing import Optional, List
 from langchain_core.documents import Document
 from ai_workspace.utils import validate_columns
-
+from langchain_core.prompts import ChatPromptTemplate
 
 class SemanticExamplesCSV:
     """
@@ -53,6 +53,7 @@ class SemanticExamplesCSV:
         self.search_kwargs = search_kwargs or {}
 
         self.validate()
+
 
     def set_filter(self, filter_kwargs: dict):
         self.filter = filter_kwargs or {}
@@ -141,7 +142,7 @@ class SemanticExamplesCSV:
             print(f"Input:  {input_ex}\nOutput: {output_ex}")
             print("-" * 120)
 
-    def format_template(self, query: str, k: int = 2, base_template: str = "") -> str:
+    def format_template(self, query: str, k: int = 2, base_template: str = "") -> ChatPromptTemplate:
         """
         Formats the extracted examples for the given query and returns them as a string,
         delimited for clarity.
@@ -169,7 +170,7 @@ class SemanticExamplesCSV:
             + f"\n: The new input: {query.replace(r"{", r"{{").replace(r"}", r"}}")}"
         )
 
-        return template
+        return template # type: ignore
 
     def remove_empty_values(self):
         self.df = self.df.dropna(subset=self.column_names)

@@ -9,6 +9,7 @@ from IPython.display import Image, display
 from langgraph.graph import StateGraph
 from pydantic import BaseModel
 import pandas as pd
+from langchain_core.messages import SystemMessage
 
 def save_graph_visualization(
     graph: StateGraph,
@@ -176,3 +177,24 @@ def validate_columns(df: pd.DataFrame, columns: list[str]):
     if invalid_columns:
         return False
     return True
+
+def inject_message(messages, content: str):
+    last_msg_index = max(
+        (i for i, m in enumerate(messages) if isinstance(m, SystemMessage)), default=1
+    )
+    insert_idx = last_msg_index + 1
+
+    messages = (
+        messages[:insert_idx] + [SystemMessage(content=content)] + messages[insert_idx:]
+    )
+    return messages
+
+
+def validate_llm_output(output: Any, model_class: type):
+    if isinstance(output, dict):
+        return model_class.parse_obj(output)
+    elif isinstance(output, model_class):
+        return output
+    else:
+        raise TypeError("Unexpected Result")
+

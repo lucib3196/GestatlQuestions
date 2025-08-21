@@ -12,7 +12,19 @@ from .question_html import app as question_html_chain, State as QHtmlState
 from .server_files import app as js_chain, app_py as py_chain, State as ServerStateInput
 from .solution_html import app as solution_chain, State as SolutionInputState
 from langchain_openai import ChatOpenAI
-from ai_workspace.utils import to_serializable, save_graph_visualization
+from ai_workspace.utils import (
+    to_serializable,
+    save_graph_visualization,
+    validate_llm_output,
+)
+
+
+from ai_workspace.agents.code_generators.v5 import (
+    JsServerState,
+    generate_js_app,
+    PyServerState,
+    generate_py_app,
+)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # Constants
@@ -124,7 +136,8 @@ def generate_server_js_file(state: CodeGenState) -> CodeGenState:
     Generates the server-side JavaScript file.
     """
     question_html = extract_question_html(state.files)
-    js_input = ServerStateInput(
+
+    js_input = JsServerState(
         original_question=state.question_payload.question,
         question_html=question_html,
         solution_guide=state.question_payload.solution_as_str,
@@ -135,8 +148,11 @@ def generate_server_js_file(state: CodeGenState) -> CodeGenState:
             else None
         ),
     )
-    result = js_chain.invoke(js_input)
-    updated_files = FilesData(server_js=result.get("server_file", ""))
+    result: JsServerState = validate_llm_output(
+        generate_js_app.invoke(js_input), JsServerState
+    )
+
+    updated_files = FilesData(server_js=result.server_file or "")
     return {"files": updated_files.model_dump()}  # type: ignore
 
 
@@ -145,7 +161,7 @@ def generate_server_py_file(state: CodeGenState) -> CodeGenState:
     Generates the server-side Python file.
     """
     question_html = extract_question_html(state.files)
-    py_input = ServerStateInput(
+    py_input = PyServerState(
         original_question=state.question_payload.question,
         question_html=question_html,
         solution_guide=state.question_payload.solution_as_str,
@@ -156,8 +172,10 @@ def generate_server_py_file(state: CodeGenState) -> CodeGenState:
             else None
         ),
     )
-    result = py_chain.invoke(py_input)
-    updated_files = FilesData(server_py=result.get("server_file", ""))
+    result: PyServerState = validate_llm_output(
+        generate_py_app.invoke(py_input), PyServerState
+    )
+    updated_files = FilesData(server_py=result.server_file or "")
     return {"files": updated_files.model_dump()}  # type: ignore
 
 
