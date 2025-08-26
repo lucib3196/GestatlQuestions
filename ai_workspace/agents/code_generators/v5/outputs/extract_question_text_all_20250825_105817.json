@@ -1,0 +1,146 @@
+[
+  {
+    "id": "ball_d_equals_vt_with_answer",
+    "input": "A ball travels at a constant speed of 10 m/s for a total time of 20 s. How much distance did the ball cover? The correct answer for the question is given by the equation d = v t, so for this question the answer will be 200 m.",
+    "chunks": [
+      {
+        "text": "A ball travels at a constant speed of 10 m/s for a total time of 20 s. How much distance did the ball cover? The correct answer for the question is given by the equation d = v t, so for this question the answer will be 200 m."
+      },
+      {
+        "text": "A ball travels at a constant speed of 10 m/s for a total time of 20 s. How much distance did the ball cover? The correct answer for the question is given by the equation d = v t, so for this question the answer will be 200 m.",
+        "questions": {
+          "questions": [
+            {
+              "question": "A ball travels at a constant speed of $10 \\ \\text{m/s}$ for a total time of $20 \\ \\text{s}$. How much distance did the ball cover? The correct answer for the question is given by the equation $d = v t$, so for this question the answer will be $200 \\ \\text{m}$.",
+              "params": [
+                {
+                  "name": "v",
+                  "value": "10",
+                  "units": "m/s"
+                },
+                {
+                  "name": "t",
+                  "value": "20",
+                  "units": "s"
+                }
+              ],
+              "correct_answers": [
+                {
+                  "name": "d",
+                  "value": "200",
+                  "units": "m"
+                }
+              ],
+              "source": null,
+              "requires_external_data": false,
+              "requires_image": false,
+              "completeness": true,
+              "additional_information": null,
+              "solution": {
+                "solution": [
+                  {
+                    "section_title": "Step 1: Use the distance formula",
+                    "description": "The distance is given by the relation $d = v t$.",
+                    "subsections": null
+                  },
+                  {
+                    "section_title": "Step 2: Substitute the given values",
+                    "description": "Substitute $v = 10\\ \\text{m/s}$ and $t = 20\\ \\text{s}$ to get $d = 10\\ \\text{m/s} \\times 20\\ \\text{s} = 200\\ \\text{m}$.",
+                    "subsections": null
+                  }
+                ],
+                "source": "user_provided"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "car_distance_parameters_only",
+    "input": "A car travels at speed v = 20 m/s for time t = 5 s. Compute the distance traveled.",
+    "chunks": [
+      {
+        "text": "A car travels at speed v = 20 m/s for time t = 5 s. Compute the distance traveled."
+      },
+      {
+        "text": "A car travels at speed v = 20 m/s for time t = 5 s. Compute the distance traveled.",
+        "questions": {
+          "questions": [
+            {
+              "question": "A car travels at speed $v = 20\\ \\mathrm{m/s}$ for time $t = 5\\ \\mathrm{s}$. Compute the distance traveled.",
+              "params": [
+                {
+                  "name": "v",
+                  "value": "20",
+                  "units": "m/s"
+                },
+                {
+                  "name": "t",
+                  "value": "5",
+                  "units": "s"
+                }
+              ],
+              "correct_answers": null,
+              "source": null,
+              "requires_external_data": false,
+              "requires_image": false,
+              "completeness": true,
+              "additional_information": null,
+              "solution": null
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "incline_symbols_units",
+    "input": "A block of mass m = 2 kg is on an incline of 30°. The friction coefficient is μ = 0.2. Use g = 9.81 m/s^2. Find the acceleration.",
+    "chunks": [
+      {
+        "text": "A block of mass m = 2 kg is on an incline of 30°. The friction coefficient is μ = 0.2. Use g = 9.81 m/s^2. Find the acceleration."
+      },
+      {
+        "text": "A block of mass m = 2 kg is on an incline of 30°. The friction coefficient is μ = 0.2. Use g = 9.81 m/s^2. Find the acceleration.",
+        "questions": {
+          "questions": [
+            {
+              "question": "A block of mass $m = 2\\ \\text{kg}$ is on an incline of $30^\\circ$. The friction coefficient is $\\mu = 0.2$. Use $g = 9.81\\ \\text{m/s}^2$. Find the acceleration.",
+              "params": [
+                {
+                  "name": "m",
+                  "value": "2",
+                  "units": "kg"
+                },
+                {
+                  "name": "incline_angle",
+                  "value": "30",
+                  "units": "°"
+                },
+                {
+                  "name": "\\mu",
+                  "value": "0.2",
+                  "units": null
+                },
+                {
+                  "name": "g",
+                  "value": "9.81",
+                  "units": "m/s^2"
+                }
+              ],
+              "correct_answers": null,
+              "source": null,
+              "requires_external_data": false,
+              "requires_image": false,
+              "completeness": true,
+              "additional_information": null,
+              "solution": null
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

@@ -34,7 +34,7 @@ export function useQuestionMeta(selectedQuestion?: string | null): any {
 
         const qData =
           typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-          console.log("This is the qdata", qData)
+        console.log("This is the qdata", qData);
         setData(qData);
       } catch (error: any) {
         if (error?.name !== "CanceledError") {

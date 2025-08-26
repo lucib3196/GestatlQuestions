@@ -6,7 +6,7 @@ export async function getQuestionHTML(questionId: string) {
     const response = await api.get(
       `/db_questions/get_question/${encodeURIComponent(
         questionId
-      )}}/file/question_html`
+      )}}/file/question.html`
     );
     return response.data.content;
   } catch (error) {
@@ -20,7 +20,7 @@ export async function getSolutionHTML(questionId: string) {
     const response = await api.get(
       `/db_questions/get_question/${encodeURIComponent(
         questionId
-      )}}/file/solution_html`
+      )}}/file/solution.html`
     );
     return response.data.content;
   } catch (error) {

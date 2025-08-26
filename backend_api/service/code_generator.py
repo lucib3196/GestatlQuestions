@@ -7,7 +7,7 @@ from ai_workspace.agents.code_generators.v4.qmeta import (
 from pathlib import Path
 from ai_workspace.utils import to_serializable
 from typing import Union
-from backend_api.model.users import User
+from backend_api.model.users_model import User
 
 
 

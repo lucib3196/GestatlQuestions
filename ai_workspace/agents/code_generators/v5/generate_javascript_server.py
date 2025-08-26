@@ -8,24 +8,29 @@ from langsmith import Client
 from pydantic import BaseModel
 
 # Local application
-from .initializer import init_js_generation
+from .initializer import init_generation
 from ai_workspace.models import CodeResponse
 from ai_workspace.utils import (
     save_graph_visualization,
     inject_message,
     validate_llm_output,
 )
+from ai_workspace.retrievers import SemanticExamplesCSV
 
 
 client = Client()
 
-resources = init_js_generation()
+resources = init_generation(column_names=("question.html", "server.js"))
 prompt_base = "server_js_template_base"
 predefined_value_template = "server_add_predefined"
 test_template = "server_test"
 fast_llm = resources.fast_llm
 base_llm = resources.base_llm
-q_retriever_js = resources.q_retriever_js
+
+if isinstance(resources.q_retriver, SemanticExamplesCSV):
+    q_retriever_js = resources.q_retriver
+else:
+    raise ValueError("Expected Retriever to be of type SemanticExampleCSV")
 
 
 # Define State
@@ -66,9 +71,7 @@ def generate_server_base(state: ServerState) -> ServerState:
         """
         messages = inject_message(messages, solution_prompt)
 
-    result: CodeResponse = validate_llm_output(
-        chain.invoke(messages), CodeResponse
-    )
+    result: CodeResponse = validate_llm_output(chain.invoke(messages), CodeResponse)
 
     return {"server_file": result.code}  # type: ignore
 
@@ -79,9 +82,7 @@ def add_predefined_values(state: ServerState):
         code=state.server_file, question=state.original_question
     )
     chain = base_llm.with_structured_output(CodeResponse)
-    result: CodeResponse = validate_llm_output(
-        chain.invoke(messages), CodeResponse
-    )
+    result: CodeResponse = validate_llm_output(chain.invoke(messages), CodeResponse)
     return {"server_file": result.code}  # type: ignore
 
 
@@ -93,9 +94,7 @@ def add_test(state: ServerState):
         parameters=state.test_parameters,
     )
     chain = base_llm.with_structured_output(CodeResponse)
-    result: CodeResponse = validate_llm_output(
-        chain.invoke(messages), CodeResponse
-    )
+    result: CodeResponse = validate_llm_output(chain.invoke(messages), CodeResponse)
     return {"server_file": result.code}  # type: ignore
 
 

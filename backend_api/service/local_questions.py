@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
 from typing import List, Literal, Union
-from backend_api.model.questions_models import QuestionMeta, QuestionMetaNew
+from backend_api.model.question_model import QuestionMeta, QuestionMetaNew
 from code_runner.run_server import run_generate
 from fastapi import HTTPException
 from collections import Counter

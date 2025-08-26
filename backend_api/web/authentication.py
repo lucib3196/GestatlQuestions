@@ -26,8 +26,8 @@ from starlette import status
 from backend_api.core.config import settings
 from backend_api.core.logging import logger
 from backend_api.data.database import get_session, SessionDep
-from backend_api.model import users as users_model
-from backend_api.model import token as token_model
+from backend_api.model import users_model as users_model
+from backend_api.model import token_model as token_model
 from backend_api.service import user as service
 
 # ==================

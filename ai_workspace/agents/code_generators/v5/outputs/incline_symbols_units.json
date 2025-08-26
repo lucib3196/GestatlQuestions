@@ -1,0 +1,44 @@
+[
+  {
+    "text": "A block of mass m = 2 kg is on an incline of 30°. The friction coefficient is μ = 0.2. Use g = 9.81 m/s^2. Find the acceleration."
+  },
+  {
+    "text": "A block of mass m = 2 kg is on an incline of 30°. The friction coefficient is μ = 0.2. Use g = 9.81 m/s^2. Find the acceleration.",
+    "questions": {
+      "questions": [
+        {
+          "question": "A block of mass $m = 2\\ \\text{kg}$ is on an incline of $30^\\circ$. The friction coefficient is $\\mu = 0.2$. Use $g = 9.81\\ \\text{m/s}^2$. Find the acceleration.",
+          "params": [
+            {
+              "name": "m",
+              "value": "2",
+              "units": "kg"
+            },
+            {
+              "name": "incline_angle",
+              "value": "30",
+              "units": "°"
+            },
+            {
+              "name": "\\mu",
+              "value": "0.2",
+              "units": null
+            },
+            {
+              "name": "g",
+              "value": "9.81",
+              "units": "m/s^2"
+            }
+          ],
+          "correct_answers": null,
+          "source": null,
+          "requires_external_data": false,
+          "requires_image": false,
+          "completeness": true,
+          "additional_information": null,
+          "solution": null
+        }
+      ]
+    }
+  }
+]

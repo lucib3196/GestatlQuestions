@@ -86,7 +86,6 @@ export function LegacyQuestion() {
                     processPrairielearnTags(replacedS, params, "", "", CHOICE_PARAMS),
                 ];
 
-                console.log("This is the solution", Object.values(sStr ?? {}));
 
                 if (!ignore) {
                     setQuestionHtml(qStr);

@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import List, Union, Literal, Optional
 from fastapi import APIRouter, Depends
 from backend_api.service import local_questions as service
-from backend_api.model.questions_models import QuestionMeta, QuestionMetaNew
+from backend_api.model.question_model import QuestionMeta, QuestionMetaNew
 from fastapi.responses import HTMLResponse, JSONResponse
 from pathlib import Path
 import json

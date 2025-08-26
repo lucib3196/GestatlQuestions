@@ -3,10 +3,7 @@ from typing import Generator, Annotated
 from fastapi import Depends
 from sqlmodel import SQLModel, Session, create_engine
 
-
-# SetUp
-# # TODo add more logic to switch between local dev and production
-
+# To do would need to handle the case where I am switching between dev, testing and production databases
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "database.db")
 engine = create_engine(f"sqlite:///{DB_PATH}", echo=True)

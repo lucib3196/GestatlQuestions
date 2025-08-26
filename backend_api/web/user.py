@@ -1,6 +1,6 @@
 from backend_api.service import user as service
 from fastapi import APIRouter, Depends
-from backend_api.model.users import User
+from backend_api.model.users_model import User
 from backend_api.data.database import get_session
 from sqlmodel import Session
 

@@ -6,7 +6,7 @@ from sqlalchemy import Column, Integer, String
 from sqlmodel import SQLModel, Field
 
 if TYPE_CHECKING:
-    from .questions_models import Question
+    from .question_model import Question
 
 
 class UserRole(str, Enum):

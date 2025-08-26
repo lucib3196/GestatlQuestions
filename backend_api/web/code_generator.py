@@ -22,7 +22,7 @@ from pydantic import BaseModel
 
 # Internal
 from backend_api.data.database import get_session
-from backend_api.model.questions_models import (
+from backend_api.model.question_model import (
     File as FileModel,  # <-- Your SQLModel table
     Question,
 )
@@ -136,4 +136,48 @@ async def generate_question_image_v4(
             for cr in code_results
         ]
         questions = await asyncio.gather(*tasks)
+    return questions
+
+
+from ai_workspace.agents.code_generators.v5.main import (
+    app as text_genv5,
+    State as TextGenV5Input,
+)
+from ai_workspace.utils import validate_llm_output
+
+
+@router.post("/v5/text_gen/")
+async def generate_question_v5(
+    data: List[TextGenV4Input] = Body(..., embed=True),
+    current_user=Depends(user.get_current_user),
+    session=Depends(get_session),
+):
+    user_id = await user.get_user_by_name(
+        username=current_user.username,
+        email=current_user.email,
+        session=session,
+    )
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Must be logged in to use generation",
+        )
+    extraction_results = await asyncio.gather(
+        *[text_genv5.ainvoke(TextGenV5Input(text=item.question)) for item in data]
+    )
+    save_tasks = []
+    for i, res in enumerate(extraction_results):
+        state: TextGenV5Input = validate_llm_output(res, TextGenV5Input)
+
+        raw_list = state.gestalt_code or []
+        code_results = raw_list if isinstance(raw_list, list) else [raw_list]
+        title = data[i].question_title or ""
+
+        for cr in code_results:
+            save_tasks.append(
+                generated_code_repository.add_generated_dbV5(
+                    cr, user_id, title, session
+                )
+            )
+    questions = await asyncio.gather(*save_tasks)
     return questions

@@ -1,5 +1,5 @@
 from backend_api.data.database import SessionDep
-from backend_api.model.users import User
+from backend_api.model.users_model import User
 from typing import Annotated
 from fastapi import Query
 from sqlmodel import select
@@ -32,8 +32,8 @@ from backend_api.core.auth import (
 from backend_api.core.config import settings
 from backend_api.core.logging import logger
 from backend_api.data.database import SessionDep
-from backend_api.model import users as users_model
-from backend_api.model import token as token_model
+from backend_api.model import users_model as users_model
+from backend_api.model import token_model as token_model
 from typing import Optional
 
 SECRET_KEY = settings.SECRET_KEY

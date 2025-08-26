@@ -1,7 +1,3 @@
-# =========================
-# Imports
-# =========================
-
 # Standard library
 import json
 from json import JSONDecodeError
@@ -22,7 +18,7 @@ import tempfile
 # Local
 from backend_api.core.logging import logger
 from backend_api.data.database import SessionDep
-from backend_api.model.questions_models import (
+from backend_api.model.question_model import (
     File,
     Question,
     QuestionDict,
@@ -30,27 +26,6 @@ from backend_api.model.questions_models import (
     Topic,
 )
 from code_runner.run_server import run_generate
-
-
-# =========================
-# Utils
-# =========================
-
-
-def get_question_id_UUID(question_id) -> UUID:
-    """Validate and convert a question_id to UUID or raise HTTP 400."""
-    try:
-        if isinstance(question_id, UUID):
-            return question_id
-        else:
-            return UUID(question_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid UUID format")
-
-
-# =========================
-# Create (Most Generic)
-# =========================
 
 
 async def add_question(question: Question, session: SessionDep):

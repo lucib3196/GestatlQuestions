@@ -1,5 +1,7 @@
 from typing import Any
 from typing import Optional
+from typing import List, Sequence, Union, Iterable, Optional
+
 _TRUE = {"true", "1", "yes", "y", "on", "t"}
 _FALSE = {"false", "0", "no", "n", "off", "f"}
 
@@ -21,8 +23,6 @@ def to_bool(v: Any, *, default: bool | None = None) -> bool:
             return False
     raise ValueError(f"Cannot interpret {v!r} as boolean")
 
-def normalize_name(name: Optional[str]) -> Optional[str]:
-    if not name:
-        return None
-    s = name.strip()
-    return s or None
+
+def normalize_names(items: Iterable[str]) -> List[str]:
+    return [s.strip().lower() for s in items if isinstance(s, str) and s.strip()]

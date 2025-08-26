@@ -8,7 +8,7 @@ from sqlmodel import select
 from backend_api.data.database import SessionDep
 
 from typing import Tuple
-from backend_api.model.questions_models import Language
+from backend_api.model.question_model import Language
 
 
 async def get_or_create_language(session: SessionDep, name: str) -> Tuple[Language, bool]:

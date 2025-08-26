@@ -8,7 +8,7 @@ from sqlmodel import select
 from backend_api.data.database import SessionDep
 
 from typing import Tuple
-from backend_api.model.questions_models import QType
+from backend_api.model.question_model import QType
 
 
 async def get_or_create_Qtype(session: SessionDep, name: str) -> Tuple[QType, bool]:

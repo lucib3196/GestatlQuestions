@@ -7,6 +7,7 @@ from langsmith import Client
 from langgraph.graph import END, START, StateGraph
 from langchain.chat_models import init_chat_model
 from typing import Optional
+from ai_workspace.utils import validate_llm_output
 
 client = Client()
 extract_question_prompt = client.pull_prompt("extract-all-questions-text")
@@ -29,8 +30,10 @@ class QuestionClassification(BaseModel):
 async def classify_question(state: State):
     structured_llm = fast_model.with_structured_output(QuestionClassification)
     chain = extract_question_prompt | structured_llm
-    results = await chain.ainvoke({"question": state.text})
-    return {"questions": results}
+    results:QuestionClassification = validate_llm_output(
+        await chain.ainvoke({"question": state.text}), QuestionClassification
+    )
+    return {"questions": results.questions}
 
 
 graph = StateGraph(State)

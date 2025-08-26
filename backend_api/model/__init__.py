@@ -1,2 +1,2 @@
-from .users import User
-from .questions_models import Question, File # type: ignore
+from .users_model import User
+from .question_model import Question, File # type: ignore
