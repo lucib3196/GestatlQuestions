@@ -18,7 +18,7 @@ from backend_api.model.question_model import (
     QuestionDict,
     QuestionMetaNew,
 )
-from backend_api.service import db_question as service
+from backend_api.service import question_crud as service
 from code_runner.run_server import run_generate
 from typing import Any, List, Literal, Optional
 from pydantic import BaseModel
@@ -292,7 +292,7 @@ async def get_question_topics(
 
 
 # Donwload Utilits
-from backend_api.service import db_question as coreDb_service
+from backend_api.service import question_crud as coreDb_service
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 import io, zipfile, pathlib

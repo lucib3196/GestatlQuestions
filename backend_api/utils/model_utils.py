@@ -5,6 +5,9 @@ from sqlalchemy import func, cast, String
 from sqlalchemy.orm.properties import RelationshipProperty
 from uuid import UUID
 from typing import Union
+from backend_api.data.database import SessionDep
+from sqlmodel import select
+from sqlalchemy import func
 
 
 def get_question_id_UUID(question_id) -> Union[UUID, None]:
@@ -46,3 +49,26 @@ def string_condition(col, raw_val: str, partial: bool = True):
     if partial:
         return func.lower(cast(col, String)).like(f"%{raw_val.lower()}%")
     return func.lower(cast(col, String)) == raw_val.lower()
+
+
+def resolve_or_create(
+    session: SessionDep,
+    target_cls,
+    value,
+    create_field: bool = True,
+    lookup_field: str = "name",
+):
+    stmt = select(target_cls).where(
+        func.lower(getattr(target_cls, lookup_field)) == value.lower().strip()
+    )
+    result = session.exec(stmt).first()
+    if result:
+        return result
+    if create_field:
+        obj = target_cls(**{lookup_field: value.lower().strip()})
+        session.add(obj)
+        session.commit()
+        session.refresh(obj)
+        return obj
+    else:
+        return None

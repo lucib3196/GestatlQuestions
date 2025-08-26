@@ -14,6 +14,7 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import select
 from starlette import status
 import tempfile
+from typing import Sequence
 
 # Local
 from backend_api.core.logging import logger
@@ -23,16 +24,109 @@ from backend_api.model.question_model import (
     Question,
     QuestionDict,
     QuestionMetaNew,
-    Topic,
 )
+from backend_api.model.topic_model import Topic
 from code_runner.run_server import run_generate
+from backend_api.data import question_db as qdata
 
 
-async def add_question(question: Question, session: SessionDep):
-    session.add(question)
-    session.commit()
-    session.refresh(question)
-    return question
+async def create_question(
+    question: Union[Question, dict], session: SessionDep
+) -> Question:
+    if not question or (
+        not isinstance(question, dict) and not isinstance(question, Question)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Question must either be object of type Question or dict or not Empty got type {type(question)}",
+        )
+    try:
+        return qdata.create_question(question, session, True)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error Processing Question Content {e}",
+        )
+
+
+async def get_all_questions(
+    session: SessionDep,
+    offset: int = 0,
+    limit: int = 100,
+) -> Sequence[Question]:
+    results = qdata.get_all_questions(session, offset=offset, limit=limit)
+    if not results:
+        raise HTTPException(
+            status_code=status.HTTP_204_NO_CONTENT, detail="No Questions in DB"
+        )
+    else:
+        return results
+
+
+async def get_question_by_id(question_id: Union[str, UUID], session: SessionDep):
+    try:
+        results = qdata.get_question_by_id(question_id, session)
+        if results is None:
+            raise HTTPException(
+                status_code=status.HTTP_204_NO_CONTENT, detail="Question does not exist"
+            )
+        return results
+    except ValueError or HTTPException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad Request {str(e)}"
+        )
+
+
+async def delete_all_questions(session: SessionDep) -> None:
+    return qdata.delete_all_questions(session)
+
+
+async def delete_question_by_id(
+    question_id: Union[str, UUID], session: SessionDep
+) -> dict[str, str]:
+    try:
+        question = await get_question_by_id(question_id, session)
+        qdata.delete_question_by_id(question.id, session)
+        return {"detail": f"Question Deleted {question.title}"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error {str(e)}"
+        )
+
+
+async def edit_question_meta(
+    question_id: Union[str, UUID], session: SessionDep, **kwargs
+):
+    try:
+        updated_question = qdata.update_question(session, question_id, **kwargs)
+        return updated_question
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error updating Question {question_id}: {str(e)}",
+        )
+
+
+async def filter_questions_meta(session: SessionDep, **kwargs) -> Sequence[Question]:
+    try:
+        questions = qdata.filter_questions(session, **kwargs)
+        if not questions:
+            raise HTTPException(
+                status_code=status.HTTP_204_NO_CONTENT, detail="No questions fit filter"
+            )
+        return questions
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unknown Error str(e)",
+        )
+
+
+# =========================
+# Read
+# =========================
 
 
 async def add_file(file_obj: File, session: SessionDep):
@@ -42,18 +136,6 @@ async def add_file(file_obj: File, session: SessionDep):
     session.commit()
     session.refresh(file_obj)
     return file_obj
-
-
-async def add_topic(topic: Topic, session: SessionDep):
-    session.add(topic)
-    session.commit()
-    session.refresh(topic)
-    return topic
-
-
-# =========================
-# Read
-# =========================
 
 
 async def get_question_file(
@@ -154,15 +236,6 @@ async def get_question_qmeta(question_id: str, session: SessionDep):
         )
 
     return qmeta
-
-
-async def get_all_questions(
-    session: SessionDep,
-    offset: int = 0,
-    limit: int = 100,
-):
-    results = session.exec(select(Question).offset(offset).limit(limit)).all()
-    return results
 
 
 async def filter_questions(session: SessionDep, qfilter: QuestionDict):
@@ -307,31 +380,6 @@ async def update_file(
 # =========================
 # Delete
 # =========================
-
-
-async def delete_question(question_id: str | UUID, session: SessionDep):
-    """Delete a question by id."""
-    question_uuid = get_question_id_UUID(question_id)
-    result = session.exec(select(Question).where(Question.id == question_uuid)).first()
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Question not found"
-        )
-    file_results = session.exec(
-        select(File).where(File.question_id == question_uuid)
-    ).all()
-    title = result.title
-    try:
-        session.delete(result)
-        if file_results:
-            for f in file_results:
-                session.delete(f)
-
-        session.commit()
-    except SQLAlchemyError as e:
-        session.rollback()
-        raise HTTPException(status_code=500, detail="Could not delete question") from e
-    return {"detail": f"Question '{title}' deleted", "id": str(question_id)}
 
 
 # =========================

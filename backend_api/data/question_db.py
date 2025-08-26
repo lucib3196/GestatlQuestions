@@ -18,6 +18,7 @@ from backend_api.model.question_model import Language, QType, Question, Topic
 from backend_api.utils.utils import normalize_names
 from backend_api.utils.general_utils import normalize_values
 from backend_api.utils.model_utils import pick_related_label_col, string_condition
+from backend_api.utils.model_utils import resolve_or_create
 
 
 def get_question_id_UUID(question_id) -> UUID:
@@ -38,7 +39,6 @@ def create_question(
     if payload is None:
         raise ValueError("Payload cannot be None")
     try:
-
         if isinstance(payload, Question):
             title = payload.title
             ai_generated = payload.ai_generated
@@ -149,15 +149,17 @@ def delete_all_questions(session: SessionDep):
 def delete_question_by_id(question_id: Union[str, UUID], session: SessionDep):
     question = get_question_by_id(question_id, session)
     if not question:
-        return
+        return None
     else:
         session.delete(question)
         session.commit()
         session.flush()
 
 
-def get_all_questions(session: SessionDep) -> Sequence[Question]:
-    return session.exec(select(Question)).all()
+def get_all_questions(
+    session: SessionDep, offset: int = 0, limit: int = 100
+) -> Sequence[Question]:
+    return session.exec(select(Question).offset(offset).limit(limit)).all()
 
 
 def get_question_by_id(question_id: Union[str, UUID], session: SessionDep):
@@ -166,16 +168,58 @@ def get_question_by_id(question_id: Union[str, UUID], session: SessionDep):
     return question
 
 
+def safe_python_type(col):
+    try:
+        return col.type.python_type
+    except (NotImplementedError, AttributeError):
+        return object
+
+
 # Update
-def update_question(session, question_id: Union[str, UUID], **kwargs) -> Question:
+def update_question(
+    session, question_id: Union[str, UUID], create_field=True, **kwargs
+) -> Question:
     question = session.get(Question, question_id)
     if not question:
         raise ValueError("Question not found")
 
-    for key, value in kwargs.items():
-        if hasattr(question, key):
-            setattr(question, key, value)
+    mapper = sa_inspect(Question)
 
+    for key, value in kwargs.items():
+        # skip unknown attributes
+        try:
+            prop = mapper.get_property(key)
+        except Exception:
+            continue
+
+        if isinstance(prop, ColumnProperty):
+            # Needs to add check that the type and value are being set correctly
+
+            col = prop.columns[0]
+            setattr(question, key, value)
+            continue
+        elif isinstance(prop, RelationshipProperty):
+            target_cls = prop.mapper.class_
+            if prop.uselist:
+                if not all(isinstance(v, target_cls) for v in value):
+                    if not create_field:
+                        raise TypeError(f"{key} expects list[{target_cls.__name__}]")
+                    else:
+                        value = [
+                            resolve_or_create(session, target_cls, v, create_field)
+                            for v in value
+                        ]
+                setattr(question, key, list(value))
+            else:
+                if value is not None and not isinstance(value, target_cls):
+                    if not create_field:
+                        raise TypeError(f"{key} expects {target_cls.__name__} or None")
+                    else:
+                        value = resolve_or_create(
+                            session, target_cls, value, create_field
+                        )
+                setattr(question, key, value)
+            continue
     session.commit()
     session.refresh(question)
     return question

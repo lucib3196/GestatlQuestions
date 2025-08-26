@@ -25,3 +25,8 @@ def normalize_values(vals: Iterable) -> List[Any]:
             out.append(v)
     return out
 
+def normset(seq):
+    return {s.strip().lower() for s in seq}
+
+def names(objs):
+    return {o.name for o in objs}

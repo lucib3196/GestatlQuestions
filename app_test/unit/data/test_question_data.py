@@ -1,6 +1,6 @@
 import pytest
 from backend_api.model.question_model import Question, Topic
-from backend_api.data import question as question_service
+from backend_api.data import question_db as question_service
 from backend_api.data import topic as topic_service
 from backend_api.data import qtype as qtype_service
 from backend_api.data import language as l_service
@@ -8,31 +8,50 @@ from app_test.conftest import engine as db_session
 from backend_api.utils.utils import normalize_names
 
 
-# Fixtures for basic data
+# Not Implement in test
+# Creates topics manually
 @pytest.fixture
-def single_question_minimal():
-    return {
-        "title": "SomeTitle",
-        "ai_generated": True,
-        "isAdaptive": True,
-        "createdBy": "John Doe",
-        "user_id": 1,
-    }
+def make_topic(db_session):
+    def _make(name: str):
+        return topic_service.create_topic(db_session, name)
+
+    return _make
 
 
+# Creates a question
 @pytest.fixture
-def multiple_questions_minimal(single_question_minimal):
-    data = [
-        *single_question_minimal(),
-        {
-            "title": "QuestionTitle2",
-            "ai_generated": False,
-            "isAdaptive": False,
-            "createdBy": "Emma Stone",
-            "user_id": 2,
-        },
-    ]
-    return data
+def make_question(db_session, make_topic):
+    """
+    Build-and-create a Question with sensible defaults.
+    If create_topics=True, it will ensure topics exist first.
+    """
+
+    def _make(
+        title: str = "Sample Question",
+        ai_generated: bool = True,
+        isAdaptive: bool = False,
+        createdBy: str = "Test User",
+        user_id: int = 1,
+        topics: list[str] | None = None,
+        create_topics: bool = True,
+        **overrides
+    ):
+        topics = topics or []
+        if create_topics and topics:
+            for n in topics:
+                make_topic(n)
+        payload = {
+            "title": title,
+            "ai_generated": ai_generated,
+            "isAdaptive": isAdaptive,
+            "createdBy": createdBy,
+            "user_id": user_id,
+            "topics": topics,
+            **overrides,
+        }
+        return question_service.create_question(payload, db_session)
+
+    return _make
 
 
 # ----------------------
@@ -96,6 +115,7 @@ def test_question_creation_minimal(db_session, question_data):
     ],
 )
 def test_get_all_questions(db_session, question_data: dict):
+    question_service.create_question(question_data, db_session)
     questions = question_service.get_all_questions(db_session)
 
     assert isinstance(questions, list)

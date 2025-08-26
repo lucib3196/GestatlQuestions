@@ -1,12 +1,15 @@
-from typing import Generator
 import pytest
-from sqlalchemy import event
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, Session, create_engine
+from backend_api.data import question_db as question_service
+from backend_api.data import topic as topic_service
+from backend_api.data import language as language_service
+from backend_api.data import qtype as qtype_service
 
 TEST_DB_URL = "sqlite:///:memory:"
 
 
+# This creates a temporary database for the test sessions
 @pytest.fixture(scope="session")
 def engine():
     engine = create_engine(
@@ -18,3 +21,16 @@ def engine():
             yield session
         finally:
             session.close()
+
+
+# Deletes all the data in the database after reuse
+@pytest.fixture(autouse=True)
+def _clean_db(db_session):
+    yield
+    question_service.delete_all_questions(db_session)
+    topic_service.delete_all_topics(db_session)
+    language_service.delete_all_languages(db_session)
+    qtype_service.delete_all_qtypes(db_session)
+
+
+

@@ -12,7 +12,7 @@ from ai_workspace.agents.code_generators.v4_5.main_text import (
 from ai_workspace.utils import to_serializable
 from backend_api.data.database import SessionDep
 from backend_api.model.question_model import File, Question
-from backend_api.service import db_question as core_db
+from backend_api.service import question_crud as core_db
 from backend_api.utils.utils import normalize_name, to_bool
 from backend_api.service import (
     get_or_create_language,
