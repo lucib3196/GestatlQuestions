@@ -212,7 +212,7 @@ async def test_filter_questions_meta(db_session, seed_questions):
 
     # Filter by title substring (case-insensitive, depends on your filter logic)
     titled = await qcrud_service.filter_questions_meta(db_session, title="SomeTitle")
-    assert all("sometitle" in q.title.lower() for q in titled) # type: ignore # fix:ignore
+    assert all("sometitle" in q.title.lower() for q in titled)  # type: ignore # fix:ignore
 
     # Filter by relationship name (expects your filter to support .any on Topic.name)
     with_topics = await qcrud_service.filter_questions_meta(
@@ -223,6 +223,38 @@ async def test_filter_questions_meta(db_session, seed_questions):
     assert any(
         any(t.name in {"topic1", "topic2"} for t in q.topics) for q in with_topics
     )
+
+
+# Get all question data
+@pytest.mark.asyncio
+async def test_get_question_data(seed_questions, db_session):
+    # Act: fetch all questions
+    results = await qcrud_service.get_all_questions(db_session)
+    # Assert: at least the seeded questions exist
+    assert results, "Expected at least one question from seed_questions"
+    for r in results:
+        # Act: get full data for each question
+        response = await qcrud_service.get_question_data(r.id, db_session)
+        # Basic structure checks
+        assert isinstance(response, dict)
+        assert "id" in response
+        assert "title" in response
+        assert "topics" in response
+        assert "qtypes" in response
+        assert "languages" in response
+
+
+@pytest.mark.asyncio
+async def test_get_all_question_data(seed_questions, db_session):
+    results = await qcrud_service.get_all_question_data(db_session)
+    assert isinstance(results, list)
+    for r in results:
+        assert isinstance(r, dict)
+        assert "id" in r
+        assert "title" in r
+        assert "topics" in r
+        assert "qtypes" in r
+        assert "languages" in r
 
 
 # ===========================

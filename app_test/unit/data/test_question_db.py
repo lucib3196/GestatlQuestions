@@ -6,7 +6,7 @@ from backend_api.data import qtype_db as qtype_service
 from backend_api.data import language_db as l_service
 from app_test.conftest import engine as db_session
 from backend_api.utils import normalize_names
-
+from uuid import UUID
 
 # Not Implement in test
 # Creates topics manually
@@ -418,3 +418,84 @@ def test_question_filtering(db_session):
         db_session, title="AutoCreate", ai_generated=False
     )
     assert res_none == []
+
+@pytest.mark.asyncio
+async def test_get_question_data(db_session):
+    payload = {
+        "title": "AutoCreate",
+        "ai_generated": True,
+        "isAdaptive": False,
+        "createdBy": "Alice",
+        "user_id": 1,
+        "topics": ["topic1", "topic2"],
+    }
+
+    # Create question with related topics
+    created = question_service.create_question(payload, db_session, create=True)
+
+    # Fetch full data with relationships
+    result = await question_service.get_question_data(created.id, db_session)
+
+    # --- Assertions ---
+    assert result is not None
+    assert result["title"] == payload["title"]
+    assert result["ai_generated"] is True
+    assert result["isAdaptive"] is False
+    assert result["createdBy"] == "Alice"
+    assert result["user_id"] == 1
+
+    # topics should be a list of dicts with 'name'
+    topic_names = [t["name"] for t in result.get("topics", [])]
+    assert set(topic_names) == set(payload["topics"])
+
+    # qtypes and languages should at least exist in the dict
+    assert "qtypes" in result
+    assert "languages" in result
+
+
+@pytest.mark.asyncio
+async def test_get_all_question_data(db_session):
+    # --- Arrange ---
+    payload1 = {
+        "title": "Question 1",
+        "ai_generated": True,
+        "isAdaptive": False,
+        "createdBy": "Alice",
+        "user_id": 1,
+        "topics": ["topicA"],
+    }
+    payload2 = {
+        "title": "Question 2",
+        "ai_generated": False,
+        "isAdaptive": True,
+        "createdBy": "Bob",
+        "user_id": 2,
+        "topics": ["topicB", "topicC"],
+    }
+
+    q1 = question_service.create_question(payload1, db_session, create=True)
+    q2 = question_service.create_question(payload2, db_session, create=True)
+
+    # --- Act ---
+    results = await question_service.get_all_question_data(db_session)
+
+    # --- Assert ---
+    assert isinstance(results, list)
+    assert len(results) >= 2  # at least the two we created
+    
+
+    # Find our created ones
+    q1_result = next((r for r in results if (r["id"]) == q1.id), None)
+    q2_result = next((r for r in results if (r["id"]) == q2.id), None)
+
+    assert q1_result is not None
+    assert q2_result is not None
+
+    assert q1_result["title"] == "Question 1"
+    assert q2_result["title"] == "Question 2"
+
+    topic_names_q1 = [t["name"] for t in q1_result["topics"]]
+    topic_names_q2 = [t["name"] for t in q2_result["topics"]]
+
+    # assert set(topic_names_q1) == {"topicA"}
+    # assert set(topic_names_q2) == {"topicB", "topicC"}

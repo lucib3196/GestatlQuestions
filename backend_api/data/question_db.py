@@ -1,24 +1,25 @@
 # Stdlib
-from typing import List, Sequence, Union
+from typing import Dict, List, Sequence, Union
 from uuid import UUID
+import asyncio
 
 # Third-party
 from fastapi import HTTPException
+from pydantic import BaseModel
 from sqlalchemy import or_
 from sqlalchemy.inspection import inspect as sa_inspect
+from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.orm.properties import ColumnProperty, RelationshipProperty
 from sqlmodel import select
+from starlette import status
 
 # Internal
-from backend_api.data.database import SessionDep
-from backend_api.data import topic_db as t_service
-from backend_api.data import qtype_db as qtype_service
 from backend_api.data import language_db as l_service
+from backend_api.data import qtype_db as qtype_service
+from backend_api.data import topic_db as t_service
+from backend_api.data.database import SessionDep
 from backend_api.model.question_model import Language, QType, Question, Topic
-from backend_api.utils import normalize_names
-from backend_api.utils.general_utils import normalize_values
-from backend_api.utils.model_utils import pick_related_label_col, string_condition
-from backend_api.utils.model_utils import resolve_or_create
+from backend_api.utils import *
 
 
 def get_question_id_UUID(question_id) -> UUID:
@@ -223,6 +224,28 @@ def update_question(
     session.commit()
     session.refresh(question)
     return question
+
+
+async def get_question_data(
+    question_id: Union[str, UUID],
+    session: SessionDep,
+    rels: List[str] = ["topics", "qtypes", "languages"],
+) -> Dict[str, Any]:
+    stmt = select(Question).where(Question.id == get_uuid(question_id))
+    result = session.exec(stmt).first()
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Question not found",
+        )
+    data = get_model_relationship_data(result, rels)
+    return data
+
+
+async def get_all_question_data(session: SessionDep) -> List[Dict[str, Any]]:
+    results: Sequence[Question] = get_all_questions(session)
+    tasks = [get_question_data(question_id=r.id, session=session) for r in results]
+    return await asyncio.gather(*tasks)
 
 
 # Hybrid

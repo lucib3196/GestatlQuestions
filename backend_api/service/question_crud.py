@@ -124,7 +124,20 @@ async def filter_questions_meta(session: SessionDep, **kwargs) -> Sequence[Quest
         )
 
 
-# Transitioning
+async def get_question_data(question_id: Union[str, UUID], session: SessionDep):
+    try:
+        result = await qdata.get_question_data(question_id, session)
+        return result
+    except HTTPException:
+        raise
+
+
+async def get_all_question_data(session: SessionDep):
+    try:
+        result = await qdata.get_all_question_data(session)
+        return result
+    except HTTPException:
+        raise
 
 
 async def get_question_topics(session: SessionDep, question_id: str) -> list[str]:

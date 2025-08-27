@@ -1,13 +1,17 @@
+# Stdlib
+from typing import Any, Dict, List, Union
+from uuid import UUID
+
+# Third-party
+from pydantic import BaseModel
+from sqlalchemy import String, cast, func
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.orm.properties import RelationshipProperty
-from sqlalchemy import func, cast, String
-from sqlalchemy.orm.properties import RelationshipProperty
-from uuid import UUID
-from typing import Union
-from backend_api.data.database import SessionDep
 from sqlmodel import select
-from sqlalchemy import func
+
+# Internal
+from backend_api.data.database import SessionDep
 
 
 def get_uuid(val: Union[str, UUID]) -> UUID:
@@ -72,3 +76,33 @@ def resolve_or_create(
         return obj
     else:
         return None
+
+
+def get_model_relationship_data(model, relationships: List[str]):
+    if not hasattr(model, "model_dump"):
+        raise ValueError("Must be valid model")
+    data: Dict[str, Any] = model.model_dump(exclude_none=True)
+
+    for rel in relationships:
+        value = getattr(model, rel, None)
+        if value is None:
+            data[rel] = None
+
+        # Relationship lists (InstrumentedList behaves like list)
+        elif hasattr(value, "__iter__") and not isinstance(value, (str, bytes)):
+            data[rel] = [
+                (
+                    item.model_dump(exclude_none=True)
+                    if hasattr(item, "model_dump")
+                    else item
+                )
+                for item in value
+            ]
+        # Single related object
+        elif not hasattr(value, "__iter__") and isinstance(value, BaseModel):
+            data[rel] = (
+                value.model_dump(exclude_none=True)
+                if hasattr(value, "model_dump")
+                else value
+            )
+    return data
