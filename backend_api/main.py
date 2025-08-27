@@ -27,6 +27,7 @@ from backend_api.web.local_questions import router as local_question_router
 from backend_api.web.code_generator import router as code_generator_router
 from backend_api.web.user import router as user_route
 from backend_api.web.db_questions import router as db_question_router
+from backend_api.web.question_crud import router as q_crud
 
 
 # Define startup activity
@@ -146,8 +147,6 @@ class Question(BaseModel):
 
 class Assign(BaseModel):
     reviewer_id: str
-
-
 
 
 def main():

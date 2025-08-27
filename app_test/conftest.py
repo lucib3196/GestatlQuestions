@@ -25,12 +25,15 @@ def engine():
 
 # Deletes all the data in the database after reuse
 @pytest.fixture(autouse=True)
-def _clean_db(db_session):
+def _clean_db(request):
+    if "db_session" not in request.fixturenames:
+        yield
+        return
+
+    db_session = request.getfixturevalue("db_session")
     yield
+
     question_service.delete_all_questions(db_session)
     topic_service.delete_all_topics(db_session)
     language_service.delete_all_languages(db_session)
     qtype_service.delete_all_qtypes(db_session)
-
-
-

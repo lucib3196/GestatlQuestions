@@ -1,11 +1,16 @@
+# Stdlib
 import importlib.util
 import inspect
+import io
 import types
+from contextlib import redirect_stdout
 from typing import Any
 
+# Third-party
 from pydantic import ValidationError
 from starlette import status
 
+# Internal
 from code_runner.models import CodeRunResponse, QuizData
 from .utils import normalize_path
 
@@ -75,7 +80,7 @@ def run_generate_py(path: str, isTesting: bool = False) -> "CodeRunResponse":
 
     # ---- Import module ----
     try:
-        module: types.ModuleType = import_module_from_path(str(p))
+        module = import_module_from_path(str(p))
     except ImportError as e:
         return CodeRunResponse(
             success=False,
@@ -121,7 +126,10 @@ def run_generate_py(path: str, isTesting: bool = False) -> "CodeRunResponse":
         args = (2,) if isTesting else ()
 
     try:
-        result = generate(*args)
+        f = io.StringIO()
+        with redirect_stdout(f):
+            result = generate(*args)
+        captured = f.getvalue().splitlines()  # This is the print statements
     except Exception as e:
         return CodeRunResponse(
             success=False,
@@ -168,7 +176,12 @@ def run_generate_py(path: str, isTesting: bool = False) -> "CodeRunResponse":
 
     # ---- Validate against QuizData ----
     try:
-        quiz_data = QuizData(**result) if isinstance(result, dict) else QuizData.model_validate(result)  # type: ignore
+        if isinstance(result, dict):
+            results = {**result, "logs": captured or []}
+        else:
+            results = {"result": result, "logs": captured or []}
+
+        quiz_data = QuizData(**results) if isinstance(results, dict) else QuizData.model_validate(results)  # type: ignore
     except ValidationError as ve:
         return CodeRunResponse(
             success=False,

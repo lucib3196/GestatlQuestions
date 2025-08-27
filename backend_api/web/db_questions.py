@@ -54,7 +54,7 @@ async def get_question_qmeta(
 async def get_question_file(
     question_id: str, filename: str, session=Depends(get_session)
 ):
-    
+
     return await service.get_question_file(question_id, filename, session)
 
 
