@@ -2,9 +2,9 @@ import pytest
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, Session, create_engine
 from backend_api.data import question_db as question_service
-from backend_api.data import topic as topic_service
-from backend_api.data import language as language_service
-from backend_api.data import qtype as qtype_service
+from backend_api.data import topic_db as topic_service
+from backend_api.data import language_db as language_service
+from backend_api.data import qtype_db as qtype_service
 
 TEST_DB_URL = "sqlite:///:memory:"
 

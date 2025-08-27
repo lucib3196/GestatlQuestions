@@ -7,7 +7,7 @@ import pytest
 import pytest_asyncio
 from fastapi import HTTPException
 
-from backend_api.data import topic as topic_service
+from backend_api.data import topic_db as topic_service
 from backend_api.model.question_model import Question
 from backend_api.service import question_crud as qcrud_service
 from backend_api.utils.general_utils import names, normset

@@ -11,11 +11,11 @@ from sqlmodel import select
 
 # Internal
 from backend_api.data.database import SessionDep
-from backend_api.data import topic as t_service
-from backend_api.data import qtype as qtype_service
-from backend_api.data import language as l_service
+from backend_api.data import topic_db as t_service
+from backend_api.data import qtype_db as qtype_service
+from backend_api.data import language_db as l_service
 from backend_api.model.question_model import Language, QType, Question, Topic
-from backend_api.utils.utils import normalize_names
+from backend_api.utils import normalize_names
 from backend_api.utils.general_utils import normalize_values
 from backend_api.utils.model_utils import pick_related_label_col, string_condition
 from backend_api.utils.model_utils import resolve_or_create

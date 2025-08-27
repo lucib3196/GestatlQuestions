@@ -1,5 +1,5 @@
 import pytest
-from backend_api.data import qtype as qtype_service
+from backend_api.data import qtype_db as qtype_service
 from app_test.conftest import engine as db_session
 
 

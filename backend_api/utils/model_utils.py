@@ -10,13 +10,13 @@ from sqlmodel import select
 from sqlalchemy import func
 
 
-def get_question_id_UUID(question_id) -> Union[UUID, None]:
+def get_uuid(val: Union[str, UUID]) -> Union[UUID, None]:
     """Validate and convert a question_id to UUID or raise HTTP 400."""
     try:
-        if isinstance(question_id, UUID):
-            return question_id
+        if isinstance(val, UUID):
+            return val
         else:
-            return UUID(question_id)
+            return UUID(val)
     except ValueError:
         return None
 

@@ -1,11 +1,11 @@
 import pytest
 from backend_api.model.question_model import Question, Topic
 from backend_api.data import question_db as question_service
-from backend_api.data import topic as topic_service
-from backend_api.data import qtype as qtype_service
-from backend_api.data import language as l_service
+from backend_api.data import topic_db as topic_service
+from backend_api.data import qtype_db as qtype_service
+from backend_api.data import language_db as l_service
 from app_test.conftest import engine as db_session
-from backend_api.utils.utils import normalize_names
+from backend_api.utils import normalize_names
 
 
 # Not Implement in test

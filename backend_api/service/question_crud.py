@@ -1,15 +1,15 @@
 # Standard library
 import json
 from json import JSONDecodeError
-from typing import List, Optional, TypedDict, Union, Literal
+from typing import Optional, Union, Literal
 from uuid import UUID
 from pathlib import Path
 
 # Third-party
 from fastapi import HTTPException
 from pydantic import ValidationError
-from sqlalchemy import and_, or_
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 from starlette import status
@@ -127,15 +127,6 @@ async def filter_questions_meta(session: SessionDep, **kwargs) -> Sequence[Quest
 # =========================
 # Read
 # =========================
-
-
-async def add_file(file_obj: File, session: SessionDep):
-    if isinstance(file_obj.content, dict):
-        file_obj.content = json.dumps(file_obj.content)
-    session.add(file_obj)
-    session.commit()
-    session.refresh(file_obj)
-    return file_obj
 
 
 async def get_question_file(

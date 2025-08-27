@@ -1,5 +1,5 @@
 import pytest
-from backend_api.data import topic as topic_service
+from backend_api.data import topic_db as topic_service
 from app_test.conftest import engine as db_session
 
 

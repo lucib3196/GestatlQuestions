@@ -9,6 +9,7 @@ from .links import *
 from .qtype_model import QType
 from .language_model import Language
 from .topic_model import Topic
+from .file_model import File
 
 
 # ----- Pydantic models -----
@@ -40,19 +41,6 @@ class QuestionMetaNew(BaseModel):
     createdBy: Optional[str] = ""
     language: Optional[List[Literal["python", "javascript"]]] = None
     ai_generated: Optional[bool] = None
-
-
-# ----- SQLModel tables -----
-
-
-class File(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    filename: str
-    content: Optional[Union[str, dict]] = Field(default=None, sa_column=Column(JSON))
-    question_id: UUID = Field(foreign_key="question.id")
-
-
-# -------------Modesl--------------
 
 
 class Question(SQLModel, table=True):

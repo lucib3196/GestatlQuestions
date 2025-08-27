@@ -1,5 +1,5 @@
 import pytest
-from backend_api.data import language as language_service
+from backend_api.data import language_db as language_service
 from app_test.conftest import engine as db_session
 
 
