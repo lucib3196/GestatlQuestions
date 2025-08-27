@@ -26,7 +26,7 @@ SCALAR_FIELDS = {"title", "ai_generated", "isAdaptive", "createdBy", "user_id"}
 async def test_create_question_minimal(
     db_session, mixed_question_payloads, invalid_question_payloads
 ):
-    # ✅ valid payloads (dict + Question model + full dict with rels)
+    # valid payloads (dict + Question model + full dict with rels)
     for payload in mixed_question_payloads:
         created = await qcrud_service.create_question(payload, db_session)
 
@@ -49,7 +49,7 @@ async def test_create_question_minimal(
                 # adjust if your schema uses single qtype instead of list
                 assert names(created.qtypes) == normset(payload["qtype"])
 
-    # ❌ invalid payloads
+    #  invalid payloads
     for bad in invalid_question_payloads:
         with pytest.raises(HTTPException) as excinfo:
             await qcrud_service.create_question(bad, db_session)
@@ -212,7 +212,7 @@ async def test_filter_questions_meta(db_session, seed_questions):
 
     # Filter by title substring (case-insensitive, depends on your filter logic)
     titled = await qcrud_service.filter_questions_meta(db_session, title="SomeTitle")
-    assert all("sometitle" in q.title.lower() for q in titled)
+    assert all("sometitle" in q.title.lower() for q in titled) # type: ignore # fix:ignore
 
     # Filter by relationship name (expects your filter to support .any on Topic.name)
     with_topics = await qcrud_service.filter_questions_meta(

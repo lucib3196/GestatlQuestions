@@ -124,38 +124,7 @@ async def filter_questions_meta(session: SessionDep, **kwargs) -> Sequence[Quest
         )
 
 
-# =========================
-# Read
-# =========================
-
-
-async def get_question_file(
-    question_id: Union[str, UUID], filename: str, session: SessionDep
-):
-
-    question_id = get_question_id_UUID(question_id)
-
-    results = session.exec(
-        select(File)
-        .where(File.question_id == question_id)
-        .where(File.filename == filename)
-    ).first()
-
-    if not results:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No File {filename} for Question",
-        )
-    return results
-
-
-async def get_all_files(question_id: UUID, session: SessionDep):
-    results = session.exec(select(File).where(File.question_id == question_id)).all()
-    if not results:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="No Files for Question"
-        )
-    return results
+# Transitioning
 
 
 async def get_question_topics(session: SessionDep, question_id: str) -> list[str]:
@@ -319,53 +288,6 @@ async def add_topic_to_question(
         session.refresh(question)
 
     return question
-
-
-async def update_file(
-    question_id: str,
-    filename: str,
-    newcontent: Union[str, dict, list],
-    session: SessionDep,
-):
-    """Update a file's content for a given question. Returns the updated row."""
-    if not filename or not filename.strip():
-        raise HTTPException(status_code=400, detail="Filename is required")
-
-    question_uuid = get_question_id_UUID(question_id)
-
-    # Fetch the content
-    file_obj = session.exec(
-        select(File).where(
-            (File.question_id == question_uuid) & (File.filename == filename.strip())
-        )
-    ).first()
-
-    if file_obj is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="File not present in question",
-        )
-
-    if isinstance(newcontent, (dict, list)):
-        newcontent = json.dumps(newcontent, ensure_ascii=False)
-
-    # Make changes
-    file_obj.content = newcontent
-
-    # Commit & refresh the *object*, not the value
-    try:
-        session.commit()
-        session.refresh(file_obj)
-    except Exception as exc:
-        session.rollback()
-        raise HTTPException(status_code=500, detail="Failed to update file") from exc
-
-    return {
-        "detail": "updated",
-        "filename": file_obj.filename,
-        "new_content": newcontent,
-        "question_id": str(file_obj.question_id),
-    }
 
 
 # =========================

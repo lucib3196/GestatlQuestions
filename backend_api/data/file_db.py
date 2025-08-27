@@ -52,7 +52,7 @@ def delete_file(session: SessionDep, file_id: Union[str, UUID]) -> None:
     session.flush()
 
 
-def edit_file_content(
+def update_file_content_by_file_id(
     file_id: Union[str, UUID], new_content: Union[str, dict], session: SessionDep
 ) -> File:
     """
@@ -61,15 +61,21 @@ def edit_file_content(
     """
     try:
         file_obj = get_file_by_id(file_id, session)
+        return update_file_content(file_obj, new_content, session)
+    except Exception as e:
+        raise ValueError(f"Could not update file contents {str(e)}")
 
+
+def update_file_content(
+    file_obj: File, new_content: Union[str, dict], session: SessionDep
+):
+    try:
         if isinstance(new_content, dict):
             new_content = json.dumps(new_content)
-
         file_obj.content = new_content
         session.commit()
         session.refresh(file_obj)
         return file_obj
-
     except ValueError:
         # bubble up cleanly if get_file_by_id already raised
         raise

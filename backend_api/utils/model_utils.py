@@ -10,15 +10,15 @@ from sqlmodel import select
 from sqlalchemy import func
 
 
-def get_uuid(val: Union[str, UUID]) -> Union[UUID, None]:
+def get_uuid(val: Union[str, UUID]) -> UUID:
     """Validate and convert a question_id to UUID or raise HTTP 400."""
     try:
         if isinstance(val, UUID):
             return val
         else:
             return UUID(val)
-    except ValueError:
-        return None
+    except Exception as e:
+        raise ValueError("Could not convert id to UUID")
 
 
 def is_relationship(model: type, attr_name: str) -> bool:

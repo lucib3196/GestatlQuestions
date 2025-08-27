@@ -71,11 +71,11 @@ def test_edit_file_content(db_session, sample_question):
     added = file_service.add_file(file_obj, db_session)
 
     # Edit content (string)
-    updated = file_service.edit_file_content(added.id, "new content", db_session)
+    updated = file_service.update_file_content_by_file_id(added.id, "new content", db_session)
     assert updated.content == "new content"
 
     # Edit with dict content (stored as JSON string)
-    updated = file_service.edit_file_content(added.id, {"key": "value"}, db_session)
+    updated = file_service.update_file_content_by_file_id(added.id, {"key": "value"}, db_session)
     assert '"key": "value"' in updated.content
 
 

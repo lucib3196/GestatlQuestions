@@ -144,7 +144,7 @@ async def add_generated_dbV5(
             for n in norm_topics:
                 topic, existing = await get_or_create_topic(session, n)
                 question.topics.append(topic)
-                
+
     if hasattr(cr.metadata, "language"):
         raw_langauges = cr.metadata.language or []
         norm_languages = {n for n in (normalize_name(l) for l in raw_langauges) if n}
@@ -157,7 +157,6 @@ async def add_generated_dbV5(
         raw_qtypes = cr.metadata.qtype or []
         norm_qtypes = {n for n in (normalize_name(l) for l in raw_qtypes) if n}
 
-
     if hasattr(cr.metadata, "qtype"):
         raw_qtypes = cr.metadata.qtype or []
         norm_qtypes = {n for n in (normalize_name(l) for l in raw_qtypes) if n}
@@ -169,7 +168,6 @@ async def add_generated_dbV5(
             for n in norm_qtypes:
                 qtype, existing = await get_or_create_Qtype(session, n)
                 question.qtypes.append(qtype)
-                
 
     session.add(question)
     session.commit()
