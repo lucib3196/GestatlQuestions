@@ -18,9 +18,11 @@ def engine():
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
         try:
+            print("Session Created Successfully")
             yield session
         finally:
             session.close()
+            print("Closing Database")
 
 
 # Deletes all the data in the database after reuse

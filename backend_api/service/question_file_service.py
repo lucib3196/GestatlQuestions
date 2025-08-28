@@ -6,24 +6,12 @@ from starlette import status
 from sqlmodel import select
 from pydantic import BaseModel
 
-from backend_api.utils import get_uuid
+from backend_api.utils import get_uuid, SuccessFileResponse
 from backend_api.data.database import SessionDep
 from backend_api.model.file_model import File
 from backend_api.data import file_db
 from backend_api.data import question_db
 from pydantic import BaseModel, field_validator
-
-
-class SuccessFileResponse(BaseModel):
-    status: Union[str, int]
-    detail: Optional[str] = None
-    file_obj: List[File]
-
-    @field_validator("file_obj", mode="before")
-    def ensure_list(cls, v):
-        if isinstance(v, File):
-            return [v]
-        return v
 
 
 def get_question_file(

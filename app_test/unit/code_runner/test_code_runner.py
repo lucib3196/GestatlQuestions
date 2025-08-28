@@ -1,19 +1,11 @@
 from pathlib import Path
 from code_runner import run_js, run_py
 from code_runner.models import CodeRunResponse
-
-# Helpers
-def logs_contain(logs, *substrs) -> bool:
-    """True if any single log line contains all given substrings."""
-    logs = logs or []
-    for line in logs:
-        if all(s in line for s in substrs):
-            return True
-    return False
+from app_test.utils import logs_contain
 
 
 def test_run_js():
-    path = Path("app_test/unit/code_runner/code_scripts/test.js").resolve()
+    path = Path("app_test/code_scripts/test.js").resolve()
     result = run_js.execute_javascript(path=path)
 
     resp = CodeRunResponse.model_validate(result)
@@ -40,7 +32,7 @@ def test_run_js():
 
 
 def test_run_py():
-    path = Path("app_test/unit/code_runner/code_scripts/test.py").resolve()
+    path = Path("app_test/code_scripts/test.py").resolve()
     result = run_py.run_generate_py(path=str(path))
 
     resp = CodeRunResponse.model_validate(result)

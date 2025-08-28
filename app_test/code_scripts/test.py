@@ -7,7 +7,7 @@ def generate() -> Dict[str, Any]:
     sum_val = a + b
     print("This is the value of a", a)
     print("This is the value of b", b)
-    print("This is a structure", {"params":{"a": a, "b": b}})
+    print("This is a structure", {"params": {"a": a, "b": b}})
 
     return {
         "params": {"a": a, "b": b},
