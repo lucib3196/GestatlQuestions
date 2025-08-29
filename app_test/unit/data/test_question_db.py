@@ -4,7 +4,7 @@ from backend_api.data import question_db as question_service
 from backend_api.data import topic_db as topic_service
 from backend_api.data import qtype_db as qtype_service
 from backend_api.data import language_db as l_service
-from app_test.conftest import engine as db_session
+from app_test.conftest import  db_session
 from backend_api.utils import normalize_names
 from uuid import UUID
 

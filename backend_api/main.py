@@ -9,7 +9,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
-
+from starlette import status
 from pydantic import BaseModel
 from firebase_admin import storage
 
@@ -21,12 +21,12 @@ from backend_api.core.config import settings
 from backend_api.data.database import create_db_and_tables
 
 # Routers
-from backend_api.web.authentication import router
-from backend_api.web.file_management import router as file_router
-from backend_api.web.local_questions import router as local_question_router
-from backend_api.web.code_generator import router as code_generator_router
-from backend_api.web.user import router as user_route
-from backend_api.web.db_questions import router as db_question_router
+# from backend_api.web.authentication import router
+# from backend_api.web.file_management import router as file_router
+# from backend_api.web.local_questions import router as local_question_router
+# from backend_api.web.code_generator import router as code_generator_router
+# from backend_api.web.user import router as user_route
+# from backend_api.web.db_questions import router as db_question_router
 from backend_api.web.question_crud import router as q_crud
 
 
@@ -43,12 +43,13 @@ def get_application():
 
     # Add routes
     routes = [
-        router,
-        code_generator_router,
-        file_router,
-        local_question_router,
-        user_route,
-        db_question_router,
+        # router,
+        # code_generator_router,
+        # file_router,
+        # local_question_router,
+        # user_route,
+        # db_question_router,
+        q_crud
     ]
     for r in routes:
         app.include_router(r)
@@ -103,8 +104,9 @@ app = get_application()
 
 
 @app.get("/")
-def test_connection():
-    return {"status": "ok"}
+@app.get("/startup", status_code=status.HTTP_200_OK)
+def startup_connection():
+    return {"message": "The API is LIVE!!"}
 
 
 # Authentication

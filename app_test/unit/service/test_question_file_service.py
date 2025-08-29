@@ -9,7 +9,7 @@ from typing import Any, Dict, Iterable, Tuple
 import pytest
 from fastapi import HTTPException
 
-from app_test.conftest import engine as db_session
+from app_test.conftest import  db_session
 from backend_api.model.file_model import File
 from backend_api.model.question_model import Question
 from backend_api.service import question_file_service

@@ -17,16 +17,6 @@ class CodeLanguage(BaseModel):
     language: Literal["python", "javascript"]
 
 
-class QuestionMeta(BaseModel):
-    question: str
-    title: str
-    topic: List[str]
-    relevant_courses: List[str]
-    tags: List[str]
-    prereqs: List[str]
-    isAdaptive: Union[str, bool]
-
-
 class QuestionMetaNew(BaseModel):
     rendering_data: List["QuestionBase"]  # keep your import if you use it
     qtype: Optional[List[Literal["numeric", "multiple_choice"]]] = PydanticField(
@@ -41,6 +31,21 @@ class QuestionMetaNew(BaseModel):
     createdBy: Optional[str] = ""
     language: Optional[List[Literal["python", "javascript"]]] = None
     ai_generated: Optional[bool] = None
+
+
+class QuestionMeta(BaseModel):
+    id: UUID
+    title: str
+    ai_generated: bool
+    isAdaptive: bool
+    createdBy: Optional[str] = None
+    user_id: Optional[int] = None
+    topics: Optional[List["Topic"]] = None
+    languages: Optional[List["Language"]] = None
+    qtypes: Optional[List["QType"]] = None
+
+    class Config:
+        from_attributes = True
 
 
 class Question(SQLModel, table=True):
@@ -60,6 +65,13 @@ class Question(SQLModel, table=True):
     user_id: Optional[int] = Field(foreign_key="user.id")
 
     # Relationships
+    files: list["File"] = Relationship(
+        back_populates="question",
+        sa_relationship_kwargs={
+            "cascade": "all, delete-orphan"
+        },  # This line means that if the question is deleted all associated files will be deleted
+    )
+
     topics: List["Topic"] = Relationship(
         back_populates="questions",
         link_model=QuestionTopicLink,
@@ -74,16 +86,3 @@ class Question(SQLModel, table=True):
         back_populates="questions",
         link_model=QuestionQTypeLink,
     )
-
-
-# (Optional) helper type for filters
-class QuestionDict(TypedDict, total=False):
-    id: UUID
-    user_id: int
-    title: str
-    qtype: str
-    topic: str
-    isAdaptive: Union[str, bool]
-    language: List[str]
-    createdBy: str
-    ai_generated: bool

@@ -91,14 +91,10 @@ def get_all_files(
         )
 
     results = session.exec(select(File).where(File.question_id == question_uuid)).all()
-    if not results:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="No Files for Question"
-        )
     return SuccessFileResponse(
         status=status.HTTP_200_OK,
         detail=f"Got all files for question {question.title}",
-        file_obj=list(results),
+        file_obj=list(results) or [],
     )
 
 

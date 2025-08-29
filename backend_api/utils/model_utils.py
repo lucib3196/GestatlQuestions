@@ -82,7 +82,6 @@ def get_model_relationship_data(model, relationships: List[str]):
     if not hasattr(model, "model_dump"):
         raise ValueError("Must be valid model")
     data: Dict[str, Any] = model.model_dump(exclude_none=True)
-
     for rel in relationships:
         value = getattr(model, rel, None)
         if value is None:

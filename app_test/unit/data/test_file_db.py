@@ -4,7 +4,7 @@ from uuid import uuid4
 from backend_api.model.file_model import File
 from backend_api.model.question_model import Question
 from backend_api.data import file_db as file_service
-from app_test.conftest import engine as db_session
+from app_test.conftest import db_session
 
 
 @pytest.fixture
@@ -71,12 +71,16 @@ def test_edit_file_content(db_session, sample_question):
     added = file_service.add_file(file_obj, db_session)
 
     # Edit content (string)
-    updated = file_service.update_file_content_by_file_id(added.id, "new content", db_session)
+    updated = file_service.update_file_content_by_file_id(
+        added.id, "new content", db_session
+    )
     assert updated.content == "new content"
 
     # Edit with dict content (stored as JSON string)
-    updated = file_service.update_file_content_by_file_id(added.id, {"key": "value"}, db_session)
-    assert '"key": "value"' in updated.content
+    updated = file_service.update_file_content_by_file_id(
+        added.id, {"key": "value"}, db_session
+    )
+    assert '"key": "value"' in updated.content # type: ignore
 
 
 def test_delete_file(db_session, sample_question):

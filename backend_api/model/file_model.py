@@ -2,7 +2,7 @@ from typing import Optional, Union, TYPE_CHECKING
 from uuid import UUID, uuid4
 from sqlalchemy import JSON, Column
 
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 
 
 if TYPE_CHECKING:
@@ -14,3 +14,4 @@ class File(SQLModel, table=True):
     filename: str
     content: Optional[Union[str, dict]] = Field(default=None, sa_column=Column(JSON))
     question_id: UUID = Field(foreign_key="question.id")
+    question: "Question" = Relationship(back_populates="files")

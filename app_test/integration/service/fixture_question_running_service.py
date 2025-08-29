@@ -3,7 +3,7 @@ import pytest
 from backend_api.model import Question, File
 from backend_api.data import question_db
 from backend_api.data import file_db
-from app_test.conftest import engine as db_session
+from app_test.conftest import  db_session
 
 
 @pytest.fixture
