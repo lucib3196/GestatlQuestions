@@ -363,7 +363,7 @@ async def test_get_all_questions_simple(test_client, create_multiple_questions):
 
 
 # Test Filtering Questions
-### Notes: This test needs to be a bit more robuts but basically it just checks to make sure that the 
+### Notes: This test needs to be a bit more robuts but basically it just checks to make sure that the
 ### Routes runs and asserts its a list
 @pytest.mark.asyncio
 async def test_question_filter(test_client, create_multiple_questions):
@@ -377,3 +377,74 @@ async def test_question_filter(test_client, create_multiple_questions):
     data = response.json()
     assert isinstance(data, list)
     assert all("title" in q for q in data)
+
+
+@pytest.mark.asyncio
+async def test_filter_questions_by_title_and_flags(
+    test_client, create_multiple_questions
+):
+    """
+    Filters by a substring in title + ai_generated + createdBy.
+    Uses the questions inserted by the create_multiple_questions fixture.
+    """
+    payload = {
+        "title": "Question",  # should match "QuestionWithFiles"
+        "ai_generated": True,
+        "createdBy": "tester",
+        # don't include isAdaptive here; your fixtures set it False
+        # add "user_id": 1 if your filter requires it
+    }
+
+    resp = test_client.post(
+        "/question_crud/filter_questions/",
+        json=payload,
+    )
+    assert resp.status_code == 200
+
+    data = resp.json()
+    assert isinstance(data, list)
+    assert len(data) >= 1
+
+    # Basic sanity checks on the filtered results
+    for q in data:
+        assert "title" in q
+        assert "createdBy" in q
+        assert q["ai_generated"] is True
+        assert "Question" in q["title"]
+        assert q["createdBy"] == "tester"
+
+
+@pytest.mark.asyncio
+async def test_update_question_meta_title_and_isadaptive(
+    test_client, question_payload_model_no_files
+):
+    """
+    Creates a single question, then PATCHes metadata (title, isAdaptive).
+    Verifies the route returns the updated object.
+    """
+    # 1) Create a question to get its id
+    create_resp = test_client.post(
+        "/question_crud/create_question/text/",
+        json=jsonable_encoder(question_payload_model_no_files),
+    )
+    assert create_resp.status_code == 200
+    created = create_resp.json()
+    assert "question" in created
+    quid = created["question"]["id"]
+
+    # 2) Patch its metadata
+    updates = {
+        "title": "Updated Title",
+        "isAdaptive": True,
+    }
+    patch_resp = test_client.patch(
+        f"/question_crud/update_question/{quid}",
+        json=updates,
+    )
+    assert patch_resp.status_code == 200
+
+    updated = patch_resp.json()
+    # Depending on your edit_question_meta return shape, this may be a dict with the fields
+    assert updated["id"] == quid
+    assert updated["title"] == "Updated Title"
+    assert updated["isAdaptive"] is True

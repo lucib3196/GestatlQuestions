@@ -10,6 +10,7 @@ from backend_api.service import question_file_service
 from starlette import status
 from fastapi import APIRouter, HTTPException
 from backend_api.core.logging import logger
+from backend_api.utils import normalize_kwargs
 
 router = APIRouter(prefix="/question_crud")
 
@@ -163,15 +164,27 @@ async def delete_all(session: SessionDep):
 async def filter_questions(session: SessionDep, filters: QuestionMeta):
     try:
         kwargs = filters.model_dump(exclude_none=True)
-        normalized_kwargs = {}
-        if isinstance(kwargs, dict):
-            for key, value in kwargs.items():
-                if isinstance(value, list):
-                    f = [v["name"] for v in value if isinstance(v, dict)]
-                    normalized_kwargs[key] = f
-                else:
-                    normalized_kwargs[key] = value
-        result = await question_crud.filter_questions_meta(session, **normalized_kwargs)
+        norm_k = normalize_kwargs(kwargs)
+        result = await question_crud.filter_questions_meta(session, **norm_k)
+        return result
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
+@router.patch("/update_question/{quid}")
+async def update_question(
+    quid: Union[str, UUID], session: SessionDep, updates: QuestionMeta
+):
+    try:
+        kwargs = updates.model_dump(exclude_none=True)
+        norm_k = normalize_kwargs(kwargs)
+        result = await question_crud.edit_question_meta(
+            question_id=quid, session=session, **norm_k
+        )
         return result
     except HTTPException as e:
         raise e

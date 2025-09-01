@@ -105,3 +105,14 @@ def get_model_relationship_data(model, relationships: List[str]):
                 else value
             )
     return data
+
+
+def normalize_kwargs(kwargs: dict):
+    normalized = {}
+    for key, value in kwargs.items():
+        if isinstance(value, list):
+            f = [v.get("name") for v in value if isinstance(v, dict)]
+            normalized[key] = f
+        else:
+            normalized[key] = value
+    return normalized

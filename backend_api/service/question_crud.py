@@ -15,6 +15,7 @@ from backend_api.model.question_model import (
 )
 from backend_api.data import question_db as qdata
 from backend_api.core.logging import logger
+from backend_api.utils import get_uuid
 
 
 async def create_question(
@@ -92,11 +93,14 @@ async def edit_question_meta(
     question_id: Union[str, UUID], session: SessionDep, **kwargs
 ):
     try:
+        question_id = get_uuid(question_id)
         updated_question = qdata.update_question(session, question_id, **kwargs)
-        return updated_question
+        return await get_question_data(question_id=updated_question.id, session=session)
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error updating Question {question_id}: {str(e)}",
         )
 
