@@ -84,7 +84,7 @@ async def test_get_question_by_id(db_session, question_payload_minimal_dict):
     # Not found
     with pytest.raises(HTTPException) as excinfo:
         await qcrud_service.get_question_by_id(uuid.uuid4(), db_session)
-    assert excinfo.value.status_code == 204
+    assert excinfo.value.status_code == 404
     assert "Question does not exist" in str(excinfo.value.detail)
 
     # Bad UUID
@@ -130,7 +130,7 @@ async def test_delete_question_by_id(db_session, seed_questions):
     # Not found
     with pytest.raises(HTTPException) as excinfo:
         await qcrud_service.delete_question_by_id(uuid.uuid4(), db_session)
-    assert excinfo.value.status_code == 400
+    assert excinfo.value.status_code == 404
 
     # Bad UUID
     with pytest.raises(HTTPException) as excinfo:
@@ -208,11 +208,11 @@ async def test_filter_questions_meta(db_session, seed_questions):
     )
     assert isinstance(only_false, list)
     assert len(only_false) == 1
-    assert only_false[0].ai_generated is False
+    assert only_false[0]["ai_generated"] is False
 
     # Filter by title substring (case-insensitive, depends on your filter logic)
     titled = await qcrud_service.filter_questions_meta(db_session, title="SomeTitle")
-    assert all("sometitle" in q.title.lower() for q in titled)  # type: ignore # fix:ignore
+    assert all("sometitle" in q["title"].lower() for q in titled)  # type: ignore # fix:ignore
 
     # Filter by relationship name (expects your filter to support .any on Topic.name)
     with_topics = await qcrud_service.filter_questions_meta(
@@ -221,7 +221,7 @@ async def test_filter_questions_meta(db_session, seed_questions):
     # At least the full dict question should match (has both Topic1/Topic2); depending on OR/AND within-key,
     # this may include others. We assert that at least one has one of those topics.
     assert any(
-        any(t.name in {"topic1", "topic2"} for t in q.topics) for q in with_topics
+        any(t["name"] in {"topic1", "topic2"} for t in q["topics"]) for q in with_topics
     )
 
 

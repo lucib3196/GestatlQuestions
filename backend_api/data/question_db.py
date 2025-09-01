@@ -268,7 +268,6 @@ def filter_questions(session, partial_match=True, **kwargs):
     mapper = sa_inspect(Question)
     filters = []
 
-    filters = []
     # Deconstruct the mapping
     for key, value in kwargs.items():
         # skip unknown attributes

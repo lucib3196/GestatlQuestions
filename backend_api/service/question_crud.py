@@ -1,11 +1,12 @@
 # Standard library
 from typing import Union
 from uuid import UUID
+import asyncio
 
 # Third-party
 from fastapi import HTTPException
 from starlette import status
-from typing import Sequence
+from typing import Sequence, Dict, List, Any
 
 # Local
 from backend_api.data.database import SessionDep
@@ -100,19 +101,16 @@ async def edit_question_meta(
         )
 
 
-async def filter_questions_meta(session: SessionDep, **kwargs) -> Sequence[Question]:
+async def filter_questions_meta(session: SessionDep, **kwargs) -> List[Dict[str, Any]]:
     try:
         questions = qdata.filter_questions(session, **kwargs)
-        if not questions:
-            raise HTTPException(
-                status_code=status.HTTP_204_NO_CONTENT, detail="No questions fit filter"
-            )
-        return questions
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Unknown Error str(e)",
-        )
+        tasks = [
+            qdata.get_question_data(question_id=r.id, session=session)
+            for r in questions
+        ]
+        return await asyncio.gather(*tasks)
+    except HTTPException as e:
+        raise e
 
 
 async def get_question_data(question_id: Union[str, UUID], session: SessionDep):

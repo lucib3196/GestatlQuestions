@@ -234,7 +234,6 @@ def test_get_question_data_all_no_files(test_client, create_question_response_no
     qid = create_resp.json()["question"]["id"]
 
     r = test_client.get(f"/question_crud/get_question_data_all/{qid}")
-    print(r)
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == 200
@@ -354,12 +353,27 @@ async def test_delete_question(test_client, create_question_response_no_files):
 
 # Testing getting all the questions
 @pytest.mark.asyncio
-async def test_get_all_questions_simple(
-    test_client, create_multiple_questions, db_session
-):
+async def test_get_all_questions_simple(test_client, create_multiple_questions):
     response = test_client.get("/question_crud/get_all_questions_simple/0/100")
     number_questions = 3
     question_list = response.json()
     assert response.status_code == 200
     assert isinstance(question_list, list)
     assert len(question_list) == number_questions
+
+
+# Test Filtering Questions
+### Notes: This test needs to be a bit more robuts but basically it just checks to make sure that the 
+### Routes runs and asserts its a list
+@pytest.mark.asyncio
+async def test_question_filter(test_client, create_multiple_questions):
+    payload = {
+        "title": "Sample",  # substring to search in title
+    }
+
+    response = test_client.post("/question_crud/filter_questions/", json=payload)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert all("title" in q for q in data)

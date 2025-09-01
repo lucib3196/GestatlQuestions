@@ -6,9 +6,9 @@ from sqlalchemy import Boolean, JSON, Column, text
 from sqlmodel import SQLModel, Field, Relationship
 from pydantic import BaseModel, Field as PydanticField
 from .links import *
-from .qtype_model import QType
-from .language_model import Language
-from .topic_model import Topic
+from .qtype_model import QType, QTypeBase
+from .language_model import Language, LanguageBase
+from .topic_model import Topic, TopicBase
 from .file_model import File
 
 
@@ -34,15 +34,15 @@ class QuestionMetaNew(BaseModel):
 
 
 class QuestionMeta(BaseModel):
-    id: UUID
-    title: str
-    ai_generated: bool
-    isAdaptive: bool
+    id: Optional[UUID] = None
+    title: Optional[str] = None
+    ai_generated: Optional[bool] = None
+    isAdaptive: Optional[bool] = None
     createdBy: Optional[str] = None
     user_id: Optional[int] = None
-    topics: Optional[List["Topic"]] = None
-    languages: Optional[List["Language"]] = None
-    qtypes: Optional[List["QType"]] = None
+    topics: Optional[Union[List["TopicBase"], List["Topic"]]] = None
+    languages: Optional[Union[List["LanguageBase"], List["Language"]]] = None
+    qtypes: Optional[Union[List["QTypeBase"], List["QType"]]] = None
 
     class Config:
         from_attributes = True

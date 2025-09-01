@@ -3,7 +3,7 @@ import pytest
 from backend_api.model import Question, File
 from backend_api.data import question_db
 from backend_api.data import file_db
-from app_test.conftest import  db_session
+from app_test.conftest import db_session
 
 
 @pytest.fixture
@@ -26,7 +26,6 @@ def create_question_with_code_file_serverjs(db_session):
         question_id=q_created.id,
     )
     file_db.add_file(f, db_session)
-    print(f"Added {q_title} and {filename} to db returning question ")
     return q_created
 
 
@@ -42,7 +41,6 @@ def create_question_with_code_file_serverpy(db_session):
         user_id=1,
     )
     q_created = question_db.create_question(q, db_session)
-    print("Created question succsefully")
     python_path = Path(r"app_test\code_scripts\test.py").resolve()
     f = File(
         filename=filename,
@@ -50,7 +48,6 @@ def create_question_with_code_file_serverpy(db_session):
         question_id=q_created.id,
     )
     file_db.add_file(f, db_session)
-    print(f"Added {q_title} and {filename} to db returning question ")
     return q_created
 
 

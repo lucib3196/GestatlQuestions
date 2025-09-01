@@ -97,11 +97,14 @@ async def get_question_data_all_by_id(
     try:
         q = await question_crud.get_question_data(qid, session)
         q_response = QuestionMeta.model_validate(q)
-        file_response = question_file_service.get_all_files(q_response.id, session)
+        file_data = []
+        if q_response.id is not None:
+            file_response = question_file_service.get_all_files(q_response.id, session)
+            file_data = file_response.file_obj
         return QuestionReadResponse(
             status=status.HTTP_200_OK,
             question=q_response,
-            files=file_response.file_obj,
+            files=file_data,
             detail=f"Retrieved question data {q_response.title}",
         )
     except HTTPException:
@@ -154,3 +157,25 @@ async def delete_all(session: SessionDep):
         r = await question_crud.delete_all_questions(session)
     except HTTPException as e:
         raise e
+
+
+@router.post("/filter_questions/")
+async def filter_questions(session: SessionDep, filters: QuestionMeta):
+    try:
+        kwargs = filters.model_dump(exclude_none=True)
+        normalized_kwargs = {}
+        if isinstance(kwargs, dict):
+            for key, value in kwargs.items():
+                if isinstance(value, list):
+                    f = [v["name"] for v in value if isinstance(v, dict)]
+                    normalized_kwargs[key] = f
+                else:
+                    normalized_kwargs[key] = value
+        result = await question_crud.filter_questions_meta(session, **normalized_kwargs)
+        return result
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
