@@ -18,7 +18,7 @@ from fastapi.openapi.utils import get_openapi
 
 # Internal imports
 from backend_api.core.config import settings
-from backend_api.data.database import create_db_and_tables
+from backend_api.data.database import init_db
 
 # Routers
 # from backend_api.web.authentication import router
@@ -32,9 +32,14 @@ from backend_api.web.question_crud import router as q_crud
 
 # Define startup activity
 # Define database and create on starup
+# Set the database
+
+
 @asynccontextmanager
 async def on_startup(app: FastAPI):
-    create_db_and_tables()
+    # Only initialize DB in dev/prod, not in tests
+    if settings.ENV in ("dev", "prod"):
+        init_db()
     yield
 
 

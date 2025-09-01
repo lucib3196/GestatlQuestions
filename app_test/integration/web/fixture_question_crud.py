@@ -122,3 +122,21 @@ def create_question_response_with_additional_meta(
         question_payload_with_files_and_meta["files"],
         question_payload_with_files_and_meta["additional_metadata"],
     )
+
+
+@pytest.fixture
+def create_multiple_questions(
+    test_client,
+    question_payload_model_no_files,
+    question_payload_model_with_files,
+    question_payload_with_files_and_meta,
+):
+    payloads = [
+        jsonable_encoder(question_payload_with_files_and_meta),
+        jsonable_encoder(question_payload_model_with_files),
+        jsonable_encoder(question_payload_model_no_files),
+    ]
+    for i, p in enumerate(payloads):
+        print("Number", i)
+        test_client.post("/question_crud/create_question/text/", json=p)
+    print("Added questiosn successfully")

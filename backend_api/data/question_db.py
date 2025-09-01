@@ -20,6 +20,7 @@ from backend_api.data import topic_db as t_service
 from backend_api.data.database import SessionDep
 from backend_api.model.question_model import Language, QType, Question, Topic
 from backend_api.utils import *
+from backend_api.core.logging import logger
 
 
 def get_question_id_UUID(question_id) -> UUID:
@@ -242,8 +243,11 @@ async def get_question_data(
     return data
 
 
-async def get_all_question_data(session: SessionDep) -> List[Dict[str, Any]]:
-    results: Sequence[Question] = get_all_questions(session)
+async def get_all_question_data(
+    session: SessionDep, offset: int = 0, limit: int = 100
+) -> List[Dict[str, Any]]:
+    results: Sequence[Question] = get_all_questions(session, offset=offset, limit=limit)
+    logger.debug("These are the questions %s", results)
     tasks = [get_question_data(question_id=r.id, session=session) for r in results]
     return await asyncio.gather(*tasks)
 

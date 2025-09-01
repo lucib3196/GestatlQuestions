@@ -2,6 +2,8 @@ from app_test.integration.web.fixture_question_crud import *
 from fastapi.encoders import jsonable_encoder
 from uuid import UUID
 from uuid import uuid4
+from fastapi import HTTPException
+from app_test.conftest import db_session
 
 
 # Testing files with no files data
@@ -319,3 +321,45 @@ def test_get_question_data_all_not_found(test_client):
     bad_id = uuid4()
     r = test_client.get(f"/question_crud/get_question_data_all/{bad_id}")
     assert r.status_code == 404
+
+
+# Test Delete Questions
+@pytest.mark.asyncio
+async def test_delete_question_not_valid_id(
+    test_client, create_question_response_no_files
+):
+    _, question = create_question_response_no_files
+    quid = question["id"]
+    # print("This is the quid", quid)
+    bad_id = uuid4()
+    response = test_client.delete(f"/question_crud/delete_question/{bad_id}")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Question does not exist"
+
+
+@pytest.mark.asyncio
+async def test_delete_question(test_client, create_question_response_no_files):
+    create_resp, _ = create_question_response_no_files
+    qid = create_resp.json()["question"]["id"]
+    response = test_client.delete(f"/question_crud/delete_question/{qid}")
+
+    assert response.status_code == 200
+    assert "Question Deleted" in response.json()["detail"]
+
+    # Try getting the data
+    response = test_client.get(f"/question_crud/get_question_data_meta/{qid}")
+    assert response.status_code == 404
+    assert "Question not found" in response.json()["detail"]
+
+
+# Testing getting all the questions
+@pytest.mark.asyncio
+async def test_get_all_questions_simple(
+    test_client, create_multiple_questions, db_session
+):
+    response = test_client.get("/question_crud/get_all_questions_simple/0/100")
+    number_questions = 3
+    question_list = response.json()
+    assert response.status_code == 200
+    assert isinstance(question_list, list)
+    assert len(question_list) == number_questions

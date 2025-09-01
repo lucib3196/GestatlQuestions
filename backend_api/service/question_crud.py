@@ -13,6 +13,7 @@ from backend_api.model.question_model import (
     Question,
 )
 from backend_api.data import question_db as qdata
+from backend_api.core.logging import logger
 
 
 async def create_question(
@@ -53,12 +54,14 @@ async def get_all_questions(
 async def get_question_by_id(question_id: Union[str, UUID], session: SessionDep):
     try:
         results = qdata.get_question_by_id(question_id, session)
+        logger.debug("This is the result of getting the id %s", results)
         if results is None:
             raise HTTPException(
-                status_code=status.HTTP_204_NO_CONTENT, detail="Question does not exist"
+                status_code=status.HTTP_404_NOT_FOUND,  # 404 is more REST-correct
+                detail="Question does not exist",
             )
         return results
-    except ValueError or HTTPException as e:
+    except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad Request {str(e)}"
         )
@@ -75,9 +78,12 @@ async def delete_question_by_id(
         question = await get_question_by_id(question_id, session)
         qdata.delete_question_by_id(question.id, session)
         return {"detail": f"Question Deleted {question.title}"}
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error {str(e)}"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unknown Error {str(e)}",
         )
 
 
@@ -113,13 +119,13 @@ async def get_question_data(question_id: Union[str, UUID], session: SessionDep):
     try:
         result = await qdata.get_question_data(question_id, session)
         return result
-    except HTTPException:
-        raise
+    except HTTPException as e:
+        raise e
 
 
-async def get_all_question_data(session: SessionDep):
+async def get_all_question_data(session: SessionDep, limit: int = 100, offset: int = 0):
     try:
-        result = await qdata.get_all_question_data(session)
+        result = await qdata.get_all_question_data(session, limit=limit, offset=offset)
         return result
-    except HTTPException:
-        raise
+    except HTTPException as e:
+        raise e

@@ -9,7 +9,7 @@ from backend_api.service import question_crud
 from backend_api.service import question_file_service
 from starlette import status
 from fastapi import APIRouter, HTTPException
-
+from backend_api.core.logging import logger
 
 router = APIRouter(prefix="/question_crud")
 
@@ -17,6 +17,11 @@ router = APIRouter(prefix="/question_crud")
 class QuestionFile(BaseModel):
     filename: str
     content: Union[str, dict]
+
+
+class Response(BaseModel):
+    status: int
+    detail: str
 
 
 class QuestionReadResponse(BaseModel):
@@ -101,3 +106,51 @@ async def get_question_data_all_by_id(
         )
     except HTTPException:
         raise
+
+
+@router.get("/get_all_questions_simple/{limit}/{offset}")
+async def get_all_questions_data(session: SessionDep):
+    try:
+        q = await question_crud.get_all_questions(session)
+        return q
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail={e}
+        )
+
+
+@router.get("get_all_questions_meta/{limit}/{offset}")
+async def get_all_questions_meta(
+    session: SessionDep, limit: int = 100, offset: int = 0
+):
+    try:
+        q = await question_crud.get_all_question_data(
+            session=session, limit=limit, offset=offset
+        )
+        return q
+    except HTTPException as e:
+        raise e
+
+
+@router.delete("/delete_question/{quid}")
+async def delete_question_by_id(
+    quid: Union[str, UUID], session: SessionDep
+) -> Response:
+    try:
+        r = await question_crud.delete_question_by_id(quid, session)
+        return Response(detail=r["detail"], status=status.HTTP_200_OK)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        )
+
+
+@router.delete("/delete_all_questions")
+async def delete_all(session: SessionDep):
+    try:
+        r = await question_crud.delete_all_questions(session)
+    except HTTPException as e:
+        raise e

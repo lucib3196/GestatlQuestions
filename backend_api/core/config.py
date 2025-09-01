@@ -1,15 +1,17 @@
-from typing import Optional
+from typing import Optional, Literal
 
 from dotenv import load_dotenv
 from pydantic import AnyHttpUrl, field_validator
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings
 
+
 load_dotenv()
 
 
 class Settings(BaseSettings):
     PROJECT_NAME: str
+    ENV: Literal["testing", "dev", "production"] = "dev"
     BACKEND_CORS_ORIGINS: list[AnyHttpUrl | str] = []
     SECRET_KEY: str
     ALGORITHM: str = "HS256"  # Authentication protocol
