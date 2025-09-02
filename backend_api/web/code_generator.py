@@ -139,7 +139,7 @@ async def generate_question_image_v4(
     return questions
 
 
-from ai_workspace.agents.code_generators.v5.main import (
+from ai_workspace.agents.code_generators.v5.main_text import (
     app as text_genv5,
     State as TextGenV5Input,
 )

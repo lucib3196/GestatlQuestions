@@ -89,7 +89,9 @@ def main():
     )
     question = "A car is traveling along a straight road at 60 mph; calculate distance after 4 hours"
     input_state = CodeGenInput(
-        question_payload=Question(question=question,),  # type: ignore
+        question_payload=Question(
+            question=question,
+        ),  # type: ignore
         initial_metadata=None,
     )  # type: ignore
     for chunk in compiled_graph.stream(input_state, stream_mode="updates"):

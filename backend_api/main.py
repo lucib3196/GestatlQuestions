@@ -27,8 +27,9 @@ from backend_api.data.database import init_db
 # from backend_api.web.code_generator import router as code_generator_router
 # from backend_api.web.user import router as user_route
 # from backend_api.web.db_questions import router as db_question_router
-from backend_api.web.question_crud import router as q_crud
 
+from backend_api.web.question_crud import router as q_crud
+from backend_api.web.file_management import router as file_router
 
 # Define startup activity
 # Define database and create on starup
@@ -50,11 +51,11 @@ def get_application():
     routes = [
         # router,
         # code_generator_router,
-        # file_router,
         # local_question_router,
         # user_route,
         # db_question_router,
-        q_crud
+        q_crud,
+        file_router,
     ]
     for r in routes:
         app.include_router(r)

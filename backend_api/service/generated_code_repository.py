@@ -105,7 +105,7 @@ async def add_generated_db(
     return question
 
 
-from ai_workspace.agents.code_generators.v5.main import CodeGen
+from ai_workspace.agents.code_generators.v5.main_text import CodeGen
 
 
 async def add_generated_dbV5(

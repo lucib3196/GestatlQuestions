@@ -8,7 +8,7 @@ router = APIRouter(prefix="/file")
 
 @router.post("/upload_files")
 async def upload_file(files: List[UploadFile]):
-    return await file_service.upload_file(files)
+    return await file_service.upload_files(files)
 
 
 @router.post("/upload_folder")

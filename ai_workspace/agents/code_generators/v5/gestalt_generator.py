@@ -1,4 +1,4 @@
-from typing import List, Optional, Annotated
+from typing import List, Optional, Annotated, Literal, List
 
 from pydantic import BaseModel
 from langgraph.graph import END, START, StateGraph
@@ -7,6 +7,7 @@ from ai_workspace.models import Question
 from ai_workspace.utils import (
     save_graph_visualization,
     validate_llm_output,
+    to_serializable,
 )
 
 from .generate_metadata import (
@@ -30,6 +31,12 @@ from .generate_solution_html import (
     State as SHtml,
 )
 
+from .generate_new_render import (
+    app as generate_new_render_graph,
+    State as StateNewRender,
+)
+from typing import Literal, List, cast
+
 
 def normalize_bool(val) -> bool:
     return val == True or (isinstance(val, str) and val.lower() == "true")
@@ -40,10 +47,22 @@ def merge_files(existing: dict, new: dict) -> dict:
     return existing
 
 
+# These are additional metadata that are appended to the file
+class UpdatedMetadata(Metadata):
+    language: Optional[List[Literal["python", "javascript"]]] = []
+    qtype: Optional[List[Literal["numerical", "multiple_choice"]]] = None
+
+
 class CodeGen(BaseModel):
     question_payload: Question
     files_data: Annotated[dict, merge_files] = {}
     metadata: Optional[Metadata] = None
+
+
+class FinalState(BaseModel):
+    question_payload: Question
+    files_data: Annotated[dict, merge_files] = {}
+    metadata: Optional[UpdatedMetadata] = None
 
 
 def generate_question_metadata(state: CodeGen):
@@ -130,6 +149,40 @@ def generate_server_py(state: CodeGen):
     return {"files_data": files_data}
 
 
+def generate_new_render(state: CodeGen):
+    result: StateNewRender = validate_llm_output(
+        generate_new_render_graph.invoke(
+            StateNewRender(
+                question_html=state.files_data.get("question.html", ""),
+                solution_html=state.files_data.get("solution.html", ""),
+            )
+        ),
+        StateNewRender,
+    )
+    files_data = {"qrender.json": to_serializable(result.new_render)}
+    return {"files_data": files_data}
+
+
+def finalize_package(state: CodeGen) -> FinalState:
+    if state.files_data.get("server.py") or state.files_data.get("server.js"):
+        language = ["python", "javascript"]
+    else:
+        language = []
+
+    if state.metadata:
+        updated_metadata = UpdatedMetadata(
+            question=state.metadata.question,
+            title=state.metadata.title,
+            topics=state.metadata.topics,
+            isAdaptive=state.metadata.isAdaptive,
+            language=language,  # type: ignore
+            qtype=["numerical"],  # Needs to be fixed,
+        )
+        return {"question_payload": state.question_payload, "files_data": state.files_data, "metadata": updated_metadata}  # type: ignore
+    else:
+        return {"question_payload": state.question_payload, "files_data": state.files_data, "metadata": state.metadata}  # type: ignore
+
+
 def route_server_file_generation(state: CodeGen) -> List[str]:
     """
     Determines which server files (JS/PY) to generate based on adaptivity.
@@ -141,7 +194,7 @@ def route_server_file_generation(state: CodeGen) -> List[str]:
     )
 
 
-graph = StateGraph(CodeGen)
+graph = StateGraph(CodeGen, output_schema=FinalState)
 graph.add_node(
     "generate_question_metadata",
     generate_question_metadata,  # type: ignore
@@ -150,6 +203,9 @@ graph.add_node("generate_question_html", generate_question_html)
 graph.add_node("generate_solution_html", generate_solution_html)
 graph.add_node("generate_server_js", generate_server_js)
 graph.add_node("generate_server_py", generate_server_py)
+graph.add_node("generate_new_render", generate_new_render)
+graph.add_node("finalize_package", finalize_package)
+
 
 graph.add_edge(START, "generate_question_metadata")
 graph.add_edge("generate_question_metadata", "generate_question_html")
@@ -164,6 +220,15 @@ graph.add_conditional_edges(
 graph.add_edge("generate_server_js", END)
 graph.add_edge("generate_server_py", END)
 graph.add_edge("generate_solution_html", END)
+
+
+graph.add_edge("generate_solution_html", "generate_new_render")
+graph.add_edge("generate_server_js", "generate_new_render")
+graph.add_edge("generate_server_py", "generate_new_render")
+
+graph.add_edge("generate_new_render", "finalize_package")
+graph.add_edge("finalize_package", END)
+
 app = graph.compile()
 
 
