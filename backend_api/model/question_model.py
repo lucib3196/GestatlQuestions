@@ -1,6 +1,6 @@
 from typing import List, Optional, Union, Literal, TypedDict
 from uuid import UUID, uuid4
-from ai_workspace.agents.question_to_json.models import QuestionBase, Solution
+from ai_workspace.models import QuestionBase
 from sqlalchemy import Boolean, JSON, Column, text
 
 from sqlmodel import SQLModel, Field, Relationship

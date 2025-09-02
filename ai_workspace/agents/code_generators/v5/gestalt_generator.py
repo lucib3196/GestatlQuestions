@@ -10,6 +10,7 @@ from ai_workspace.utils import (
     to_serializable,
 )
 
+from backend_api.utils import to_bool
 from .generate_metadata import (
     compiled_graph as metadata_graph,
     MetadataInput as Metadata,
@@ -183,14 +184,14 @@ def finalize_package(state: CodeGen) -> FinalState:
         return {"question_payload": state.question_payload, "files_data": state.files_data, "metadata": state.metadata}  # type: ignore
 
 
-def route_server_file_generation(state: CodeGen) -> List[str]:
+def route_server_file_generation(state: CodeGen):
     """
     Determines which server files (JS/PY) to generate based on adaptivity.
     """
     return (
         ["generate_server_js", "generate_server_py"]
-        if bool(state.metadata.isAdaptive if state.metadata else False)
-        else []
+        if normalize_bool(state.metadata.isAdaptive if state.metadata else False)
+        else "generate_new_render"
     )
 
 
@@ -214,13 +215,8 @@ graph.add_edge("generate_question_html", "generate_solution_html")
 graph.add_conditional_edges(
     "generate_question_html",
     route_server_file_generation,  # type: ignore
-    ["generate_server_js", "generate_server_py"],
+    ["generate_server_js", "generate_server_py", "generate_new_render"],
 )
-
-graph.add_edge("generate_server_js", END)
-graph.add_edge("generate_server_py", END)
-graph.add_edge("generate_solution_html", END)
-
 
 graph.add_edge("generate_solution_html", "generate_new_render")
 graph.add_edge("generate_server_js", "generate_new_render")
@@ -239,15 +235,15 @@ def main():
     save_graph_visualization(
         app,  # type: ignore
         filename="code_generator_v5.png",
-        base_path=r"ai_workspace\agents\code_generators\v5\graphs",
+        base_path=r"ai_workspace\agents\code_generators\v5",
     )
-    question = "A car is traveling along a straight road at 60 mph; calculate distance after 4 hours"
-    input_state = CodeGen(
-        question_payload=Question(question=question),  # type: ignore
-    )  # type: ignore
-    for chunk in app.stream(input_state, stream_mode="updates"):
-        print(chunk)
-        print("/n")
+    # question = "A car is traveling along a straight road at 60 mph; calculate distance after 4 hours"
+    # input_state = CodeGen(
+    #     question_payload=Question(question=question),  # type: ignore
+    # )  # type: ignore
+    # for chunk in app.stream(input_state, stream_mode="updates"):
+    #     print(chunk)
+    #     print("/n")
 
 
 if __name__ == "__main__":

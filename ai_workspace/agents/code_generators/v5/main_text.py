@@ -2,7 +2,11 @@ from ai_workspace.agents.code_generators.v4_5.extract_question_text import (
     app as question_extraction,
     State as QExtractionState,
 )
-from .gestalt_generator import app as gestalt_generator, CodeGen
+from .gestalt_generator import (
+    app as gestalt_generator,
+    CodeGen,
+    FinalState as CodeGenFinal,
+)
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel
 from ai_workspace.models import Question
@@ -14,7 +18,7 @@ import asyncio
 class State(BaseModel):
     text: str
     questions: List[Question] = []
-    gestalt_code: List[CodeGen] = []
+    gestalt_code: List[CodeGenFinal] = []
 
 
 async def extract_question(state: State):

@@ -10,9 +10,12 @@ from langgraph.graph import StateGraph
 from pydantic import BaseModel
 import pandas as pd
 from langchain_core.messages import SystemMessage
+from typing import Sequence, Union
+from langchain_core.messages import BaseMessage, SystemMessage
+from langchain_core.prompt_values import ChatPromptValue
 
 def save_graph_visualization(
-    graph: StateGraph,
+    graph,
     filename: str = "Graph.png",
     base_path: Optional[str] = None,
 ) -> None:
@@ -26,11 +29,12 @@ def save_graph_visualization(
     """
     try:
         image_bytes = graph.get_graph().draw_mermaid_png()  # type: ignore
+        print("Got image bites")
         display(Image(image_bytes))
 
         save_dir = base_path or os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(save_dir, filename)
-        
+
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         with open(file_path, "wb") as file:
@@ -69,7 +73,7 @@ async def pdf_to_image_temp(
             page_img = f"{pdf_name}_page_{page_number + 1}.png"
             temp_path = os.path.join(tmpdir, page_img)
 
-            pix = page.get_pixmap() # type: ignore
+            pix = page.get_pixmap()  # type: ignore
             pix.save(temp_path)
 
             if page_number == 0:
@@ -125,15 +129,15 @@ async def pdf_to_image_persistent(
             height = rect.height
             # Get the right hand cornder
             point = (width - 25, height - 25)
-            page.draw_circle(point, 25) # type: ignore
+            page.draw_circle(point, 25)  # type: ignore
             font_size = 30
             point = fitz.Point(point[0], point[1])
-            page.insert_text(point=point, text=str(page_number), fontsize=font_size) # type: ignore
+            page.insert_text(point=point, text=str(page_number), fontsize=font_size)  # type: ignore
 
         page_img = f"{pdf_name}_page_{page_number}.png"
         temp_path = os.path.join(folder_path, page_img)
 
-        pix = page.get_pixmap() # type: ignore
+        pix = page.get_pixmap()  # type: ignore
         pix.save(temp_path)
         image_paths.append(temp_path)
 
@@ -178,16 +182,24 @@ def validate_columns(df: pd.DataFrame, columns: list[str]):
         return False
     return True
 
-def inject_message(messages, content: str):
-    last_msg_index = max(
-        (i for i, m in enumerate(messages) if isinstance(m, SystemMessage)), default=1
-    )
-    insert_idx = last_msg_index + 1
 
-    messages = (
-        messages[:insert_idx] + [SystemMessage(content=content)] + messages[insert_idx:]
-    )
-    return messages
+def inject_message(
+    messages: Union[Sequence[BaseMessage], ChatPromptValue],
+    content: str,
+    insert_idx: int = 0,
+) -> list[BaseMessage]:
+    """
+    Insert a SystemMessage into a chat message sequence (or ChatPromptValue).
+
+    - Accepts either a concrete sequence[List[BaseMessage]] or a ChatPromptValue.
+    - Returns a new list with the injected SystemMessage at insert_idx.
+    """
+    # Convert ChatPromptValue -> list[BaseMessage]
+    if isinstance(messages, ChatPromptValue):
+        messages = messages.to_messages()  # <-- critical conversion
+    # Ensure we can slice safely
+    seq = list(messages)
+    return seq[:insert_idx] + [SystemMessage(content=content)] + seq[insert_idx:]
 
 
 def validate_llm_output(output: Any, model_class: type):
@@ -196,5 +208,6 @@ def validate_llm_output(output: Any, model_class: type):
     elif isinstance(output, model_class):
         return output
     else:
-        raise TypeError("Unexpected Result")
-
+        raise TypeError(
+            f"Unexpected Resuls: Output is of type {type(output)} expected type {model_class}"
+        )

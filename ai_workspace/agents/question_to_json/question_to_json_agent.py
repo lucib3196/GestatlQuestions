@@ -1,6 +1,6 @@
 from langchain_openai import ChatOpenAI
 from langsmith import Client
-from .models import QuestionBase
+from ai_workspace.models import QuestionBase
 from typing import Literal
 from pydantic import BaseModel, Field
 from typing import List

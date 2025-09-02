@@ -1,19 +1,27 @@
 // src/features/questions/TableToolbar.tsx
-import React from "react";
 import { MdDelete } from "react-icons/md";
+import { UploadQuestionButton } from "../Tools/UploadQuestionTool";
 
 type Props = {
     canAct: boolean;
     count: number;
     onDelete: () => void;
     onRunTests: () => void;
-    onHandleDownload: () => void
+    onHandleDownload: () => void;
 };
 
-export function TableToolbar({ canAct, count, onDelete, onRunTests, onHandleDownload }: Props) {
+
+
+export function TableToolbar({
+    canAct,
+    count,
+    onDelete,
+    onRunTests,
+    onHandleDownload,
+}: Props) {
     return (
         <div className="w-full border flex items-center justify-center mb-10 py-3 gap-3">
-
+            <UploadQuestionButton />
 
             <button
                 type="button"
@@ -28,20 +36,27 @@ export function TableToolbar({ canAct, count, onDelete, onRunTests, onHandleDown
             >
                 Run Tests
             </button>
-            <button type="button"
-                onClick={onHandleDownload} className={[
+            <button
+                type="button"
+                onClick={onHandleDownload}
+                className={[
                     "border-2 px-3 py-1 rounded-md transition",
                     canAct
                         ? "border-green-600 text-green-700 hover:bg-green-200"
                         : "border-gray-300 text-gray-400 cursor-not-allowed",
-                ].join(" ")}>
+                ].join(" ")}
+            >
                 Download Questions
             </button>
             <button
                 type="button"
                 onClick={canAct ? onDelete : undefined}
                 disabled={!canAct}
-                title={canAct ? `Delete ${count} selected` : "Select questions to enable delete"}
+                title={
+                    canAct
+                        ? `Delete ${count} selected`
+                        : "Select questions to enable delete"
+                }
                 aria-label="Delete selected questions"
                 className={[
                     "inline-flex items-center rounded-md p-2 transition",
@@ -52,7 +67,6 @@ export function TableToolbar({ canAct, count, onDelete, onRunTests, onHandleDown
             >
                 <div className="flex flex-row justify-baseline">
                     Delete Questions <MdDelete size={20} />
-
                 </div>
 
                 <span className="sr-only">Delete</span>

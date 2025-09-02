@@ -6,6 +6,7 @@ from ai_workspace.models.payloads import Question
 from backend_api.core.logging import logger
 from langsmith import Client
 from langgraph.graph import END, START, StateGraph
+from ai_workspace.utils import validate_llm_output
 
 client = Client()
 extract_question_prompt = client.pull_prompt("extract-all-questions")
@@ -33,9 +34,11 @@ async def extract_question(state: InputState) -> IntermediateState:
     extractor = ImageLLMProcessor(
         prompt=extract_question_prompt, schema=ExtractedQuestions, model=fast_llm
     )
-    results = await extractor.send_arequest(state.image_paths)
+    results: ExtractedQuestions = validate_llm_output(
+        await extractor.send_arequest(state.image_paths), ExtractedQuestions
+    )
 
-    return {"questions": results}  # type: ignore
+    return {"questions": results.questions}  # type: ignore
 
 
 graph = StateGraph(

@@ -20,7 +20,6 @@ export function MyModal({ setShowModal, children }: ModalProps) {
                 setShowModal(false);
             }
         }
-
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
