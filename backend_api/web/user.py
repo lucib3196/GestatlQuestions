@@ -16,7 +16,7 @@ async def create_user(user: User, session: Session = Depends(get_session)):
 async def get_all(
     offset: int = 0, limit: int = 10, session: Session = Depends(get_session)
 ):
-    return await service.get_users(session=session, offset=offset, limit=limit)
+    return await service.get_all_users(session=session, offset=offset, limit=limit)
 
 
 @router.get("/get_user/{id}")

@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional
 # --- Third-Party ---
 from fastapi import HTTPException, UploadFile, status
 from pydantic import ValidationError
+from backend_api.utils import to_bool
 
 # --- Internal ---
 from ai_workspace.utils import to_serializable, validate_llm_output
@@ -21,10 +22,9 @@ from ai_workspace.agents.code_generators.v5.main_image import (
     app as image_generator_v5,
     State as ImageState,
 )
-from backend_api.utils import to_bool
 from backend_api.data.database import SessionDep
 from . import question_crud, question_file_service
-from backend_api.core.logging import logger
+
 
 async def process_output(
     gc: CodeGenFinal,
@@ -57,7 +57,7 @@ async def process_output(
     files_data["question_payload.json"] = to_serializable(question_payload)
 
     q_payload: Dict[str, Any] = {
-        "title": metadata.title,
+        "title": meta.get("title") or metadata.title,
         "ai_generated": True,
         "isAdaptive": to_bool(metadata.isAdaptive),
         "createdBy": meta.get("createdBy"),

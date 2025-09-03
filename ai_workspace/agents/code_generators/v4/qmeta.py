@@ -9,7 +9,7 @@ from ai_workspace.agents.question_to_json import (
     question_to_json_chain,
 )
 from typing import List, Optional, Literal
-from ai_workspace.agents.question_to_json.models import QuestionBase, Solution
+from ai_workspace.models import QuestionBase
 from backend_api.model.question_model import QuestionMetaNew
 from ai_workspace.models import Question
 from ai_workspace.utils import to_serializable

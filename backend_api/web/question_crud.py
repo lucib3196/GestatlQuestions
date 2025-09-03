@@ -136,6 +136,40 @@ async def get_all_questions_meta(
         raise e
 
 
+@router.patch("/update_question/{quid}")
+async def update_question(
+    quid: Union[str, UUID], session: SessionDep, updates: QuestionMeta
+):
+    try:
+        kwargs = updates.model_dump(exclude_none=True)
+        norm_k = normalize_kwargs(kwargs)
+        result = await question_crud.edit_question_meta(
+            question_id=quid, session=session, **norm_k
+        )
+        return result
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
+@router.post("/filter_questions/")
+async def filter_questions(session: SessionDep, filters: QuestionMeta):
+    try:
+        kwargs = filters.model_dump(exclude_none=True)
+        norm_k = normalize_kwargs(kwargs)
+        result = await question_crud.filter_questions_meta(session, **norm_k)
+        return result
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
 @router.delete("/delete_question/{quid}")
 async def delete_question_by_id(
     quid: Union[str, UUID], session: SessionDep
@@ -158,37 +192,3 @@ async def delete_all(session: SessionDep):
         r = await question_crud.delete_all_questions(session)
     except HTTPException as e:
         raise e
-
-
-@router.post("/filter_questions/")
-async def filter_questions(session: SessionDep, filters: QuestionMeta):
-    try:
-        kwargs = filters.model_dump(exclude_none=True)
-        norm_k = normalize_kwargs(kwargs)
-        result = await question_crud.filter_questions_meta(session, **norm_k)
-        return result
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-        )
-
-
-@router.patch("/update_question/{quid}")
-async def update_question(
-    quid: Union[str, UUID], session: SessionDep, updates: QuestionMeta
-):
-    try:
-        kwargs = updates.model_dump(exclude_none=True)
-        norm_k = normalize_kwargs(kwargs)
-        result = await question_crud.edit_question_meta(
-            question_id=quid, session=session, **norm_k
-        )
-        return result
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-        )

@@ -21,11 +21,11 @@ from backend_api.core.config import settings
 from backend_api.data.database import init_db
 
 # Routers
-# from backend_api.web.authentication import router
+from backend_api.web.authentication import router as auth_router
 # from backend_api.web.file_management import router as file_router
 # from backend_api.web.local_questions import router as local_question_router
-# from backend_api.web.code_generator import router as code_generator_router
-# from backend_api.web.user import router as user_route
+from backend_api.web.code_generator import router as code_generator_router
+from backend_api.web.user import router as user_route
 # from backend_api.web.db_questions import router as db_question_router
 
 from backend_api.web.question_crud import router as q_crud
@@ -49,10 +49,10 @@ def get_application():
 
     # Add routes
     routes = [
-        # router,
-        # code_generator_router,
+        auth_router,
+        code_generator_router,
         # local_question_router,
-        # user_route,
+        user_route,
         # db_question_router,
         q_crud,
         file_router,
@@ -113,49 +113,6 @@ app = get_application()
 @app.get("/startup", status_code=status.HTTP_200_OK)
 def startup_connection():
     return {"message": "The API is LIVE!!"}
-
-
-# Authentication
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-class User(BaseModel):
-    username: str
-    email: str | None = None
-    fullname: str | None = None
-    disabled: bool | None = None
-
-
-def fake_decode_token(token):
-    return User(
-        username=token + "fakedecoded", email="john@example.com", fullname="John Doe"
-    )
-
-
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-    user = fake_decode_token(token)
-    return user
-
-
-@app.get("/users/me")
-async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
-    return current_user
-
-
-@app.get("/items/")
-async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
-    return {"token": token}
-
-
-class Question(BaseModel):
-    title: str
-    content_url: str  # URL to uploaded file
-
-
-class Assign(BaseModel):
-    reviewer_id: str
-
 
 def main():
     uvicorn.run(
