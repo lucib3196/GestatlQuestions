@@ -1,5 +1,3 @@
-
-
 import { MathJaxContext } from "better-react-mathjax";
 import QuestionProvider from "./context/QuestionFilterContext";
 import QuestionSettingsProvider from "./context/GeneralSettingsContext";
@@ -8,7 +6,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { QuestionDBProvider } from "./context/QuestionContext";
 import NavBar from "./components/NavBar";
 import { ToastContainer } from "react-toastify";
-
+import LogsProvider from "./context/CodeLogsContext";
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {
@@ -17,28 +15,24 @@ const config = {
   },
 };
 
-
 function App() {
-
   return (
-    <AuthProvider >
+    <AuthProvider>
       <QuestionDBProvider>
         <MathJaxContext version={3} config={config}>
-            <QuestionProvider >
-              <QuestionSettingsProvider>
-                <RunningQuestionProvider>
-                
+          <QuestionProvider>
+            <QuestionSettingsProvider>
+              <RunningQuestionProvider>
+                <LogsProvider>
                   {/* Main Content */}
                   <NavBar />
                   <ToastContainer />
-                  
+
                   {/* End of Main Content */}
-  
-                  
-                </RunningQuestionProvider>
-              </QuestionSettingsProvider>
-            </QuestionProvider>
-          
+                </LogsProvider>
+              </RunningQuestionProvider>
+            </QuestionSettingsProvider>
+          </QuestionProvider>
         </MathJaxContext>
       </QuestionDBProvider>
     </AuthProvider>

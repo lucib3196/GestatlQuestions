@@ -10,10 +10,10 @@ import { QuestionSettingsContext } from "../../context/GeneralSettingsContext";
 import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
 
 // API
-import { getAdaptiveParams, getQuestionMeta } from "../../api/questionClient";
+import { getAdaptiveParams, getQuestionMeta } from "../../api/questionHooks";
 
 // Utils
-import { trueish } from "../../utils/truish";
+import { trueish } from "../../utils";
 
 // Components
 import QuestionInfo from "./QuestionInfo";

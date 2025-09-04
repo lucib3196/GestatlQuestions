@@ -115,7 +115,7 @@ export const processPrairielearnTags = (
   // pl-hint (collect solutionsStrings)
   $("pl-hint").each((_, el) => {
     const res = plutil.pl_hint($, qdata, el);
-    console.log("This is the current res", res)
+  
 
     solutionsStrings[res.level] = res.htmlString;
     formattedSolution = Object.entries(solutionsStrings)

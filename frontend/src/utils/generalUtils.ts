@@ -1,5 +1,10 @@
+export function toStringSafe(value: any) {
+  if (value == null) return "";
+  if (typeof value === "string") return value;
+  return JSON.stringify(value);
+}
 
-// Converst value to a boolean 
+// Converst value to a boolean
 export function trueish(v: unknown): boolean {
   if (typeof v === "boolean") return v;
   if (typeof v === "number") return v != 0;

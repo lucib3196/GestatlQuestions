@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
 
 // API & Context
-import { searchQuestions } from "../../api/questionClient";
+import { searchQuestions } from "../../api";
 import { useQuestionContext } from "../../context/QuestionContext";
 
 // Types

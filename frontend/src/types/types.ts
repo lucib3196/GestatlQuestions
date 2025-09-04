@@ -104,3 +104,8 @@ export type QuestionMeta = {
   qtypes?: GenericRelationship[];
   languages?: GenericRelationship[];
 };
+
+export type FileData = {
+    filename: string;
+    content: string;
+};

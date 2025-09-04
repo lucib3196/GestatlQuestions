@@ -1,183 +1,82 @@
-import { useContext, useEffect, useState } from "react";
+//  React core
+import { useContext, useEffect, useMemo, useState } from "react";
 
-// Context
+//  Context
 import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
-import { useCallback } from "react";
-// Components
+
+//  API
+import { getFiles } from "../../api";
+//  Utilities
+import { fetchFileContent, getFileNames, getLanguage } from "../../utils";
+//  Types
+import type { FileData } from "../../types/types";
+//  Components
 import CodeEditor from "./CodeEditor";
-import CreateFileModal from "./CreateFileModal";
-import { SaveCodeButton, CreateFileButton, UploadFileButton } from "../Buttons";
-import { UploadFileModal } from "./UploadFileModal";
-// API
-import api from "../../api/api";
-import { toast } from 'react-toastify';
-// MUI Components
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import type { SelectChangeEvent } from "@mui/material/Select";
+import CodeFileDropDown from "./CodeFileDropDown";
 
-type CodeFileDropDownProps = {
-    fileNames: string[];
-    selectedFile: string;
-    setSelectedFile: (val: string) => void;
-};
+import { LogOutput } from "./LogPrint";
+import { CodeEditorOptions } from "./CodeEditorOptions";
 
-
-function toStringSafe(value: any) {
-    if (value == null) return "";
-    if (typeof value === "string") return value;
-    return JSON.stringify(value)
-}
-function CodeFileDropDown({
-    fileNames,
-    selectedFile,
-    setSelectedFile,
-}: CodeFileDropDownProps) {
-    const handleFileChange = (event: SelectChangeEvent) => {
-        setSelectedFile(event.target.value as string);
-    };
-
-    return (
-        <FormControl fullWidth size="small" sx={{ mt: 2 }}>
-            <InputLabel id="code-file-select-label">File</InputLabel>
-            <Select
-                labelId="code-file-select-label"
-                id="code-file-select"
-                value={selectedFile}
-                label="File"
-                onChange={handleFileChange}
-                sx={{ backgroundColor: "background.paper" }}
-            >
-                {fileNames.map((val) => (
-                    <MenuItem key={val} value={val}>
-                        {val}
-                    </MenuItem>
-                ))}
-            </Select>
-        </FormControl>
-    );
-}
-
-type FileData = {
-    filename: string;
-    content: string;
-};
 function QuestionCodeEditor() {
     const { selectedQuestion } = useContext(RunningQuestionSettingsContext);
     const [filesData, setFileData] = useState<FileData[]>([]);
-
-    const [fileNames, setFileNames] = useState<string[]>([]);
     const [selectedFile, setSelectedFile] = useState<string>("");
-    const [fileContent, setFileContent] = useState<string>("");
-    const [showAddFile, setShowAddFile] = useState(false);
-    const [uploadFile, setUploadFile] = useState(false);
+    const [showLogOutput, setShowLogOutput] = useState(false)
 
-    const fetchFiles = useCallback(
-        async (id: string) => {
-            try {
-                const res = await api.get(
-                    `/question_crud/get_question/${encodeURIComponent(id)}/get_all_files`
-                );
-                setFileData(Array.isArray(res.data) ? res.data : []);
-            } catch (err) {
-                console.error("Failed to fetch file names:", err);
-                setFileData([]);
-            }
-        },
-        [api]
-    );
-
+    const [fileContent, setFileContent] = useState("");
     useEffect(() => {
         const id = String(selectedQuestion ?? "").trim();
         if (!id) {
             setFileData([]);
             return;
         }
-        fetchFiles(id);
-    }, [selectedQuestion, fetchFiles]);
+        (async () => {
+            const files = await getFiles(id);
+            setFileData(files ?? []);
+            const first = getFileNames(files ?? [])[0] ?? "";
+            setSelectedFile(first);
+        })();
+    }, [selectedQuestion]);
+    const fileNames = useMemo(() => getFileNames(filesData), [filesData]);
 
-    useEffect(() => {
-        const names = (filesData ?? [])
-            .map((f) => (typeof f?.filename === "string" ? f.filename : null))
-            .filter(Boolean) as string[];
-        setFileNames(names);
-    }, [filesData]);
+    useEffect(
+        () => setFileContent(fetchFileContent(selectedFile, filesData) ?? ""),
+        [selectedFile, filesData]
+    );
 
-    useEffect(() => {
-        if (fileNames.length > 0) {
-            setSelectedFile(fileNames[0]);
-        }
-    }, [fileNames]);
-
-    const fetchFileContent = (filename: string) => {
-        try {
-            const match = filesData?.find((f) => f.filename === filename);
-            if (!match) {
-                console.warn(`File not found: ${filename}`);
-                setFileContent("");
-                return;
-            }
-            setFileContent(toStringSafe(match.content) ?? "");
-
-        } catch (err) {
-            console.error("Failed to fetch file content:", err);
-        }
-    };
-    useEffect(() => {
-        if (selectedFile) {
-            fetchFileContent(selectedFile);
-        } else {
-            setFileContent("");
-        }
-    }, [selectedFile]);
-
-
-    const saveCode = async () => {
-        try {
-            await api.post("/db_questions/update_file/", {
-                title: selectedQuestion,
-                filename: selectedFile,
-                newcontent: fileContent,
-            });
-
-            toast.success("Code Saved Succesfully")
-        } catch (err) {
-            toast.error("Code Not Saved")
-        }
-    };
-
-
-    const getLanguage = () =>
-        selectedFile?.split(/[_\.]/).pop() || "";
-    console.log(fileContent)
     return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <div className="flex flex-col items-center justify-center space-y-6">
+            {/* Toolbar Options */}
+            <CodeEditorOptions
+                selectedFile={selectedFile}
+                selectedQuestion={selectedQuestion}
+                fileContent={fileContent}
+            />
+
+            {/* File Selector */}
             <CodeFileDropDown
                 fileNames={fileNames}
                 selectedFile={selectedFile}
                 setSelectedFile={setSelectedFile}
             />
 
-            <div className="flex flex-row justify-start gap-x-5">
-                <SaveCodeButton onClick={saveCode} />
-                <CreateFileButton onClick={() => setShowAddFile((prev) => !prev)} />
-                <UploadFileButton onClick={() => setUploadFile((prev) => !prev)} />
-            </div>
+            {/* Editor */}
+            <CodeEditor
+                content={fileContent}
+                language={getLanguage(selectedFile)}
+                onChange={setFileContent}
+            />
 
-            <Paper className="z-0" sx={{ mt: 2, p: 2, backgroundColor: "#f5f5f5" }}>
-                <CodeEditor
-                    content={fileContent}
-                    language={getLanguage()}
-                    onChange={(value) => setFileContent(value ?? "")}
-                />
-                {showAddFile && <CreateFileModal showModal={setShowAddFile} />}
-                {uploadFile && <UploadFileModal setShowModal={setUploadFile} />}
-            </Paper>
-        </Box>
+            {/* Logs Toggle */}
+            <button
+                className="rounded-md border-2 border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
+                onClick={() => setShowLogOutput((prev) => !prev)}
+            >
+                {showLogOutput ? "Hide Logs" : "Show Logs"}
+            </button>
+
+            {showLogOutput && <LogOutput />}
+        </div>
     );
 }
 

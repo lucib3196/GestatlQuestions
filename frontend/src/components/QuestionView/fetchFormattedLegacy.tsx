@@ -1,8 +1,9 @@
 import type { QuestionParams } from "../../types/types";
 import applyPlaceHolders from "../../utils/flattenParams";
-import { processPrairielearnTags } from "../../legacy/readPrairielearn";
-import { getQuestionHTML, getSolutionHTML } from "../../api/questionClient";
+import { processPrairielearnTags } from "../../utils/readPrairielearn";
+import { getQuestionHTML, getSolutionHTML } from "../../api";
 import { useState, useEffect } from "react";
+
 export const fetchFormattedLegacyAdaptive = async (
     selectedQuestion: string | null,
     params: QuestionParams | null

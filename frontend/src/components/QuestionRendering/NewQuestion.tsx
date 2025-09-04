@@ -4,9 +4,9 @@ import { MathJax } from "better-react-mathjax";
 
 import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
 import { QuestionSettingsContext } from "../../context/GeneralSettingsContext";
-import { trueish } from "../../utils/truish";
-import { getQuestionMeta } from "../../api/questionClient";
-import { getAdaptiveParams } from "../../api/questionClient";
+import { trueish } from "../../utils";
+import { getQuestionMeta } from "../../api/questionHooks";
+import { getAdaptiveParams } from "../../api/questionHooks";
 import useQuestionRender from "./utils/useQuestionRender";
 
 import { QuestionPanel } from "./QuestionPanel";

@@ -14,7 +14,7 @@ import { TableToolbar } from "./TableToolBar";
 import type { QuestionMeta } from "../../types/types";
 import type { MinimalTestResult } from "./utils/services";
 import { toast } from "react-toastify";
-import { deleteQuestions } from "../../api/questionClient";
+import { deleteQuestions } from "../../api";
 type Props = { results: QuestionMeta[] };
 
 

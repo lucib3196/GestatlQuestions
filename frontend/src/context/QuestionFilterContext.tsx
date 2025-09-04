@@ -22,7 +22,7 @@ export const QuestionFilterContext = createContext<QuestionFilterContextType>({
 const QuestionProvider = ({ children }: { children: React.ReactNode }) => {
     const [isAdaptive, setIsAdaptive] = useState<string | boolean>("false");
     const [showAllQuestions, setShowAllQuestions] = useState<boolean>(false);
-    const [isAIGen, setIsAIGen] = useState<boolean|string>(false);
+    const [isAIGen, setIsAIGen] = useState<boolean | string>(false);
 
     return (
         <QuestionFilterContext.Provider

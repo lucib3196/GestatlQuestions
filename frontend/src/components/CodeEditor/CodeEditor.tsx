@@ -3,17 +3,11 @@ import Editor from '@monaco-editor/react';
 import type { OnChange } from '@monaco-editor/react';
 
 interface CodeEditorProps {
-    /** Initial or current editor content */
     content: string;
-    /** Language key: 'js', 'py', etc. */
-    language: string;
-    /** Callback when content changes */
-    onChange?: (value: string | undefined) => void;
-    /** Editor height (default '60vh') */
+    language: string; /** Language key: 'js', 'py', etc. */
+    onChange?: (value: string) => void;
     height?: string;
 }
-
-// Map shorthand keys to Monaco language identifiers
 const languageMap: Record<string, string> = {
     js: 'javascript',
     py: 'python',
