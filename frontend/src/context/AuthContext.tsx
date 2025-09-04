@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import api from "../api";
+import api from "../api/api";
 
 
 type LoggedInMessage = {

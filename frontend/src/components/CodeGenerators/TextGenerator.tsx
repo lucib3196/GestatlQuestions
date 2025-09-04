@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import ModGenerators from "./BaseTemplate";
 import PopUpHelp from "../PopUpHelp";
-import api from "../../api";
+import api from "../../api/api";
 import { toast } from "react-toastify";
 import { AddQuestionInput } from "./AddQuestionInput";
 
@@ -154,18 +154,22 @@ const InputForm: React.FC = () => {
                 ...(question_title?.trim() ? { question_title } : {}),
             }));
 
-            console.log("This is the payload", payload)
 
-            await api.post(
-                "/codegenerator/v4/text_gen/",
-                { data: payload },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                }
+
+            const requests = payload.map((dataItem) =>
+                api.post(
+                    "/codegenerator/v5/text_gen",
+                    { data: dataItem },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                )
             );
+            const responses = await Promise.all(requests);
+
 
             toast.success("Generated successfully");
         } catch (error: any) {

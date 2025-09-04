@@ -5,10 +5,7 @@ from pydantic import AnyHttpUrl, field_validator
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings
 
-
 load_dotenv()
-
-
 class Settings(BaseSettings):
     PROJECT_NAME: str
     ENV: Literal["testing", "dev", "production"] = "dev"

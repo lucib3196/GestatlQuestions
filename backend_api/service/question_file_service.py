@@ -79,23 +79,28 @@ def get_all_files(
 
     try:
         question_uuid = get_uuid(question_id)
+        question = question_db.get_question_by_id(question_id, session)
+        if not question:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Question is not valid",
+            )
+        results = session.exec(
+            select(File).where(File.question_id == question_uuid)
+        ).all()
+        return SuccessFileResponse(
+            status=status.HTTP_200_OK,
+            detail=f"Got all files for question {question.title}",
+            file_obj=list(results) or [],
+        )
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Question ID is not valid"
         )
-    question = question_db.get_question_by_id(question_id, session)
-    if not question:
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Question is not valid",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
-
-    results = session.exec(select(File).where(File.question_id == question_uuid)).all()
-    return SuccessFileResponse(
-        status=status.HTTP_200_OK,
-        detail=f"Got all files for question {question.title}",
-        file_obj=list(results) or [],
-    )
 
 
 def update_question_file(

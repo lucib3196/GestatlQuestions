@@ -1,8 +1,9 @@
-import type { QuestionDB } from "../../types/types";
+import type { QuestionMeta } from "../../types/types";
 import { Checkbox, TableCell, TableRow } from "@mui/material";
 import type { MinimalTestResult } from "./utils/services";
+
 type Props = {
-    question: QuestionDB;
+    question: QuestionMeta;
     isActive: boolean; // matches context.selectedQuestion
     isChecked: boolean; // from selection hook
     onToggleCheck: (idx: string, title: string, isChecked: boolean) => void;
@@ -26,14 +27,14 @@ export function QuestionRow({
                     value={question.id}
                     checked={isChecked}
                     onChange={(e) =>
-                        onToggleCheck(question.id, question.title, e.target.checked)
+                        onToggleCheck(question.id ?? "", question.title ?? "", e.target.checked)
                     }
                 />
             </TableCell>
 
             <TableCell>
                 <div
-                    onClick={() => onClickTitle(question.id)}
+                    onClick={() => onClickTitle(question.id ?? "")}
                     className={[
                         "flex items-center gap-2 font-medium text-base cursor-pointer",
                         isActive
@@ -47,7 +48,7 @@ export function QuestionRow({
 
             <TableCell>
                 <div className="flex items-center gap-2 font-medium text-base text-indigo-900">
-                    {question.qtype}
+                    {(question.qtypes ?? []).map(q => q.name).join(", ")}
                 </div>
             </TableCell>
 

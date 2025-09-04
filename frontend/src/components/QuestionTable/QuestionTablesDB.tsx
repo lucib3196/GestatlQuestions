@@ -8,13 +8,14 @@ import {
 } from "@mui/material";
 import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
 import { useSelection } from "./utils/useSelection";
-import { deleteQuestions, runQuestionTest, downloadQuestions } from "./utils/services";
+import { runQuestionTest, downloadQuestions } from "./utils/services";
 import { QuestionRow } from './QuestionRow';
 import { TableToolbar } from "./TableToolBar";
-import type { QuestionDB } from "../../types/types";
+import type { QuestionMeta } from "../../types/types";
 import type { MinimalTestResult } from "./utils/services";
 import { toast } from "react-toastify";
-type Props = { results: QuestionDB[] };
+import { deleteQuestions } from "../../api/questionClient";
+type Props = { results: QuestionMeta[] };
 
 
 export function QuestionTable({ results }: Props) {
@@ -76,24 +77,11 @@ export function QuestionTable({ results }: Props) {
                 <Table aria-label="question table">
                     <TableHead>
                         <TableRow>
-                            <TableCell>
-                                <div className="flex items-center gap-2 font-bold text-base text-indigo-900">Select</div>
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex items-center gap-2 font-bold text-base text-indigo-900">Question Title</div>
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex items-center gap-2 font-bold text-base text-indigo-900">Question Type</div>
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex items-center gap-2 font-bold text-base text-indigo-900">Is Adaptive</div>
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex items-center gap-2 font-bold text-base text-indigo-900">CreatedBy</div>
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex items-center gap-2 font-bold text-base text-indigo-900">Test Results</div>
-                            </TableCell>
+                            {["Select", "Question Title", "Question Type", "Is Adaptive", "CreatedBy", "Test Results"].map((h) => (
+                                <TableCell key={h}>
+                                    <div className="flex items-center gap-2 font-bold text-base text-indigo-900">{h}</div>
+                                </TableCell>
+                            ))}
                         </TableRow>
                     </TableHead>
 
@@ -103,7 +91,7 @@ export function QuestionTable({ results }: Props) {
                                 key={q.id}
                                 question={q}
                                 isActive={selectedQuestion === q.id}
-                                isChecked={isSelected(q.id)}
+                                isChecked={isSelected(q.id ?? "")}
                                 onToggleCheck={toggle}
                                 onClickTitle={handleQuestionClick}
                                 testResults={testResults}

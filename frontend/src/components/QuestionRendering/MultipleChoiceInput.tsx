@@ -3,7 +3,7 @@ import { shuffleArray } from "../../utils/mathHelpers";
 import Checkbox from "@mui/material/Checkbox";
 import { useState, useEffect } from "react";
 import type { MultipleChoiceOption } from "../../types/types";
-import CorrectIndicator from "../CorrectIndicator";
+import CorrectIndicator from "../Generic/CorrectIndicator";
 
 type MultipleChoiceProps = {
     name: string;

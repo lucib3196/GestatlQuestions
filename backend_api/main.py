@@ -22,10 +22,13 @@ from backend_api.data.database import init_db
 
 # Routers
 from backend_api.web.authentication import router as auth_router
+
 # from backend_api.web.file_management import router as file_router
 # from backend_api.web.local_questions import router as local_question_router
 from backend_api.web.code_generator import router as code_generator_router
 from backend_api.web.user import router as user_route
+from backend_api.web.question_running import router as question_running_router
+
 # from backend_api.web.db_questions import router as db_question_router
 
 from backend_api.web.question_crud import router as q_crud
@@ -51,11 +54,10 @@ def get_application():
     routes = [
         auth_router,
         code_generator_router,
-        # local_question_router,
         user_route,
-        # db_question_router,
         q_crud,
         file_router,
+        question_running_router,
     ]
     for r in routes:
         app.include_router(r)
@@ -114,12 +116,13 @@ app = get_application()
 def startup_connection():
     return {"message": "The API is LIVE!!"}
 
+
 def main():
     uvicorn.run(
         "backend_api.main:app",
-        host="0.0.0.0",
+        host=os.getenv("HOST", "0.0.0.0"),
         port=int(os.getenv("PORT", 8000)),
-        reload=True,
+        reload=False,
     )
 
 

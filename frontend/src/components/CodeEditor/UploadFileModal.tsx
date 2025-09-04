@@ -1,6 +1,6 @@
 import { MyModal } from "../Generic/MyModal";
 import { useContext, useState } from "react";
-import api from "../../api";
+import api from "../../api/api";
 import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
 type UploadFileModalProps = {
     setShowModal: (visible: boolean) => void;

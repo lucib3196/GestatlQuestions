@@ -31,7 +31,9 @@ function App() {
                   {/* Main Content */}
                   <NavBar />
                   <ToastContainer />
+                  
                   {/* End of Main Content */}
+  
                   
                 </RunningQuestionProvider>
               </QuestionSettingsProvider>

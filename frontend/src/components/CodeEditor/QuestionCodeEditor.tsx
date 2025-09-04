@@ -9,7 +9,7 @@ import CreateFileModal from "./CreateFileModal";
 import { SaveCodeButton, CreateFileButton, UploadFileButton } from "../Buttons";
 import { UploadFileModal } from "./UploadFileModal";
 // API
-import api from "../../api";
+import api from "../../api/api";
 import { toast } from 'react-toastify';
 // MUI Components
 import Box from "@mui/material/Box";
@@ -80,7 +80,7 @@ function QuestionCodeEditor() {
         async (id: string) => {
             try {
                 const res = await api.get(
-                    `/db_questions/get_question_files/${encodeURIComponent(id)}`
+                    `/question_crud/get_question/${encodeURIComponent(id)}/get_all_files`
                 );
                 setFileData(Array.isArray(res.data) ? res.data : []);
             } catch (err) {

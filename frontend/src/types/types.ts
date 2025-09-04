@@ -43,8 +43,6 @@ type CheckboxInput = BaseQuestionInput & {
 
 export type QuestionInput = NumberInput | MultipleChoiceInput | CheckboxInput;
 
-
-
 export type Solution = {
   solution_hint: string[];
 };
@@ -87,4 +85,22 @@ export type QuestionDB = {
   createdBy: string;
   language: string[];
   ai_generated: string[];
+};
+
+// New Interfaces
+
+type GenericRelationship = {
+  name: string;
+  id?: string;
+};
+export type QuestionMeta = {
+  title?: string;
+  ai_generated?: boolean;
+  createdBy?: string;
+  id?: string;
+  isAdaptive?: boolean;
+  user_id?: number;
+  topics?: GenericRelationship[];
+  qtypes?: GenericRelationship[];
+  languages?: GenericRelationship[];
 };

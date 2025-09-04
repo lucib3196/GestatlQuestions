@@ -1,4 +1,4 @@
-import api from "../../../api";
+import api from "../../../api/api";
 import type { AxiosError } from "axios";
 
 type CodeRunResponse = {
@@ -62,16 +62,6 @@ export async function runQuestionTest(
   }
 }
 
-export async function deleteQuestions(ids: string[]): Promise<void> {
-  if (!ids.length) return;
-  await Promise.all(
-    ids.map((id) =>
-      api.post("/db_questions/delete_question", null, {
-        params: { question_id: id },
-      })
-    )
-  );
-}
 
 export function filenameFromDisposition(
   cd?: string | null,

@@ -42,18 +42,11 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     );
     const editorRef = useRef(null);
 
-    function handleEditorDidMount(editor, monaco) {
+    function handleEditorDidMount(editor: any) {
         editorRef.current = editor;
     }
-    function formatCode() {
-        if (editorRef.current) {
-            editorRef.current.getAction("editor.action.formatDocument").run();
-        }
-    }
-
     return (
         <>
-            <button onClick={formatCode}>Format Code</button>
             <Editor
                 height={height}
                 language={resolvedLanguage}

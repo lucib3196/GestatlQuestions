@@ -76,6 +76,29 @@ async def create_question(
         raise
 
 
+@router.get("/get_question/{qid}/file/{filename}")
+async def get_question_file(qid: Union[str, UUID], filename: str, session: SessionDep):
+    try:
+        result = question_file_service.get_question_file(
+            question_id=qid, filename=filename, session=session
+        )
+        print(result)
+        return result.file_obj[0]
+    except HTTPException as e:
+        raise e
+
+
+@router.get("/get_question/{quid}/get_all_files")
+async def get_all_question_files(quid: Union[str, UUID], session: SessionDep):
+    try:
+        result = question_file_service.get_all_files(question_id=quid, session=session)
+        return result.file_obj
+    except HTTPException as e:
+        raise e
+
+@router.post("/update_file_content")
+async def update_file(question_id: Union[UUID, str], filename: str, new_content: str, session: SessionDep)
+
 @router.get("/get_question_data_meta/{qid}")
 async def get_question_only_data_meta_by_id(
     qid: Union[str, UUID], session: SessionDep
@@ -123,7 +146,7 @@ async def get_all_questions_data(session: SessionDep):
         )
 
 
-@router.get("get_all_questions_meta/{limit}/{offset}")
+@router.get("/get_all_questions_meta/{limit}/{offset}")
 async def get_all_questions_meta(
     session: SessionDep, limit: int = 100, offset: int = 0
 ):

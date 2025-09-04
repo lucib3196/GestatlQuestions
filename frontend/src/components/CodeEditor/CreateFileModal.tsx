@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { CloseButton } from "../CloseButton";
-import api from "../../api";
+import api from "../../api/api";
 import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
 
 import { useContext } from "react";

@@ -5,7 +5,6 @@ import { CiCircleInfo } from "react-icons/ci";
 import {
     Modal,
     Box,
-    Typography,
     IconButton,
     FormControl,
     InputLabel,

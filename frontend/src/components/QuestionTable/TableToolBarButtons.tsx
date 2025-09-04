@@ -35,7 +35,7 @@ export const TableToolBarButton = ({
             )}
             disabled={disabled}
         >
-            {icon} {value}
+            icon {value}
         </button>
     );
 };

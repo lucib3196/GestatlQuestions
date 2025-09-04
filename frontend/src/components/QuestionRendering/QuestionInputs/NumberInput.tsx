@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MathJax } from "better-react-mathjax";
-import CorrectIndicator from "../../CorrectIndicator";
+import CorrectIndicator from "../../Generic/CorrectIndicator";
 import { isCloseEnoug } from "../../../utils/mathHelpers";
 import type { NumberInput } from "../../../types/types";
 import { useMemo, useId } from "react";

@@ -54,6 +54,7 @@ async def run_server(
                 detail=f"Failed to serialize server content: {e}",
             )
     elif not isinstance(server_content, str):
+
         server_content = str(server_content)
     # Write to a temp file and execute
 
