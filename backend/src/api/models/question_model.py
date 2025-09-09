@@ -87,6 +87,7 @@ class QType(SQLModel, table=True):
         link_model=QuestionQTypeLink,
     )
 
+
 class Topic(SQLModel, table=True):
     __tablename__ = "topic"  # type: ignore
 

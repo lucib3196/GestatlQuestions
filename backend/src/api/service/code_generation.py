@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 # --- Third-Party ---
 from fastapi import HTTPException, UploadFile, status
 from pydantic import ValidationError
-from api.utils import to_bool
+from src.utils import to_bool
 
 # --- Internal ---
 from ai_workspace.utils import to_serializable, validate_llm_output
@@ -22,7 +22,7 @@ from ai_workspace.agents.code_generators.v5.main_image import (
     app as image_generator_v5,
     State as ImageState,
 )
-from api.data.database import SessionDep
+from src.api.database import SessionDep
 from . import question_crud, question_file_service
 
 

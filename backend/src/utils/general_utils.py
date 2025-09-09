@@ -1,5 +1,5 @@
 from typing import Any, Iterable, List, Optional, Sequence, Union
-from typing import Any
+
 
 _TRUE = {"true", "1", "yes", "y", "on", "t"}
 _FALSE = {"false", "0", "no", "n", "off", "f"}
@@ -19,6 +19,13 @@ def normalize_values(vals: Iterable) -> List[Any]:
         else:
             out.append(v)
     return out
+
+
+def normalize_name(name: str) -> str:
+    """Lowercase + trim; raises if empty after normalization."""
+    if not name or not str(name).strip():
+        raise ValueError("Name cannot be empty")
+    return str(name).lower().strip()
 
 
 def normset(seq):

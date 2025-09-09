@@ -11,11 +11,11 @@ import tempfile
 
 # Local
 from api.core.logging import logger
-from api.data.database import SessionDep
-from code_runner.run_server import run_generate
-from api.utils import get_uuid
-from api.service import question_file_service
-from api.service.question_file_service import SuccessFileResponse
+from src.api.database import SessionDep
+from src.code_runner.run_server import run_generate
+from src.utils import convert_uuid
+from src.api.service import question_file_service
+from src.api.response_models import SuccessFileResponse
 
 
 async def run_server(
@@ -27,7 +27,7 @@ async def run_server(
     mapping_filename = {"python": "server.py", "javascript": "server.js"}
 
     if (isinstance, str):
-        question_id = get_uuid(question_id)
+        question_id = convert_uuid(question_id)
 
     # Validate language
     if code_language not in mapping_db:

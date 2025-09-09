@@ -1,40 +1,32 @@
-from src.api.database import SessionDep
-from src.api.models.users_model import User
-from typing import Annotated
-from fastapi import Query
-from sqlmodel import select
-
-from collections.abc import Sequence
-
 # Standard Library
-from typing import Annotated
+from collections.abc import Sequence
+from typing import Annotated, Optional
 
 # FastAPI
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Query
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from starlette import status
 
 # SQLAlchemy / SQLModel
+from sqlmodel import select
 from sqlalchemy.exc import IntegrityError
-from src.api.core.logging import logger
 
 # Third-party
 from jose import JWTError
 from passlib.context import CryptContext
-from starlette import status
 
 # Project-specific
+from src.api.core import settings, logger
+from src.api.database import SessionDep
+from src.api.models import token_model, users_model
+from src.api.models.users_model import User
 from src.api.service.authentication_service import (
     check_password,
     decode_token,
     encrypt_password,
     generate_token,
 )
-from src.api.core.config import settings
-from src.api.core.logging import logger
-from src.api.database.database import SessionDep
-from src.api.models import users_model as users_model
-from src.api.models import token_model as token_model
-from typing import Optional
+
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM

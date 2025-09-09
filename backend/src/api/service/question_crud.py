@@ -9,18 +9,36 @@ from starlette import status
 from typing import Sequence, Dict, List, Any
 
 # Local
-from api.data.database import SessionDep
+from src.api.database import SessionDep
 from api.models.question_model import (
     Question,
 )
-from api.data import question_db as qdata
+from src.api.database import question_db as qdata
 from api.core.logging import logger
-from api.utils import get_uuid
+from src.utils import convert_uuid
 
 
 async def create_question(
     question: Union[Question, dict], session: SessionDep
 ) -> Question:
+    """
+    Create a new Question record.
+
+    Accepts either a `Question` model instance or a plain `dict` payload and delegates
+    persistence to `question_db.create_question`. Validates input type and maps
+    unexpected errors to HTTP exceptions.
+
+    Args:
+        question: The incoming question as a `Question` or `dict`.
+        session: Database session dependency.
+
+    Returns:
+        The persisted `Question` instance.
+
+    Raises:
+        HTTPException: 400 if payload is invalid or creation fails with ValueError;
+                       500 for unexpected errors.
+    """
     if not question or (
         not isinstance(question, dict) and not isinstance(question, Question)
     ):
@@ -29,7 +47,7 @@ async def create_question(
             detail=f"Question must either be object of type Question or dict or not Empty got type {type(question)}",
         )
     try:
-        return qdata.create_question(question, session, True)
+        return qdata.create_question(question, session)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
@@ -44,6 +62,20 @@ async def get_all_questions(
     offset: int = 0,
     limit: int = 100,
 ) -> Sequence[Question]:
+    """
+    Retrieve a paginated list of Questions.
+
+    Args:
+        session: Database session dependency.
+        offset: Number of records to skip.
+        limit: Maximum number of records to return.
+
+    Returns:
+        A sequence of `Question` rows.
+
+    Raises:
+        HTTPException: 204 if there are no questions.
+    """
     results = qdata.get_all_questions(session, offset=offset, limit=limit)
     if not results:
         raise HTTPException(
@@ -54,6 +86,19 @@ async def get_all_questions(
 
 
 async def get_question_by_id(question_id: Union[str, UUID], session: SessionDep):
+    """
+    Fetch a single Question by its ID.
+
+    Args:
+        question_id: Question identifier as `str` or `UUID`.
+        session: Database session dependency.
+
+    Returns:
+        The matching `Question` instance.
+
+    Raises:
+        HTTPException: 404 if not found; 400 if the ID is not a valid UUID.
+    """
     try:
         results = qdata.get_question_by_id(question_id, session)
         logger.debug("This is the result of getting the id %s", results)
@@ -70,12 +115,36 @@ async def get_question_by_id(question_id: Union[str, UUID], session: SessionDep)
 
 
 async def delete_all_questions(session: SessionDep) -> None:
+    """
+    Delete all Question records.
+
+    Args:
+        session: Database session dependency.
+
+    Returns:
+        None
+    """
     return qdata.delete_all_questions(session)
 
 
 async def delete_question_by_id(
     question_id: Union[str, UUID], session: SessionDep
 ) -> dict[str, str]:
+    """
+    Delete a Question by ID.
+
+    Looks up the question first (raising 404 if missing), then deletes it.
+
+    Args:
+        question_id: Question identifier as `str` or `UUID`.
+        session: Database session dependency.
+
+    Returns:
+        A dict with a human-readable `detail` message.
+
+    Raises:
+        HTTPException: 404 if not found; 500 for unexpected errors.
+    """
     try:
         question = await get_question_by_id(question_id, session)
         qdata.delete_question_by_id(question.id, session)
@@ -92,8 +161,25 @@ async def delete_question_by_id(
 async def edit_question_meta(
     question_id: Union[str, UUID], session: SessionDep, **kwargs
 ):
+    """
+    Update Question metadata fields.
+
+    Delegates attribute updates to `question_db.update_question`, then returns
+    the full question data (including relationships).
+
+    Args:
+        question_id: Question identifier as `str` or `UUID`.
+        session: Database session dependency.
+        **kwargs: Field updates to apply to the Question.
+
+    Returns:
+        A dict of the full question data from `get_question_data`.
+
+    Raises:
+        HTTPException: 500 on update failures; passes through other HTTPExceptions.
+    """
     try:
-        question_id = get_uuid(question_id)
+        question_id = convert_uuid(question_id)
         updated_question = qdata.update_question(session, question_id, **kwargs)
         return await get_question_data(question_id=updated_question.id, session=session)
     except HTTPException as e:
@@ -106,6 +192,19 @@ async def edit_question_meta(
 
 
 async def filter_questions_meta(session: SessionDep, **kwargs) -> List[Dict[str, Any]]:
+    """
+    Filter questions by provided criteria and return full data for each match.
+
+    Args:
+        session: Database session dependency.
+        **kwargs: Filter criteria supported by `question_db.filter_questions`.
+
+    Returns:
+        A list of dicts, each containing full question data.
+
+    Raises:
+        HTTPException: Propagates any HTTPExceptions from filtering or retrieval.
+    """
     try:
         questions = qdata.filter_questions(session, **kwargs)
         tasks = [
@@ -118,6 +217,19 @@ async def filter_questions_meta(session: SessionDep, **kwargs) -> List[Dict[str,
 
 
 async def get_question_data(question_id: Union[str, UUID], session: SessionDep):
+    """
+    Retrieve a single Question's data including requested relationships.
+
+    Args:
+        question_id: Question identifier as `str` or `UUID`.
+        session: Database session dependency.
+
+    Returns:
+        A dict with the question fields plus relationship arrays.
+
+    Raises:
+        HTTPException: Propagates not-found or validation errors from the DB layer.
+    """
     try:
         result = await qdata.get_question_data(question_id, session)
         return result
@@ -126,6 +238,20 @@ async def get_question_data(question_id: Union[str, UUID], session: SessionDep):
 
 
 async def get_all_question_data(session: SessionDep, limit: int = 100, offset: int = 0):
+    """
+    Retrieve full data for all Questions (paginated).
+
+    Args:
+        session: Database session dependency.
+        limit: Maximum number of questions to fetch.
+        offset: Number of questions to skip.
+
+    Returns:
+        A list of dicts, each containing full question data.
+
+    Raises:
+        HTTPException: Propagates any HTTPExceptions from the DB layer.
+    """
     try:
         result = await qdata.get_all_question_data(session, limit=limit, offset=offset)
         return result

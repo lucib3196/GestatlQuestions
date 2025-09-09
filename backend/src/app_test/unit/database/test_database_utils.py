@@ -72,7 +72,7 @@ def test_is_relationship(rel_attributes):
 
 @pytest.mark.parametrize(
     "rel",
-    [{"target_model": Question}],
+    [{"target_model": Question, "target_rel": "topics"}],
 )
 def test_get_model_relationship_data(rel):
     # Act: request all relationships for the model
