@@ -6,7 +6,7 @@ from api.models.question_model import Question, QuestionMeta
 from api.models import File
 from api.data.database import SessionDep
 from api.service import question_crud
-from api.service import question_file_service
+from backend.src.api.service import question_storage_service
 from starlette import status
 from fastapi import APIRouter, HTTPException
 from api.core.logging import logger
@@ -67,7 +67,7 @@ async def create_question(
         )
         if files:
             for f in files:
-                question_file_service.add_file_to_question(
+                question_storage_service.add_file_to_question(
                     question_id=q_created.id,
                     filename=f.filename,
                     content=f.content,
@@ -86,7 +86,7 @@ async def create_question(
 @router.get("/get_question/{qid}/file/{filename}")
 async def get_question_file(qid: Union[str, UUID], filename: str, session: SessionDep):
     try:
-        result = question_file_service.get_question_file(
+        result = question_storage_service.get_question_file(
             question_id=qid, filename=filename, session=session
         )
         print(result)
@@ -98,7 +98,7 @@ async def get_question_file(qid: Union[str, UUID], filename: str, session: Sessi
 @router.get("/get_question/{quid}/get_all_files")
 async def get_all_question_files(quid: Union[str, UUID], session: SessionDep):
     try:
-        result = question_file_service.get_all_files(question_id=quid, session=session)
+        result = question_storage_service.get_all_files(question_id=quid, session=session)
         return result.file_obj
     except HTTPException as e:
         raise e
@@ -120,7 +120,7 @@ async def update_file(
         dict: { success: bool, result: ... } if successful.
     """
     try:
-        result = question_file_service.update_question_file(
+        result = question_storage_service.update_question_file(
             question_id=payload.question_id,
             filename=payload.filename,
             new_content=payload.new_content,
@@ -155,7 +155,7 @@ async def get_question_data_all_by_id(
         q_response = QuestionMeta.model_validate(q)
         file_data = []
         if q_response.id is not None:
-            file_response = question_file_service.get_all_files(q_response.id, session)
+            file_response = question_storage_service.get_all_files(q_response.id, session)
             file_data = file_response.file_obj
         return QuestionReadResponse(
             status=status.HTTP_200_OK,

@@ -3,7 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from uuid import UUID
 from uuid import uuid4
 from fastapi import HTTPException
-from backend.src.app_test.unit.database.conftest import db_session
+from backend.src.app_test.integration.service.conftest import db_session
 
 
 # Testing files with no files data

@@ -9,10 +9,10 @@ from typing import Any, Dict, Iterable, Tuple
 import pytest
 from fastapi import HTTPException
 
-from backend.src.app_test.unit.database.conftest import  db_session
+from backend.src.app_test.integration.service.conftest import  db_session
 from api.models.file_model import File
 from api.models.question_model import Question
-from api.service import question_file_service
+from backend.src.api.service import question_storage_service
 
 
 # -----------------------------
@@ -106,7 +106,7 @@ def sample_question_with_file_dict(db_session) -> Question:
 def test_get_question_file_errors(db_session, sample_question):
     # Non-existing file in existing question
     with pytest.raises(HTTPException) as excinfo:
-        question_file_service.get_question_file(
+        question_storage_service.get_question_file(
             question_id=sample_question.id, filename="Notvalid.txt", session=db_session
         )
     assert excinfo.value.status_code == 404
@@ -115,7 +115,7 @@ def test_get_question_file_errors(db_session, sample_question):
     # Non-existing question id
     fake_id = uuid.uuid4()
     with pytest.raises(HTTPException) as excinfo:
-        question_file_service.get_question_file(
+        question_storage_service.get_question_file(
             question_id=fake_id, filename="DoesNotMatter.txt", session=db_session
         )
     assert excinfo.value.status_code == 404
@@ -123,7 +123,7 @@ def test_get_question_file_errors(db_session, sample_question):
 
 
 def test_get_question_file_success_text(db_session, sample_question_with_file):
-    result = question_file_service.get_question_file(
+    result = question_storage_service.get_question_file(
         question_id=sample_question_with_file.id,
         filename="Test.txt",
         session=db_session,
@@ -134,7 +134,7 @@ def test_get_question_file_success_text(db_session, sample_question_with_file):
 
 
 def test_get_question_file_success_dict(db_session, sample_question_with_file_dict):
-    result = question_file_service.get_question_file(
+    result = question_storage_service.get_question_file(
         question_id=sample_question_with_file_dict.id,
         filename="TestDict.txt",
         session=db_session,
@@ -155,11 +155,11 @@ def test_add_file_to_question(db_session, sample_question):
 
     # Verify absence first
     with pytest.raises(HTTPException):
-        question_file_service.get_question_file(
+        question_storage_service.get_question_file(
             question_id=sample_question.id, filename=new_filename, session=db_session
         )
 
-    response = question_file_service.add_file_to_question(
+    response = question_storage_service.add_file_to_question(
         question_id=sample_question.id,
         filename=new_filename,
         content=new_content,
@@ -173,7 +173,7 @@ def test_add_file_to_question(db_session, sample_question):
     newer_filename = "NewerFile.txt"
     newer_content = {"a": "a", "b": "b"}
 
-    response = question_file_service.add_file_to_question(
+    response = question_storage_service.add_file_to_question(
         question_id=sample_question.id,
         filename=newer_filename,
         content=newer_content,
@@ -196,20 +196,20 @@ def test_add_file_to_question(db_session, sample_question):
 def test_get_all_files(db_session, sample_question, files: Iterable[Tuple[str, Any]]):
     # No files yet
     with pytest.raises(HTTPException) as excinfo:
-        question_file_service.get_all_files(sample_question.id, db_session)
+        question_storage_service.get_all_files(sample_question.id, db_session)
     assert excinfo.value.status_code == 404
     assert "No Files for Question" in excinfo.value.detail
 
     # Add files
     for filename, content in files:
-        question_file_service.add_file_to_question(
+        question_storage_service.add_file_to_question(
             question_id=sample_question.id,
             filename=filename,
             content=content,
             session=db_session,
         )
 
-    response = question_file_service.get_all_files(sample_question.id, db_session)
+    response = question_storage_service.get_all_files(sample_question.id, db_session)
     assert isinstance(response.file_obj, list)
     returned_names = {f.filename for f in response.file_obj}
     expected_names = {fn for fn, _ in files}
@@ -223,7 +223,7 @@ def test_get_all_files(db_session, sample_question, files: Iterable[Tuple[str, A
 
 def test_update_question_file(db_session, sample_question_with_file):
     # Validate initial state
-    initial = question_file_service.get_question_file(
+    initial = question_storage_service.get_question_file(
         question_id=sample_question_with_file.id,
         filename="Test.txt",
         session=db_session,
@@ -232,7 +232,7 @@ def test_update_question_file(db_session, sample_question_with_file):
     _assert_file(initial.file_obj[0], filename="Test.txt", content="Hello World")
 
     # Update
-    response = question_file_service.update_question_file(
+    response = question_storage_service.update_question_file(
         sample_question_with_file.id,
         filename="Test.txt",
         new_content="Hello Sun!!!",
@@ -244,7 +244,7 @@ def test_update_question_file(db_session, sample_question_with_file):
     # Bad question id
     fake_uuid = uuid.uuid4()
     with pytest.raises(HTTPException) as excinfo:
-        question_file_service.get_question_file(
+        question_storage_service.get_question_file(
             question_id=fake_uuid, filename="Test.txt", session=db_session
         )
     assert excinfo.value.status_code == 404
@@ -260,7 +260,7 @@ def test_add_file_to_question_returns_dict_for_json(db_session, sample_question)
     Once your service always normalizes JSON content to dict (not string),
     this test should pass without normalization helper.
     """
-    resp = question_file_service.add_file_to_question(
+    resp = question_storage_service.add_file_to_question(
         question_id=sample_question.id,
         filename="strict.json",
         content={"k": "v"},

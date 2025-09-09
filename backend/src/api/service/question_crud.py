@@ -10,11 +10,11 @@ from typing import Sequence, Dict, List, Any
 
 # Local
 from src.api.database import SessionDep
-from api.models.question_model import (
+from src.api.models.question_model import (
     Question,
 )
 from src.api.database import question_db as qdata
-from api.core.logging import logger
+from src.api.core.logging import logger
 from src.utils import convert_uuid
 
 
@@ -101,7 +101,6 @@ async def get_question_by_id(question_id: Union[str, UUID], session: SessionDep)
     """
     try:
         results = qdata.get_question_by_id(question_id, session)
-        logger.debug("This is the result of getting the id %s", results)
         if results is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,  # 404 is more REST-correct

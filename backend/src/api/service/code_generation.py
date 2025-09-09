@@ -23,7 +23,7 @@ from ai_workspace.agents.code_generators.v5.main_image import (
     State as ImageState,
 )
 from src.api.database import SessionDep
-from . import question_crud, question_file_service
+from . import question_crud, question_storage_service
 
 
 async def process_output(
@@ -69,7 +69,7 @@ async def process_output(
 
     q = await question_crud.create_question(q_payload, session)
     for filename, content in files_data.items():
-        question_file_service.add_file_to_question(
+        question_storage_service.add_file_to_question(
             question_id=q.id,
             filename=filename,
             content=content,

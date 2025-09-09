@@ -11,7 +11,7 @@ from api.data import topic_db as topic_service
 from api.models.question_model import Question
 from api.service import question_crud as qcrud_service
 from api.utils.general_utils import names, normset
-from backend.src.app_test.unit.database.conftest import  db_session
+from backend.src.app_test.integration.service.conftest import  db_session
 
 # Only scalar fields to compare directly
 SCALAR_FIELDS = {"title", "ai_generated", "isAdaptive", "createdBy", "user_id"}

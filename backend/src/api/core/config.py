@@ -26,9 +26,9 @@ class Settings(BaseSettings):
     # Cloud Storage
     FIREBASE_PATH: Optional[str] = None
     STORAGE_BUCKET: Optional[str] = None
-    
+
     # Static Directory
-    QUESTIONS_PATH:Optional[str] = None
+    QUESTIONS_PATH: Optional[str] = None
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
@@ -60,5 +60,5 @@ settings = Settings(
     SECRET_KEY=os.getenv("SECRET_KEY", ""),
     FIREBASE_PATH=os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON"),
     STORAGE_BUCKET=os.getenv("STORAGE_BUCKET"),
-    QUESTIONS_PATH="/questions"
+    QUESTIONS_PATH="/questions",
 )

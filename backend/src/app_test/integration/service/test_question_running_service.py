@@ -1,8 +1,8 @@
 import pytest
-from api.service import question_running_service
-from code_runner.models import CodeRunResponse, QuizData
-from app_test.integration.service.fixture_question_running_service import *
-from app_test.utils import logs_contain
+from src.api.service import question_running_service
+from src.code_runner.models import CodeRunResponse, QuizData
+from src.app_test.integration.service.fixture_question_running_service import *
+from src.utils import logs_contain
 from fastapi import HTTPException
 
 
@@ -10,8 +10,9 @@ from fastapi import HTTPException
 async def test_running_server_js_check_response_model(
     create_question_with_code_file_serverjs, db_session
 ):
+    question = await create_question_with_code_file_serverjs
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverjs.id,
+        question_id=question.id,
         code_language="javascript",
         session=db_session,
     )
@@ -22,8 +23,9 @@ async def test_running_server_js_check_response_model(
 async def test_running_server_js_check_successful_response(
     create_question_with_code_file_serverjs, db_session
 ):
+    question = await create_question_with_code_file_serverjs
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverjs.id,
+        question_id=question.id,
         code_language="javascript",
         session=db_session,
     )
@@ -34,8 +36,9 @@ async def test_running_server_js_check_successful_response(
 async def test_running_server_js_check_error_none(
     create_question_with_code_file_serverjs, db_session
 ):
+    question = await create_question_with_code_file_serverjs
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverjs.id,
+        question_id=question.id,
         code_language="javascript",
         session=db_session,
     )
@@ -46,8 +49,9 @@ async def test_running_server_js_check_error_none(
 async def test_running_server_js_check_quiz_data(
     create_question_with_code_file_serverjs, db_session
 ):
+    question = await create_question_with_code_file_serverjs
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverjs.id,
+        question_id=question.id,
         code_language="javascript",
         session=db_session,
     )
@@ -59,8 +63,9 @@ async def test_running_server_js_check_quiz_data(
 async def test_running_server_js_check_quiz_params(
     create_question_with_code_file_serverjs, db_session
 ):
+    question = await create_question_with_code_file_serverjs
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverjs.id,
+        question_id=question.id,
         code_language="javascript",
         session=db_session,
     )
@@ -75,8 +80,9 @@ async def test_running_server_js_check_quiz_params(
 async def test_running_server_js_check_quiz_correct_answers(
     create_question_with_code_file_serverjs, db_session
 ):
+    question = await create_question_with_code_file_serverjs
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverjs.id,
+        question_id=question.id,
         code_language="javascript",
         session=db_session,
     )
@@ -90,8 +96,9 @@ async def test_running_server_js_check_quiz_correct_answers(
 async def test_running_server_js_check_quiz_logs(
     create_question_with_code_file_serverjs, db_session
 ):
+    question = await create_question_with_code_file_serverjs
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverjs.id,
+        question_id=question.id,
         code_language="javascript",
         session=db_session,
     )
@@ -113,8 +120,9 @@ async def test_running_server_js_check_quiz_logs(
 async def test_running_server_py_check_response_model(
     create_question_with_code_file_serverpy, db_session
 ):
+    question = await create_question_with_code_file_serverpy
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverpy.id,
+        question_id=question.id,
         code_language="python",
         session=db_session,
     )
@@ -125,8 +133,9 @@ async def test_running_server_py_check_response_model(
 async def test_running_server_py_check_successful_response(
     create_question_with_code_file_serverpy, db_session
 ):
+    question = await create_question_with_code_file_serverpy
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverpy.id,
+        question_id=question.id,
         code_language="python",
         session=db_session,
     )
@@ -137,8 +146,9 @@ async def test_running_server_py_check_successful_response(
 async def test_running_server_py_check_error_none(
     create_question_with_code_file_serverpy, db_session
 ):
+    question = await create_question_with_code_file_serverpy
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverpy.id,
+        question_id=question.id,
         code_language="python",
         session=db_session,
     )
@@ -149,8 +159,9 @@ async def test_running_server_py_check_error_none(
 async def test_running_server_py_check_quiz_data(
     create_question_with_code_file_serverpy, db_session
 ):
+    question = await create_question_with_code_file_serverpy
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverpy.id,
+        question_id=question.id,
         code_language="python",
         session=db_session,
     )
@@ -162,8 +173,9 @@ async def test_running_server_py_check_quiz_data(
 async def test_running_server_py_check_quiz_params(
     create_question_with_code_file_serverpy, db_session
 ):
+    question = await create_question_with_code_file_serverpy
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverpy.id,
+        question_id=question.id,
         code_language="python",
         session=db_session,
     )
@@ -178,8 +190,9 @@ async def test_running_server_py_check_quiz_params(
 async def test_running_server_py_check_quiz_correct_answers(
     create_question_with_code_file_serverpy, db_session
 ):
+    question = await create_question_with_code_file_serverpy
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverpy.id,
+        question_id=question.id,
         code_language="python",
         session=db_session,
     )
@@ -193,8 +206,9 @@ async def test_running_server_py_check_quiz_correct_answers(
 async def test_running_server_py_check_quiz_logs(
     create_question_with_code_file_serverpy, db_session
 ):
+    question = await create_question_with_code_file_serverpy
     result = await question_running_service.run_server(
-        question_id=create_question_with_code_file_serverpy.id,
+        question_id=question.id,
         code_language="python",
         session=db_session,
     )
@@ -222,8 +236,9 @@ async def test_running_server_non_supported_language(
     create_question_no_code, db_session
 ):
     with pytest.raises(HTTPException) as excinfo:
+        question = create_question_no_code
         await question_running_service.run_server(
-            question_id=create_question_no_code.id,
+            question_id=question.id,
             code_language="C++",  # type: ignore
             session=db_session,
         )
@@ -236,13 +251,14 @@ async def test_running_server_no_file_present_python(
     create_question_no_code, db_session
 ):
     with pytest.raises(HTTPException) as excinfo:
+        question =  create_question_no_code
         await question_running_service.run_server(
-            question_id=create_question_no_code.id,
+            question_id=question.id,
             code_language="python",
             session=db_session,
         )
-    assert excinfo.value.status_code == 404
-    assert "No File" in excinfo.value.detail
+    assert excinfo.value.status_code == 400
+    assert "does not exist" in excinfo.value.detail
 
 
 @pytest.mark.asyncio
@@ -250,22 +266,25 @@ async def test_running_server_no_file_present_javascript(
     create_question_no_code, db_session
 ):
     with pytest.raises(HTTPException) as excinfo:
+        question =  create_question_no_code
         await question_running_service.run_server(
-            question_id=create_question_no_code.id,
+            question_id=question.id,
             code_language="javascript",
             session=db_session,
         )
-    assert excinfo.value.status_code == 404
-    assert "No File" in excinfo.value.detail
+    assert excinfo.value.status_code == 400
+    print("This is the detail")
+    print(excinfo.value.detail)
+    assert "does not exist" in excinfo.value.detail
 
 
 @pytest.mark.asyncio
 async def test_running_server_no_content_python(
     create_question_empty_file_python, db_session
 ):
-
+    question = await create_question_empty_file_python
     result = await question_running_service.run_server(
-        question_id=create_question_empty_file_python.id,
+        question_id=question.id,
         code_language="python",
         session=db_session,
     )
@@ -277,9 +296,10 @@ async def test_running_server_no_content_python(
 async def test_running_server_no_content_javascript(
     create_question_empty_file_js, db_session
 ):
+    question = await create_question_empty_file_js
 
     result = await question_running_service.run_server(
-        question_id=create_question_empty_file_js.id,
+        question_id=question.id,
         code_language="javascript",
         session=db_session,
     )

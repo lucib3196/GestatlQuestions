@@ -3,6 +3,7 @@ import json
 from typing import Union, Literal
 from uuid import UUID
 from pathlib import Path
+from typing import cast
 
 # Third-party
 from fastapi import HTTPException
@@ -10,12 +11,12 @@ from starlette import status
 import tempfile
 
 # Local
-from api.core.logging import logger
+from src.api.core.logging import logger
 from src.api.database import SessionDep
 from src.code_runner.run_server import run_generate
 from src.utils import convert_uuid
-from src.api.service import question_file_service
-from src.api.response_models import SuccessFileResponse
+from src.api.service import question_storage_service as qs
+from src.api.response_models import SuccessFileResponse, FileData
 
 
 async def run_server(
@@ -36,14 +37,16 @@ async def run_server(
         )
 
     try:
-        response: SuccessFileResponse = question_file_service.get_question_file(
+        response = await qs.get_file_content(
             question_id, mapping_db[code_language], session
         )
     except HTTPException:
         raise
 
-    server_file = response.file_obj[0]
-    server_content = server_file.content
+    file_data = response.files[0]
+    file_data = cast(FileData, file_data)
+
+    server_content = file_data.content
 
     if isinstance(server_content, (dict, list)):
         try:
