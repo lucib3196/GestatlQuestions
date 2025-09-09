@@ -1,11 +1,11 @@
 from pathlib import Path
-from code_runner import run_js, run_py
-from code_runner.models import CodeRunResponse
-from app_test.utils import logs_contain
+from src.code_runner import run_js, run_py
+from src.code_runner.models import CodeRunResponse
+from src.utils import logs_contain
 
 
 def test_run_js():
-    path = Path("app_test/code_scripts/test.js").resolve()
+    path = Path("backend/assets/code_scripts/test.js").resolve()
     result = run_js.execute_javascript(path=path)
 
     resp = CodeRunResponse.model_validate(result)
@@ -32,7 +32,7 @@ def test_run_js():
 
 
 def test_run_py():
-    path = Path("app_test/code_scripts/test.py").resolve()
+    path = Path("backend/assets/code_scripts/test.py").resolve()
     result = run_py.run_generate_py(path=str(path))
 
     resp = CodeRunResponse.model_validate(result)

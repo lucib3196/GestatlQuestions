@@ -1,7 +1,7 @@
 import pytest
 from app_test.integration.service.fixture_code_generation import *
-from api.service import code_generation
-from api.service import question_crud
+from src.api.service import code_generation
+from src.api.service import question_crud
 from fastapi import UploadFile
 import io
 

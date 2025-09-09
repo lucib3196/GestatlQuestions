@@ -10,7 +10,7 @@ from pydantic import ValidationError
 from starlette import status
 
 # Internal
-from code_runner.models import CodeRunResponse, QuizData
+from src.code_runner.models import CodeRunResponse, QuizData
 from .utils import normalize_path
 
 

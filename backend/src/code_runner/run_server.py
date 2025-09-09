@@ -1,6 +1,6 @@
 from .run_js import run_js, execute_javascript
 from .run_py import run_generate_py
-from code_runner.models import CodeRunResponse
+from src.code_runner.models import CodeRunResponse
 import os
 from pathlib import Path
 from typing import Union
