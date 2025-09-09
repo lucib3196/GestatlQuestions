@@ -4,3 +4,4 @@ venv
 /backend_api/firebase_cred.json"backend_api/config/firebase_cred.json" 
 /local_questions
 /backend_api/data/database.db
+/secrets
