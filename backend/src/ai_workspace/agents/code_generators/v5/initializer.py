@@ -1,4 +1,4 @@
-from ai_workspace.core import (
+from src.ai_workspace.core import (
     LLMConfiguration,
     load_vectorstore,
     validate_paths,
@@ -6,8 +6,8 @@ from ai_workspace.core import (
 )
 from langchain.chat_models import init_chat_model
 from langchain_openai import OpenAIEmbeddings
-from api.core.logging import logger
-from ai_workspace.retrievers import SemanticExamplesCSV
+from src.api.core.logging import logger
+from src.ai_workspace.retrievers import SemanticExamplesCSV
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path

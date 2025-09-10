@@ -3,7 +3,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from typing import Optional, List
 from langchain_core.documents import Document
-from ai_workspace.utils import validate_columns
+from src.ai_workspace.utils import validate_columns
 from langchain_core.prompts import ChatPromptTemplate
 
 class SemanticExamplesCSV:

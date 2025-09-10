@@ -1,6 +1,6 @@
 import pytest
-from api.models.question_model import Question
-from ai_workspace.utils import to_serializable
+from src.api.models.question_model import Question
+from src.ai_workspace.utils import to_serializable
 from fastapi.encoders import jsonable_encoder
 
 

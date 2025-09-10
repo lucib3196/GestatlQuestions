@@ -1,11 +1,11 @@
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Any
 from pydantic import BaseModel, field_validator
 from src.api.models.file_model import File
 
 
 class FileData(BaseModel):
     filename: str
-    content: dict | str
+    content: dict | str | Any
 
 
 class FilesData(BaseModel):
@@ -28,7 +28,7 @@ class SuccessDataResponse(SuccessfulResponse):
 class SuccessFileResponse(SuccessfulResponse):
     """Success response with one or more file objects."""
 
-    files: List[FileData] |List[File] | List[str] 
+    files: List[FileData] | List[File] | List[str]
 
     @field_validator("files", mode="before")
     def ensure_list(cls, v):

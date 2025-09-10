@@ -17,8 +17,8 @@ from pydantic import BaseModel, Field
 # Local application
 # ======================
 from .initializer import init_generation
-from ai_workspace.core.config import LLMConfiguration
-from ai_workspace.utils import save_graph_visualization, validate_llm_output
+from src.ai_workspace.core.config import LLMConfiguration
+from src.ai_workspace.utils import save_graph_visualization, validate_llm_output
 
 
 # ======================
@@ -26,7 +26,9 @@ from ai_workspace.utils import save_graph_visualization, validate_llm_output
 # ======================
 client = Client()
 
-cfg = LLMConfiguration(vector_store_path=Path(r"ai_workspace/vectorstores/TOPIC_VS"))
+cfg = LLMConfiguration(
+    vector_store_path=Path(r"backend/src/ai_workspace/vectorstores/TOPIC_VS").resolve()
+)
 llm_config = init_generation(cfg, retriever_type="mmr")
 llm_base = llm_config.base_llm
 query_prompt = "query_question_topic"

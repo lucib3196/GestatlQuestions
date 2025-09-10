@@ -256,16 +256,14 @@ def update_question(
     for key, value in kwargs.items():
         try:
             prop = mapper.get_property(key)
+            is_rel = is_relationship(Question, key)
         except Exception:
             continue
 
-        if isinstance(prop, ColumnProperty):
-            # Needs to add check that the type and value are being set correctly
-
-            col = prop.columns[0]
+        if not is_rel:
             setattr(question, key, value)
             continue
-        elif isinstance(prop, RelationshipProperty):
+        else:
             target_cls = prop.mapper.class_
             if prop.uselist:
                 if not all(isinstance(v, target_cls) for v in value):
@@ -273,7 +271,7 @@ def update_question(
                         raise TypeError(f"{key} expects list[{target_cls.__name__}]")
                     else:
                         value = [
-                            resolve_or_create(session, target_cls, v, create_field)
+                            resolve_or_create(session, target_cls, v, create_field)[0]
                             for v in value
                         ]
                 setattr(question, key, list(value))
@@ -284,7 +282,7 @@ def update_question(
                     else:
                         value = resolve_or_create(
                             session, target_cls, value, create_field
-                        )
+                        )[0]
                 setattr(question, key, value)
             continue
     session.commit()

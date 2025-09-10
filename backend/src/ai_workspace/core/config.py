@@ -10,8 +10,11 @@ class LLMConfiguration(BaseSettings):
     embedding_model: str = "text-embedding-3-large"
     n_search_queries: int = 3
 
-    vector_store_path: Path = Path("ai_workspace/vectorstores/QUESTIONMOD_VS")
+    vector_store_path: Path = Path("backend/src/ai_workspace/vectorstores/QUESTIONMOD_VS").resolve()
     question_csv_path: Path = Path("data/QuestionDataV2_06122025_classified.csv")
+    
+    
+
 
     model_config = SettingsConfigDict(
         env_file=".env",

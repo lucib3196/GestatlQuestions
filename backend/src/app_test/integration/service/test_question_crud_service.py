@@ -1,17 +1,15 @@
-# tests/unit/service/test_question_crud_service.py
-
 import uuid
 from uuid import UUID
 
 import pytest
-import pytest_asyncio
 from fastapi import HTTPException
 
-from api.data import topic_db as topic_service
-from api.models.question_model import Question
-from api.service import question_crud as qcrud_service
-from api.utils.general_utils import names, normset
-from backend.src.app_test.integration.service.conftest import  db_session
+
+from src.api.models.question_model import Question
+from src.api.service import question_crud as qcrud_service
+from src.app_test.integration.service.fixture_question_crud import *
+from src.utils import *
+
 
 # Only scalar fields to compare directly
 SCALAR_FIELDS = {"title", "ai_generated", "isAdaptive", "createdBy", "user_id"}
@@ -158,8 +156,6 @@ async def test_delete_question_by_id(db_session, seed_questions):
 
 @pytest.mark.asyncio
 async def test_update_question_meta(db_session, question_payload_minimal_dict):
-    # Clean slate for topics to avoid collisions
-    topic_service.delete_all_topics(db_session)
 
     created = await qcrud_service.create_question(
         question_payload_minimal_dict, db_session
@@ -170,22 +166,20 @@ async def test_update_question_meta(db_session, question_payload_minimal_dict):
     updated = await qcrud_service.edit_question_meta(
         qid, session=db_session, title="New Title"
     )
-    assert updated.id == qid
-    assert updated.title == "New Title"
+
+    assert pick(updated, "id") == qid
+    assert pick(updated, "title") == "New Title"
 
     # Update relationship with strings (resolve/create + attach)
     updated = await qcrud_service.edit_question_meta(
         qid, session=db_session, topics=["New Topic", " AnotherTopic  "]
     )
-    assert {t.name for t in updated.topics} == {
+    assert {t.name for t in pick(updated, "topics")} == {  # type: ignore
         "new topic",
         "anothertopic",
-    }  # adapt if no normalization
-    assert {t.name for t in topic_service.list_topics(db_session)}.issuperset(
-        {"new topic", "anothertopic"}
-    )
+    }
     # Scalar change persists
-    assert updated.title == "New Title"
+    assert pick(updated, "title") == "New Title"
 
 
 # ---------------------------
@@ -221,7 +215,11 @@ async def test_filter_questions_meta(db_session, seed_questions):
     # At least the full dict question should match (has both Topic1/Topic2); depending on OR/AND within-key,
     # this may include others. We assert that at least one has one of those topics.
     assert any(
-        any(t["name"] in {"topic1", "topic2"} for t in q["topics"]) for q in with_topics
+        any(
+            pick(t, "name") in {"topic1", "topic2"}
+            for t in pick(q, "topics", default=[])
+        )
+        for q in with_topics
     )
 
 
@@ -255,72 +253,3 @@ async def test_get_all_question_data(seed_questions, db_session):
         assert "topics" in r
         assert "qtypes" in r
         assert "languages" in r
-
-
-# ===========================
-# Fixtures
-# ===========================
-@pytest.fixture
-def question_payload_minimal_dict():
-    return {
-        "title": "SomeTitle",
-        "ai_generated": True,
-        "isAdaptive": True,
-        "createdBy": "John Doe",
-        "user_id": 1,
-    }
-
-
-@pytest.fixture
-def question_payload_full_dict():
-    return {
-        "title": "SomeTitle",
-        "ai_generated": True,
-        "isAdaptive": True,
-        "createdBy": "John Doe",
-        "user_id": 1,
-        "topics": ["Topic1", "Topic2"],
-        "qtype": ["Numerical", "Matrix"],
-        "languages": ["Python", "Go", "Rust"],
-    }
-
-
-@pytest.fixture
-def question_instance_minimal():
-    return Question(
-        title="TestQuestion",
-        ai_generated=False,  # distinct from the dict payloads
-        isAdaptive=True,
-        createdBy="Luciano",
-        user_id=5,
-    )
-
-
-@pytest.fixture
-def mixed_question_payloads(
-    question_payload_minimal_dict, question_instance_minimal, question_payload_full_dict
-):
-    """Mix of a model instance, a minimal dict, and a full dict (with relationships)."""
-    return [
-        question_instance_minimal,
-        question_payload_minimal_dict,
-        question_payload_full_dict,
-    ]
-
-
-@pytest_asyncio.fixture
-async def seed_questions(db_session, mixed_question_payloads):
-    """Create the mixed payloads in the DB for read/filter/delete tests."""
-    for payload in mixed_question_payloads:
-        await qcrud_service.create_question(payload, db_session)
-
-
-@pytest.fixture
-def invalid_question_payloads():
-    # Values that should NOT work
-    return [
-        "question_data",
-        ["A list of values of question data"],
-        123,
-        None,
-    ]

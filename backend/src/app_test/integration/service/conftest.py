@@ -23,7 +23,7 @@ def test_engine():
     url = "sqlite:///:memory:"
     engine = create_engine(
         url,
-        echo=True,
+        echo=False,
         #    connect_args={"check_same_thread": False})
     )
     SQLModel.metadata.create_all(engine)

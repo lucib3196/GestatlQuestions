@@ -2,7 +2,7 @@
 import asyncio
 import json
 from pathlib import Path
-from typing import List
+from typing import List, Union
 from uuid import UUID
 
 # Third-party
@@ -136,39 +136,44 @@ async def write_file(f: FileData, base_dir: str | Path, overwrite: bool = True):
     return str(target)
 
 
-def write(target: str | Path, content: str | dict | bytes, overwrite: bool = True):
+def write(
+    target: Union[str, Path],
+    content: Union[str, dict, list, bytes, bytearray],
+    overwrite: bool = True,
+) -> Path:
     """
     Write raw content to a target path.
 
-    - Dicts are JSON-encoded.
-    - Bytes are written in binary mode.
+    - Dicts and lists are JSON-encoded.
+    - Bytes/bytearray are written in binary mode.
     - Strings are written with Path.write_text.
     - If overwrite is False and the file exists, raise HTTP 409.
     - Returns the Path object of the target.
     """
     target = Path(target)
-    filename = str(target).split("/").pop()
-    # Handle cases of the content
-    if isinstance(content, dict):
-        content = json.dumps(content)
+    filename = target.name
+
+    # Prevent overwrite if disabled
+    if not overwrite and target.exists():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"File already exists and cannot overwrite {filename}",
+        )
+
+    # Handle dicts/lists → JSON
+    if isinstance(content, (dict, list)):
+        target.write_text(json.dumps(content, indent=2))
+        return target
+
+    # Handle bytes/bytearray
     if isinstance(content, (bytes, bytearray)):
-        if not overwrite and target.exists():
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"File already exist and cannot overwrite {filename}",
-            )
         mode = "wb" if overwrite else "xb"
-        with open(target, mode) as fn:
-            fn.write(content)
-    else:
-        s = str(content)
-        if not overwrite and target.exists():
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"File already exist and cannot overwrite {filename}",
-            )
-        mode = "wb" if overwrite else "xb"
-        target.write_text(content)  # type: ignore
+        with open(target, mode) as f:
+            f.write(content)
+        return target
+
+    # Fallback: write as string
+    target.write_text(str(content))
     return target
 
 

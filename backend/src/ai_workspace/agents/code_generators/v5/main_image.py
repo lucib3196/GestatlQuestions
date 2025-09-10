@@ -1,4 +1,4 @@
-from ai_workspace.agents.code_generators.v4_5.extract_question_image import (
+from src.ai_workspace.agents.code_generators.v4_5.extract_question_image import (
     InputState as ImageUploadState,
     IntermediateState as FinalState,
     app as image_upload_graph,
@@ -11,9 +11,9 @@ from .gestalt_generator import (
 )
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel
-from ai_workspace.models import Question
+from src.ai_workspace.models import Question
 from typing import List
-from ai_workspace.utils import validate_llm_output
+from src.ai_workspace.utils import validate_llm_output
 import asyncio
 
 

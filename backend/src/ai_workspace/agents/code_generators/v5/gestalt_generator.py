@@ -3,14 +3,14 @@ from typing import List, Optional, Annotated, Literal, List
 from pydantic import BaseModel
 from langgraph.graph import END, START, StateGraph
 
-from ai_workspace.models import Question
-from ai_workspace.utils import (
+from src.ai_workspace.models import Question
+from src.ai_workspace.utils import (
     save_graph_visualization,
     validate_llm_output,
     to_serializable,
 )
 
-from api.utils import to_bool
+from src.utils import to_bool
 from .generate_metadata import (
     compiled_graph as metadata_graph,
     MetadataInput as Metadata,

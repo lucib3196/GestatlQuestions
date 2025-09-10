@@ -4,8 +4,8 @@ from pydantic import BaseModel, Field
 from langsmith import Client
 from langgraph.graph import END, START, StateGraph
 
-from ai_workspace.core import LLMConfiguration
-from ai_workspace.utils import validate_llm_output, save_graph_visualization
+from src.ai_workspace.core import LLMConfiguration
+from src.ai_workspace.utils import validate_llm_output, save_graph_visualization
 from langchain.chat_models import init_chat_model
 
 from .classification_question_topic import (

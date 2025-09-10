@@ -5,9 +5,9 @@ from langsmith import Client
 from langchain.chat_models import init_chat_model
 from pydantic import BaseModel
 
-from ai_workspace.models.payloads import QuestionBase
-from ai_workspace.core.config import LLMConfiguration
-from ai_workspace.utils import validate_llm_output
+from src.ai_workspace.models.payloads import QuestionBase
+from src.ai_workspace.core.config import LLMConfiguration
+from src.ai_workspace.utils import validate_llm_output
 
 
 # --- Configuration and Model Setup ---

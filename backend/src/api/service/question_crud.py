@@ -180,6 +180,7 @@ async def edit_question_meta(
     try:
         question_id = convert_uuid(question_id)
         updated_question = qdata.update_question(session, question_id, **kwargs)
+        print("Finished updating question")
         return await get_question_data(question_id=updated_question.id, session=session)
     except HTTPException as e:
         raise e

@@ -9,15 +9,16 @@ from typing import Any, Dict, Iterable, Tuple
 import pytest
 from fastapi import HTTPException
 
-from backend.src.app_test.integration.service.conftest import  db_session
-from api.models.file_model import File
-from api.models.question_model import Question
-from backend.src.api.service import question_storage_service
+from src.app_test.integration.service.conftest import db_session
+from src.api.models.file_model import File
+from src.api.models.question_model import Question
+from src.api.service import question_storage_service
 
 
 # -----------------------------
 # Helpers
 # -----------------------------
+
 
 def _normalize_json_content(value: Any) -> Any:
     """
@@ -43,6 +44,7 @@ def _assert_file(f: File, *, filename: str, content: Any) -> None:
 # -----------------------------
 # Fixtures
 # -----------------------------
+
 
 @pytest.fixture
 def sample_question(db_session) -> Question:
@@ -94,7 +96,9 @@ def sample_question_with_file_dict(db_session) -> Question:
     db_session.refresh(q)
 
     file_content = {"a": "Data", "b": "Another data"}
-    db_session.add(File(filename="TestDict.txt", content=file_content, question_id=q.id))
+    db_session.add(
+        File(filename="TestDict.txt", content=file_content, question_id=q.id)
+    )
     db_session.commit()
     return q
 
@@ -102,6 +106,7 @@ def sample_question_with_file_dict(db_session) -> Question:
 # -----------------------------
 # Tests
 # -----------------------------
+
 
 def test_get_question_file_errors(db_session, sample_question):
     # Non-existing file in existing question
@@ -187,9 +192,11 @@ def test_add_file_to_question(db_session, sample_question):
 @pytest.mark.parametrize(
     "files",
     [
-        (("NewFile.txt", "Hello World"),
-         ("AnotherFile.json", "Content"),
-         ("ThirdFile.py", "I am tired")),
+        (
+            ("NewFile.txt", "Hello World"),
+            ("AnotherFile.json", "Content"),
+            ("ThirdFile.py", "I am tired"),
+        ),
         (("data.json", {"x": 1}),),
     ],
 )

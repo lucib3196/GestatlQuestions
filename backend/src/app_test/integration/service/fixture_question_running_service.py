@@ -1,9 +1,8 @@
-from pathlib import Path
 import pytest
+from pathlib import Path
 from src.api.models import Question
 from src.api.database import question_db
 from src.api.service import question_storage_service as qs
-from src.app_test.integration.service.conftest import db_session
 
 
 @pytest.mark.asyncio
@@ -46,7 +45,6 @@ async def create_question_with_code_file_serverpy(db_session):
         q_created.id, file_data=filedata, session=db_session
     )
     return q_created
-
 
 
 @pytest.fixture

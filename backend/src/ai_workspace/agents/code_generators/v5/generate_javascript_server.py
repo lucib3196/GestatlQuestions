@@ -9,13 +9,13 @@ from pydantic import BaseModel
 
 # Local application
 from .initializer import init_generation
-from ai_workspace.models import CodeResponse
-from ai_workspace.utils import (
+from src.ai_workspace.models import CodeResponse
+from src.ai_workspace.utils import (
     save_graph_visualization,
     inject_message,
     validate_llm_output,
 )
-from ai_workspace.retrievers import SemanticExamplesCSV
+from src.ai_workspace.retrievers import SemanticExamplesCSV
 
 
 client = Client()

@@ -5,7 +5,7 @@ from typing import List, Union, Type, Optional
 
 from pydantic import BaseModel, Field
 
-from api.core.logging import logger
+from src.api.core.logging import logger
 
 from langchain_core.prompts.chat import ChatPromptTemplate
 from langchain_core.messages import HumanMessage

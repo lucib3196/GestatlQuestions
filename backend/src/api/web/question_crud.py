@@ -3,8 +3,8 @@ from uuid import UUID
 from typing import Union, Optional, List
 from pydantic import BaseModel
 from api.models.question_model import Question, QuestionMeta
-from api.models import File
-from api.data.database import SessionDep
+from src.api.models import File
+from src.api.database import SessionDep
 from api.service import question_crud
 from backend.src.api.service import question_storage_service
 from starlette import status
@@ -98,7 +98,9 @@ async def get_question_file(qid: Union[str, UUID], filename: str, session: Sessi
 @router.get("/get_question/{quid}/get_all_files")
 async def get_all_question_files(quid: Union[str, UUID], session: SessionDep):
     try:
-        result = question_storage_service.get_all_files(question_id=quid, session=session)
+        result = question_storage_service.get_all_files(
+            question_id=quid, session=session
+        )
         return result.file_obj
     except HTTPException as e:
         raise e
@@ -155,7 +157,9 @@ async def get_question_data_all_by_id(
         q_response = QuestionMeta.model_validate(q)
         file_data = []
         if q_response.id is not None:
-            file_response = question_storage_service.get_all_files(q_response.id, session)
+            file_response = question_storage_service.get_all_files(
+                q_response.id, session
+            )
             file_data = file_response.file_obj
         return QuestionReadResponse(
             status=status.HTTP_200_OK,

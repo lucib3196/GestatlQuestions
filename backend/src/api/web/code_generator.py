@@ -19,7 +19,7 @@ from src.api.service import user
 
 router = APIRouter(prefix="/codegenerator")
 
-from api.service.code_generation import run_text
+from src.api.service.code_generation import run_text
 
 
 # Loads up directory and get all the questions

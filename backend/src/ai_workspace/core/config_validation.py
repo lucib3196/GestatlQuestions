@@ -1,5 +1,5 @@
 from pathlib import Path
-from ai_workspace.core import LLMConfiguration
+from src.ai_workspace.core import LLMConfiguration
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from pathlib import Path

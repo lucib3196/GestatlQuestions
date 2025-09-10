@@ -5,24 +5,28 @@ import shutil
 import tempfile
 from copy import deepcopy
 from typing import Any, Dict, List, Optional
+import json
 
 # --- Third-Party ---
 from fastapi import HTTPException, UploadFile, status
 from pydantic import ValidationError
-from src.utils import to_bool
 
-# --- Internal ---
-from ai_workspace.utils import to_serializable, validate_llm_output
-from ai_workspace.agents.code_generators.v5.main_text import (
+# --- Internal / Project ---
+from src.ai_workspace.agents.code_generators.v5.main_image import (
+    app as image_generator_v5,
+    State as ImageState,
+)
+from src.ai_workspace.agents.code_generators.v5.main_text import (
     app as text_generator_v5,
     CodeGenFinal,
     State as TextState,
 )
-from ai_workspace.agents.code_generators.v5.main_image import (
-    app as image_generator_v5,
-    State as ImageState,
-)
+from src.ai_workspace.utils import to_serializable, validate_llm_output
 from src.api.database import SessionDep
+from src.api.response_models import FileData
+from src.utils import to_bool
+from src.api.core import logger
+
 from . import question_crud, question_storage_service
 
 
@@ -44,40 +48,51 @@ async def process_output(
     Raises:
         ValueError: If the generated question lacks necessary metadata.
     """
-    meta = deepcopy(meta) if meta else {}
-    files_data: Dict[str, Any] = dict(gc.files_data or {})
+    try:
 
-    if not gc.metadata:
-        raise ValueError("Metadata not present in question")
+        meta = deepcopy(meta) if meta else {}
+        files_data: Dict[str, Any] = dict(gc.files_data or {})
 
-    metadata = gc.metadata
-    question_payload = gc.question_payload
+        if not gc.metadata:
+            raise ValueError("Metadata not present in question")
 
-    files_data["metadata.json"] = to_serializable(metadata)
-    files_data["question_payload.json"] = to_serializable(question_payload)
+        metadata = gc.metadata
+        question_payload = gc.question_payload
 
-    q_payload: Dict[str, Any] = {
-        "title": meta.get("title") or metadata.title,
-        "ai_generated": True,
-        "isAdaptive": to_bool(metadata.isAdaptive),
-        "createdBy": meta.get("createdBy"),
-        "user_id": meta.get("user_id"),
-        "topics": metadata.topics,
-        "languages": metadata.language,
-        "qtypes": metadata.qtype,
-    }
+        files_data["metadata.json"] = to_serializable(metadata)
+        files_data["question_payload.json"] = to_serializable(question_payload)
 
-    q = await question_crud.create_question(q_payload, session)
-    for filename, content in files_data.items():
-        question_storage_service.add_file_to_question(
-            question_id=q.id,
-            filename=filename,
-            content=content,
-            session=session,
+        q_payload: Dict[str, Any] = {
+            "title": meta.get("title") or metadata.title,
+            "ai_generated": True,
+            "isAdaptive": to_bool(metadata.isAdaptive),
+            "createdBy": meta.get("createdBy"),
+            "user_id": meta.get("user_id"),
+            "topics": metadata.topics,
+            "languages": metadata.language,
+            "qtypes": metadata.qtype,
+        }
+
+        q = await question_crud.create_question(q_payload, session)
+
+        fd_list: List[FileData] = [
+            FileData(filename=filename, content=to_serializable(content))
+            for filename, content in files_data.items()
+        ]
+        results = await question_storage_service.write_files_to_directory(
+            q.id, fd_list, session
         )
-
-    created = await question_crud.get_question_data(question_id=q.id, session=session)
-    return created
+        created = await question_crud.get_question_data(
+            question_id=q.id, session=session
+        )
+        return created
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not process {str(e)}",
+        )
 
 
 async def run_text(
