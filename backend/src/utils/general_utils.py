@@ -1,5 +1,5 @@
 from typing import Any, Iterable, List, Optional, Sequence, Union
-
+import json
 
 _TRUE = {"true", "1", "yes", "y", "on", "t"}
 _FALSE = {"false", "0", "no", "n", "off", "f"}
@@ -81,3 +81,16 @@ def pick(obj, *keys, default=None):
             if hasattr(obj, k):
                 return getattr(obj, k)
     return default
+
+
+def normalize_json_content(value: Any) -> Any:
+    """
+    Make tests robust whether File.content is stored as a dict (JSON column)
+    or as a stringified JSON. Non-JSON strings are returned as-is.
+    """
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return value
+    return value

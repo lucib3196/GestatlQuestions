@@ -27,7 +27,7 @@ from src.ai_workspace.utils import save_graph_visualization, validate_llm_output
 client = Client()
 
 cfg = LLMConfiguration(
-    vector_store_path=Path(r"backend/src/ai_workspace/vectorstores/TOPIC_VS").resolve()
+    vector_store_path=Path(r"src/ai_workspace/vectorstores/TOPIC_VS").resolve()
 )
 llm_config = init_generation(cfg, retriever_type="mmr")
 llm_base = llm_config.base_llm

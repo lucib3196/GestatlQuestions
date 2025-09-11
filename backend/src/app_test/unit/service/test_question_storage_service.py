@@ -24,7 +24,7 @@ async def test_returns_existing_local_path(
 
     # Assert
     assert resp.status == status.HTTP_200_OK
-    assert "already set" in resp.detail.lower()
+    assert "already exists" in resp.detail.lower()
     assert resp.data == str(existing)
     assert session.committed is False  # no write needed
     assert session.refreshed is False
@@ -148,11 +148,13 @@ async def test_get_filename(monkeypatch, tmp_path, patch_questions_path, session
         qs.FileData(filename="readme.txt", content="hello"),
         qs.FileData(filename="config.json", content={"env": "dev", "debug": True}),
     ]
+
     # Write the files
     await qs.write_files_to_directory(
         question_id=q.id, files_data=files_data, session=session
     )
 
+    # Validate contents
     for f in files_data:
         r = await qs.get_file_path(
             question_id=q.id, filename=f.filename, session=session
@@ -161,10 +163,12 @@ async def test_get_filename(monkeypatch, tmp_path, patch_questions_path, session
         assert r.data
 
         content = Path(r.data).read_text()
-        c = f.content
+
         if isinstance(f.content, dict):
-            c = json.dumps(c)
-        assert content == c
+            # Compare JSON objects (ignore whitespace/indent differences)
+            assert json.loads(content) == f.content
+        else:
+            assert content == f.content
 
 
 @pytest.mark.asyncio
@@ -202,7 +206,9 @@ async def test_update_file(monkeypatch, tmp_path, patch_questions_path, session)
         r = await qs.update_file_content(
             q.id, f.filename, new_content=new_content, session=session
         )
-        c = Path(str(r.data)).read_text()
+        assert r.file_paths
+        assert r.file_paths[0]
+        c = Path(str(r.file_paths[0])).read_text()
         assert c == new_content
 
 
@@ -259,10 +265,10 @@ async def test_update_file_happy_paths(
 
     # Assert response basics
     assert resp.status == 200, f"Unexpected status: {resp}"
-    assert isinstance(resp.data, (str, Path)), "response.data must be path-like"
+    assert isinstance(resp.files[0], (qs.FileData)), "response.data must be path-like"
 
     # Assert persisted content
-    persisted = expect_reader(resp.data)
+    persisted = expect_reader(resp.file_paths[0])
     if isinstance(new_content, dict):
         # For dicts, compare as objects
         assert persisted == new_content
@@ -274,7 +280,7 @@ async def test_update_file_happy_paths(
     target = existing_dir / qs.safe_name(fname)
     assert target.exists(), "Updated file should exist at normalized path"
     # And resp.data should point to that file
-    assert Path(resp.data).resolve() == target.resolve()
+    assert Path(resp.file_paths[0]).resolve() == target.resolve()
 
 
 @pytest.mark.asyncio

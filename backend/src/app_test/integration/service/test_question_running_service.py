@@ -1,7 +1,7 @@
 import pytest
 from src.api.service import question_running_service
 from src.code_runner.models import CodeRunResponse, QuizData
-from src.app_test.integration.service.fixture_question_running_service import *
+from src.app_test.integration.fixtures.fixture_question_running_service import *
 from src.utils import logs_contain
 from fastapi import HTTPException
 

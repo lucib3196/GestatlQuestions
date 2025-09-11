@@ -21,53 +21,105 @@ from src.api.service import question_crud as qc
 from src.utils import safe_name
 
 
-async def set_directory(question_id: str | UUID, session: SessionDep):
+from pathlib import Path
+from typing import Union
+from uuid import UUID
+from fastapi import HTTPException
+from starlette import status
+
+# adjust these imports to your project
+from src.api.core import settings
+from src.api.service import question_crud as qc
+from src.api.response_models import SuccessDataResponse
+from src.utils import safe_name
+
+
+async def set_directory(question_id: Union[str, UUID], session) -> SuccessDataResponse:
     """
     Ensure a question has a local directory on disk.
 
-    If a directory is already set/exists, returns that path.
-    Otherwise, creates a directory under settings.QUESTIONS_PATH using a safe
-    version of the question title (falling back to title_id if needed), updates
-    the question.local_path, and returns the created path in a SuccessDataResponse.
+    Behavior:
+      - If question.local_path exists on disk, return it (200).
+      - Else, create a directory under BASE_PATH / QUESTIONS_DIRNAME using a safe name
+        derived from the question title; fall back to "question_<uuid>".
+      - If the intended directory name already exists for a different question,
+        append "_<uuid>" to avoid overwriting.
+      - Persist question.local_path as a *relative path* (e.g. "questions/<name>")
+        and return it (201).
     """
-    try:
-        question = await qc.get_question_by_id(question_id, session)
-        response = await get_question_directory(session, question.id)
-        assert question.title
-        assert settings.QUESTIONS_PATH
+    # 1) Fetch question
+    question = await qc.get_question_by_id(question_id, session)
+    if question is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Question {question_id} not found",
+        )
 
-        if response.data:
-            return response
-        else:
-            path = Path(settings.QUESTIONS_PATH) / safe_name(question.title)
-            if path.exists() and (question.local_path is None):
-                # Handle Cases where questions have the same name prevent
-                # Previous data from getting overwritten
-                path = Path(settings.QUESTIONS_PATH) / safe_name(
-                    f"{question.title}_{question.id}"
-                )
-            path = path.resolve()
-            # Create the path
-            path.mkdir(parents=True, exist_ok=True)
-            question.local_path = str(path.resolve())
+    if (
+        not settings.BASE_PATH
+        or not settings.QUESTIONS_PATH
+        or not settings.QUESTIONS_DIRNAME
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"base path, question path or question dirname is not set "},
+        )
+    # 2) Resolve base dir
+    base_dir = Path(str(settings.BASE_PATH)) / str(settings.QUESTIONS_DIRNAME)
+    base_dir = base_dir.resolve()
 
-            session.add(question)
-            session.commit()
-            session.refresh(question)
+    if not base_dir.exists():
+        base_dir.mkdir(parents=True, exist_ok=True)
 
+    # 3) If already set and exists, return early (idempotent)
+    if question.local_path:
+        existing = Path(str(settings.BASE_PATH)) / question.local_path
+        if existing.exists() and existing.is_dir():
             return SuccessDataResponse(
-                status=status.HTTP_201_CREATED,
-                detail=f"Path for question {question.title} created successfully",
-                data=question.local_path,
+                status=status.HTTP_200_OK,
+                detail=f"Path for question {question.id} already exists.",
+                data=question.local_path,  # stored as relative path
             )
 
-    except HTTPException:
-        raise
+    # 4) Build a safe directory name
+    title = (question.title or "").strip()
+    base_name = safe_name(title) if title else f"question_{question.id}"
+    target = base_dir / base_name
+
+    # 5) Avoid collisions
+    if target.exists() and str(target) != (question.local_path or ""):
+        target = base_dir / f"{base_name}_{question.id}"
+
+    # 6) Create directory
+    try:
+        target.mkdir(parents=True, exist_ok=True)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Could not set directory {e}",
-        )
+            detail=f"Failed to create directory '{target}': {e}",
+        ) from e
+
+    # 7) Compute relative path (always relative to BASE_PATH)
+    relative_path = f"{settings.QUESTIONS_DIRNAME}/{target.name}"
+
+    # 8) Persist relative path in the DB
+    question.local_path = relative_path
+    try:
+        session.add(question)
+        session.commit()
+        session.refresh(question)
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating Question {question.id}: {e}",
+        ) from e
+
+    return SuccessDataResponse(
+        status=status.HTTP_201_CREATED,
+        detail=f"Path for question '{question.title or question.id}' created successfully.",
+        data=relative_path,
+    )
 
 
 async def get_question_directory(session: SessionDep, question_id: str | UUID):
@@ -86,7 +138,9 @@ async def get_question_directory(session: SessionDep, question_id: str | UUID):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Question missing required fields (title or QUESTIONS_PATH).",
             )
-        qpath = Path(str(question.local_path)) if question.local_path else None
+        qpath = Path(str(settings.BASE_PATH)) / Path(
+            str(question.local_path)
+        )  # if question.local_path else None
         if qpath and qpath.exists():
             return SuccessDataResponse(
                 status=status.HTTP_200_OK,
@@ -94,10 +148,9 @@ async def get_question_directory(session: SessionDep, question_id: str | UUID):
                 data=str(qpath),
             )
         else:
-            return SuccessDataResponse(
-                status=status.HTTP_200_OK,
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"No Question Path Set for {question.title}",
-                data=None,
             )
     except HTTPException:
         raise
@@ -186,8 +239,15 @@ async def write_file_to_directory(
     Returns a SuccessDataResponse with the written file's absolute path.
     """
     try:
-        response = await set_directory(question_id, session)
+        response = await get_question_directory(
+            session,
+            question_id,
+        )
+        print("This is getting the local dir")
+        print(response)
         base_dir = Path(str(response.data)).resolve()
+
+        print("This is base dir", base_dir)
 
         if not file_data:
             raise HTTPException(
@@ -218,7 +278,10 @@ async def write_files_to_directory(
     Returns a SuccessFileResponse with the list of absolute paths for all written files.
     """
     try:
-        response = await set_directory(question_id, session)
+        response = await get_question_directory(
+            session,
+            question_id,
+        )
         base_dir = Path(str(response.data)).resolve()
 
         results = await asyncio.gather(*[write_file(f, base_dir) for f in files_data])
@@ -252,8 +315,16 @@ async def get_files_from_directory(question_id: str | UUID, session: SessionDep)
         question_path = Path(str(response.data)).resolve()
         files = [str(f) for f in question_path.iterdir() if f.is_file]
 
+        file_data: List[FileData] = []
+        for f in files:
+            fpath = Path(f)
+            file_data.append(FileData(filename=fpath.name, content=fpath.read_text()))
+
         return SuccessFileResponse(
-            status=status.HTTP_200_OK, detail="Retrieved files", files=files
+            status=status.HTTP_200_OK,
+            detail="Retrieved files",
+            files=file_data,
+            file_paths=files,
         )
     except HTTPException:
         raise
@@ -288,7 +359,7 @@ async def get_file_path(question_id: str | UUID, filename: str, session: Session
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"filename f{filename} does not exist for question {question.title}",
+                detail=f"filename {filename} does not exist for question {question.title}",
             )
     except HTTPException:
         raise
@@ -350,151 +421,11 @@ async def update_file_content(
         r = await get_file_path(question_id, filename, session)
         file_path = Path(str(r.data))
         file_path = write(file_path, content=new_content, overwrite=True)
-        return SuccessDataResponse(
+        return SuccessFileResponse(
             status=status.HTTP_200_OK,
             detail=f"Updated file content {filename} from {question_id} ",
-            data=str(file_path),
+            files=[FileData(filename=filename, content=new_content)],
+            file_paths=[file_path],
         )
     except HTTPException:
         raise
-
-
-# def get_question_file(
-#     question_id: Union[str, UUID], filename: str, session: SessionDep
-# ) -> SuccessFileResponse:
-
-#     try:
-#         question_uuid = get_uuid(question_id)
-
-#     except ValueError:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST, detail="Question ID is not valid"
-#         )
-
-#     question = question_db.get_question_by_id(
-#         question_id=question_uuid, session=session
-#     )
-#     if not question:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND, detail="Question not Found"
-#         )
-
-#     results = session.exec(
-#         select(File)
-#         .where(File.question_id == question_uuid)
-#         .where(File.filename == filename)
-#     ).first()
-#     if not results:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail=f"No File {filename} for Question",
-#         )
-#     return SuccessFileResponse(
-#         status=status.HTTP_200_OK,
-#         detail=f"{filename} in question found",
-#         file_obj=[results],
-#     )
-
-
-# def delete_file(file_id: UUID | str, session: SessionDep):
-#     try:
-#         file_db.delete_file(session, file_id)
-#         return {"detail": f"File {file_id} deleted"}
-#     except ValueError as e:
-#         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail=str(e))
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-#         )
-
-
-# def delete_file_by_question_id(
-#     question_id: Union[str, UUID], filename: str, session: SessionDep
-# ):
-#     try:
-#         question = question_db.get_question_by_id(question_id, session)
-#         if not question:
-#             raise HTTPException(
-#                 status_code=status.HTTP_400_BAD_REQUEST,
-#                 detail="Question is not valid cannot add file",
-#             )
-#         qfile = session.exec(select(File).where(filename == filename)).first()
-#         if not qfile:
-#             raise HTTPException(
-#                 status_code=status.HTTP_204_NO_CONTENT,
-#                 detail=f"File not found {filename}",
-#             )
-#         delete_file(file_id=qfile.id, session=session)
-#     except HTTPException as e:
-#         raise e
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-#         )
-
-
-# def add_file_to_question(
-#     question_id: Union[str, UUID],
-#     filename: str,
-#     content: Union[dict, str],
-#     session: SessionDep,
-# ) -> SuccessFileResponse:
-
-#     question = question_db.get_question_by_id(question_id, session)
-#     if not question:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="Question is not valid cannot add file",
-#         )
-#     new_file = File(filename=filename, content=content, question_id=question.id)
-#     file_obj = file_db.add_file(new_file, session)
-#     return SuccessFileResponse(
-#         status=status.HTTP_201_CREATED,
-#         detail=f"File {filename} added to question {question.title}",
-#         file_obj=[file_obj],
-#     )
-
-
-# def get_all_files(
-#     question_id: Union[str, UUID], session: SessionDep
-# ) -> SuccessFileResponse:
-
-#     try:
-#         question_uuid = get_uuid(question_id)
-#         question = question_db.get_question_by_id(question_id, session)
-#         if not question:
-#             raise HTTPException(
-#                 status_code=status.HTTP_400_BAD_REQUEST,
-#                 detail="Question is not valid",
-#             )
-#         results = session.exec(
-#             select(File).where(File.question_id == question_uuid)
-#         ).all()
-#         return SuccessFileResponse(
-#             status=status.HTTP_200_OK,
-#             detail=f"Got all files for question {question.title}",
-#             file_obj=list(results) or [],
-#         )
-#     except ValueError:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST, detail="Question ID is not valid"
-#         )
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-#         )
-
-
-# def update_question_file(
-#     question_id: Union[str, UUID],
-#     filename: str,
-#     new_content: Union[str, dict],
-#     session: SessionDep,
-# ) -> SuccessFileResponse:
-#     response = get_question_file(question_id, filename, session)
-#     file_obj = file_db.update_file_content(response.file_obj[0], new_content, session)
-#     return SuccessFileResponse(
-#         status=status.HTTP_200_OK,
-#         detail=f"Updated file {filename} succesfully",
-#         file_obj=[file_obj],
-#     )

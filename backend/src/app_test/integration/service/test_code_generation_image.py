@@ -3,7 +3,7 @@ from fastapi import UploadFile
 import pytest
 from pathlib import Path
 
-from src.app_test.integration.service.fixture_code_generation import *
+from src.app_test.integration.fixtures.fixture_code_generation import *
 from src.api.service import code_generation
 
 

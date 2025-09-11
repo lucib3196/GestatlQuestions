@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from pydantic import AnyHttpUrl, field_validator
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings
+from pathlib import Path
 
 load_dotenv()
 
@@ -28,7 +29,9 @@ class Settings(BaseSettings):
     STORAGE_BUCKET: Optional[str] = None
 
     # Static Directory
-    QUESTIONS_PATH: Optional[str] = None
+    QUESTIONS_DIRNAME: Optional[str | Path] = None
+    QUESTIONS_PATH: Optional[str | Path] = None
+    BASE_PATH: Optional[str | Path] = None
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
@@ -51,6 +54,8 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 
+BASE_DIR = Path(__file__).resolve().parents[4]
+
 settings = Settings(
     PROJECT_NAME="gestalt_question_review",
     BACKEND_CORS_ORIGINS=[
@@ -60,5 +65,9 @@ settings = Settings(
     SECRET_KEY=os.getenv("SECRET_KEY", ""),
     FIREBASE_PATH=os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON"),
     STORAGE_BUCKET=os.getenv("STORAGE_BUCKET"),
-    QUESTIONS_PATH="/questions",
+    # relative folder name only
+    QUESTIONS_DIRNAME="questions",
+    # absolute path resolved against BASE_DIR
+    QUESTIONS_PATH=BASE_DIR / "questions",
+    BASE_PATH=BASE_DIR,
 )

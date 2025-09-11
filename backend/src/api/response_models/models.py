@@ -1,6 +1,14 @@
-from typing import Union, Optional, List, Any
-from pydantic import BaseModel, field_validator
+# --- Standard Library ---
+from pathlib import Path
+from typing import Any, List, Optional, Union
+from uuid import UUID
+
+# --- Third-Party ---
+from pydantic import BaseModel, Field, field_validator
+
+# --- Internal ---
 from src.api.models.file_model import File
+from src.api.models.question_model import QuestionMeta
 
 
 class FileData(BaseModel):
@@ -28,7 +36,8 @@ class SuccessDataResponse(SuccessfulResponse):
 class SuccessFileResponse(SuccessfulResponse):
     """Success response with one or more file objects."""
 
-    files: List[FileData] | List[File] | List[str]
+    files: List[FileData] | List[str] = []
+    file_paths: List[str] | List[Path] = []
 
     @field_validator("files", mode="before")
     def ensure_list(cls, v):
@@ -38,3 +47,27 @@ class SuccessFileResponse(SuccessfulResponse):
         if isinstance(v, File):
             return [v]
         return v
+
+
+class Response(BaseModel):
+    status: int
+    detail: str
+
+
+class QuestionReadResponse(BaseModel):
+    status: int
+    question: QuestionMeta
+    files: List[FileData] | List[str] = []
+    detail: str
+
+
+class UpdateFile(BaseModel):
+    question_id: str | UUID
+    filename: str
+    new_content: str | dict
+
+
+class AdditionalQMeta(BaseModel):
+    topics: Optional[List[str]] = None
+    languages: Optional[List[str]] = None
+    qtype: Optional[List[str]] = None

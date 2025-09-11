@@ -1,26 +1,42 @@
-from typing import Annotated
 from fastapi import UploadFile, HTTPException
 from typing import List
 import os
-import asyncio
 from starlette import status
-from typing import Optional
-from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
+from fastapi import UploadFile, HTTPException
 from pathlib import Path
 import zipfile
-import shutil
-import tempfile
 
 # Configuration for file size and filetypes
 MAX_FILE_SIZE_MB = 5
-ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".pdf", ".txt"}
-ALLOWED_CONTENT_TYPES = {"image/png", "image/jpeg", "application/pdf"}
+ALLOWED_EXTENSIONS = {
+    # Images
+    ".png",
+    ".jpg",
+    ".jpeg",
+    # Documents
+    ".pdf",
+    ".txt",
+    ".html",
+    ".json",
+    # Code
+    ".py",
+    ".js",
+}
+ALLOWED_MIME_TYPES = {
+    "image/png",
+    "image/jpeg",
+    "application/pdf",
+    "text/plain",
+    "text/html",
+    "application/json",
+    "text/x-python",
+    "application/javascript",
+    "text/javascript",
+}
 ALLOWED_ZIP_EXTENSIONS = {"application/zip", "application/x-zip-compressed"}
 
 
 async def validate_file(file: UploadFile) -> UploadFile:
-
     if not file.filename:
         raise HTTPException(status_code=400, detail="There is no file")
     if not file.content_type:
@@ -29,7 +45,7 @@ async def validate_file(file: UploadFile) -> UploadFile:
             detail="Cannot determine the file's content type",
         )
 
-    if file.content_type.lower() not in ALLOWED_CONTENT_TYPES:
+    if file.content_type.lower() not in ALLOWED_MIME_TYPES:
         raise HTTPException(
             status_code=400,
             detail=f"File of Content type {file.content_type} is not allowed",
@@ -44,6 +60,7 @@ async def validate_file(file: UploadFile) -> UploadFile:
         raise HTTPException(
             status_code=400, detail=f"{file.filename} exceeds {MAX_FILE_SIZE_MB}MB"
         )
+    await file.seek(0)
     return file
 
 

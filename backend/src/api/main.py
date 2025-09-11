@@ -10,6 +10,7 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.routing import APIRouter
 from starlette import status
 from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
 # Local application imports
 from src.api.core.config import settings
@@ -19,7 +20,9 @@ from src.api.web.code_generator import router as code_generator_router
 from src.api.web.user import router as user_route
 from src.api.web.question_running import router as question_running_router
 from src.api.web.question_crud import router as q_crud
-from src.api.web.file_management import router as file_router
+from src.api.web.file_management import router as f_router
+
+# from backend.src.api.web.refactor_file_management import router as file_router
 
 # from backend_api.web.file_management import router as file_router
 # from backend_api.web.local_questions import router as local_question_router
@@ -38,9 +41,10 @@ routes = [
     code_generator_router,
     user_route,
     q_crud,
-    file_router,
+    f_router,
     question_running_router,
 ]
+print("This is the path", settings.QUESTIONS_PATH)
 
 
 def add_routes(app: FastAPI, routes: list[APIRouter] = routes):
@@ -63,9 +67,16 @@ def get_application():
     )
     if not settings.QUESTIONS_PATH:
         raise ValueError("Cannot Find Local Path")
+    print("This is the question path", settings.QUESTIONS_PATH)
+    questions_dir = Path(settings.QUESTIONS_PATH).resolve()
+    print(questions_dir)
+
     app.mount(
-        settings.QUESTIONS_PATH, StaticFiles(directory="questions"), name="questions"
+        f"/{questions_dir.name}",  # -> "/questions"
+        StaticFiles(directory=questions_dir, html=False),
+        name="questions",
     )
+    print("Serving static files from:", questions_dir)
 
     # Define a custom OpenAPI schema that uses your token URL at /auth/login
     def custom_openapi():
