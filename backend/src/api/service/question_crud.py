@@ -18,6 +18,20 @@ from src.api.core.logging import logger
 from src.utils import convert_uuid
 
 
+async def safe_refresh_question(question: Question, session: SessionDep):
+    try:
+        session.add(question)
+        session.commit()
+        session.refresh(question)
+        return question
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating Question {question.id}: {e}",
+        ) from e
+
+
 async def create_question(
     question: Union[Question, dict], session: SessionDep
 ) -> Question:

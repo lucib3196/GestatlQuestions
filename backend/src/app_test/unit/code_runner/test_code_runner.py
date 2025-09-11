@@ -5,7 +5,7 @@ from src.utils import logs_contain
 
 
 def test_run_js():
-    path = Path("backend/assets/code_scripts/test.js").resolve()
+    path = Path("assets/code_scripts/test.js").resolve()
     result = run_js.execute_javascript(path=path)
 
     resp = CodeRunResponse.model_validate(result)
@@ -32,7 +32,8 @@ def test_run_js():
 
 
 def test_run_py():
-    path = Path("backend/assets/code_scripts/test.py").resolve()
+    path = Path("assets/code_scripts/test.py").resolve()
+    print("This is the path", path)
     result = run_py.run_generate_py(path=str(path))
 
     resp = CodeRunResponse.model_validate(result)

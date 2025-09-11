@@ -5,45 +5,131 @@ from starlette import status
 import json
 from typing import List
 from fastapi import HTTPException
+from src.utils import safe_name
 
 
 @pytest.mark.asyncio
-async def test_returns_existing_local_path(
-    monkeypatch, tmp_path, patch_questions_path, session
+async def test_get_directory_when_local_path_already_set(
+    monkeypatch, patch_questions_path, patch_question_dir, session
 ):
-    # Arrange: question already has a valid local_path
-    existing = tmp_path / "already-there"
-    existing.mkdir(parents=True)
-    q = FakeQuestion(id=uuid4(), title="My Question", local_path=str(existing))
+    """Return existing directory if local_path is already set; no DB commit/refresh should occur."""
+    # Arrange
+    question_title = "MyQuestion"
+    safe_name = qs.safe_name(question_title)
 
-    # stub qc in the module under test
-    monkeypatch.setattr(qs, "qc", make_qc_stub(q))
+    rel_path = Path(patch_question_dir) / safe_name
+    abs_path = Path(patch_questions_path) / safe_name
+    abs_path.mkdir(parents=True)
+
+    q = FakeQuestion(id=uuid4(), title=question_title, local_path=str(rel_path))
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
 
     # Act
-    resp = await qs.set_directory(q.id, session)
+    resp = await qs.get_question_directory(session, q.id)
 
-    # Assert
+    # Assert: response details
     assert resp.status == status.HTTP_200_OK
-    assert "already exists" in resp.detail.lower()
-    assert resp.data == str(existing)
-    assert session.committed is False  # no write needed
+    assert "local path already set" in resp.detail.lower()
+
+    # Assert: path handling
+    assert abs_path.exists()
+    assert resp.filepaths and isinstance(resp.filepaths, list)
+    assert resp.filepaths[0] == str(rel_path)
+
+    # Assert: session untouched
+    assert not session.committed
+    assert not session.refreshed
+
+
+@pytest.mark.asyncio
+async def test_get_directory_when_local_path_missing(
+    monkeypatch, patch_questions_path, patch_question_dir, session
+):
+    """Raise 400 if no local_path is set on the question."""
+    # Arrange
+    q = FakeQuestion(id=uuid4(), title="My Question", local_path=None)
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
+
+    # Act & Assert
+    with pytest.raises(HTTPException) as excinfo:
+        await qs.get_question_directory(session, q.id)
+
+    assert excinfo.value.status_code == 400
+    assert "no question path set" in excinfo.value.detail.lower()
+
+
+@pytest.mark.asyncio
+async def test_get_directory_when_path_set_but_dir_missing(
+    monkeypatch, patch_question_dir, session
+):
+    """Raise 400 if local_path is set but the directory does not exist on disk."""
+    # Arrange
+    question_title = "MyQuestionNoDir"
+    safe_name = qs.safe_name(question_title)
+    rel_path = Path(patch_question_dir) / safe_name
+
+    q = FakeQuestion(id=uuid4(), title=question_title, local_path=str(rel_path))
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
+
+    # Act & Assert
+    with pytest.raises(HTTPException) as excinfo:
+        await qs.get_question_directory(session, q.id)
+
+    assert excinfo.value.status_code == 400
+    assert "directory may not exist" in excinfo.value.detail.lower()
+
+
+@pytest.mark.asyncio
+async def test_set_or_get_directory_returns_existing_path_without_changes(
+    monkeypatch, patch_questions_path, session
+):
+    question_title = "MyExistingQuestion"
+    # Arrange: question already has a valid local_path
+    existing = patch_questions_path / question_title
+    existing.mkdir(parents=True)
+    q = FakeQuestion(id=uuid4(), title=question_title, local_path=str(existing))
+    # stub qc in the module under test
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
+    # Act
+    resp = await qs.set_or_get_directory(q.id, session)
+
+    # Assert that response was successful and right type
+    assert resp.status == status.HTTP_200_OK
+    assert "local path already set" in resp.detail.lower()
+
+    # Assert the filepath exist and created
+    assert len(resp.filepaths) == 1
+
+    retrieved_path = patch_questions_path / resp.filepaths[0]
+    assert retrieved_path.resolve() == existing
+
+    # Check database there should be no changes at this point
+    assert session.committed is False
     assert session.refreshed is False
 
 
 @pytest.mark.asyncio
-async def test_create_new_directory_not_set(
-    monkeypatch, tmp_path, patch_questions_path, session
+async def test_set_or_get_directory_creates_new_directory_when_not_set(
+    monkeypatch, patch_questions_path, session
 ):
-    q = FakeQuestion(id=uuid4(), title="New Question", local_path=None)
-    monkeypatch.setattr(qs, "qc", make_qc_stub(q))
+    question_title = "My New Question"
+    q = FakeQuestion(id=uuid4(), title=question_title, local_path=None)
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
 
-    resp = await qs.set_directory(q.id, session)
+    resp = await qs.set_or_get_directory(session, q.id)
 
+    # Assert that response was successful and right type
     assert resp.status == status.HTTP_201_CREATED
     assert "created successfully" in resp.detail.lower()
-    created_path = resp.data
+    assert isinstance(resp.filepaths, list)
+    assert len(resp.filepaths) == 1
+
+    # Check the filepath
+    created_path = resp.filepaths[0]
     assert created_path  # string
     assert (patch_questions_path / qs.safe_name(str(q.title))).exists()
+
+    # Assert database changes
     assert session.committed is True
     assert session.refreshed is True
     # also check Question was updated
@@ -51,164 +137,182 @@ async def test_create_new_directory_not_set(
 
 
 @pytest.mark.asyncio
-async def test_name_collision_append_id(monkeypatch, patch_questions_path, session):
+async def test_set_or_get_directory_appends_id_on_name_collision(
+    monkeypatch, patch_questions_path, patch_question_dir, session
+):
+    """If a directory with the same name exists, append the UUID to avoid collision."""
     fixed_uuid = UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
     title = "Duplicate"
-    base = patch_questions_path / qs.safe_name(title)
 
+    # Create the base directory that will cause a collision
+    base = patch_questions_path / qs.safe_name(title)
     base.mkdir(parents=True)
 
     q = FakeQuestion(id=fixed_uuid, title=title, local_path=None)
-    monkeypatch.setattr(qs, "qc", make_qc_stub(q))
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
 
-    resp = await qs.set_directory(q.id, session)
+    # Act
+    resp = await qs.set_or_get_directory(session, q.id)
+
+    # Assert response
     assert resp.status == status.HTTP_201_CREATED
-    expected = patch_questions_path / qs.safe_name(f"{title}_{fixed_uuid}")
-    assert expected.exists()
-    assert resp.data == str(expected.resolve())
+
+    # Build expected paths
+    safe_dirname = qs.safe_name(f"{title}_{fixed_uuid}")
+    relative_path = Path(patch_question_dir) / safe_dirname
+    expected_path = patch_questions_path / safe_dirname
+
+    # Assert paths
+    assert Path(resp.filepaths[0]) == Path(relative_path)
+    assert expected_path.exists()
 
 
 @pytest.mark.asyncio
-async def test_get_directory(monkeypatch, tmp_path, patch_questions_path, session):
-    # Arrange: question already has a valid local_path
-    existing = tmp_path / "already-there"
-    existing.mkdir(parents=True)
-
-    q = FakeQuestion(id=uuid4(), title="My Question", local_path=str(existing))
-    monkeypatch.setattr(qs, "qc", make_qc_stub(q))
-
-    resp = await qs.get_question_directory(
-        session,
-        q.id,
-    )
-    assert resp.status == status.HTTP_200_OK
-    assert "already set" in resp.detail.lower()
-    assert resp.data == str(existing)
-    assert session.committed is False  # no write needed
-    assert session.refreshed is False
-
-
-@pytest.mark.asyncio
-async def test_write_files(monkeypatch, tmp_path, patch_questions_path, session):
-    # Arrange: question already has a valid local_path
-    existing = tmp_path / "already-there"
-    existing.mkdir(parents=True)
-
-    q = FakeQuestion(id=uuid4(), title="My Question", local_path=str(existing))
-    monkeypatch.setattr(qs, "qc", make_qc_stub(q))
+async def test_write_files_returns_expected_response(
+    monkeypatch, patch_questions_path, patch_question_dir, session
+):
+    """Ensure write_files_to_directory returns the correct response object with filedata and filepaths."""
+    question_title = "QuestionWriteFiles"
+    q = FakeQuestion(id=uuid4(), title=question_title, local_path=None)
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
+    await qs.set_or_get_directory(session, q.id)
 
     files_data = [
         qs.FileData(filename="readme.txt", content="hello"),
         qs.FileData(filename="config.json", content={"env": "dev", "debug": True}),
     ]
+
+    # Act
     resp = await qs.write_files_to_directory(
-        question_id=q.id, files_data=files_data, session=session
+        q.id, files_data=files_data, session=session
     )
-    base_dir = Path(str(q.local_path)).resolve()
-    assert base_dir == existing.resolve()
 
-    # Files written correctly
-    assert (existing / "readme.txt").read_text(encoding="utf-8") == "hello"
-    cfg = json.loads((existing / "config.json").read_text(encoding="utf-8"))
-    assert cfg == {"env": "dev", "debug": True}
+    # Assert response structure
+    assert resp.status == 200
+    assert resp.filedata
+    assert resp.filedata == files_data
+    assert len(resp.filedata) == len(resp.filepaths)
 
 
 @pytest.mark.asyncio
-async def test_get_files(monkeypatch, tmp_path, patch_questions_path, session):
-    # Arrange: question already has a valid local_path
-    existing = tmp_path / "already-there"
-    existing.mkdir(parents=True)
-
-    q = FakeQuestion(id=uuid4(), title="My Question", local_path=str(existing))
-    monkeypatch.setattr(qs, "qc", make_qc_stub(q))
+async def test_write_files_creates_files_on_disk(
+    monkeypatch, patch_questions_path, patch_question_dir, session
+):
+    """Ensure write_files_to_directory actually writes files with correct contents to disk."""
+    question_title = "QuestionWriteFiles"
+    q = FakeQuestion(id=uuid4(), title=question_title, local_path=None)
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
+    await qs.set_or_get_directory(session, q.id)
 
     files_data = [
         qs.FileData(filename="readme.txt", content="hello"),
         qs.FileData(filename="config.json", content={"env": "dev", "debug": True}),
     ]
-    # Write the files
-    await qs.write_files_to_directory(
-        question_id=q.id, files_data=files_data, session=session
+
+    # Act
+    resp = await qs.write_files_to_directory(
+        q.id, files_data=files_data, session=session
     )
 
-    response = await qs.get_files_from_directory(q.id, session=session)
-    assert len(response.files) == len(files_data)
+    # Assert filesystem state
+    for filedata, filepath in zip(resp.filedata, resp.filepaths):
+        expected_rel = (
+            Path(patch_question_dir) / qs.safe_name(question_title) / filedata.filename
+        )
+        assert filepath == str(expected_rel), f"{filepath} mismatch"
+
+        abs_path = (
+            Path(patch_questions_path)
+            / qs.safe_name(question_title)
+            / filedata.filename
+        )
+        assert abs_path.exists()
+
+        if isinstance(filedata.content, dict):
+            assert json.loads(abs_path.read_text(encoding="utf-8")) == filedata.content
+        else:
+            assert abs_path.read_text(encoding="utf-8") == filedata.content
 
 
 @pytest.mark.asyncio
-async def test_get_filename(monkeypatch, tmp_path, patch_questions_path, session):
-    # Arrange: question already has a valid local_path
-    existing = tmp_path / "already-there"
-    existing.mkdir(parents=True)
-
-    q = FakeQuestion(id=uuid4(), title="My Question", local_path=str(existing))
-    monkeypatch.setattr(qs, "qc", make_qc_stub(q))
-
-    files_data: List[qs.FileData] = [
+async def test_get_files_check_filedata(monkeypatch, patch_questions_path, session):
+    """Ensure get_files_from_directory returns written files."""
+    question_title = "QuestionWriteFiles"
+    q = FakeQuestion(id=uuid4(), title=question_title, local_path=None)
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
+    await qs.set_or_get_directory(session, q.id)
+    files_data = [
         qs.FileData(filename="readme.txt", content="hello"),
         qs.FileData(filename="config.json", content={"env": "dev", "debug": True}),
     ]
+    await qs.write_files_to_directory(q.id, files_data=files_data, session=session)
+    # Act
+    response = await qs.get_files_from_directory(q.id, session=session)
+    # Assert
+    assert len(response.filedata) == len(files_data)
 
-    # Write the files
-    await qs.write_files_to_directory(
-        question_id=q.id, files_data=files_data, session=session
-    )
 
-    # Validate contents
+@pytest.mark.asyncio
+async def test_get_filename(monkeypatch, patch_questions_path, session):
+    """Ensure get_file_path returns correct file contents."""
+    existing = patch_questions_path / "already-there"
+    existing.mkdir(parents=True)
+
+    q = FakeQuestion(id=uuid4(), title="My Question", local_path=str(existing))
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
+
+    files_data = [
+        qs.FileData(filename="readme.txt", content="hello"),
+        qs.FileData(filename="config.json", content={"env": "dev", "debug": True}),
+    ]
+    await qs.write_files_to_directory(q.id, files_data=files_data, session=session)
+
     for f in files_data:
-        r = await qs.get_file_path(
-            question_id=q.id, filename=f.filename, session=session
-        )
-
-        assert r.data
-
-        content = Path(r.data).read_text()
+        r = await qs.get_file_path_abs(q.id, filename=f.filename, session=session)
+        content = Path(r.filepaths[0]).read_text()
 
         if isinstance(f.content, dict):
-            # Compare JSON objects (ignore whitespace/indent differences)
             assert json.loads(content) == f.content
         else:
             assert content == f.content
 
 
 @pytest.mark.asyncio
-async def test_get_filename_empty(monkeypatch, tmp_path, patch_questions_path, session):
-    # Arrange: question already has a valid local_path
-    existing = tmp_path / "already-there"
+async def test_get_filename_empty(monkeypatch, patch_questions_path, session):
+    """Ensure get_file_path raises if filename does not exist."""
+    existing = patch_questions_path / "already-there"
     existing.mkdir(parents=True)
 
     q = FakeQuestion(id=uuid4(), title="My Question", local_path=str(existing))
-    monkeypatch.setattr(qs, "qc", make_qc_stub(q))
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
 
     with pytest.raises(HTTPException) as excinfo:
-        await qs.get_file_path(q.id, filename="NotExist.txt", session=session)
+        await qs.get_file_path_abs(q.id, filename="NotExist.txt", session=session)
+
     assert excinfo.value.status_code == 400
 
 
 @pytest.mark.asyncio
-async def test_update_file(monkeypatch, tmp_path, patch_questions_path, session):
-    # Arrange: question already has a valid local_path
-    existing = tmp_path / "already-there"
+async def test_update_file(monkeypatch, patch_questions_path, session):
+    """Ensure update_file_content overwrites files correctly."""
+    existing = patch_questions_path / "already-there"
     existing.mkdir(parents=True)
 
     q = FakeQuestion(id=uuid4(), title="My Question", local_path=str(existing))
-    monkeypatch.setattr(qs, "qc", make_qc_stub(q))
-    files_data: List[qs.FileData] = [
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
+
+    files_data = [
         qs.FileData(filename="readme.txt", content="hello"),
         qs.FileData(filename="config.json", content={"env": "dev", "debug": True}),
     ]
-    # Write the files
-    await qs.write_files_to_directory(
-        question_id=q.id, files_data=files_data, session=session
-    )
+    await qs.write_files_to_directory(q.id, files_data=files_data, session=session)
+
     for f in files_data:
         new_content = "New Content"
         r = await qs.update_file_content(
             q.id, f.filename, new_content=new_content, session=session
         )
-        assert r.file_paths
-        assert r.file_paths[0]
-        c = Path(str(r.file_paths[0])).read_text()
+        c = Path(str(r.filepaths[0])).read_text()
         assert c == new_content
 
 
@@ -216,89 +320,64 @@ async def test_update_file(monkeypatch, tmp_path, patch_questions_path, session)
 @pytest.mark.parametrize(
     "fname,new_content,expect_reader",
     [
-        # plain text replacement
         ("readme.txt", "New Content", lambda p: Path(p).read_text()),
-        # dict should be JSON-serialized; compare via json.loads to avoid whitespace issues
         (
             "config.json",
             {"env": "prod", "debug": False},
             lambda p: json.loads(Path(p).read_text()),
         ),
-        # bytes content
         ("binary.bin", b"\x00\x01\x02\x03", lambda p: Path(p).read_bytes()),
-        # safe-name normalization (spaces -> underscores etc.)
         ("notes with spaces.md", " spaced ok ", lambda p: Path(p).read_text()),
     ],
 )
 async def test_update_file_happy_paths(
-    monkeypatch,
-    tmp_path,
-    patch_questions_path,
-    session,
-    fname,
-    new_content,
-    expect_reader,
+    monkeypatch, patch_questions_path, session, fname, new_content, expect_reader
 ):
-    """
-    Ensure update_file_content overwrites existing file contents correctly for
-    str, dict->JSON, and bytes, and respects safe filename normalization.
-    """
-    # Arrange: question already has a valid local_path
-    existing_dir = tmp_path / "already-there"
+    """Ensure update_file_content overwrites str, dict->JSON, and bytes; respects safe filename normalization."""
+    existing_dir = patch_questions_path / "already-there"
     existing_dir.mkdir(parents=True)
 
     q = FakeQuestion(id=uuid4(), title="My Question", local_path=str(existing_dir))
-    monkeypatch.setattr(qs, "qc", make_qc_stub(q))
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
 
-    # Prime the directory with an initial version of the file
+    # Prime directory with initial version
     initial = "hello" if not isinstance(new_content, (bytes, bytearray)) else b"hello"
-    (
-        (existing_dir / qs.safe_name(fname)).write_text(initial)
-        if isinstance(initial, str)
-        else (existing_dir / qs.safe_name(fname)).write_bytes(initial)
-    )
+    target = existing_dir / qs.safe_name(fname)
+    if isinstance(initial, str):
+        target.write_text(initial)
+    else:
+        target.write_bytes(initial)
 
-    # Act: update content
     resp = await qs.update_file_content(
         q.id, fname, new_content=new_content, session=session
     )
 
-    # Assert response basics
-    assert resp.status == 200, f"Unexpected status: {resp}"
-    assert isinstance(resp.files[0], (qs.FileData)), "response.data must be path-like"
-
-    # Assert persisted content
-    persisted = expect_reader(resp.file_paths[0])
+    # Assert content persisted
+    persisted = expect_reader(resp.filepaths[0])
     if isinstance(new_content, dict):
-        # For dicts, compare as objects
         assert persisted == new_content
     else:
-        # For bytes/str, direct equality
         assert persisted == new_content
 
-    # Sanity: file lives under the safe-named location
-    target = existing_dir / qs.safe_name(fname)
-    assert target.exists(), "Updated file should exist at normalized path"
-    # And resp.data should point to that file
-    assert Path(resp.file_paths[0]).resolve() == target.resolve()
+    # Sanity check target file exists
+    assert target.exists()
+    assert Path(resp.filepaths[0]).resolve() == target.resolve()
 
 
 @pytest.mark.asyncio
-async def test_update_file_nonexistent_raises(monkeypatch, tmp_path, session):
-    """
-    Updating a file that doesn't exist should raise an HTTPException (404/400).
-    """
-    base = tmp_path / "empty-dir"
+async def test_update_file_nonexistent_raises(
+    monkeypatch, patch_questions_path, session
+):
+    """Updating a missing file should raise HTTPException."""
+    base = patch_questions_path / "empty-dir"
     base.mkdir(parents=True)
 
     q = FakeQuestion(id=uuid4(), title="Ghost Q", local_path=str(base))
-    monkeypatch.setattr(qs, "qc", make_qc_stub(q))
+    monkeypatch.setattr(qs, "qc", make_qc_stub(q, session))
 
-    with pytest.raises(Exception) as ei:
+    with pytest.raises(HTTPException) as excinfo:
         await qs.update_file_content(
             q.id, "missing.txt", new_content="whatever", session=session
         )
 
-    # Accept either 404 or 400 depending on your implementation
-    msg = str(ei.value)
-    assert "404" in msg or "400" in msg or "not exist" in msg.lower()
+    assert excinfo.value.status_code in (400, 404)

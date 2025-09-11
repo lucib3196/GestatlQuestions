@@ -29,9 +29,9 @@ class Settings(BaseSettings):
     STORAGE_BUCKET: Optional[str] = None
 
     # Static Directory
-    QUESTIONS_DIRNAME: Optional[str | Path] = None
-    QUESTIONS_PATH: Optional[str | Path] = None
-    BASE_PATH: Optional[str | Path] = None
+    QUESTIONS_DIRNAME: str | Path
+    QUESTIONS_PATH: str | Path
+    BASE_PATH: str | Path
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod

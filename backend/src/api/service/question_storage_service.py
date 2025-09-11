@@ -1,128 +1,54 @@
-# Standard library
+# --- Standard Library ---
 import asyncio
+import base64
 import json
+import mimetypes
 from pathlib import Path
-from typing import List, Union
+from typing import List, Literal, Union
 from uuid import UUID
 
-# Third-party
+# --- Third-Party ---
 from fastapi import HTTPException
 from starlette import status
 
-# Local
+# --- Internal ---
 from src.api.core import settings
 from src.api.database import SessionDep
 from src.api.response_models import (
     FileData,
     SuccessDataResponse,
     SuccessFileResponse,
+    SuccessfulResponse,
 )
 from src.api.service import question_crud as qc
 from src.utils import safe_name
 
 
-from pathlib import Path
-from typing import Union
-from uuid import UUID
-from fastapi import HTTPException
-from starlette import status
-
-# adjust these imports to your project
-from src.api.core import settings
-from src.api.service import question_crud as qc
-from src.api.response_models import SuccessDataResponse
-from src.utils import safe_name
+IMAGE_MIMETYPES = {"image/png"}
 
 
-async def set_directory(question_id: Union[str, UUID], session) -> SuccessDataResponse:
-    """
-    Ensure a question has a local directory on disk.
+def reconstruct_path(relative_path: str | Path) -> Path:
+    return Path(settings.BASE_PATH) / Path(relative_path)
 
-    Behavior:
-      - If question.local_path exists on disk, return it (200).
-      - Else, create a directory under BASE_PATH / QUESTIONS_DIRNAME using a safe name
-        derived from the question title; fall back to "question_<uuid>".
-      - If the intended directory name already exists for a different question,
-        append "_<uuid>" to avoid overwriting.
-      - Persist question.local_path as a *relative path* (e.g. "questions/<name>")
-        and return it (201).
-    """
-    # 1) Fetch question
-    question = await qc.get_question_by_id(question_id, session)
-    if question is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Question {question_id} not found",
-        )
 
-    if (
-        not settings.BASE_PATH
-        or not settings.QUESTIONS_PATH
-        or not settings.QUESTIONS_DIRNAME
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"base path, question path or question dirname is not set "},
-        )
-    # 2) Resolve base dir
-    base_dir = Path(str(settings.BASE_PATH)) / str(settings.QUESTIONS_DIRNAME)
-    base_dir = base_dir.resolve()
-
-    if not base_dir.exists():
-        base_dir.mkdir(parents=True, exist_ok=True)
-
-    # 3) If already set and exists, return early (idempotent)
-    if question.local_path:
-        existing = Path(str(settings.BASE_PATH)) / question.local_path
-        if existing.exists() and existing.is_dir():
-            return SuccessDataResponse(
-                status=status.HTTP_200_OK,
-                detail=f"Path for question {question.id} already exists.",
-                data=question.local_path,  # stored as relative path
-            )
-
-    # 4) Build a safe directory name
-    title = (question.title or "").strip()
-    base_name = safe_name(title) if title else f"question_{question.id}"
-    target = base_dir / base_name
-
-    # 5) Avoid collisions
-    if target.exists() and str(target) != (question.local_path or ""):
-        target = base_dir / f"{base_name}_{question.id}"
-
-    # 6) Create directory
+async def set_or_get_directory(
+    session, question_id, method: Literal["local", "firebase"] = "local"
+):
     try:
-        target.mkdir(parents=True, exist_ok=True)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create directory '{target}': {e}",
-        ) from e
+        # Try to get existing directory
+        response = await get_question_directory(session, question_id)
+        if response.status == status.HTTP_200_OK:
+            return response
+    except HTTPException:
+        pass
 
-    # 7) Compute relative path (always relative to BASE_PATH)
-    relative_path = f"{settings.QUESTIONS_DIRNAME}/{target.name}"
-
-    # 8) Persist relative path in the DB
-    question.local_path = relative_path
-    try:
-        session.add(question)
-        session.commit()
-        session.refresh(question)
-    except Exception as e:
-        session.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error updating Question {question.id}: {e}",
-        ) from e
-
-    return SuccessDataResponse(
-        status=status.HTTP_201_CREATED,
-        detail=f"Path for question '{question.title or question.id}' created successfully.",
-        data=relative_path,
-    )
+    # Fallback: create a new directory
+    return await set_directory(question_id, session)
 
 
-async def get_question_directory(session: SessionDep, question_id: str | UUID):
+async def get_question_directory(
+    session: SessionDep, question_id: str | UUID
+) -> SuccessFileResponse:
     """
     Get the question's local directory as a SuccessDataResponse.
 
@@ -133,19 +59,19 @@ async def get_question_directory(session: SessionDep, question_id: str | UUID):
     """
     try:
         question = await qc.get_question_by_id(question_id, session)
-        if not (question.title and settings.QUESTIONS_PATH):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Question missing required fields (title or QUESTIONS_PATH).",
-            )
-        qpath = Path(str(settings.BASE_PATH)) / Path(
-            str(question.local_path)
-        )  # if question.local_path else None
+
+        qpath = reconstruct_path(str(question.local_path))
+
         if qpath and qpath.exists():
-            return SuccessDataResponse(
+            return SuccessFileResponse(
                 status=status.HTTP_200_OK,
                 detail="Local Path already set",
-                data=str(qpath),
+                file_paths=[str(question.local_path)],
+            )
+        elif (not qpath.exists()) and question.local_path:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Question Path Set for {question.title}, but directory may not exist (ie points to nowhere)",
             )
         else:
             raise HTTPException(
@@ -161,7 +87,72 @@ async def get_question_directory(session: SessionDep, question_id: str | UUID):
         )
 
 
-async def write_file(f: FileData, base_dir: str | Path, overwrite: bool = True):
+async def set_directory(
+    question_id: Union[str, UUID],
+    session,
+    method: Literal["local", "firebase"] = "local",
+) -> SuccessFileResponse:
+    """
+    Ensure a question has a local directory on disk.
+
+    Behavior:
+      - If question.local_path exists on disk, return it (200).
+      - Else, create a directory under BASE_PATH / QUESTIONS_DIRNAME using a safe name
+        derived from the question title; fall back to "question_<uuid>".
+      - If the intended directory name already exists for a different question,
+        append "_<uuid>" to avoid overwriting.
+      - Persist question.local_path as a *relative path* (e.g. "questions/<name>")
+        and return it (201).
+    """
+    if not settings.QUESTIONS_PATH or not settings.BASE_PATH:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"base path, question path or question dirname is not set "},
+        )
+
+    question = await qc.get_question_by_id(question_id, session)
+
+    # Create the path
+    abs_path = Path(settings.QUESTIONS_PATH).resolve()
+    if not abs_path.exists():
+        abs_path.mkdir(parents=True, exist_ok=True)
+
+    title = (question.title or "").strip()
+    question_title = safe_name(title) if title else f"question_{question.id}"
+    target = abs_path / question_title
+
+    # 5) Avoid collisions
+    if target.exists() and str(target) != (question.local_path or ""):
+        target = abs_path / f"{question_title}_{question.id}"
+
+    # 6) Create directory
+    try:
+        target.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create directory '{target}': {e}",
+        ) from e
+
+    # 7) Compute relative path (always relative to BASE_PATH)
+    ## Should return /question/question_title
+    relative_path = f"{settings.QUESTIONS_DIRNAME}/{target.name}"
+
+    # 8) Persist relative path in the DB
+    question.local_path = relative_path
+
+    # Refresh the database
+    await qc.safe_refresh_question(question, session)
+
+    return SuccessFileResponse(
+        status=status.HTTP_201_CREATED,
+        detail=f"Path for question '{question.title or question.id}' created successfully.",
+        file_paths=[relative_path],
+        files=[],
+    )
+
+
+async def write_file(f: FileData, dirname: str | Path, overwrite: bool = True):
     """
     Write a single FileData into base_dir.
 
@@ -177,7 +168,7 @@ async def write_file(f: FileData, base_dir: str | Path, overwrite: bool = True):
         )
 
     fname = safe_name(f.filename)
-    target = (Path(base_dir) / fname).resolve()
+    target = (Path(dirname) / fname).resolve()
 
     content = f.content
     if not content:
@@ -186,7 +177,9 @@ async def write_file(f: FileData, base_dir: str | Path, overwrite: bool = True):
             detail=f"File {f.filename} has no content",
         )
     target = write(target, content=content, overwrite=True)
-    return str(target)
+    return SuccessfulResponse(
+        status=status.HTTP_200_OK, detail=f"wrote content to {fname}"
+    )
 
 
 def write(
@@ -201,7 +194,7 @@ def write(
     - Bytes/bytearray are written in binary mode.
     - Strings are written with Path.write_text.
     - If overwrite is False and the file exists, raise HTTP 409.
-    - Returns the Path object of the target.
+    - Returns the Path object of the target.Returns the absolute path
     """
     target = Path(target)
     filename = target.name
@@ -230,45 +223,6 @@ def write(
     return target
 
 
-async def write_file_to_directory(
-    question_id: str | UUID, file_data: FileData, session: SessionDep
-):
-    """
-    Ensure the question directory exists, then write a single file to it.
-
-    Returns a SuccessDataResponse with the written file's absolute path.
-    """
-    try:
-        response = await get_question_directory(
-            session,
-            question_id,
-        )
-        print("This is getting the local dir")
-        print(response)
-        base_dir = Path(str(response.data)).resolve()
-
-        print("This is base dir", base_dir)
-
-        if not file_data:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No file provided.",
-            )
-        result = await write_file(file_data, base_dir, overwrite=True)
-        return SuccessDataResponse(
-            status=status.HTTP_200_OK,
-            detail="Wrote files to directory Correctly",
-            data=result,
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error adding files {e}",
-        )
-
-
 async def write_files_to_directory(
     question_id: str | UUID, files_data: List[FileData], session: SessionDep
 ):
@@ -278,29 +232,33 @@ async def write_files_to_directory(
     Returns a SuccessFileResponse with the list of absolute paths for all written files.
     """
     try:
-        response = await get_question_directory(
+        response = await set_or_get_directory(
             session,
             question_id,
         )
-        base_dir = Path(str(response.data)).resolve()
+        rel_path = response.filepaths[0]
+        abs_path = reconstruct_path(rel_path)
 
-        results = await asyncio.gather(*[write_file(f, base_dir) for f in files_data])
+        # Write files to the directory
+        result = await asyncio.gather(
+            *[write_file(f, abs_path.resolve()) for f in files_data]
+        )
+        for r in result:
+            assert r.status == 200
+
         return SuccessFileResponse(
             status=status.HTTP_200_OK,
             detail="Wrote files to directory Correctly",
-            files=results,
+            file_paths=[str(Path(rel_path) / f.filename) for f in files_data],
+            files=files_data,
         )
-
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error adding files {e}",
-        )
 
 
-async def get_files_from_directory(question_id: str | UUID, session: SessionDep):
+async def get_files_from_directory(
+    question_id: str | UUID, session: SessionDep, skip_images: bool = True
+):
     """
     List all files (not directories) within the question's local directory.
 
@@ -309,22 +267,28 @@ async def get_files_from_directory(question_id: str | UUID, session: SessionDep)
     try:
         question = await qc.get_question_by_id(question_id, session)
         response = await get_question_directory(session, question.id)
-        assert question.title
-        assert settings.QUESTIONS_PATH
+        question_path = reconstruct_path(response.filepaths[0])
 
-        question_path = Path(str(response.data)).resolve()
         files = [str(f) for f in question_path.iterdir() if f.is_file]
 
         file_data: List[FileData] = []
         for f in files:
             fpath = Path(f)
-            file_data.append(FileData(filename=fpath.name, content=fpath.read_text()))
-
+            mime_type = mimetypes.guess_type(fpath.name)
+            if mime_type[0] and (mime_type[0] not in IMAGE_MIMETYPES):
+                content = fpath.read_text(encoding="utf-8", errors="ignore")
+            else:
+                if skip_images:
+                    content = "Some Image"
+                else:
+                    with open(fpath, "rb") as bin_file:
+                        content = base64.b64encode(bin_file.read()).decode("utf-8")
+            file_data.append(FileData(filename=fpath.name, content=content))
         return SuccessFileResponse(
             status=status.HTTP_200_OK,
             detail="Retrieved files",
             files=file_data,
-            file_paths=files,
+            file_paths=[Path(f).relative_to(settings.BASE_PATH) for f in files],
         )
     except HTTPException:
         raise
@@ -334,7 +298,9 @@ async def get_files_from_directory(question_id: str | UUID, session: SessionDep)
         )
 
 
-async def get_file_path(question_id: str | UUID, filename: str, session: SessionDep):
+async def get_file_path_abs(
+    question_id: str | UUID, filename: str, session: SessionDep
+):
     """
     Resolve and validate the absolute path to a specific file for a question.
 
@@ -344,17 +310,15 @@ async def get_file_path(question_id: str | UUID, filename: str, session: Session
     try:
         question = await qc.get_question_by_id(question_id, session)
         response = await get_question_directory(session, question.id)
-        assert question.title
-        assert settings.QUESTIONS_PATH
 
-        question_path = Path(str(response.data)).resolve()
+        question_path = reconstruct_path(response.filepaths[0])
         filepath = question_path / safe_name(filename)
         file_exist = filepath.is_file()
         if file_exist:
-            return SuccessDataResponse(
+            return SuccessFileResponse(
                 status=status.HTTP_200_OK,
                 detail=f"File Found {filename}",
-                data=str(filepath),
+                file_paths=[filepath],
             )
         else:
             raise HTTPException(
@@ -372,8 +336,8 @@ async def get_file_content(question_id: str | UUID, filename: str, session: Sess
     Returns a SuccessFileResponse containing a single FileData with the file content.
     """
     try:
-        response = await get_file_path(question_id, filename, session=session)
-        filepath = response.data
+        response = await get_file_path_abs(question_id, filename, session=session)
+        filepath = response.filepaths[0]
         return SuccessFileResponse(
             files=[
                 FileData(filename=filename, content=Path(str(filepath)).read_text())
@@ -392,10 +356,9 @@ async def delete_file(question_id: str | UUID, filename: str, session: SessionDe
     Returns a SuccessDataResponse confirming deletion (idempotent with missing_ok=True).
     """
     try:
-        r = await get_file_path(question_id, filename, session)
-
+        r = await get_file_path_abs(question_id, filename, session)
         # Delete file
-        Path(str(r.data)).unlink(missing_ok=True)
+        Path(str(r.filepaths[0])).unlink(missing_ok=True)
         return SuccessDataResponse(
             status=status.HTTP_200_OK,
             detail=f"Deleted file {filename} from {question_id} ",
@@ -418,8 +381,8 @@ async def update_file_content(
     and returns the absolute path of the updated file.
     """
     try:
-        r = await get_file_path(question_id, filename, session)
-        file_path = Path(str(r.data))
+        r = await get_file_path_abs(question_id, filename, session)
+        file_path = Path(r.filepaths[0])
         file_path = write(file_path, content=new_content, overwrite=True)
         return SuccessFileResponse(
             status=status.HTTP_200_OK,

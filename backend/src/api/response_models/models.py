@@ -1,13 +1,12 @@
 # --- Standard Library ---
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 from uuid import UUID
 
 # --- Third-Party ---
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 # --- Internal ---
-from src.api.models.file_model import File
 from src.api.models.question_model import QuestionMeta
 
 
@@ -36,17 +35,19 @@ class SuccessDataResponse(SuccessfulResponse):
 class SuccessFileResponse(SuccessfulResponse):
     """Success response with one or more file objects."""
 
-    files: List[FileData] | List[str] = []
-    file_paths: List[str] | List[Path] = []
+    filedata: List[FileData] = Field(
+        default_factory=list,
+        alias="files",
+        description="List of file objects or file strings",
+    )
+    filepaths: List[str] | List[Path] = Field(
+        default_factory=list,
+        alias="file_paths",
+        description="List of relative file paths",
+    )
 
-    @field_validator("files", mode="before")
-    def ensure_list(cls, v):
-        """Always coerce single File into a list of File objects."""
-        if v is None:
-            return []
-        if isinstance(v, File):
-            return [v]
-        return v
+    class Config:
+        populate_by_name = True  # allows using both aliases & python names
 
 
 class Response(BaseModel):
