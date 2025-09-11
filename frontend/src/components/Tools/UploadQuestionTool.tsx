@@ -9,7 +9,8 @@ import { MdDriveFolderUpload } from "react-icons/md";
 
 const UploadQuestion: React.FC = () => {
     const handleClick = () => {
-        document.getElementById('file-input')?.click();
+        const data = document.getElementById('file-input')?.click();
+        console.log("This is the data", data)
     };
 
     return (

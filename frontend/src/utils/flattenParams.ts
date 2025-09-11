@@ -25,7 +25,6 @@ type Options = {
 };
 
 import { roundToSigFigs } from "./mathHelpers";
-
 function flattenParams(
   obj: unknown,
   prefix = "",

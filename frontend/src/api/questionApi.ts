@@ -2,7 +2,6 @@
 import api from "./api";
 import type { QuestionMeta } from "../types/types";
 import { toast } from "react-toastify";
-import { re } from "mathjs";
 
 type searchQuestionProps = {
   filter?: QuestionMeta;
@@ -66,7 +65,9 @@ export async function getFiles(id: string) {
     const res = await api.get(
       `/question_crud/get_question/${encodeURIComponent(id)}/get_all_files`
     );
-    return Array.isArray(res.data) ? res.data : [];
+    console.log("these are all the files");
+    console.log(res.data.files);
+    return Array.isArray(res.data.files) ? res.data.files : [];
   } catch (error) {
     console.log(error);
     return [];
@@ -85,7 +86,7 @@ export async function saveFileContent(
       new_content: content,
     });
     toast.success("Code Saved Successfully");
-    console.log(result)
+    console.log(result);
 
     return true;
   } catch (err) {

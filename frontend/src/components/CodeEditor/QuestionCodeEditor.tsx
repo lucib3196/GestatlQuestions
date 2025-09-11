@@ -33,6 +33,7 @@ function QuestionCodeEditor() {
         (async () => {
             const files = await getFiles(id);
             setFileData(files ?? []);
+            console.log("These are the files", files)
             const first = getFileNames(files ?? [])[0] ?? "";
             setSelectedFile(first);
         })();

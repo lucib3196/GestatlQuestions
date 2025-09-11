@@ -106,6 +106,6 @@ export type QuestionMeta = {
 };
 
 export type FileData = {
-    filename: string;
-    content: string;
+  filename: string;
+  content: string;
 };
