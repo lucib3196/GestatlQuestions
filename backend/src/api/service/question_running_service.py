@@ -43,7 +43,7 @@ async def run_server(
     except HTTPException:
         raise
 
-    file_data = response.files[0]
+    file_data = response.filedata[0]
     file_data = cast(FileData, file_data)
 
     server_content = file_data.content

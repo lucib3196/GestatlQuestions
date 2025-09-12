@@ -103,7 +103,7 @@ async def get_question_file(qid: Union[str, UUID], filename: str, session: Sessi
         result = await qs.get_file_content(
             question_id=qid, filename=filename, session=session
         )
-        return result.files[0]
+        return result.filedata[0].content
     except HTTPException as e:
         raise e
 
@@ -188,7 +188,7 @@ async def get_question_data_all_by_id(
         file_data = []
         if q_response.id is not None:
             file_response = await qs.get_files_from_directory(q_response.id, session)
-            file_data = file_response.files
+            file_data = file_response.filedata
 
         return QuestionReadResponse(
             status=status.HTTP_200_OK,

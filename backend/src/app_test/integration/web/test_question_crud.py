@@ -138,7 +138,7 @@ def test_get_question_data_meta_no_files(
     body = r.json()
     assert body["status"] == 200
     assert body["question"]["id"] == qid
-    assert body["files"] is None  # this route intentionally returns files=None
+    assert body["files"] == []  # this route intentionally returns files=None
 
 
 def test_get_question_data_meta_with_files(
@@ -154,7 +154,8 @@ def test_get_question_data_meta_with_files(
 
     # Base fields
     assert body["status"] == 200
-    assert body["files"] is None
+    assert isinstance(body["files"], list)
+    assert body["files"] == []
     assert q["id"] == qid
     assert q["title"] == expected_q["title"]
     assert q["ai_generated"] == expected_q["ai_generated"]
@@ -178,7 +179,7 @@ def test_get_question_data_meta_with_additional_meta(
 
     # Base fields
     assert body["status"] == 200
-    assert body["files"] is None
+    assert body["files"] == []
     assert q["id"] == qid
     assert q["title"] == expected_q["title"]
     assert q["ai_generated"] == expected_q["ai_generated"]

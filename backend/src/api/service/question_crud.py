@@ -16,6 +16,9 @@ from src.api.models.question_model import (
 from src.api.database import question_db as qdata
 from src.api.core.logging import logger
 from src.utils import convert_uuid
+from src.api.core import settings
+from pathlib import Path
+from sqlmodel import select
 
 
 async def safe_refresh_question(question: Question, session: SessionDep):
@@ -270,3 +273,30 @@ async def get_all_question_data(session: SessionDep, limit: int = 100, offset: i
         return result
     except HTTPException as e:
         raise e
+
+
+def check_for_new_folders(session: SessionDep):
+    base_dir = Path(settings.QUESTIONS_PATH).resolve()
+
+    all_q = session.exec(select(Question)).all()
+    all_qname = {str(q.local_path).split("/")[1] for q in all_q}
+    disk_folders = {p.name for p in base_dir.iterdir() if p.is_dir}
+    new_folders = disk_folders - all_qname
+    print(new_folders)
+
+
+if __name__ == "__main__":
+    from src.api.database import get_session
+
+    # manually grab a session
+    session_gen = get_session()
+    session = next(session_gen)
+    try:
+        check_for_new_folders(session)
+    finally:
+        session.close()
+        # finalize generator
+        try:
+            next(session_gen)
+        except StopIteration:
+            pass

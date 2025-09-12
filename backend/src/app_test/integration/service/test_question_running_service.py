@@ -251,14 +251,14 @@ async def test_running_server_no_file_present_python(
     create_question_no_code, db_session
 ):
     with pytest.raises(HTTPException) as excinfo:
-        question =  create_question_no_code
+        question = create_question_no_code
         await question_running_service.run_server(
             question_id=question.id,
             code_language="python",
             session=db_session,
         )
     assert excinfo.value.status_code == 400
-    assert "does not exist" in excinfo.value.detail
+    assert "no question path" in excinfo.value.detail.lower()
 
 
 @pytest.mark.asyncio
@@ -266,7 +266,7 @@ async def test_running_server_no_file_present_javascript(
     create_question_no_code, db_session
 ):
     with pytest.raises(HTTPException) as excinfo:
-        question =  create_question_no_code
+        question = create_question_no_code
         await question_running_service.run_server(
             question_id=question.id,
             code_language="javascript",
@@ -275,7 +275,7 @@ async def test_running_server_no_file_present_javascript(
     assert excinfo.value.status_code == 400
     print("This is the detail")
     print(excinfo.value.detail)
-    assert "does not exist" in excinfo.value.detail
+    assert "no question path" in excinfo.value.detail.lower()
 
 
 @pytest.mark.asyncio

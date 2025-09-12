@@ -185,7 +185,13 @@ def run_generate_py(path: str, isTesting: bool = False) -> "CodeRunResponse":
     except ValidationError as ve:
         return CodeRunResponse(
             success=False,
-            error=f"Output did not match expected QuizData schema: {ve}",
+            error=(
+                "Output validation failed: Python function must return a dictionary "
+                "matching the QuizData schema. At minimum, the return value must include:\n"
+                "  - 'params': Dict[str, Any]\n"
+                "  - 'correct_answers': Dict[str, Any]\n"
+                f"Validation error details: {ve}"
+            ),
             quiz_response=None,
             http_status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         )
