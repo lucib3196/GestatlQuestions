@@ -72,9 +72,6 @@ def question_payload_with_files_and_meta():
         "qtype": ["numeric"],
     }
 
-    print("this is the files payload", files_payload)
-    print("this is the additional metadata", additional_metadata)
-
     payload = {
         "question": to_serializable(q),
         **files_payload,
@@ -84,7 +81,9 @@ def question_payload_with_files_and_meta():
 
 
 @pytest.fixture
-def create_question_response_no_files(test_client, question_payload_model_no_files):
+def create_question_response_no_files(
+    test_client, db_session, question_payload_model_no_files, patch_questions_path
+):
     """Helper fixture to create a question and return the response + payload."""
     response = test_client.post(
         "/question_crud/create_question/text/",
@@ -94,7 +93,7 @@ def create_question_response_no_files(test_client, question_payload_model_no_fil
 
 
 @pytest.fixture
-def create_question_response_with_files(test_client, question_payload_model_with_files):
+def create_question_response_with_files(test_client, question_payload_model_with_files,patch_questions_path):
     """Helper fixture to create a question and return the response + payload."""
     response = test_client.post(
         "/question_crud/create_question/text/",
@@ -109,7 +108,7 @@ def create_question_response_with_files(test_client, question_payload_model_with
 
 @pytest.fixture
 def create_question_response_with_additional_meta(
-    test_client, question_payload_with_files_and_meta
+    test_client, question_payload_with_files_and_meta,patch_questions_path
 ):
     """Helper fixture to create a question and return the response + payload."""
     response = test_client.post(
@@ -130,6 +129,7 @@ def create_multiple_questions(
     question_payload_model_no_files,
     question_payload_model_with_files,
     question_payload_with_files_and_meta,
+    patch_questions_path
 ):
     payloads = [
         jsonable_encoder(question_payload_with_files_and_meta),

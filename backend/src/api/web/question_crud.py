@@ -62,7 +62,7 @@ async def create_question(
             response = await qs.write_files_to_directory(
                 question_id=q_created.id, files_data=files, session=session
             )
-            fresponse = response.files
+            fresponse = response.filedata
 
         return QuestionReadResponse(
             status=status.HTTP_201_CREATED,

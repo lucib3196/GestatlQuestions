@@ -44,7 +44,6 @@ routes = [
     f_router,
     question_running_router,
 ]
-print("This is the path", settings.QUESTIONS_PATH)
 
 
 def add_routes(app: FastAPI, routes: list[APIRouter] = routes):
@@ -52,7 +51,7 @@ def add_routes(app: FastAPI, routes: list[APIRouter] = routes):
         app.include_router(r)
 
 
-def get_application():
+def get_application(test_mode: bool = False):
     app = FastAPI(title=settings.PROJECT_NAME, lifespan=on_startup)
     add_routes(app)
 
@@ -67,9 +66,8 @@ def get_application():
     )
     if not settings.QUESTIONS_PATH:
         raise ValueError("Cannot Find Local Path")
-    print("This is the question path", settings.QUESTIONS_PATH)
+    
     questions_dir = Path(settings.QUESTIONS_PATH).resolve()
-    print(questions_dir)
 
     app.mount(
         f"/{questions_dir.name}",  # -> "/questions"

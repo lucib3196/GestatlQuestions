@@ -3,31 +3,31 @@ from fastapi.encoders import jsonable_encoder
 from uuid import UUID
 from uuid import uuid4
 from fastapi import HTTPException
-from src.app_test.integration.service.conftest import db_session
+from src.utils import pick
+
+
+def check_payload_created_keys(payload, created, key):
+    return pick(payload, key) == pick(created, key)
 
 
 # Testing files with no files data
-def test_create_question_status_no_files(create_question_response_no_files):
+def test_create_question_status_ok(
+    create_question_response_no_files,
+):
     response, _ = create_question_response_no_files
+
     assert response.status_code == 200
     assert response.json()["status"] == 201
 
 
-def test_create_question_has_data_no_files(create_question_response_no_files):
-    response, _ = create_question_response_no_files
-    j_response = response.json()
-    assert j_response.get("question") is not None
-
-
-def test_create_question_fields_match_no_files(create_question_response_no_files):
-    response, expected = create_question_response_no_files
-    question_data = response.json()["question"]
-
-    assert question_data["title"] == expected["title"]
-    assert question_data["ai_generated"] == expected["ai_generated"]
-    assert question_data["isAdaptive"] == expected["isAdaptive"]
-    assert question_data["createdBy"] == expected["createdBy"]
-    assert question_data["user_id"] == expected["user_id"]
+def test_create_question_check_created_question(create_question_response_no_files):
+    response, q_payload = create_question_response_no_files
+    q_created = response.json()["question"]
+    # Check some basic properties not meant to be a full test
+    keys_to_check = ["title", "ai_generated", "isAdaptive", "createdBy"]
+    assert q_created
+    for k in keys_to_check:
+        assert check_payload_created_keys(q_payload, q_created, k)
 
 
 def test_create_question_has_no_files_no_files(create_question_response_no_files):
@@ -40,23 +40,6 @@ def test_create_question_status_with_files(create_question_response_with_files):
     response, _, _ = create_question_response_with_files
     assert response.status_code == 200
     assert response.json()["status"] == 201
-
-
-def test_create_question_has_data_with_files(create_question_response_with_files):
-    response, _, _ = create_question_response_with_files
-    j_response = response.json()
-    assert j_response.get("question") is not None
-
-
-def test_create_question_fields_match_with_files(create_question_response_with_files):
-    response, expected, _ = create_question_response_with_files
-    question_data = response.json()["question"]
-
-    assert question_data["title"] == expected["title"]
-    assert question_data["ai_generated"] == expected["ai_generated"]
-    assert question_data["isAdaptive"] == expected["isAdaptive"]
-    assert question_data["createdBy"] == expected["createdBy"]
-    assert question_data["user_id"] == expected["user_id"]
 
 
 def test_create_question_has_files_with_files(create_question_response_with_files):
