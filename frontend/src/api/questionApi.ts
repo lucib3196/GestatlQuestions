@@ -2,6 +2,7 @@
 import api from "./api";
 import type { QuestionMeta } from "../types/types";
 import { toast } from "react-toastify";
+import type { QuestionFormData } from "../types/types";
 
 type searchQuestionProps = {
   filter?: QuestionMeta;
@@ -33,7 +34,7 @@ export async function getQuestionHTML(questionId: string) {
         questionId
       )}}/file/question.html` // kept as-is (note the double `}}`)
     );
-    return response.data.content;
+    return response.data;
   } catch (error) {
     console.log(error);
   }
@@ -47,7 +48,7 @@ export async function getSolutionHTML(questionId: string) {
         questionId
       )}}/file/solution.html` // kept as-is (note the double `}}`)
     );
-    return response.data.content;
+    return response.data;
   } catch (error) {
     console.log(error);
   }
@@ -93,5 +94,49 @@ export async function saveFileContent(
     console.error("Error saving file content:", err);
     toast.error("Code Not Saved");
     return false;
+  }
+}
+
+type QuestionFormInput = QuestionFormData & { files?: File[] };
+export async function createQuestion({
+  title,
+  isAdaptive,
+  createdBy,
+  ai_generated,
+  topics,
+  languages,
+  qtypes,
+  files,
+}: QuestionFormInput) {
+  try {
+    const qData = {
+      title: title,
+      ai_generated: ai_generated
+        ? ai_generated.toLowerCase() === "true"
+        : false,
+      isAdaptive: isAdaptive ? isAdaptive.toLowerCase() === "true" : false,
+      createdBy: createdBy,
+    };
+    const additionalMeta = {
+      topics: topics,
+      languages: languages,
+      qtypes: qtypes,
+    };
+
+    const formData = new FormData();
+    formData.append("question", JSON.stringify(qData));
+    formData.append("additional_metadata", JSON.stringify(additionalMeta));
+
+    files.forEach((file) => {
+      formData.append("files", file, file.name);
+    });
+
+    const response = await api.post(
+      "/file_uploads/create_question/upload",
+      formData
+    );
+    console.log(response);
+  } catch (error) {
+    console.log(error);
   }
 }

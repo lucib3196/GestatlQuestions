@@ -7,6 +7,7 @@ import { QuestionDBProvider } from "./context/QuestionContext";
 import NavBar from "./components/NavBar";
 import { ToastContainer } from "react-toastify";
 import LogsProvider from "./context/CodeLogsContext";
+import CreateQuestion from "./components/CreateQuestion/CreateQuestion";
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {
@@ -27,6 +28,8 @@ function App() {
                   {/* Main Content */}
                   <NavBar />
                   <ToastContainer />
+                  <CreateQuestion />
+                  
 
                   {/* End of Main Content */}
                 </LogsProvider>

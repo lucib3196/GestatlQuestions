@@ -86,6 +86,7 @@ function applyPlaceHolders(
     ...opts
   } = {}
 ) {
+  if (!data) return template;
   const flat = flattenParams(data, rootPrefix, {}, opts); // Flattens the data so that we can use it
   const lookUp = new Map();
   for (const [path, val] of Object.entries(flat)) {

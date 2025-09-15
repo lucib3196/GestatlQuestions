@@ -3,7 +3,7 @@ import {
     ResetQuestionButton,
     ShowSolutionStep,
     SubmitAnswerButton,
-} from "../Buttons";
+} from "../Generic/Buttons";
 import type { FormEvent } from "react";
 
 

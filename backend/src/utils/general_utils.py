@@ -73,12 +73,16 @@ def pick(obj, *keys, default=None):
     """
     Get the first present key/attr from `keys` on either a dict or an object.
     """
+    
     for k in keys:
         if isinstance(obj, dict):
+            
             if k in obj:
+                print("Is value in dict",k)
                 return obj[k]
         else:
             if hasattr(obj, k):
+                print("Has Attribute")
                 return getattr(obj, k)
     return default
 

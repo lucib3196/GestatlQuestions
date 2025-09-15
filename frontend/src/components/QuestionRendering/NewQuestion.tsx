@@ -17,7 +17,7 @@ import {
   ResetQuestionButton,
   GenerateNewVariantButton,
   ShowSolutionStep,
-} from "../Buttons";
+} from "../Generic/Buttons";
 
 import { useState } from "react";
 

@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { saveFileContent } from "../../api";
 
 import CreateFileModal from "./CreateFileModal";
-import { CreateFileButton, SaveCodeButton, UploadFileButton } from "../Buttons";
+import { CreateFileButton, SaveCodeButton, UploadFileButton } from "../Generic/Buttons";
 import { UploadFileModal } from "./UploadFileModal";
 
 

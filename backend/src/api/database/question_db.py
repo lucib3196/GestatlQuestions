@@ -17,6 +17,22 @@ from src.api.models.question_model import Language, QType, Question, Topic
 from src.utils import *
 from src.api.core.logging import logger
 from src.utils import resolve_or_create
+from src.api.core import logger
+from src.utils import convert_uuid
+from datetime import datetime
+
+def safe_refresh_question(question: Question, session: SessionDep):
+    try:
+        session.add(question)
+        session.commit()
+        session.refresh(question)
+        return question
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating Question {question.id}: {e}",
+        ) from e
 
 
 def create_question(
@@ -35,7 +51,7 @@ def create_question(
     question = Question(
         title=payload["title"],
         ai_generated=payload["ai_generated"],
-        isAdaptive=payload["is_adaptive"],
+        isAdaptive=to_bool(payload["is_adaptive"]),
         createdBy=payload["created_by"],
         user_id=payload["user_id"],
     )
@@ -51,9 +67,7 @@ def create_question(
     question.languages = language_objs
     question.qtypes = qtype_objs
 
-    session.add(question)
-    session.commit()
-    session.refresh(question)
+    question = safe_refresh_question(question, session)
     return question
 
 
@@ -68,8 +82,11 @@ def get_question_by_id(question_id: str | UUID, session: SessionDep):
     Returns:
         The matching Question instance, or None if not found.
     """
+    
+    question_id = convert_uuid(question_id)
+    logger.debug("This is the question id %s", question_id)
     return session.exec(
-        select(Question).where(Question.id == convert_uuid(question_id))
+        select(Question).where(Question.id == question_id)
     ).first()
 
 
@@ -147,32 +164,35 @@ def parse_question_payload(
       - qtypes: List[Any]
       - languages: List[Any]
     """
-    # Scalars (support snake_case and camelCase)
-    title = pick(payload, "title")
-    ai_generated = pick(payload, "ai_generated")
-    is_adaptive = pick(payload, "is_adaptive", "isAdaptive")
-    created_by = pick(payload, "created_by", "createdBy")
-    user_id = pick(payload, "user_id")
+    try:
+        # Scalars (support snake_case and camelCase)
+        title = pick(payload, "title")
+        ai_generated = pick(payload, "ai_generated")
+        is_adaptive = pick(payload, "isAdaptive")
+        created_by = pick(payload, "created_by", "createdBy")
+        user_id = pick(payload, "user_id")
 
-    # Relationships; accept multiple key variants
-    t_incoming = pick(payload, "topics")
-    q_incoming = pick(payload, "qtypes", "qtype")
-    l_incoming = pick(payload, "languages")
+        # Relationships; accept multiple key variants
+        t_incoming = pick(payload, "topics")
+        q_incoming = pick(payload, "qtypes", "qtype")
+        l_incoming = pick(payload, "languages")
 
-    # Normalize/clean
-    if isinstance(title, str):
-        title = title.strip()
+        # Normalize/clean
+        if isinstance(title, str):
+            title = title.strip()
 
-    return {
-        "title": title,
-        "ai_generated": ai_generated,
-        "is_adaptive": is_adaptive,
-        "created_by": created_by,
-        "user_id": user_id,
-        "topics": to_list(t_incoming),
-        "qtypes": to_list(q_incoming),
-        "languages": to_list(l_incoming),
-    }
+        return {
+            "title": title,
+            "ai_generated": ai_generated,
+            "is_adaptive": is_adaptive,
+            "created_by": created_by,
+            "user_id": user_id,
+            "topics": to_list(t_incoming),
+            "qtypes": to_list(q_incoming),
+            "languages": to_list(l_incoming),
+        }
+    except ValueError as e:
+        raise ValueError(f"Could not parse {str(e)}")
 
 
 async def get_question_data(
@@ -285,6 +305,8 @@ def update_question(
                         )[0]
                 setattr(question, key, value)
             continue
+    logger.debug("Got the question qtypes")
+    logger.debug("%s \n", question.qtypes)
     session.commit()
     session.refresh(question)
     return question
@@ -354,3 +376,5 @@ def filter_questions(session, partial_match=True, **kwargs):
     if filters:
         stmt = stmt.where(*filters)  # AND across keys, OR within each key
     return session.exec(stmt).all()
+
+

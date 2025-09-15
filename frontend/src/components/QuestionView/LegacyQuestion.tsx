@@ -27,9 +27,11 @@ import ActionBar from "./LegacyActionBar";
 // Local hooks
 import { useFormattedLegacy } from "./fetchFormattedLegacy";
 
-
 const QuestionHtml: React.FC<{ html: string }> = ({ html }) => (
-    <div className="mt-4 prose max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
+    <div
+        className="mt-4 prose max-w-none"
+        dangerouslySetInnerHTML={{ __html: html }}
+    />
 );
 
 export function LegacyQuestion() {
@@ -42,20 +44,37 @@ export function LegacyQuestion() {
     const [showSolution, setShowSolution] = useState<boolean>(false);
 
     const {
-        data: question,
+        data: qdata,
         loading: qLoading,
         error: qError,
     } = getQuestionMeta(selectedQuestion);
+    const isAdaptive = useMemo(
+        () => trueish(qdata?.isAdaptive),
+        [qdata?.isAdaptive]
+    );
 
-    const isAdaptive = useMemo(() => trueish(question?.isAdaptive), [question?.isAdaptive]);
     const {
         params,
         loading: pLoading,
         error: pError,
         reset: refetchParams,
-    } = getAdaptiveParams(selectedQuestion ?? null, codeRunningSettings, isAdaptive);
+    } = getAdaptiveParams(
+        selectedQuestion ?? null,
+        codeRunningSettings,
+        isAdaptive
+    );
 
-    const { questionHtml, solutionHTML } = useFormattedLegacy(selectedQuestion ?? null, params);
+    const questionTitle = qdata?.title;
+
+    const { questionHtml, solutionHTML } = useFormattedLegacy(
+        selectedQuestion ?? null,
+        params,
+        questionTitle
+    );
+
+
+
+    console.log("This is the question", questionHtml)
 
     // Reset transient UI when switching questions
     useEffect(() => {
@@ -87,20 +106,28 @@ export function LegacyQuestion() {
     }, [refetchParams]);
 
     /* ----------------------------- States ----------------------------- */
-
-    if ((qLoading && !question) || (isAdaptive && !params)) return <Loading />;
-    if (!questionHtml) return <Error error={"Could not render question no question.html present"} />
+    if (pError) return <Error error={pError as string} />;
+    if ((qLoading && !qdata) || (isAdaptive && !params)) return <Loading />;
+    if (!questionHtml)
+        return (
+            <Error error={"Could not render question no question.html present"} />
+        );
     if (qError) return <Error error={qError as string} />;
-    if (!question) return null;
+
+    if (!qdata) return null;
 
     return (
         <MathJax>
             <div className="max-w-5xl mx-auto my-8 px-4">
                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm">
                     <div className="p-4">
-                        <QuestionInfo qmetadata={question} />
+                        <QuestionInfo qmetadata={qdata} />
 
-                        <Alerts pLoading={pLoading} pError={pError as string | null} variantError={variantError} />
+                        <Alerts
+                            pLoading={pLoading}
+                            pError={pError as string | null}
+                            variantError={variantError}
+                        />
 
                         <QuestionHtml html={questionHtml} />
 

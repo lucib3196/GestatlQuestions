@@ -11,7 +11,7 @@ from sqlmodel import SQLModel, select
 
 # Local
 from src.api.database import SessionDep
-
+from datetime import datetime
 
 def convert_uuid(uuid: str | UUID) -> UUID:
     try:
@@ -162,8 +162,14 @@ def normalize_kwargs(kwargs: dict):
     normalized = {}
     for key, value in kwargs.items():
         if isinstance(value, list):
-            f = [v.get("name") for v in value if isinstance(v, dict)]
-            normalized[key] = f
+            for v in value:
+                if isinstance(v, dict):
+                    f = v.get("name")
+                else:
+                    f = [v]
+
+                normalized[key] = f
+
         else:
             normalized[key] = value
     return normalized
@@ -174,3 +180,14 @@ def safe_python_type(col):
         return col.type.python_type
     except (NotImplementedError, AttributeError):
         return object
+
+
+def normalize_timestamps(data: dict) -> dict:
+    for field in ("created_at", "updated_at", "deleted_at", "storage_updated_at"):
+        if field in data and isinstance(data[field], str):
+            try:
+                data[field] = datetime.fromisoformat(data[field])
+            except ValueError:
+                # fallback: drop invalid date or log warning
+                data[field] = None
+    return data

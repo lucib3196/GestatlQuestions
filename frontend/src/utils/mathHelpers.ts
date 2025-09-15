@@ -1,3 +1,5 @@
+import * as math from "mathjs";
+
 export function roundToSigFigs(num: number, sigfigs: number): number {
   if (num === 0) return 0;
 
@@ -25,4 +27,35 @@ export function shuffleArray(array: any[]) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+/**
+ * Return a random permutation of integers in range [0, num).
+ */
+export function getRandomPermutationRange(num: number): number[] {
+  const A = Array.from({ length: num }, (_, i) => i);
+  return getRandomPermutationArray(A);
+}
+
+/**
+ * Return a random integer from [0, max).
+ */
+export function getRandomInt(max: number): number {
+  return Math.floor(Math.random() * max);
+}
+
+/**
+ * Return a random permutation of the input array.
+ */
+function getRandomPermutationArray<T>(arr: T[]): T[] {
+  const copy = [...arr];
+  const result: T[] = [];
+
+  while (copy.length > 0) {
+    const idx = math.randomInt(copy.length); // safe random index
+    const [item] = copy.splice(idx, 1);
+    result.push(item);
+  }
+
+  return result;
 }

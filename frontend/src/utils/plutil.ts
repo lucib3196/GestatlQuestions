@@ -1,8 +1,8 @@
 // plutil.runtime.ts
 import * as math from "mathjs";
 import _ from "lodash";
-import * as mathhelper from "./mathhelpers.js";
-
+import * as mathhelper from "./mathHelpers";
+import { imageUrl } from "../api/api.js";
 /**
  * Safer / clearer param replacement:
  *  - Supports {{ params.foo.bar }}, {{ param_labels.x }}, {{ correct_answers.y }}
@@ -86,10 +86,11 @@ export const pl_figure = ($: any, qname: string, el: any): string => {
   const att = $(el).attr() || {};
   const nm = att["file-name"] ?? "";
   const imFileName = `/questions/${qname}/${nm}`;
+  const imgURL = imageUrl(imFileName);
   return `
 <figure class="pl-figure">
   <img src="${escAttr(
-    imFileName
+    imgURL
   )}" alt="Figure for question" class="pl-figure__img" />
 </figure>`.trim();
 };
@@ -296,11 +297,9 @@ export const pl_hint = ($: any, _qdata: any, el: any) => {
   const att = $(el).attr() || {};
   const level = att["level"] ?? "default";
   const htmlString = $(el).html() ?? "";
-  console.log("Inside the pl hint",htmlString)
+  console.log("Inside the pl hint", htmlString);
   return { htmlString, level };
 };
-
-
 
 export const pl_matrix_input = ($: any, _qdata: any, el: any) => {
   const att = $(el).attr() || {};

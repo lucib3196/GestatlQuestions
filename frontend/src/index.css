@@ -43,6 +43,7 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
+/* Widget-specific form variants */
 .pl-form--number,
 .pl-form--symbolic,
 .pl-form--matrix,
@@ -137,7 +138,9 @@
 /* ===============================
    Prompt & Hints
 =================================*/
-.pl-prompt {
+.pl-prompt,
+pl-quest-prompt {
+  display: block;
   padding: 0.75rem 1rem;
   background: #f0f9ff;
   border: 1px solid #bae6fd;
@@ -147,7 +150,9 @@
 }
 
 pl-hint,
-.pl-hint, .pl-solution-hint {
+.pl-hint,
+.pl-solution-hint {
+  display: block;
   padding: 0.75rem 1rem;
   background: #fefce8;
   border: 1px solid #fde68a;
@@ -159,12 +164,13 @@ pl-hint,
 /* ===============================
    Figures
 =================================*/
-.pl-figure {
+.pl-figure,
+pl-figure {
   margin: 1.25rem auto;
   text-align: center;
+  display: block;
 }
 .pl-figure__img,
-.pic,
 pl-figure img {
   max-width: 100%;
   height: auto;
@@ -177,7 +183,12 @@ pl-figure img {
 /* ===============================
    Adaptive wrappers
 =================================*/
-.pl-adaptive {
+.pl-adaptive,
+.pl-adaptive--mcq,
+.pl-adaptive--mca,
+pl-mcq-adaptive,
+pl-mca-adaptive {
+  display: block;
   padding: 1rem 1.25rem;
   background: #fff;
   border: 1px solid var(--c-border);
@@ -187,19 +198,24 @@ pl-figure img {
 }
 
 /* ===============================
-   Wrappers / static text
+   Wrappers / Panels
 =================================*/
-.wrapper {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  background: var(--c-panel);
+pl-question-panel {
+  display: block;
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem;
   border: 1px solid var(--c-border);
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: var(--c-panel);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
+/* ===============================
+   Static text
+=================================*/
+pl-static-text,
 .static_text {
+  display: block;
   margin: 1rem 0;
   padding: 0.9rem 1.1rem;
   background: #fff;
@@ -210,7 +226,25 @@ pl-figure img {
 }
 
 /* ===============================
+   Matrix Latex
+=================================*/
+pl-matrix-latex {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  margin: 1rem 0;
+  color: var(--c-fg);
+}
+
+/* ===============================
    Utilities
 =================================*/
-
-
+.wrapper {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--c-panel);
+  border: 1px solid var(--c-border);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}

@@ -6,7 +6,9 @@ from src.api.service import question_crud
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("payload_index", range(1))  # adjust to len(question_payloads)
-async def test_run_text_each(db_session, question_payloads, payload_index):
+async def test_run_text_each(
+    db_session, question_payloads, payload_index, patch_questions_path
+):
     payload = question_payloads[payload_index]
 
     result = await code_generation.run_text(
@@ -21,7 +23,7 @@ async def test_run_text_each(db_session, question_payloads, payload_index):
 
 
 @pytest.mark.asyncio
-async def test_run_text_bulk(db_session, question_payloads):
+async def test_run_text_bulk(db_session, question_payloads, patch_questions_path):
     for payload in question_payloads:
         result = await code_generation.run_text(
             text=payload["question"],
@@ -34,7 +36,9 @@ async def test_run_text_bulk(db_session, question_payloads):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("payload_index", range(1))  # adjust to len(question_payloads)
-async def test_run_test_check_db(db_session, question_payloads, payload_index):
+async def test_run_test_check_db(
+    db_session, question_payloads, payload_index, patch_questions_path
+):
     payload = question_payloads[payload_index]
 
     result = await code_generation.run_text(

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # Standard library
 from typing import Union
 from uuid import UUID
@@ -19,20 +21,13 @@ from src.utils import convert_uuid
 from src.api.core import settings
 from pathlib import Path
 from sqlmodel import select
+from src.api.database import get_session
+import json
+import datetime
 
 
 async def safe_refresh_question(question: Question, session: SessionDep):
-    try:
-        session.add(question)
-        session.commit()
-        session.refresh(question)
-        return question
-    except Exception as e:
-        session.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error updating Question {question.id}: {e}",
-        ) from e
+    return qdata.safe_refresh_question(question, session)
 
 
 async def create_question(
@@ -64,7 +59,8 @@ async def create_question(
             detail=f"Question must either be object of type Question or dict or not Empty got type {type(question)}",
         )
     try:
-        return qdata.create_question(question, session)
+        question = qdata.create_question(question, session)
+        return question
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
@@ -196,6 +192,7 @@ async def edit_question_meta(
     """
     try:
         question_id = convert_uuid(question_id)
+        logger.debug("These are the kwargs %s", kwargs)
         updated_question = qdata.update_question(session, question_id, **kwargs)
         return await get_question_data(question_id=updated_question.id, session=session)
     except HTTPException as e:
@@ -274,29 +271,3 @@ async def get_all_question_data(session: SessionDep, limit: int = 100, offset: i
     except HTTPException as e:
         raise e
 
-
-def check_for_new_folders(session: SessionDep):
-    base_dir = Path(settings.QUESTIONS_PATH).resolve()
-
-    all_q = session.exec(select(Question)).all()
-    all_qname = {str(q.local_path).split("/")[1] for q in all_q}
-    disk_folders = {p.name for p in base_dir.iterdir() if p.is_dir}
-    new_folders = disk_folders - all_qname
-    print(new_folders)
-
-
-if __name__ == "__main__":
-    from src.api.database import get_session
-
-    # manually grab a session
-    session_gen = get_session()
-    session = next(session_gen)
-    try:
-        check_for_new_folders(session)
-    finally:
-        session.close()
-        # finalize generator
-        try:
-            next(session_gen)
-        except StopIteration:
-            pass
