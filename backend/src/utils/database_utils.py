@@ -164,7 +164,7 @@ def normalize_kwargs(kwargs: dict):
         if isinstance(value, list):
             for v in value:
                 if isinstance(v, dict):
-                    f = v.get("name")
+                    f = [v.get("name")]
                 else:
                     f = [v]
 

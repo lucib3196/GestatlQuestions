@@ -1,18 +1,21 @@
+# --- Standard Library ---
+import json
 import os
 import tempfile
-from typing import Optional, List, Any
-import json
-import fitz  # PyMuPDF
-from fitz import Page
+from datetime import date, datetime, time
+from typing import Any, List, Optional, Sequence, Union
+from uuid import UUID
 
+# --- Third-Party ---
+import fitz  # PyMuPDF
+import pandas as pd
 from IPython.display import Image, display
 from langgraph.graph import StateGraph
-from pydantic import BaseModel
-import pandas as pd
-from langchain_core.messages import SystemMessage
-from typing import Sequence, Union
 from langchain_core.messages import BaseMessage, SystemMessage
 from langchain_core.prompt_values import ChatPromptValue
+from pydantic import BaseModel
+
+
 
 def save_graph_visualization(
     graph,
@@ -165,6 +168,13 @@ def to_serializable(obj: Any) -> Any:
         return {k: to_serializable(v) for k, v in obj.items()}
     if isinstance(obj, list):
         return [to_serializable(v) for v in obj]
+
+    # --- Special cases ---
+    if isinstance(obj, (datetime, date, time)):
+        return obj.isoformat()
+    if isinstance(obj, UUID):
+        return str(obj)
+
     return obj
 
 

@@ -47,7 +47,7 @@ async def create_question_full(
             question_id=q.id, files_data=[metadata], session=session
         )
         qdata = await qc.get_question_data(question_id=q.id, session=session)
-        return qdata
+        return q, qdata
     except HTTPException as e:
         session.rollback()
         raise e

@@ -136,9 +136,12 @@ async def create_question_file_upload(
 ):
     try:
         base_question, metadata = parse_payload(question, additional_metadata)
-        q_created = await question_crud.create_question(base_question, session)
+        if metadata:
+            base_question = {**base_question, **metadata.model_dump()}
+        q, qdata = await qs.create_question_full(base_question, session)
+
         if save_dir == "local":
-            response = await qs.set_directory(q_created.id, session)
+            response = await qs.set_directory(q.id, session)
         elif save_dir == "firebase":
             raise NotImplementedError("Have not implemented firebase functionality")
 
@@ -146,7 +149,7 @@ async def create_question_file_upload(
         # Inspect the filedata
         if not files:
             file_data_list = create_base_files(
-                languages=q_created.languages, is_adaptive=q_created.isAdaptive
+                languages=q.languages, is_adaptive=q.isAdaptive
             )
         else:
             for f in files:
@@ -156,9 +159,9 @@ async def create_question_file_upload(
                 fd = FileData(filename=str(f.filename), content=content)
                 file_data_list.append(fd)
         await qs.write_files_to_directory(
-            question_id=q_created.id, files_data=file_data_list, session=session
+            question_id=q.id, files_data=file_data_list, session=session
         )
-        return {"detail": "okay", "question": q_created, "metadata": metadata}
+        return {"detail": "okay", "question": q, "metadata": metadata}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

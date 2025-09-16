@@ -21,6 +21,7 @@ from src.api.core import logger
 from src.utils import convert_uuid
 from datetime import datetime
 
+
 def safe_refresh_question(question: Question, session: SessionDep):
     try:
         session.add(question)
@@ -82,12 +83,9 @@ def get_question_by_id(question_id: str | UUID, session: SessionDep):
     Returns:
         The matching Question instance, or None if not found.
     """
-    
+
     question_id = convert_uuid(question_id)
-    logger.debug("This is the question id %s", question_id)
-    return session.exec(
-        select(Question).where(Question.id == question_id)
-    ).first()
+    return session.exec(select(Question).where(Question.id == question_id)).first()
 
 
 def delete_all_questions(session: SessionDep):
@@ -305,8 +303,6 @@ def update_question(
                         )[0]
                 setattr(question, key, value)
             continue
-    logger.debug("Got the question qtypes")
-    logger.debug("%s \n", question.qtypes)
     session.commit()
     session.refresh(question)
     return question
@@ -376,5 +372,3 @@ def filter_questions(session, partial_match=True, **kwargs):
     if filters:
         stmt = stmt.where(*filters)  # AND across keys, OR within each key
     return session.exec(stmt).all()
-
-

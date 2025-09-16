@@ -57,64 +57,83 @@ def check_for_new_folders(session: SessionDep):
 
 async def handle_metadata_found(metadata_found: list[str], session: SessionDep):
     base_dir = Path(settings.QUESTIONS_PATH).resolve()
+    created_count = 0
+    updated_count = 0
+
     for m in metadata_found:
         metadata_path = base_dir / m / "metadata.json"
 
+        # If file missing, skip
         if not metadata_path.exists():
-            logger.warning(f"Metadata file not found: {metadata_path}")
+            print(f"metadata.json not found for {m}, skipping")
             continue
 
         try:
-            text = await read_file_async(metadata_path)
-            content = json.loads(text)
+            content = json.loads(metadata_path.read_text(encoding="utf-8"))
         except Exception as e:
-            logger.error(f"Failed to read/parse {metadata_path}: {e}")
+            print(f"Failed to read/parse metadata.json for {m}: {e}")
             continue
+        question_id = content.get("id", None)
+        exists = False
 
-        content = json.loads(metadata_path.read_text(encoding="utf-8"))
-
-        # get question id
-        question_id = convert_uuid(content.get("id", ""))
-        is_question = False
-        # Check if exists, or if 404 → treat appropriately
+        # Check existence in DB
         if question_id:
             try:
+                question_id = convert_uuid(question_id)
                 await qc.get_question_by_id(question_id, session=session)
-                is_question = True
+                exists = True
             except HTTPException as e:
                 if e.status_code == 404:
-                    is_question = False
+                    exists = False
+                    print("Not a question")
                 else:
-                    # some other error, log and skip?
-                    logger.error(f"Error retrieving question by id {question_id}: {e}")
+                    print(f"Error checking question id {question_id} for {m}: {e}")
                     continue
 
         try:
-            if not is_question:
-                # create new
-                await qs.create_question_full(content, session, existing=True)
+            if not exists:
+                # CREATE
+                q, qdata = await qs.create_question_full(
+                    content, session, existing=True
+                )
+                question_id = q.id
+                created_count += 1
+                print(f"Created question for metadata {m} with new ID {question_id}")
+                metadata = qdata
             else:
-                # edit meta
-                content.pop("id", None)
-                content = normalize_timestamps(content)
-
-                # Now normalize the rest of the fields
-                data = await qc.edit_question_meta(
-                    question_id,
-                    session,
+                # UPDATE
+                for field in ["id", "created_at", "updated_at"]:
+                    content.pop(field, None)
+                qdata = await qc.edit_question_meta(
+                    question_id=question_id,
+                    session=session,
                     **normalize_kwargs(content),
                 )
-                metadata = FileData(
-                    filename="metadata.json", content=json.dumps(data, default=str)
-                )
-                await qs.write_files_to_directory(
-                    question_id=question_id, files_data=[metadata], session=session
-                )
-        except Exception as e:
-            logger.error(
-                f"Failed to process metadata for {metadata_path}: {e}, content: {content}"
+                updated_count += 1
+                print(f"Updated question id {question_id} from metadata {m}")
+                metadata = qdata
+
+            # --- Rewrite metadata.json ---
+            print("This is the metdata before", metadata)
+            metadata = FileData(
+                filename="metadata.json",
+                content=to_serializable(normalize_timestamps(metadata)),
             )
+            await qs.write_files_to_directory(
+                question_id=question_id,
+                files_data=[metadata],
+                session=session,
+            )
+            print(f"Rewrote metadata.json for {question_id}")
+
+        except Exception as e:
+            print(f"Failed to process {m}: {e}, content: {content}")
             continue
+
+    # Final summary
+    print(
+        f"Summary: {created_count} questions created, {updated_count} questions updated."
+    )
 
 
 if __name__ == "__main__":
