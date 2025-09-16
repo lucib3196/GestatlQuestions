@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import ModGenerators from "./BaseTemplate";
 import api from "../../api/api";
 import { toast } from "react-toastify";
+import UploadFilesButton from "../Generic/UploadFilesButton";
 const ImageGeneratorConst = {
     name: "Visual Extract",
 };
@@ -23,12 +24,9 @@ const examples = [
 ];
 
 const FileUploadForm: React.FC = () => {
-    const [fileList, setFileList] = useState<FileList | null>(null);
+    const [fileList, setFileList] = useState<File[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFileList(e.target.files);
-    };
 
 
 
@@ -51,7 +49,7 @@ const FileUploadForm: React.FC = () => {
                 return;
             }
             const response = await api.post(
-                "/codegenerator/v4/image_gen/",
+                "/codegenerator/v5/image_gen",
                 formData,
                 {
                     headers: {
@@ -72,20 +70,28 @@ const FileUploadForm: React.FC = () => {
         <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
             <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-4">
 
-                <input
-                    type="file"
-                    name="files"
-                    multiple
-                    onChange={handleFileChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-
+                <UploadFilesButton onFilesSelected={setFileList} />
+                {fileList.length > 0 && (
+                    <ul className="mt-4 space-y-2 text-sm text-gray-700">
+                        {fileList.map((file, idx) => (
+                            <li
+                                key={idx}
+                                className="flex justify-between items-center bg-gray-100 px-3 py-2 rounded-md"
+                            >
+                                <span className="font-medium">{file.name}</span>
+                                <span className="text-xs text-gray-500">
+                                    {Math.round(file.size / 1024)} KB
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                )}
                 <button
                     type="submit"
                     className={`w-full py-2 px-4 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors duration-200 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                     disabled={loading}
                 >
-                    {loading ? "Uploading..." : "Upload Files"}
+                    {loading ? "Generating..." : "Generate"}
                 </button>
             </form>
         </div>

@@ -12,6 +12,7 @@ from starlette import status
 # Internal
 from src.code_runner.models import CodeRunResponse, QuizData
 from .utils import normalize_path
+from src.api.core import logger
 
 
 def run_js(path: str) -> CodeRunResponse:
@@ -165,16 +166,51 @@ def execute_javascript(
             + user_js
             + """
             function callWithLogs(arg) {
-            logs = [];  // reset
-            let out = {};
-            try {
-                const safeArg = (arg && typeof arg === "object") ? arg : {};
-                out = (typeof generate === "function") ? generate(safeArg) : undefined;
-            } catch (e) {
-                console.log("Error in generate:", e);
+    const logs = [];  // reset
+    let result = null;
+    let params = {};             // default
+    let correct_answers = [];    // default
+
+    try {
+        const safeArg = (arg && typeof arg === "object") ? arg : {};
+        // Maybe record params?
+        params = safeArg;
+
+        if (typeof generate === "function") {
+            const out = generate(safeArg);
+
+            // We expect out to maybe contain correct_answers or something
+            // If so, extract them; else leave default
+            if (out && typeof out === "object") {
+                result = out;
+                if ("correct_answers" in out) {
+                    correct_answers = out.correct_answers;
+                }
+            } else {
+                // generate didn't return an object
+                logs.push("generate returned non‐object output");
+                result = out;
             }
-            return { result: out, logs: logs };
-            }
+        } else {
+            logs.push("generate is not a function");
+        }
+    } catch (e) {
+        // Log error with details
+        const msg = (e && e.message) ? e.message : String(e);
+        logs.push(`Error in generate: ${msg}`);
+        // Optionally logs.push(e.stack) if available
+        if (e && e.stack) {
+            logs.push(`Stack: ${e.stack}`);
+        }
+    }
+
+    return {
+        result,
+        logs,
+        params,
+        correct_answers
+    };
+}
         """
         )
     except UnicodeDecodeError:
@@ -319,11 +355,13 @@ def execute_javascript(
 
     # Validate against QuizData
     try:
+        logger.debug("This si the payload before validation %s", payload)
         quiz_data = (
             QuizData(**payload)
             if isinstance(payload, dict)
             else QuizData.model_validate(payload)
         )
+        logger.debug("This is the quiz daata, %s ", quiz_data)
     except ValidationError as e:
         return CodeRunResponse(
             success=False,

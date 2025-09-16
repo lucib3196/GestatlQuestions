@@ -23,15 +23,20 @@ export const fetchFormattedLegacyAdaptive = async (
         ]);
         console.log("This is the raw html", rawHtml)
         console.log("This is the data", params)
+        console.log("This si the question title inside", questionTitle)
         const replacedQ = rawHtml ? applyPlaceHolders(rawHtml, params) : null
         const replacedS = rawSolution ? applyPlaceHolders(rawSolution, params) : null
-        const { htmlString: qStr } = replacedQ
+        const qRes = replacedQ
             ? processPrairielearnTags(replacedQ, params, "", questionTitle, CHOICE_PARAMS)
-            : { htmlString: null };
+            : undefined;
 
-        const { solutionsStrings } = replacedS
+        const qStr = qRes?.htmlString ?? null;
+
+        const sRes = replacedS
             ? processPrairielearnTags(replacedS, params, "", questionTitle, CHOICE_PARAMS)
-            : { solutionsStrings: null };
+            : undefined;
+
+        const solutionsStrings = sRes?.solutionsStrings ?? null;
 
         console.log(qStr)
         const sStr: string[] = solutionsStrings ? Object.values(solutionsStrings) : []
@@ -63,7 +68,7 @@ export function useFormattedLegacy(selectedQuestion: string | null, params: any,
         return () => {
             mounted = false;
         };
-    }, [selectedQuestion, params]);
+    }, [selectedQuestion, params, questionTitle]);
 
     return { questionHtml, solutionHTML, setQuestionHtml, setSolutionHTML };
 }

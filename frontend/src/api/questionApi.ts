@@ -135,7 +135,7 @@ export async function createQuestion({
       "/file_uploads/create_question/upload",
       formData
     );
-    console.log(response);
+    toast.success("Question created succesfully");
   } catch (error) {
     console.log(error);
   }

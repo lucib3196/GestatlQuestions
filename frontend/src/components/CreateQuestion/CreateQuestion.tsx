@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { MyModal } from "../Generic/MyModal";
 import QuestionCreationForm from "./QuestionForm";
-
+import { TableToolBarButton } from "../QuestionTable/TableToolBarButtons";
+import { FiUpload } from "react-icons/fi";
 function Header() {
     return (
         <div className="text-center py-6">
@@ -21,14 +22,20 @@ function Header() {
 
 
 export default function CreateQuestion() {
-    const [showPopUp, setShowPopUp] = useState(true);
+    const [showPopUp, setShowPopUp] = useState(false);
 
     return (
         <>
+            <TableToolBarButton
+                value="Upload Question"
+                className="border-indigo-600 text-indigo-700 hover:bg-indigo-200 "
+                onClick={() => setShowPopUp(prev => !prev)}
+                icon={<FiUpload className="self-center" />}
+            />
             {showPopUp && (
                 <MyModal variant="large" setShowModal={setShowPopUp}>
                     <Header />
-                    <QuestionCreationForm />
+                    <QuestionCreationForm onFinish={() => setShowPopUp(false)} />
                 </MyModal>
             )}
         </>

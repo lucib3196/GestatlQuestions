@@ -1,4 +1,4 @@
-import React from "react";
+
 import clsx from "clsx";
 import type { IconType } from "react-icons/lib";
 
@@ -9,7 +9,7 @@ type TableToolBarProps = {
     className: string;
     disabledClassName?: string;
     onHoverMsg?: string;
-    icon?: React.ReactNode | IconType;
+    icon?: React.ReactNode;
 };
 
 export const TableToolBarButton = ({
@@ -35,7 +35,7 @@ export const TableToolBarButton = ({
             )}
             disabled={disabled}
         >
-            icon {value}
+            {icon} {value}
         </button>
     );
 };

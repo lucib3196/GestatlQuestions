@@ -1,6 +1,7 @@
 // src/features/questions/TableToolbar.tsx
 import { MdDelete } from "react-icons/md";
 import { UploadQuestionButton } from "../Tools/UploadQuestionTool";
+import CreateQuestion from "../CreateQuestion/CreateQuestion";
 
 type Props = {
     canAct: boolean;
@@ -21,8 +22,7 @@ export function TableToolbar({
 }: Props) {
     return (
         <div className="w-full border flex items-center justify-center mb-10 py-3 gap-3">
-            <UploadQuestionButton />
-
+            <CreateQuestion />
             <button
                 type="button"
                 onClick={onRunTests}

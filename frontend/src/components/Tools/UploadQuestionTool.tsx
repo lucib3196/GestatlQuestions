@@ -3,8 +3,7 @@ import { TableToolBarButton } from "../QuestionTable/TableToolBarButtons";
 import { useState } from "react";
 import { MyModal } from "../Generic/MyModal";
 import { FiUpload } from "react-icons/fi";
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import CreateQuestion from "../CreateQuestion/CreateQuestion";
 import { MdDriveFolderUpload } from "react-icons/md";
 
 const UploadQuestion: React.FC = () => {
@@ -49,59 +48,7 @@ const UploadQuestion: React.FC = () => {
 };
 
 
-const ManualQuestionCreation = () => {
-    return (
-        <div className="w-full h-full flex flex-col items-center px-4 py-8">
-            <h1 className="text-2xl font-semibold text-center mb-2">
-                Create a Question
-            </h1>
-        </div>
-    )
-}
 
-const UploadQuestionForm = () => {
-    const [uploadOption, setUploadOption] = useState<string | null>(null);
-
-    const handleChange = (event: React.MouseEvent<HTMLElement>, newOption: string | null) => {
-        if (newOption !== null) {
-            setUploadOption(newOption);
-            console.log('Selected option:', newOption);
-        }
-    };
-
-    return (
-        <div className="flex flex-col justify-center">
-            <h1 className="text-center text-xl font-bold">
-                Upload or Create Question
-                <hr className="my-3" />
-            </h1>
-
-            {/* Options Container */}
-            <div className="flex justify-center">
-                <ToggleButtonGroup
-                    value={uploadOption}
-                    color="primary"
-                    exclusive
-                    onChange={handleChange}
-                    aria-label="upload method"
-                    className="flex justify-center"
-                >
-                    <ToggleButton value="FileUpload" aria-label="file upload">
-                        File Upload
-                    </ToggleButton>
-                    <ToggleButton value="Manual" aria-label="manual entry">
-                        Manual
-                    </ToggleButton>
-                </ToggleButtonGroup>
-            </div>
-
-            <div className="flex justify-center grow my-2 items-end">
-                {uploadOption === "FileUpload" && <UploadQuestion />}
-                {uploadOption === "Manual" && <ManualQuestionCreation />}
-            </div>
-        </div>
-    );
-};
 
 export const UploadQuestionButton = () => {
     const [showPopUp, setShowPopUp] = useState(false)
@@ -114,8 +61,7 @@ export const UploadQuestionButton = () => {
                 icon={<FiUpload className="self-center" />}
             />
             {
-                showPopUp && <MyModal setShowModal={setShowPopUp}>
-                    <UploadQuestionForm></UploadQuestionForm></MyModal>
+                <CreateQuestion />
             }
         </>
     );

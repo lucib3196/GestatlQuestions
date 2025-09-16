@@ -21,6 +21,15 @@
       "type": "debugpy",
       "request": "launch",
       "module": "ai_workspace.agents.code_generators.v5.extract_question_image"
+    },
+    {
+      "name": "Edit local meta",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "backend.src.api.service.question_local_service",
+      "env": {
+        "PYTHONPATH": "backend"
+      }
     }
   ]
 }

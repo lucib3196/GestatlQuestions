@@ -41,6 +41,7 @@ const QuestionFilter = ({ setSearchResults }: QuestionFilterProps) => {
                     },
                     showAllQuestions: ctx.showAllQuestions,
                 });
+                console.log("This is the retrieved", retrievedQuestions)
                 setSearchResults(retrievedQuestions);
             } catch (error) {
 

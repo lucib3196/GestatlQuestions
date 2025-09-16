@@ -37,7 +37,10 @@ function handleQtypes(qtypes: string[] | string) {
             .filter(Boolean);
 }
 
-function QuestionCreationForm() {
+type FormProps = {
+    onFinish: () => void
+}
+function QuestionCreationForm({ onFinish }: FormProps) {
     const [files, setFiles] = useState<File[]>([]);
     const [alignment, setAlignment] = useState("files");
     const [formData, setFormData] = useState<QuestionFormData>({
@@ -90,7 +93,14 @@ function QuestionCreationForm() {
             files,
         };
         console.log("Submitting form:", submission);
-        const result = await createQuestion(submission);
+        try {
+            const result = await createQuestion(submission);
+            onFinish()
+
+        } catch (error) {
+            console.log(error)
+        }
+
     };
 
     return (

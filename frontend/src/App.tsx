@@ -28,8 +28,6 @@ function App() {
                   {/* Main Content */}
                   <NavBar />
                   <ToastContainer />
-                  <CreateQuestion />
-                  
 
                   {/* End of Main Content */}
                 </LogsProvider>

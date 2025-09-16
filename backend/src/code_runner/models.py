@@ -8,8 +8,8 @@ class QuizData(BaseModel):
     intermediate: Optional[Dict[str, Any]] = None
     test_results: Optional[Dict[str, Any]] = None
     logs: Optional[List[Any]] = []
-    nDigits: int = 3
-    sigfigs: int = 3
+    nDigits: Optional[int] = 3
+    sigfigs: Optional[int] = 3
 
 
 class CodeRunResponse(BaseModel):

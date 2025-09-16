@@ -66,15 +66,13 @@ export function LegacyQuestion() {
 
     const questionTitle = qdata?.title;
 
+    console.log("This is the title outside", qdata?.title)
+
     const { questionHtml, solutionHTML } = useFormattedLegacy(
         selectedQuestion ?? null,
         params,
         questionTitle
     );
-
-
-
-    console.log("This is the question", questionHtml)
 
     // Reset transient UI when switching questions
     useEffect(() => {
@@ -145,7 +143,7 @@ export function LegacyQuestion() {
                         {showCorrectAnswer(isSubmitted, params ?? null)}
 
                         {/* Solution (toggle) */}
-                        {showSolution && <SolutionPanel solution={solutionHTML} />}
+                        {showSolution && <SolutionPanel solution={solutionHTML ?? []} />}
                     </div>
                 </div>
             </div>
