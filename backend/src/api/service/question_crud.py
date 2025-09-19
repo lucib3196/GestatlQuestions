@@ -18,12 +18,6 @@ from src.api.models.question_model import (
 from src.api.database import question_db as qdata
 from src.api.core.logging import logger
 from src.utils import convert_uuid
-from src.api.core import settings
-from pathlib import Path
-from sqlmodel import select
-from src.api.database import get_session
-import json
-import datetime
 
 
 async def safe_refresh_question(question: Question, session: SessionDep):
@@ -270,4 +264,3 @@ async def get_all_question_data(session: SessionDep, limit: int = 100, offset: i
         return result
     except HTTPException as e:
         raise e
-

@@ -1,18 +1,18 @@
-# Stdlib
+# --- Standard Library ---
 import subprocess
 from pathlib import Path
-from typing import Union, Any
+from typing import Any, Dict, Union
 
-# Third-party
-import execjs
+# --- Third-Party ---
 import json5
 from pydantic import ValidationError
 from starlette import status
 
-# Internal
-from src.code_runner.models import CodeRunResponse, QuizData
-from .utils import normalize_path
+# --- Internal ---
 from src.api.core import logger
+from src.code_runner.models import CodeRunResponse, QuizData, CodeRunException
+from src.code_runner.utils import *
+from .utils import *
 
 
 def run_js(path: str) -> CodeRunResponse:
@@ -104,285 +104,94 @@ def run_js(path: str) -> CodeRunResponse:
 def execute_javascript(
     path: Union[str, Path], isTesting: bool = False
 ) -> CodeRunResponse:
-    # Normalize/validate path
+    """
+    Execute a JavaScript file, validate its structure, and return a CodeRunResponse.
+
+    Args:
+        path (Union[str, Path]): Path to the JavaScript file (.js or .mjs).
+        isTesting (bool): Whether the execution is in test mode.
+
+    Returns:
+        CodeRunResponse: Success response containing validated QuizData.
+
+    Raises:
+        CodeRunException: For validation, runtime, or schema errors.
+    """
     try:
-        file_path = normalize_path(path)
-    except ValueError as e:
-        return CodeRunResponse(
-            success=False,
-            error=f"No file argument provided for JavaScript execution. {e}",
-            quiz_response=None,
-            http_status_code=status.HTTP_400_BAD_REQUEST,
-        )
+        # Validate input file path
+        file_path = validate_filepath(path, extensions=[".mjs", ".js"])
 
-    if not file_path.exists():
-        return CodeRunResponse(
-            success=False,
-            error=f"File not found: {file_path}",
-            quiz_response=None,
-            http_status_code=status.HTTP_404_NOT_FOUND,
-        )
-    if not file_path.is_file():
-        return CodeRunResponse(
-            success=False,
-            error=f"Path is not a regular file: {file_path}",
-            quiz_response=None,
-            http_status_code=status.HTTP_400_BAD_REQUEST,
-        )
-    if file_path.suffix.lower() not in {".js", ".mjs"}:
-        return CodeRunResponse(
-            success=False,
-            error=f"Unsupported file extension '{file_path.suffix}'. Expected .js or .mjs.",
-            quiz_response=None,
-            http_status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-        )
+        # Read and wrap JS with logging + shim
+        js_code = append_javascript_logs(file_path)
 
-    # Read JS and wrap with logger + call shim
-    try:
-        user_js = file_path.read_text(encoding="utf-8")
-        js_code = (
-            """
-            var logs = [];
+        # Compile JS
+        ctx = compile_js_code(js_code)
 
-            // capture console.log into logs array
-            console.log = function(...args) {
-            const processed = args.map(arg => {
-                if (typeof arg === "object") {
-                try {
-                    return JSON.stringify(arg);
-                } catch (e) {
-                    return "[Unserializable Object]";
-                }
-                }
-                return String(arg);
-            });
+        # Ensure `generate` function exists
+        validate_generate_function_js(ctx)
 
-            logs.push(processed.join(" "));
-            };
+        # Run JS and extract results
+        raw = run_javascript(ctx, isTesting)
+        logger.info("Ran JavaScript successfully")
 
-            // `generate` should exist in user code.
-            // We allow an optional arg; tests can pass a fixed value.
-            """
-            + user_js
-            + """
-            function callWithLogs(arg) {
-    const logs = [];  // reset
-    let result = null;
-    let params = {};             // default
-    let correct_answers = [];    // default
+        js_result: Any = raw.get("result")
+        logs: list[str] = raw.get("logs", [])
 
-    try {
-        const safeArg = (arg && typeof arg === "object") ? arg : {};
-        // Maybe record params?
-        params = safeArg;
-
-        if (typeof generate === "function") {
-            const out = generate(safeArg);
-
-            // We expect out to maybe contain correct_answers or something
-            // If so, extract them; else leave default
-            if (out && typeof out === "object") {
-                result = out;
-                if ("correct_answers" in out) {
-                    correct_answers = out.correct_answers;
-                }
-            } else {
-                // generate didn't return an object
-                logs.push("generate returned non‐object output");
-                result = out;
-            }
-        } else {
-            logs.push("generate is not a function");
-        }
-    } catch (e) {
-        // Log error with details
-        const msg = (e && e.message) ? e.message : String(e);
-        logs.push(`Error in generate: ${msg}`);
-        // Optionally logs.push(e.stack) if available
-        if (e && e.stack) {
-            logs.push(`Stack: ${e.stack}`);
-        }
-    }
-
-    return {
-        result,
-        logs,
-        params,
-        correct_answers
-    };
-}
-        """
-        )
-    except UnicodeDecodeError:
-        return CodeRunResponse(
-            success=False,
-            error="File is not valid UTF-8 text.",
-            quiz_response=None,
-            http_status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-        )
-    except OSError as e:
-        return CodeRunResponse(
-            success=False,
-            error=f"Failed to read file: {e}",
-            quiz_response=None,
-            http_status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
-
-    # Compile JS
-    try:
-        ctx = execjs.compile(js_code)
-    except execjs.RuntimeUnavailableError:
-        return CodeRunResponse(
-            success=False,
-            error="No JavaScript runtime available. Install Node.js so execjs can use it.",
-            quiz_response=None,
-            http_status_code=status.HTTP_424_FAILED_DEPENDENCY,
-        )
-    except execjs.ProgramError as e:
-        return CodeRunResponse(
-            success=False,
-            error=f"JavaScript compile error: {e}",
-            quiz_response=None,
-            http_status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        )
-    except Exception as e:
-        return CodeRunResponse(
-            success=False,
-            error=f"Unexpected error compiling JavaScript: {e}",
-            quiz_response=None,
-            http_status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
-
-    # Verify generate exists
-    try:
-        has_generate = ctx.eval("typeof generate === 'function'")
-        if not has_generate:
-            return CodeRunResponse(
-                success=False,
-                error="The JavaScript file does not define a function named `generate`.",
-                quiz_response=None,
+        # Ensure result exists
+        if js_result is None:
+            raise CodeRunException(
+                error=(
+                    "Missing `result` in JavaScript return object. "
+                    "Nothing was returned from the JavaScript code."
+                ),
                 http_status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
-    except execjs.ProgramError as e:
-        return CodeRunResponse(
-            success=False,
-            error=f"Error checking for `generate` function: {e}",
-            quiz_response=None,
-            http_status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        )
 
-    # Execute: tests pass a fixed arg (e.g., 2); normal run passes null
-    try:
-        raw = ctx.call("callWithLogs", 2 if isTesting else None)
-        # raw should look like: { result: <payload>, logs: [...] }
-        if not isinstance(raw, dict):
-            return CodeRunResponse(
-                success=False,
-                error="JavaScript did not return an object. Expected { result, logs }.",
-                quiz_response=None,
+        logger.debug("Raw JavaScript Results: %s", js_result)
+        logger.debug("Captured logs: %s", logs)
+
+        # Ensure result type
+        if not isinstance(js_result, dict):
+            raise CodeRunException(
+                error=(
+                    f"Expected JavaScript result to be of type dict, "
+                    f"but received {type(js_result).__name__}"
+                ),
                 http_status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
-    except execjs.ProgramError as e:
+
+        # Construct payload
+        payload: Dict[str, Any] = {**js_result, "logs": logs}
+
+        # Validate test metadata if in test mode
+        if isTesting:
+            test_meta: Dict[str, Any] = js_result.get("test_results", {})
+            validate_test_result_structure(test_meta)
+
+        # Validate against QuizData schema
+        quiz_data = QuizData(**payload)
+
         return CodeRunResponse(
-            success=False,
-            error=f"JavaScript runtime error: {e}",
-            quiz_response=None,
-            http_status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
-    except Exception as e:
-        return CodeRunResponse(
-            success=False,
-            error=f"Unexpected error during JS execution: {e}",
-            quiz_response=None,
-            http_status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            success=True,
+            error=None,
+            quiz_response=quiz_data,
+            http_status_code=status.HTTP_200_OK,
         )
 
-    # ---------------------------
-    # Parse the *actual* payload:
-    #   raw = { result: <payload>, logs: [...] }
-    # Some generators nest under `result.results`, so handle both.
-    # ---------------------------
-    js_result: Any = raw.get("result", None)
+    except CodeRunException:
+        raise
 
-    if js_result is None:
-        return CodeRunResponse(
-            success=False,
-            error="Missing `result` in JavaScript return object.",
-            quiz_response=None,
-            http_status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        )
-
-    # If payload is nested like { result: { results: {...}, test_results: {...} } }
-    logs = raw.get("logs", [])
-    payload = (
-        js_result.get("results", js_result)
-        if isinstance(js_result, dict)
-        else js_result
-    )
-    # Merge results + logs into one dict
-    if isinstance(payload, dict):
-        payload = {**payload, **{"logs": logs}}
-
-    # If running tests, validate `test_results` if present
-    if isTesting:
-        test_meta = (
-            js_result.get("test_results") if isinstance(js_result, dict) else None
-        )
-        if test_meta is not None:
-            if not isinstance(test_meta, dict):
-                return CodeRunResponse(
-                    success=False,
-                    error="Test run expected `result.test_results` as a dict.",
-                    quiz_response=None,
-                    http_status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                )
-            passed = test_meta.get("pass")
-            if passed not in (0, 1, True, False):
-                return CodeRunResponse(
-                    success=False,
-                    error="`test_results.pass` must be 0/1 or boolean.",
-                    quiz_response=None,
-                    http_status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                )
-            if not bool(passed):
-                msg = test_meta.get("message", "JavaScript test failed.")
-                return CodeRunResponse(
-                    success=False,
-                    error=f"Test failed: {msg}",
-                    quiz_response=None,
-                    http_status_code=status.HTTP_200_OK,
-                )
-
-    # Validate against QuizData
-    try:
-        logger.debug("This si the payload before validation %s", payload)
-        quiz_data = (
-            QuizData(**payload)
-            if isinstance(payload, dict)
-            else QuizData.model_validate(payload)
-        )
-        logger.debug("This is the quiz daata, %s ", quiz_data)
     except ValidationError as e:
-        return CodeRunResponse(
-            success=False,
+        raise CodeRunException(
             error=f"Result did not match QuizData schema: {e}",
-            quiz_response=None,
             http_status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         )
+
     except Exception as e:
-        return CodeRunResponse(
-            success=False,
-            error=f"Error constructing QuizData: {e}",
-            quiz_response=None,
+        raise CodeRunException(
+            error=f"Unexpected error during JavaScript execution: {e}",
             http_status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
-
-    return CodeRunResponse(
-        success=True,
-        error=None,
-        quiz_response=quiz_data,
-        http_status_code=status.HTTP_200_OK,
-    )
 
 
 def test():

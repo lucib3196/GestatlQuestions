@@ -1,12 +1,29 @@
+# --- Standard Library ---
 from pathlib import Path
+from typing import Literal
+
+# --- Third-Party ---
+import pytest
+
+# --- Internal ---
+from src.api.core import logger
 from src.code_runner import run_js, run_py
 from src.code_runner.models import CodeRunResponse
 from src.utils import logs_contain
 
 
-def test_run_js():
-    path = Path("assets/code_scripts/test.js").resolve()
-    result = run_js.execute_javascript(path=path)
+@pytest.fixture
+def js_test_file(get_asset_path) -> Path:
+    return get_asset_path / "code_scripts" / "test.js"
+
+
+@pytest.fixture
+def py_test_file(get_asset_path) -> Path:
+    return get_asset_path / "code_scripts" / "test.py"
+
+
+def test_run_js(js_test_file):
+    result = run_js.execute_javascript(path=js_test_file)
 
     resp = CodeRunResponse.model_validate(result)
     assert resp.success is True
@@ -16,7 +33,7 @@ def test_run_js():
     # params / answers
     assert qr.params == {"a": 1, "b": 2}
     assert qr.correct_answers["sum"] == 3
-
+    logger.debug("These are the logs %s", qr.logs)
     # value logs
     assert logs_contain(qr.logs, "This is the value of a", "1")
     assert logs_contain(qr.logs, "This is the value of b", "2")
@@ -31,10 +48,8 @@ def test_run_js():
     )
 
 
-def test_run_py():
-    path = Path("assets/code_scripts/test.py").resolve()
-    print("This is the path", path)
-    result = run_py.run_generate_py(path=str(path))
+def test_run_py(py_test_file):
+    result = run_py.run_generate_py(path=str(py_test_file))
 
     resp = CodeRunResponse.model_validate(result)
     assert resp.success is True

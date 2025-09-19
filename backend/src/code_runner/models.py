@@ -17,3 +17,15 @@ class CodeRunResponse(BaseModel):
     error: Optional[str] = None
     quiz_response: Optional[QuizData] = None
     http_status_code: Optional[int] = None
+
+
+
+class CodeRunException(Exception):
+    def __init__(self, *, error: str, http_status_code: int, quiz_response=None):
+        self.response = CodeRunResponse(
+            success=False,
+            error=error,
+            http_status_code=http_status_code,
+            quiz_response=quiz_response,
+        )
+        super().__init__(error)
