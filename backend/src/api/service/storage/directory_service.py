@@ -17,6 +17,9 @@ class DirectoryService:
     def get_question_dir(self, question_identifier: str) -> Path:
         return self.base_dir / safe_dir_name(str(question_identifier))
 
+    def get_filepath(self, identifier: str, filename: str):
+        return self.get_question_dir(identifier) / filename
+
     def set_directory(self, question_identifier: str, relative: bool = True) -> Path:
         q_dir = self.get_question_dir(question_identifier)
         q_dir.mkdir(parents=True, exist_ok=True)

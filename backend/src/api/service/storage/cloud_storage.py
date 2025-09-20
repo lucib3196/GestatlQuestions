@@ -185,6 +185,11 @@ class FireCloudStorageService(StorageService):
         blob = self.get_blob(identifier, filename)
         return blob.exists()
 
+    def does_directory_exist(self, identifier: str) -> bool:
+        prefix = f"{self.get_directory(identifier).as_posix().rstrip('/')}/"
+        blobs = list(self.bucket.list_blobs(prefix=prefix, max_results=1))
+        return len(blobs) > 0
+
     def delete_file(self, identifier: str, filename: str) -> None:
         """
         Delete a file from Firebase storage if it exists.

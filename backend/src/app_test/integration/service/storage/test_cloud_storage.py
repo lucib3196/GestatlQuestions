@@ -72,6 +72,12 @@ def test_get_file(cloud_storage_service, save_file):
     assert content.decode("utf-8") == file_data["content"]
 
 
+def test_does_directory_exist(cloud_storage_service, save_file):
+    _, file_data = save_file
+    exist = cloud_storage_service.does_directory_exist(file_data["identifier"])
+    assert exist
+
+
 def test_delete_file(cloud_storage_service, save_file):
     """
     Ensure a saved file can be deleted and is no longer retrievable.

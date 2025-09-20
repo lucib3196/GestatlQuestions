@@ -7,6 +7,14 @@ class StorageService(ABC):
     """Abstract storage interface. All storage backends must implement these."""
 
     @abstractmethod
+    def get_directory(self, identifier: str) -> Path:
+        pass
+
+    @abstractmethod
+    def get_filepath(self, identifier: str, filename: str) -> Path:
+        pass
+
+    @abstractmethod
     def save_file(
         self,
         identifier: str,
@@ -26,4 +34,8 @@ class StorageService(ABC):
 
     @abstractmethod
     def delete_file(self, identifier: str, filename: str) -> None:
+        pass
+    
+    @abstractmethod
+    def does_directory_exist(self, identifier:str)->bool:
         pass

@@ -13,6 +13,15 @@ class LocalStorageService(StorageService):
         self.dir_service = DirectoryService(base_path)
         self.dir_service.ensure_base_exist()
 
+    def get_directory(self, identifier: str) -> Path:
+        return self.dir_service.get_question_dir(identifier)
+
+    def get_filepath(self, identifier: str, filename: str) -> Path:
+        return super().get_filepath(identifier, filename)
+
+    def does_directory_exist(self, identifier: str) -> bool:
+        return self.get_directory(identifier).exists()
+
     def create_directory(self, identifier) -> Path:
         return self.dir_service.set_directory(identifier, relative=False)
 
