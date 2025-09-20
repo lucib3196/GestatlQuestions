@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     DATABASE_URL: Optional[str] = None
 
     # Cloud Storage
-    FIREBASE_PATH: Optional[str] = None
+    FIREBASE_PATH: Optional[str | Path] = None
     STORAGE_BUCKET: Optional[str] = None
 
     # Static Directory
@@ -63,7 +63,7 @@ settings = Settings(
         "http://127.0.0.1:5173",
     ],
     SECRET_KEY=os.getenv("SECRET_KEY", ""),
-    FIREBASE_PATH=os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON"),
+    FIREBASE_PATH=Path(BASE_DIR) / str(os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")),
     STORAGE_BUCKET=os.getenv("STORAGE_BUCKET"),
     # relative folder name only
     QUESTIONS_DIRNAME="questions",
