@@ -23,10 +23,10 @@ from src.ai_workspace.agents.code_generators.v5.main_text import (
 from src.ai_workspace.utils import to_serializable, validate_llm_output
 from src.api.database import SessionDep
 from src.api.response_models import FileData
-from ..crud import question_crud
 from src.utils import to_bool
 
-from .. import question_storage_service
+from src.api.service.crud import question_crud
+from src.api.service import question_storage_service
 
 
 async def process_output(
