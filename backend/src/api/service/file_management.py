@@ -21,6 +21,7 @@ ALLOWED_EXTENSIONS = {
     # Code
     ".py",
     ".js",
+    ".bin"
 }
 ALLOWED_MIME_TYPES = {
     "image/png",
@@ -31,6 +32,7 @@ ALLOWED_MIME_TYPES = {
     "application/json",
     "text/x-python",
     "application/javascript",
+    "application/octet-stream",
     "text/javascript",
 }
 ALLOWED_ZIP_EXTENSIONS = {"application/zip", "application/x-zip-compressed"}

@@ -15,19 +15,19 @@ from pathlib import Path
 # Local application imports
 from src.api.core.config import settings
 from src.api.database.database import create_db_and_tables
-from src.api.web.authentication import router as auth_router
-from src.api.web.code_generator import router as code_generator_router
+from src.api.web.auth.authentication import router as auth_router
+from src.api.web.ai_generation.code_generator import router as code_generator_router
 from src.api.web.user import router as user_route
 from src.api.web.question_running import router as question_running_router
 from src.api.web.question_crud import router as q_crud
 from src.api.web.file_management import router as f_router
+from src.api.web.crud.questions import router as q_router
 
 # from backend.src.api.web.refactor_file_management import router as file_router
 
 # from backend_api.web.file_management import router as file_router
 # from backend_api.web.local_questions import router as local_question_router
 # from backend_api.web.db_questions import router as db_question_router
-
 
 ## Intializes the database
 @asynccontextmanager
@@ -43,6 +43,7 @@ routes = [
     q_crud,
     f_router,
     question_running_router,
+    q_router
 ]
 
 

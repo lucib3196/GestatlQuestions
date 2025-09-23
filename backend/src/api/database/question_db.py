@@ -129,7 +129,7 @@ def delete_question_by_id(question_id: Union[str, UUID], session: SessionDep):
 
 
 def get_all_questions(
-    session: SessionDep, offset: int = 0, limit: int = 100
+    session: SessionDep, offset: int = 0, limit: int = 100, 
 ) -> Sequence[Question]:
     """
     Retrieve a paginated list of Question rows.

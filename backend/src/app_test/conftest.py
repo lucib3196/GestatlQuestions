@@ -28,6 +28,7 @@ from src.api.response_models import FileData
 from src.api.service.storage.cloud_storage import FireCloudStorageService
 from src.api.service.storage.local_storage import LocalStorageService
 from src.api.service.question_manager import QuestionManager
+from src.api.dependencies import get_question_manager
 
 
 @asynccontextmanager
@@ -66,16 +67,28 @@ def _clean_db(db_session, test_engine):
     Base.metadata.create_all(test_engine)
 
 
-@pytest.fixture(scope="function")
-def test_client(db_session):
+@pytest.fixture(scope="function", params=["local", "cloud"])
+def test_client(db_session, request, question_manager_cloud, question_manager_local):
     app = get_application()
+
+    storage_type = request.param
+    if storage_type == "cloud":
+        qm = question_manager_cloud
+    elif storage_type == "local":
+        qm = question_manager_local
+    else:
+        raise ValueError("Incorrect storage type")
 
     app.router.lifespan_context = on_startup_test
 
     def override_get_db():
         yield db_session
 
+    async def override_get_qm():
+        yield qm
+
     app.dependency_overrides[get_session] = override_get_db
+    app.dependency_overrides[get_question_manager] = override_get_qm
 
     with TestClient(app) as client:
         yield client
@@ -236,6 +249,11 @@ def qpayload_min():
 
 
 @pytest.fixture
+def qpayload_bad():
+    return {"Data": "Some Content"}
+
+
+@pytest.fixture
 def file_data_payload() -> List[FileData]:
     """Provide a list of FileData objects with string, dict, and binary content."""
     text_content = "Hello World"
@@ -247,6 +265,26 @@ def file_data_payload() -> List[FileData]:
         FileData(filename="Config.json", content=dict_content),
         FileData(filename="Binary.bin", content=binary_content),
     ]
+
+
+@pytest.fixture
+def question_file_payload() -> List[FileData]:
+    files_data = [
+        ("question.html", "Some question text"),
+        ("solution.html", "Some solution"),
+        ("server.js", "some code content"),
+        ("meta.json", {"content": "some content"}),
+    ]
+    return [FileData(filename=f[0], content=f[1]) for f in files_data]
+
+
+@pytest.fixture
+def question_additional_metadata():
+    return {
+        "topics": ["Mechanics", "Statics"],
+        "languages": ["python", "javascript"],
+        "qtype": ["numeric"],
+    }
 
 
 # Storage Fixtures

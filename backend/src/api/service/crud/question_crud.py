@@ -56,7 +56,10 @@ async def create_question(
         question = qdata.create_question(question, session)
         return question
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid or missing input when creating question: {e}",
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -84,12 +87,7 @@ async def get_all_questions(
         HTTPException: 204 if there are no questions.
     """
     results = qdata.get_all_questions(session, offset=offset, limit=limit)
-    if not results:
-        raise HTTPException(
-            status_code=status.HTTP_204_NO_CONTENT, detail="No Questions in DB"
-        )
-    else:
-        return results
+    return results
 
 
 async def get_question_by_id(question_id: Union[str, UUID], session: SessionDep):

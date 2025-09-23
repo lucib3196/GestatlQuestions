@@ -1,7 +1,7 @@
 # Stdlib
 import asyncio
 from pathlib import Path
-from typing import List, Literal
+from typing import List, Literal, Sequence
 from uuid import UUID
 
 # Internal
@@ -12,6 +12,7 @@ from src.api.response_models import FileData
 from src.api.service.crud import question_crud as qc
 from src.api.service.storage import StorageService
 from src.utils import safe_dir_name
+from sqlmodel import select
 
 
 class QuestionManager:
@@ -33,13 +34,13 @@ class QuestionManager:
         """Create a new question in DB and storage."""
         try:
             q = await qc.create_question(question, session)
+            logger.info("Created question successfully %s", q.title)
         except Exception as e:
             logger.error("Failed to create question in DB: %s", e)
             raise
-
         try:
+            logger.info("Setting up Question")
             qname = safe_dir_name((q.title or "").strip())
-            logger.info("Created question successfully %s", q.title)
 
             if not qname:
                 logger.error("Question title is None")
@@ -98,6 +99,21 @@ class QuestionManager:
             )
             raise
 
+    # Retrieving all Questions
+    # TODO: Add a test for this 
+    async def get_all_questions(
+        self, offset: int, limit: int, session: SessionDep
+    ) -> Sequence[Question] | None:
+        if self.storage_type == "cloud":
+            filter = Question.blob_name != None
+        else:
+            filter = Question.local_path != None
+
+        results = session.exec(
+            select(Question).where(filter).offset(offset).limit(limit)
+        ).all()
+        return results
+
     # ---------------------------
     # File Operations
     # ---------------------------
@@ -147,7 +163,7 @@ class QuestionManager:
             logger.error("Failed to save files to question %s: %s", question_id, e)
             raise
 
-    async def get_file(
+    async def read_file(
         self, question_id: str | UUID, session: SessionDep, filename: str
     ) -> bytes | None:
         """Retrieve a file from a question directory."""
@@ -169,6 +185,31 @@ class QuestionManager:
             return self.storage.get_files_names(qidentifier)
         except Exception as e:
             logger.error("Failed to get files for question %s", question_id)
+            raise
+
+    async def read_all_files(
+        self, question_id: str | UUID, session: SessionDep
+    ) -> List[FileData]:
+        try:
+            files = await self.get_all_files(question_id, session)
+
+            # Await to actually run and collect results
+            contents = await asyncio.gather(
+                *[self.read_file(question_id, session, f) for f in files]
+            )
+
+            # Pair each filename with its content
+            file_data = [
+                FileData(filename=f, content=c) for f, c in zip(files, contents)
+            ]
+            return file_data
+
+        except Exception as e:
+            logger.error(
+                "Failed to read all files for question %s Error: %s",
+                question_id,
+                str(e),
+            )
             raise
 
     # ---------------------------

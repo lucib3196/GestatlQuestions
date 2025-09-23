@@ -28,8 +28,8 @@ class UploadQuesiton(BaseModel):
     question: Union[Question, dict]
     additional_metadata: Optional[AdditionalQMeta] = None
 
-
-def parse_payload(qdata: str | dict, additional_metadata: Optional[str]):
+# TODO Can delete this soon 
+def parse_payload(qdata: str | dict | Question, additional_metadata: Optional[str]):
     base_question: Dict[str, Any] | None = None
     qdata = json.loads(str(qdata))
     if not qdata:
