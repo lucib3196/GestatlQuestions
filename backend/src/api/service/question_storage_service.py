@@ -107,7 +107,7 @@ async def get_question_directory(
         # Case 3: No DB path, but directory exists and we allow fixing
         if existing:
             # try reconstruct from expected location
-            abs_path = Path(settings.QUESTIONS_PATH) / safe_name(
+            abs_path = Path(settings.QUESTIONS_PATH) / safe_dir_name(
                 question.title or f"question_{question.id}"
             )
             if abs_path.exists():
@@ -167,7 +167,7 @@ async def set_directory(
         abs_path.mkdir(parents=True, exist_ok=True)
 
     title = (question.title or "").strip()
-    question_title = safe_name(title) if title else f"question_{question.id}"
+    question_title = safe_dir_name(title) if title else f"question_{question.id}"
     target = abs_path / question_title
 
     # 5) Avoid collisions
@@ -216,7 +216,7 @@ async def write_file(f: FileData, dirname: str | Path, overwrite: bool = True):
             detail="Missing a filename for the file",
         )
 
-    fname = safe_name(f.filename)
+    fname = safe_dir_name(f.filename)
     target = (Path(dirname) / fname).resolve()
 
     content = f.content
@@ -361,7 +361,7 @@ async def get_file_path_abs(
         response = await get_question_directory(session, question.id)
 
         question_path = reconstruct_path(response.filepaths[0])
-        filepath = question_path / safe_name(filename)
+        filepath = question_path / safe_dir_name(filename)
         file_exist = filepath.is_file()
         if file_exist:
             return SuccessFileResponse(

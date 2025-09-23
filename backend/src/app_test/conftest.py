@@ -7,18 +7,27 @@ from pathlib import Path
 from types import SimpleNamespace
 from uuid import UUID
 
+# Testing logs
+from src.api.core.logging import in_test_ctx
+
 # --- Third-Party ---
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic_settings import BaseSettings
 from sqlmodel import Session, SQLModel, create_engine
-
+from pydantic import BaseModel
+from typing import List
 
 # --- Internal ---
 from src.api.core import settings, logger
 from src.api.database.database import Base, get_session
 from src.api.main import get_application
+from src.api.service.storage import StorageService
+from src.api.response_models import FileData
+from src.api.service.storage.cloud_storage import FireCloudStorageService
+from src.api.service.storage.local_storage import LocalStorageService
+from src.api.service.question_manager import QuestionManager
 
 
 @asynccontextmanager
@@ -72,15 +81,18 @@ def test_client(db_session):
         yield client
 
 
-# Dummy Session for Database
-@dataclass
-class FakeQuestion:
-    id: UUID
+class FakeQuestion(BaseModel):
+    """A fake Question model for testing."""
+
     title: str | None
     local_path: str | None
+    blob_name: str | None
+    id: UUID
 
 
 class DummySession:
+    """A fake DB session used for testing."""
+
     def __init__(self):
         self.committed = False
         self.refreshed = False
@@ -95,19 +107,55 @@ class DummySession:
         pass
 
 
-@pytest.fixture
-def dummy_session():
-    return DummySession()
+class DummyStorage(StorageService):
+    """A fake storage service used for testing."""
+
+    def __init__(self, path: Path):
+        self.path = Path(path)
+        self.basename = self.path.name
+
+    def get_basename(self) -> str | Path:
+        return self.basename
+
+    def does_directory_exist(self, identifier: str) -> bool:
+        return self.get_directory(identifier).exists()
+
+    def create_directory(self, identifier: str) -> Path:
+        Path.mkdir(self.get_directory(identifier), parents=True, exist_ok=True)
+        return self.get_directory(identifier)
+
+    def get_directory(self, identifier: str) -> Path:
+        return self.path / identifier
+
+    def get_filepath(self, identifier: str, filename: str) -> Path:
+        return super().get_filepath(identifier, filename)
+
+    def save_file(
+        self,
+        identifier: str,
+        filename: str,
+        content: str | dict | list | bytes | bytearray,
+        overwrite: bool = True,
+    ) -> Path:
+        return super().save_file(identifier, filename, content, overwrite)
+
+    def get_files_names(self, identifier: str) -> list[str]:
+        return super().get_files_names(identifier)
+
+    def get_file(self, identifier: str, filename: str) -> bytes | None:
+        return super().get_file(identifier, filename)
+
+    def delete_file(self, identifier: str, filename: str) -> None:
+        return super().delete_file(identifier, filename)
 
 
-def make_qc_stub(question: "FakeQuestion", session: DummySession):
-    """Return a qc stub with async get_question_by_id."""
+def make_qc_stub(question: FakeQuestion, session: DummySession):
+    """Return a qc stub with async get_question_by_id and safe_refresh_question."""
 
     async def _get_question_by_id(qid, _session):
         return question
 
     async def _safe_refresh_question(qid, _session):
-        # Call DummySession methods, don't overwrite them
         _session.commit()
         _session.refresh(question)
         return question
@@ -118,7 +166,22 @@ def make_qc_stub(question: "FakeQuestion", session: DummySession):
     )
 
 
-# Globa Fixtures
+# ---------------------------------------------------------------------------
+# Fixtures
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def dummy_session():
+    return DummySession()
+
+
+@pytest.fixture
+def dummy_storage(tmp_path):
+    path = Path(tmp_path) / "questions"
+    return DummyStorage(path)
+
+
 @pytest.fixture
 def patch_question_dir(monkeypatch):
     """Patch QUESTIONS_DIRNAME to a test directory name."""
@@ -152,15 +215,88 @@ def get_asset_path():
     return test_config.asset_path
 
 
-# Testing logs
-from src.api.core.logging import in_test_ctx
-
 @pytest.fixture(autouse=True)
 def mark_logs_in_test():
+    """Mark logs as being inside test context for duration of each test."""
     token = in_test_ctx.set(True)
     yield
     in_test_ctx.reset(token)
 
+
+# Question Fixture
+@pytest.fixture
+def qpayload_min():
+    return {
+        "title": "SomeTitle",
+        "ai_generated": True,
+        "isAdaptive": True,
+        "createdBy": "John Doe",
+        "user_id": 1,
+    }
+
+
+@pytest.fixture
+def file_data_payload() -> List[FileData]:
+    """Provide a list of FileData objects with string, dict, and binary content."""
+    text_content = "Hello World"
+    dict_content = {"key": "value", "number": 123}
+    binary_content = b"\x00\x01\x02\x03"
+
+    return [
+        FileData(filename="Test.txt", content=text_content),
+        FileData(filename="Config.json", content=dict_content),
+        FileData(filename="Binary.bin", content=binary_content),
+    ]
+
+
+# Storage Fixtures
+@pytest.fixture(scope="function")
+def cloud_storage_service():
+    """
+    Provides a FireCloudStorageService connected to the configured test bucket.
+    """
+    cred_path = settings.FIREBASE_PATH
+    bucket_name = settings.STORAGE_BUCKET
+    base_name = "integration_test"
+
+    assert cred_path, "FIREBASE_PATH must be set in settings"
+    assert bucket_name, "STORAGE_BUCKET must be set in settings"
+
+    return FireCloudStorageService(
+        cred_path=cred_path, bucket_name=bucket_name, base_name=base_name
+    )
+
+
+@pytest.fixture(autouse=True)
+def clean_up_cloud(cloud_storage_service):
+    # Setup code (before test runs)
+    yield
+    # Teardown code (after test finishes)
+    cloud_storage_service.hard_delete()
+    logger.debug("Deleting Bucket Cleaning Up")
+
+
+@pytest.fixture
+def local_storage(tmp_path):
+    """Provide a LocalStorageService rooted in a temp directory."""
+    base = tmp_path / "questions"
+    return LocalStorageService(base)
+
+
+@pytest.fixture
+def question_manager_local(local_storage):
+    """Provide a QuestionManager using LocalStorageService."""
+    return QuestionManager(local_storage, "local")
+
+
+@pytest.fixture
+def question_manager_cloud(cloud_storage_service):
+    return QuestionManager(cloud_storage_service, "cloud")
+
+
+# ---------------------------------------------------------------------------
+# Debug Run
+# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     print(test_config)

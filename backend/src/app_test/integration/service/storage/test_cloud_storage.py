@@ -7,27 +7,6 @@ import pytest
 
 # --- Internal ---
 from src.api.core import settings, logger
-from src.api.service.storage.cloud_storage import FireCloudStorageService
-
-
-# ----------------------
-# Fixtures
-# ----------------------
-@pytest.fixture(scope="module")
-def cloud_storage_service():
-    """
-    Provides a FireCloudStorageService connected to the configured test bucket.
-    """
-    cred_path = settings.FIREBASE_PATH
-    bucket_name = settings.STORAGE_BUCKET
-    base_name = "integration_test"
-
-    assert cred_path, "FIREBASE_PATH must be set in settings"
-    assert bucket_name, "STORAGE_BUCKET must be set in settings"
-
-    return FireCloudStorageService(
-        cred_path=cred_path, bucket_name=bucket_name, base_name=base_name
-    )
 
 
 @pytest.fixture

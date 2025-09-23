@@ -52,7 +52,7 @@ async def sample_question_with_file(db_session, set_testing_directory) -> Questi
 
     file_content = "Hello World"
     f = FileData(filename="Test.txt", content=file_content)
-    await qs.write_file_to_directory(q.id, file_data=f, session=db_session)
+    await qs.write_files_to_directory(q.id, files_data=[f], session=db_session)
     return q
 
 

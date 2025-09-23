@@ -12,7 +12,7 @@ from google.cloud.storage.blob import Blob
 from .base import StorageService
 from src.api.core import settings, logger
 from src.utils import safe_dir_name
-
+from google.cloud.exceptions import NotFound
 
 # Define the credentials
 if not settings.FIREBASE_PATH:
@@ -66,6 +66,11 @@ class FireCloudStorageService(StorageService):
             Path object representing the directory for this identifier.
         """
         return Path(self.base_dir) / safe_dir_name(identifier)
+
+    def create_directory(self, identifier: str) -> Path | Blob:
+        blob = self.bucket.blob(self.get_directory(identifier).as_posix())
+        blob.upload_from_string("")
+        return blob
 
     def get_filepath(self, identifier: str, filename: str) -> Path:
         """
@@ -187,8 +192,17 @@ class FireCloudStorageService(StorageService):
 
     def does_directory_exist(self, identifier: str) -> bool:
         prefix = f"{self.get_directory(identifier).as_posix().rstrip('/')}/"
+        logger.debug("Checking if blob exist %s", prefix)
         blobs = list(self.bucket.list_blobs(prefix=prefix, max_results=1))
-        return len(blobs) > 0
+        logger.debug("These are all the blobs %s", blobs)
+
+        blob = self.bucket.blob(self.get_directory(identifier).as_posix())
+        if blob.exists():
+            logger.debug("Found blob it exist")
+            return True
+        elif len(blobs) > 0 and not blob.exists():
+            return False
+        return False
 
     def delete_file(self, identifier: str, filename: str) -> None:
         """
@@ -209,6 +223,16 @@ class FireCloudStorageService(StorageService):
             blob = self.get_blob(identifier, filename)
             blob.delete()
         return None
+
+    def hard_delete(self) -> None:
+        blobs = self.bucket.list_blobs(prefix=str(self.base_dir))
+        try:
+            for blob in blobs:
+                logger.info(f"Deleting {blob.name}")
+                blob.delete()
+        except NotFound:
+            print("Blob not found, nothing to delete.")
+        return
 
     def get_files_names(self, identifier: str) -> List[str]:
         """
@@ -234,3 +258,14 @@ class FireCloudStorageService(StorageService):
             if relative_path:
                 files.append(relative_path.split("/")[-1])
         return files
+
+    def delete_all(self, identifier: str) -> None:
+        filepath = self.get_directory(identifier)
+        prefix = filepath.as_posix()
+        for blob in self.bucket.list_blobs(prefix=prefix):
+            try:
+                logger.info(f"Deleting {blob.name}")
+                blob.delete()
+            except NotFound:
+                logger.error("Blob not found, nothing to delete.")
+            return

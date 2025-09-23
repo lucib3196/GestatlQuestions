@@ -1,20 +1,29 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Union
+from google.cloud.storage.blob import Blob
 
 
-class StorageService(ABC):
-    """Abstract storage interface. All storage backends must implement these."""
+class StorageService:
+    """Base storage interface. Subclasses may override methods they need."""
 
-    @abstractmethod
+    def get_basename(self) -> str | Path:
+        raise NotImplementedError("get_basename must be implemented by subclass")
+
     def get_directory(self, identifier: str) -> Path:
-        pass
+        raise NotImplementedError("get_directory must be implemented by subclass")
 
-    @abstractmethod
+    def create_directory(self, identifier: str) -> Path | Blob:
+        raise NotImplementedError("create_directory must be implemented by subclass")
+
+    def does_directory_exist(self, identifier: str) -> bool:
+        raise NotImplementedError(
+            "does_directory_exist must be implemented by subclass"
+        )
+
     def get_filepath(self, identifier: str, filename: str) -> Path:
-        pass
+        raise NotImplementedError("get_filepath must be implemented by subclass")
 
-    @abstractmethod
     def save_file(
         self,
         identifier: str,
@@ -22,20 +31,19 @@ class StorageService(ABC):
         content: Union[str, dict, list, bytes, bytearray],
         overwrite: bool = True,
     ) -> Path:
-        pass
+        raise NotImplementedError("save_file must be implemented by subclass")
 
-    @abstractmethod
     def get_file(self, identifier: str, filename: str) -> bytes | None:
-        pass
+        raise NotImplementedError("get_file must be implemented by subclass")
 
-    @abstractmethod
     def get_files_names(self, identifier: str) -> list[str]:
-        pass
+        raise NotImplementedError("get_files_names must be implemented by subclass")
 
-    @abstractmethod
     def delete_file(self, identifier: str, filename: str) -> None:
-        pass
-    
-    @abstractmethod
-    def does_directory_exist(self, identifier:str)->bool:
-        pass
+        raise NotImplementedError("delete_file must be implemented by subclass")
+
+    def delete_all(self, identifier: str) -> None:
+        raise NotImplementedError("delete_all must be implemented by subclass")
+
+    def hard_delete(self) -> None:
+        raise NotImplementedError("hard_delete must be implemented by subclass")

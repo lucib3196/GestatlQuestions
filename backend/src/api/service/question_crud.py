@@ -108,11 +108,6 @@ async def get_question_by_id(question_id: Union[str, UUID], session: SessionDep)
     """
     try:
         results = qdata.get_question_by_id(question_id, session)
-        if results is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,  # 404 is more REST-correct
-                detail="Question does not exist",
-            )
         return results
     except ValueError as e:
         raise HTTPException(

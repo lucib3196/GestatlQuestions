@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 from typing import List, Union
+import shutil
 
 # --- Internal ---
 from .base import StorageService
@@ -9,21 +10,22 @@ from src.api.service.storage.directory_service import DirectoryService
 
 
 class LocalStorageService(StorageService):
-    def __init__(self, base_path: str | Path):
-        self.dir_service = DirectoryService(base_path)
+    def __init__(self, base_name: str | Path):
+        self.dir_service = DirectoryService(base_name)
         self.dir_service.ensure_base_exist()
+        self.base_dir = self.dir_service.base_dir
 
     def get_directory(self, identifier: str) -> Path:
         return self.dir_service.get_question_dir(identifier)
+
+    def create_directory(self, identifier) -> Path:
+        return self.dir_service.set_directory(identifier, relative=False)
 
     def get_filepath(self, identifier: str, filename: str) -> Path:
         return super().get_filepath(identifier, filename)
 
     def does_directory_exist(self, identifier: str) -> bool:
         return self.get_directory(identifier).exists()
-
-    def create_directory(self, identifier) -> Path:
-        return self.dir_service.set_directory(identifier, relative=False)
 
     def save_file(
         self,
@@ -64,3 +66,8 @@ class LocalStorageService(StorageService):
         file_path = self.dir_service.get_file(identifier, filename)
         if file_path and file_path.exists():
             file_path.unlink()
+
+    def delete_all(self, identifier: str) -> None:
+        dir = self.get_directory(identifier)
+        if dir.exists() and dir.is_dir():
+            shutil.rmtree(dir)
