@@ -9,7 +9,7 @@ from src.api.core import logger
 from src.api.database import SessionDep
 from src.api.models import Question
 from src.api.response_models import FileData
-from src.api.service import question_crud as qc
+from src.api.service.crud import question_crud as qc
 from src.api.service.storage import StorageService
 from src.utils import safe_dir_name
 

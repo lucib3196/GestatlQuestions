@@ -7,7 +7,7 @@ import pytest
 
 # Internal
 from src.api.core import logger
-from src.api.service import question_crud
+from src.api.service.crud import question_crud
 from src.api.service.question_manager import QuestionManager
 from src.app_test.conftest import FakeQuestion, DummyStorage
 

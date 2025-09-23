@@ -11,7 +11,7 @@ from starlette import status
 from src.api.database import SessionDep
 from src.api.models.question_model import Question, QuestionMeta
 from src.api.response_models import *
-from src.api.service import question_crud
+from src.api.service.crud import question_crud
 from src.api.service import question_storage_service as qs
 from src.utils import normalize_kwargs
 from src.api.service import file_management as fm

@@ -14,7 +14,7 @@ from src.api.core import settings
 from src.api.database import SessionDep, get_session
 from src.api.models.question_model import Question
 from src.api.service import question_storage_service as qs
-from src.api.service import question_crud as qc
+from src.api.service.crud import question_crud as qc
 from src.utils import normalize_kwargs
 from fastapi import HTTPException
 from src.api.core import logger

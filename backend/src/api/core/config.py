@@ -1,23 +1,27 @@
-from typing import Optional, Literal
+# --- Standard Library ---
 import os
+from pathlib import Path
+from typing import Optional, Literal
+
+# --- Third-Party ---
 from dotenv import load_dotenv
 from pydantic import AnyHttpUrl, field_validator
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings
-from pathlib import Path
 
 load_dotenv()
 
 
-class Settings(BaseSettings):
+class AppSettings(BaseSettings):
     PROJECT_NAME: str
     ENV: Literal["testing", "dev", "production"] = "dev"
+    STORAGE_SERVICE: Literal["local", "cloud"] = "local"
     BACKEND_CORS_ORIGINS: list[AnyHttpUrl | str] = []
     SECRET_KEY: str
 
     # User authentication
-    ALGORITHM: str = "HS256"  # Authentication protocol
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30  # how long session info is retained
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     AUTH_URL: str = "/auth/login"
 
     # Database Settings
@@ -56,7 +60,7 @@ class Settings(BaseSettings):
 
 BASE_DIR = Path(__file__).resolve().parents[4]
 
-settings = Settings(
+settings = AppSettings(
     PROJECT_NAME="gestalt_question_review",
     BACKEND_CORS_ORIGINS=[
         "http://localhost:5173",
@@ -65,9 +69,7 @@ settings = Settings(
     SECRET_KEY=os.getenv("SECRET_KEY", ""),
     FIREBASE_PATH=Path(BASE_DIR) / str(os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")),
     STORAGE_BUCKET=os.getenv("STORAGE_BUCKET"),
-    # relative folder name only
-    QUESTIONS_DIRNAME="questions",
-    # absolute path resolved against BASE_DIR
-    QUESTIONS_PATH=BASE_DIR / "questions",
+    QUESTIONS_DIRNAME="questions",  # relative folder name only
+    QUESTIONS_PATH=BASE_DIR / "questions",  # absolute path resolved against BASE_DIR
     BASE_PATH=BASE_DIR,
 )

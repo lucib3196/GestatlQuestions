@@ -18,7 +18,7 @@ from api.models.question_model import (
     QuestionDict,
     QuestionMetaNew,
 )
-from api.service import question_crud as service
+from src.api.service.crud import question_crud as service
 from code_runner.run_server import run_generate
 from typing import Any, List, Literal, Optional
 from pydantic import BaseModel

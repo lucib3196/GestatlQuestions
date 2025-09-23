@@ -20,7 +20,7 @@ from src.api.core import settings, logger
 from src.api.database import SessionDep
 from src.api.models import token_model, users_model
 from src.api.models.users_model import User
-from src.api.service.authentication_service import (
+from src.api.service.auth.authentication_service import (
     check_password,
     decode_token,
     encrypt_password,

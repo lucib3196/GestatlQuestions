@@ -12,16 +12,16 @@ from starlette import status
 from src.api.database import SessionDep
 from src.api.models.question_model import Question, QuestionMeta
 from src.api.response_models import *
-from src.api.service import question_crud
+from src.api.service.crud import question_crud
 from src.api.service import question_storage_service as qs
 from src.utils import normalize_kwargs
 
 import json
-from src.api.service import question_crud as qs
+from src.api.service.crud import question_crud as qs
 router = APIRouter(prefix="/question_crud", tags=["question_crud"])
 
 # Donwload Utilits
-from api.service import question_crud as coreDb_service
+from src.api.service.crud import question_crud as coreDb_service
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 import io, zipfile, pathlib

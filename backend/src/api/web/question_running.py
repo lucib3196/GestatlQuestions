@@ -3,7 +3,7 @@ from typing import Union, Literal
 from starlette import status
 from fastapi import APIRouter, HTTPException
 from src.api.database import SessionDep
-from src.api.service import question_running_service
+from src.api.service.code_running import question_running_service
 
 router = APIRouter(prefix="/question_running")
 

@@ -6,7 +6,7 @@ import pytest_asyncio
 
 
 from src.api.models.question_model import Question
-from src.api.service import question_crud as qcrud_service
+from src.api.service.crud import question_crud as qcrud_service
 from src.utils import *
 
 

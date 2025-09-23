@@ -24,7 +24,7 @@ from src.api.response_models import (
     SuccessFileResponse,
     SuccessfulResponse,
 )
-from src.api.service import question_crud as qc
+from src.api.service.crud import question_crud as qc
 from src.utils import safe_dir_name
 from src.ai_workspace.utils import to_serializable
 
