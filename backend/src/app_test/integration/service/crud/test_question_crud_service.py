@@ -80,10 +80,7 @@ async def test_get_all_questions(db_session, seed_questions, mixed_question_payl
 @pytest.mark.asyncio
 async def test_get_question_by_id(db_session, question_payload_minimal_dict):
     # Not found
-    with pytest.raises(HTTPException) as excinfo:
-        await qcrud_service.get_question_by_id(uuid.uuid4(), db_session)
-    assert excinfo.value.status_code == 404
-    assert "Question does not exist" in str(excinfo.value.detail)
+    assert await qcrud_service.get_question_by_id(uuid.uuid4(), db_session) is None
 
     # Bad UUID
     with pytest.raises(HTTPException) as excinfo:
@@ -126,9 +123,8 @@ async def test_delete_all_questions(seed_questions, db_session):
 @pytest.mark.asyncio
 async def test_delete_question_by_id(db_session, seed_questions):
     # Not found
-    with pytest.raises(HTTPException) as excinfo:
-        await qcrud_service.delete_question_by_id(uuid.uuid4(), db_session)
-    assert excinfo.value.status_code == 404
+    result = await qcrud_service.delete_question_by_id(uuid.uuid4(), db_session)
+    assert "Does Not Exist" in result["detail"]
 
     # Bad UUID
     with pytest.raises(HTTPException) as excinfo:

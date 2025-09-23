@@ -148,6 +148,8 @@ async def delete_question_by_id(
     """
     try:
         question = await get_question_by_id(question_id, session)
+        if question is None:
+            return {"detail": f"Question Does Not Exist"}
         qdata.delete_question_by_id(question.id, session)
         return {"detail": f"Question Deleted {question.title}"}
     except HTTPException as e:
