@@ -19,6 +19,7 @@ def save_file(cloud_storage_service) -> Tuple[Path, Dict[str, str]]:
         "filename": "hello.txt",
         "content": "Hello Firebase!",
     }
+    cloud_storage_service.create_directory(file_data["identifier"])
     blob_path = cloud_storage_service.save_file(
         file_data["identifier"], file_data["filename"], file_data["content"]
     )
@@ -54,7 +55,7 @@ def test_get_file(cloud_storage_service, save_file):
 def test_does_directory_exist(cloud_storage_service, save_file):
     _, file_data = save_file
     exist = cloud_storage_service.does_directory_exist(file_data["identifier"])
-    assert exist
+    assert exist 
 
 
 def test_delete_file(cloud_storage_service, save_file):
