@@ -11,20 +11,18 @@ from src.api.service.storage import local_storage as ls
 from src.api.core import logger
 
 
-@pytest.fixture
-def storage_service(tmp_path):
-    return ls.LocalStorageService(base_path=tmp_path)
+
 
 
 @pytest.fixture
-def create_test_dir(storage_service) -> Tuple[Path, str]:
+def create_test_dir(local_storage) -> Tuple[Path, str]:
     testdir = "TestFolder"
-    created_dir = storage_service.create_directory(testdir)
+    created_dir = local_storage.create_directory(testdir)
     return created_dir, testdir
 
 
 @pytest.fixture
-def save_multiple_files(storage_service, create_test_dir):
+def save_multiple_files(local_storage, create_test_dir):
     _, name = create_test_dir
     files = [
         ("text.txt", "Hello World"),  # string
@@ -33,13 +31,13 @@ def save_multiple_files(storage_service, create_test_dir):
     ]
 
     for filename, content in files:
-        storage_service.save_file(name, filename, content)
+        local_storage.save_file(name, filename, content)
 
     return files
 
 
-def test_storage_service_init(storage_service):
-    assert storage_service
+def test_local_storage_init(local_storage):
+    assert local_storage
 
 
 def test_create_directory(create_test_dir):
@@ -56,40 +54,40 @@ def test_create_directory(create_test_dir):
         ("binary.bin", b"\x00\x01\x02", lambda f: f.read_bytes()),  # bytes
     ],
 )
-def test_save_file(storage_service, create_test_dir, filename, content, reader):
+def test_save_file(local_storage, create_test_dir, filename, content, reader):
     _, name = create_test_dir
-    f = storage_service.save_file(name, filename, content)
+    f = local_storage.save_file(name, filename, content)
     assert f.exists()
     assert reader(f) == content
 
 
-def test_empty_directory(create_test_dir, storage_service):
+def test_empty_directory(create_test_dir, local_storage):
     _, name = create_test_dir
-    f = storage_service.get_files_names(name)
+    f = local_storage.get_files_names(name)
     assert f == []
 
 
-def test_list_file_names(create_test_dir, storage_service, save_multiple_files):
+def test_list_file_names(create_test_dir, local_storage, save_multiple_files):
     _, name = create_test_dir
-    f = storage_service.get_files_names(name)
+    f = local_storage.get_files_names(name)
     assert len(f) == len(save_multiple_files)
 
     for fname, _ in save_multiple_files:
         assert fname in f
 
 
-def test_delete_file(create_test_dir, storage_service, save_multiple_files):
+def test_delete_file(create_test_dir, local_storage, save_multiple_files):
     _, name = create_test_dir
     for filename, _ in save_multiple_files:
-        storage_service.delete_file(name, filename)
-        assert storage_service.get_file(name, filename) is None
+        local_storage.delete_file(name, filename)
+        assert local_storage.get_file(name, filename) is None
 
 
-def test_get_file(create_test_dir, storage_service, save_multiple_files):
+def test_get_file(create_test_dir, local_storage, save_multiple_files):
     _, name = create_test_dir
 
     for filename, expected in save_multiple_files:
-        content = storage_service.get_file(name, filename)
+        content = local_storage.get_file(name, filename)
         assert content is not None, f"File {filename} should exist"
 
         if isinstance(expected, str):

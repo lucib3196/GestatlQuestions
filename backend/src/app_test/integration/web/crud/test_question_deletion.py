@@ -1,25 +1,8 @@
 from uuid import uuid4
-import pytest
-import json
 from src.api.core import logger
 
 
-@pytest.fixture
-def create_question_minimal_response(
-    test_client, db_session, question_payload_minimal_dict
-):
-    """POST a minimal valid question payload to /questions/."""
-    data = {"question": json.dumps(question_payload_minimal_dict)}
-    return test_client.post("/questions/", data=data)
 
-
-@pytest.fixture
-def create_multiple_question(test_client, all_question_payloads):
-    """Ensure multiple question payloads can be created sequentially."""
-    for p in all_question_payloads:
-        data = {"question": json.dumps(p)}
-        response = test_client.post("/questions/", data=data)
-        assert response.status_code == 201
 
 
 # Test Delete Questions
@@ -46,7 +29,8 @@ def test_delete_question(test_client, create_question_minimal_response):
     assert response.status_code == 404
     assert "not found" in response.json()["detail"].lower()
 
-#TODO Fix this
+
+# TODO Fix this
 # def test_delete_all(test_client, create_multiple_question, all_question_payloads):
 #     """
 #     Ensure all questions can be deleted successfully.
@@ -70,7 +54,7 @@ def test_delete_question(test_client, create_question_minimal_response):
 #     delete_body = delete_response.json()
 
 #     logger.info("This is the delete body", delete_body)
-    
+
 
 #     # --- Act 3: Verify no questions remain ---
 #     response_after_delete = test_client.get(

@@ -1,5 +1,5 @@
 import pytest
-from src.app_test.integration.fixtures.fixture_code_generation import *
+from src.app_test.fixtures.fixture_code_generation import *
 from src.api.service.ai_generation import code_generation
 from src.api.service.crud import question_crud
 
@@ -7,7 +7,7 @@ from src.api.service.crud import question_crud
 @pytest.mark.asyncio
 @pytest.mark.parametrize("payload_index", range(1))  # adjust to len(question_payloads)
 async def test_run_text_each(
-    db_session, question_payloads, payload_index, patch_questions_path
+    db_session, question_payloads, payload_index, patch_questions_path, question_manager
 ):
     payload = question_payloads[payload_index]
 
@@ -15,6 +15,7 @@ async def test_run_text_each(
         text=payload["question"],
         session=db_session,
         additional_meta=payload["additional_meta"],
+        qm=question_manager,
     )
 
     assert result["success"] is True
@@ -23,12 +24,15 @@ async def test_run_text_each(
 
 
 @pytest.mark.asyncio
-async def test_run_text_bulk(db_session, question_payloads, patch_questions_path):
+async def test_run_text_bulk(
+    db_session, question_payloads, patch_questions_path, question_manager
+):
     for payload in question_payloads:
         result = await code_generation.run_text(
             text=payload["question"],
             session=db_session,
             additional_meta=payload["additional_meta"],
+            qm=question_manager,
         )
         assert result["success"] is True
         assert "questions" in result
@@ -37,7 +41,7 @@ async def test_run_text_bulk(db_session, question_payloads, patch_questions_path
 @pytest.mark.asyncio
 @pytest.mark.parametrize("payload_index", range(1))  # adjust to len(question_payloads)
 async def test_run_test_check_db(
-    db_session, question_payloads, payload_index, patch_questions_path
+    db_session, question_payloads, payload_index, patch_questions_path, question_manager
 ):
     payload = question_payloads[payload_index]
 
@@ -45,6 +49,7 @@ async def test_run_test_check_db(
         text=payload["question"],
         session=db_session,
         additional_meta=payload["additional_meta"],
+        qm=question_manager,
     )
     assert "questions" in result
 

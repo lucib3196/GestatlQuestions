@@ -286,8 +286,8 @@ async def update_question(
 
 
 # Special
-# TODO add test web
-@router.post("/filter_questions/")
+
+@router.post("/filter_questions")
 async def filter_questions(
     session: SessionDep,
     filters: QuestionMeta,
@@ -301,6 +301,7 @@ async def filter_questions(
         filters (QuestionMeta): Filter criteria.
     """
     try:
+        logger.debug("Filtering questions")
         kwargs = filters.model_dump(exclude_none=True)
         norm_k = normalize_kwargs(kwargs)
         result = await qm.filter_questions(session, **norm_k)

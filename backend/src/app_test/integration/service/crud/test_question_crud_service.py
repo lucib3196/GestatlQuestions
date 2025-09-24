@@ -7,7 +7,7 @@ from fastapi import HTTPException
 
 from src.api.models.question_model import Question
 from src.api.service.crud import question_crud as qcrud_service
-from src.app_test.integration.fixtures.fixture_question_crud import *
+from src.app_test.fixtures.fixture_crud import *
 from src.utils import *
 
 
@@ -22,10 +22,10 @@ SCALAR_FIELDS = {"title", "ai_generated", "isAdaptive", "createdBy", "user_id"}
 
 @pytest.mark.asyncio
 async def test_create_question_minimal(
-    db_session, mixed_question_payloads, invalid_question_payloads
+    db_session, all_question_payloads, invalid_question_payloads
 ):
     # valid payloads (dict + Question model + full dict with rels)
-    for payload in mixed_question_payloads:
+    for payload in all_question_payloads:
         created = await qcrud_service.create_question(payload, db_session)
 
         # Compare scalar fields only
@@ -72,9 +72,9 @@ async def test_get_all_questions_empty(db_session):
 
 
 @pytest.mark.asyncio
-async def test_get_all_questions(db_session, seed_questions, mixed_question_payloads):
+async def test_get_all_questions(db_session, seed_questions, all_question_payloads):
     results = await qcrud_service.get_all_questions(db_session)
-    assert len(results) == len(mixed_question_payloads)  # seeded 3
+    assert len(results) == len(all_question_payloads)  # seeded 3
 
 
 @pytest.mark.asyncio

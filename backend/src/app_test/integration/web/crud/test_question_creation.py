@@ -19,23 +19,7 @@ QUESTION_KEYS = ["title", "ai_generated", "isAdaptive", "createdBy"]
 ADDTIONAL_METAKEYS = ["topics", "languages", "qtypes"]
 
 
-# ----------------------------------------------------------------------
-# Fixtures
-# ----------------------------------------------------------------------
-@pytest.fixture
-def create_question_minimal_response(
-    test_client, db_session, question_payload_minimal_dict
-):
-    """POST a minimal valid question payload to /questions/."""
-    data = {"question": json.dumps(question_payload_minimal_dict)}
-    return test_client.post("/questions/", data=data)
 
-
-@pytest.fixture
-def create_question_bad_payload_response(test_client, db_session, qpayload_bad):
-    """POST an invalid question payload to /questions/."""
-    data = {"question": json.dumps(qpayload_bad)}
-    return test_client.post("/questions/", data=data)
 
 
 # ----------------------------------------------------------------------

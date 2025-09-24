@@ -1,6 +1,8 @@
 # --- Standard Library ---
 import json
 from typing import List
+from uuid import UUID
+from uuid import uuid4
 
 # --- Third-Party ---
 import pytest
@@ -12,6 +14,8 @@ from src.api.response_models import FileData
 from src.utils.normalization_utils import to_serializable
 
 QUESTION_KEYS = ["title", "ai_generated", "isAdaptive", "createdBy"]
+
+
 
 
 @pytest.mark.parametrize("payload_fixture", ["question_payload_minimal_dict"])
@@ -239,3 +243,87 @@ def test_question_metadata_retrieval_full(
     retrieved_filenames = {f["filename"] for f in retrieved_filesdata}
     expected_filenames = {f.filename for f in files_data}
     assert retrieved_filenames == expected_filenames
+
+
+def test_get_question_bad_id(test_client):
+    bad_id = uuid4()
+    r = test_client.get(f"/questions/{bad_id}")
+    assert r.status_code == 404
+
+
+def test_get_question_data_all_not_found(test_client):
+    bad_id = uuid4()
+    r = test_client.get(f"/questions/{bad_id}/full")
+    assert r.status_code == 500
+
+
+@pytest.mark.asyncio
+async def test_question_filter_by_title(test_client, create_multiple_question):
+    """
+    Filter questions by a substring in the title.
+    Expects at least one match from create_multiple_questions fixture.
+    """
+    payload = {"title": "SomeTitle"}
+
+    response = test_client.post("/questions/filter_questions", json=payload)
+    assert response.status_code == 200
+
+    data = response.json()
+    logger.info("Filter by title response: %s", data)
+
+    assert isinstance(data, list)
+    assert len(data) > 0
+    for q in data:
+        assert "title" in q
+        assert payload["title"].lower() in q["title"].lower()
+
+
+@pytest.mark.asyncio
+async def test_filter_questions_by_title_and_flags(
+    test_client, create_multiple_question
+):
+    """
+    Filters by a substring in title + ai_generated + createdBy.
+    Uses the questions inserted by the create_multiple_questions fixture.
+    """
+    payload = {
+        "title": "Thermodynamics",
+        "ai_generated": False,
+        "createdBy": "tester_thermo",
+    }
+
+    response = test_client.post("/questions/filter_questions", json=payload)
+    assert response.status_code == 200
+
+    data = response.json()
+    logger.info("Filter by title + flags response: %s", data)
+
+    assert isinstance(data, list)
+    assert len(data) >= 1
+
+    for q in data:
+        assert payload["title"].lower() in q["title"].lower()
+        assert q["ai_generated"] == payload["ai_generated"]
+        assert q["createdBy"] == payload["createdBy"]
+
+
+@pytest.mark.asyncio
+async def test_filter_questions_no_match(test_client, create_multiple_question):
+    """
+    Filtering with values that should not match anything.
+    Expect an empty list.
+    """
+    payload = {
+        "title": "NonExistent",
+        "ai_generated": True,
+        "createdBy": "ghost_user",
+    }
+
+    response = test_client.post("/questions/filter_questions", json=payload)
+    assert response.status_code == 200
+
+    data = response.json()
+    logger.info("Filter with no match response: %s", data)
+
+    assert isinstance(data, list)
+    assert len(data) == 0

@@ -106,9 +106,9 @@ def all_question_payloads(
 
 
 @pytest_asyncio.fixture
-async def seed_questions(db_session, mixed_question_payloads):
+async def seed_questions(db_session, all_question_payloads):
     """Create the mixed payloads in the DB for read/filter/delete tests."""
-    for payload in mixed_question_payloads:
+    for payload in all_question_payloads:
         await qcrud_service.create_question(payload, db_session)
 
 
@@ -121,3 +121,31 @@ def invalid_question_payloads():
         123,
         None,
     ]
+
+
+# ----------------------------------------------------------------------
+# Fixtures
+# ----------------------------------------------------------------------
+@pytest.fixture
+def create_question_minimal_response(
+    test_client, db_session, question_payload_minimal_dict
+):
+    """POST a minimal valid question payload to /questions/."""
+    data = {"question": json.dumps(question_payload_minimal_dict)}
+    return test_client.post("/questions/", data=data)
+
+
+@pytest.fixture
+def create_question_bad_payload_response(test_client, db_session, qpayload_bad):
+    """POST an invalid question payload to /questions/."""
+    data = {"question": json.dumps(qpayload_bad)}
+    return test_client.post("/questions/", data=data)
+
+
+@pytest.fixture
+def create_multiple_question(test_client, all_question_payloads):
+    """Ensure multiple question payloads can be created sequentially."""
+    for p in all_question_payloads:
+        data = {"question": json.dumps(p)}
+        response = test_client.post("/questions/", data=data)
+        assert response.status_code == 201

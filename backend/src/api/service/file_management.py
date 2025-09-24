@@ -21,7 +21,7 @@ ALLOWED_EXTENSIONS = {
     # Code
     ".py",
     ".js",
-    ".bin"
+    ".bin",
 }
 ALLOWED_MIME_TYPES = {
     "image/png",

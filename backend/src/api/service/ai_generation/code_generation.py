@@ -27,11 +27,13 @@ from src.utils import to_bool
 
 from src.api.service.crud import question_crud
 from src.api.service import question_storage_service
+from src.api.dependencies import QuestionManagerDependency
 
 
 async def process_output(
     gc: CodeGenFinal,
     session: SessionDep,
+    qm: QuestionManagerDependency,
     meta: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Process a generated question, persist it, and return created question data.
@@ -72,7 +74,7 @@ async def process_output(
             "qtypes": metadata.qtype,
         }
 
-        q = await question_crud.create_question(q_payload, session)
+        q = await qm.create_question(q_payload, session)
 
         fd_list: List[FileData] = [
             FileData(filename=filename, content=to_serializable(content))
@@ -97,6 +99,7 @@ async def process_output(
 async def run_text(
     text: str,
     session: SessionDep,
+    qm: QuestionManagerDependency,
     additional_meta: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Generate questions from input text, store them, and return results.
@@ -126,7 +129,7 @@ async def run_text(
         results: TextState = validate_llm_output(llm_out, TextState)
 
         tasks = [
-            process_output(gc, session=session, meta=meta)
+            process_output(gc, session=session, meta=meta, qm=qm)
             for gc in results.gestalt_code
         ]
         created_questions: List[Dict[str, Any]] = await asyncio.gather(*tasks)
@@ -151,7 +154,10 @@ async def run_text(
 
 
 async def run_image(
-    files: List[UploadFile], session: SessionDep, meta: Optional[Dict[str, Any]] = None
+    files: List[UploadFile],
+    session: SessionDep,
+    qm: QuestionManagerDependency,
+    meta: Optional[Dict[str, Any]] = None,
 ):
     try:
 
@@ -168,7 +174,7 @@ async def run_image(
 
             validated_results: ImageState = validate_llm_output(results, ImageState)
             tasks = [
-                process_output(gc, session=session, meta=meta)
+                process_output(gc, session=session, meta=meta, qm=qm)
                 for gc in validated_results.gestalt_code
             ]
             created_questions: List[Dict[str, Any]] = await asyncio.gather(*tasks)

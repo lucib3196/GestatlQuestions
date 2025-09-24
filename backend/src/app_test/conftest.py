@@ -100,7 +100,7 @@ class FakeQuestion(BaseModel):
 
     title: str | None
     local_path: str | None
-    blob_name: str | None
+    blob_name: str | None = None
     id: UUID
 
 
@@ -238,7 +238,7 @@ def mark_logs_in_test():
 
 
 
-from src.app_test.fixtures.fixture_question_crud import *
+from src.app_test.fixtures.fixture_crud import *
 
 
 
@@ -325,6 +325,15 @@ def question_manager_local(local_storage):
 def question_manager_cloud(cloud_storage_service):
     return QuestionManager(cloud_storage_service, "cloud")
 
+@pytest.fixture(scope="function", params=["local", "cloud"])
+def question_manager(request,question_manager_local, question_manager_cloud):
+    storage_type = request.param
+    if storage_type == "cloud":
+        qm = question_manager_cloud
+    elif storage_type == "local":
+        qm = question_manager_local
+    else:
+        raise ValueError("Incorrect storage type")
 
 # ---------------------------------------------------------------------------
 # Debug Run
