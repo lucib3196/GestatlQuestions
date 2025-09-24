@@ -1,130 +1,8 @@
-from src.app_test.integration.web.fixture_question_crud import *
 from fastapi.encoders import jsonable_encoder
 from uuid import UUID
 from uuid import uuid4
 from fastapi import HTTPException
 from src.utils import pick
-
-
-def check_payload_created_keys(payload, created, key):
-    return pick(payload, key) == pick(created, key)
-
-
-# Testing files with no files data
-def test_create_question_status_ok(
-    create_question_response_no_files,
-):
-    response, _ = create_question_response_no_files
-
-    assert response.status_code == 200
-    assert response.json()["status"] == 201
-
-
-def test_create_question_check_created_question(create_question_response_no_files):
-    response, q_payload = create_question_response_no_files
-    q_created = response.json()["question"]
-    # Check some basic properties not meant to be a full test
-    keys_to_check = ["title", "ai_generated", "isAdaptive", "createdBy"]
-    assert q_created
-    for k in keys_to_check:
-        assert check_payload_created_keys(q_payload, q_created, k)
-
-
-def test_create_question_has_no_files_no_files(create_question_response_no_files):
-    response, _ = create_question_response_no_files
-    assert response.json()["files"] == []
-
-
-# Testing with files
-def test_create_question_status_with_files(create_question_response_with_files):
-    response, _, _ = create_question_response_with_files
-    assert response.status_code == 200
-    assert response.json()["status"] == 201
-
-
-def test_create_question_has_files_with_files(create_question_response_with_files):
-    response, _, expected_files = create_question_response_with_files
-    files_data = response.json()["files"]
-
-    # Check the number of files matches
-    assert len(files_data) == len(expected_files)
-
-    # Check that all filenames from payload exist in response
-    response_filenames = [f["filename"] for f in files_data]
-    for f in expected_files:
-        assert f["filename"] in response_filenames
-
-
-def test_create_question_status_with_additional_meta(
-    create_question_response_with_additional_meta,
-):
-    response, _, _, _ = create_question_response_with_additional_meta
-    assert response.status_code == 200
-    assert response.json()["status"] == 201
-
-
-def test_create_question_has_data_with_additional_meta(
-    create_question_response_with_additional_meta,
-):
-    response, _, _, _ = create_question_response_with_additional_meta
-    j_response = response.json()
-    assert j_response.get("question") is not None
-
-
-def test_create_question_fields_match_with_additional_meta(
-    create_question_response_with_additional_meta,
-):
-    response, expected_question, _, expected_meta = (
-        create_question_response_with_additional_meta
-    )
-    question_data = response.json()["question"]
-
-    # Base question fields
-    assert question_data["title"] == expected_question["title"]
-    assert question_data["ai_generated"] == expected_question["ai_generated"]
-    assert question_data["isAdaptive"] == expected_question["isAdaptive"]
-    assert question_data["createdBy"] == expected_question["createdBy"]
-    assert question_data["user_id"] == expected_question["user_id"]
-
-    # Additional metadata
-    if expected_meta.get("topics"):
-        response_topics = [
-            t["name"] if isinstance(t, dict) else t
-            for t in question_data.get("topics", [])
-        ]
-        for topic in expected_meta["topics"]:
-            assert topic.lower() in response_topics
-
-    if expected_meta.get("languages"):
-        response_languages = [
-            l["name"] if isinstance(l, dict) else l
-            for l in question_data.get("languages", [])
-        ]
-        for lang in expected_meta["languages"]:
-            assert lang.lower() in response_languages
-
-    if expected_meta.get("qtypes"):
-        response_qtypes = [
-            q["name"] if isinstance(q, dict) else q
-            for q in question_data.get("qtypes", [])
-        ]
-        for qt in expected_meta["qtypes"]:
-            assert qt.lower() in response_qtypes
-
-
-def test_create_question_has_files_with_additional_meta(
-    create_question_response_with_additional_meta,
-):
-    response, _, expected_files, _ = create_question_response_with_additional_meta
-    files_data = response.json()["files"]
-
-    # Number of files matches
-    assert len(files_data) == len(expected_files)
-
-    # All filenames exist
-    response_filenames = [f["filename"] for f in files_data]
-    for f in expected_files:
-        assert f["filename"] in response_filenames
 
 
 def test_get_question_data_meta_no_files(
@@ -306,33 +184,7 @@ def test_get_question_data_all_not_found(test_client):
     assert r.status_code == 404
 
 
-# Test Delete Questions
-@pytest.mark.asyncio
-async def test_delete_question_not_valid_id(
-    test_client, create_question_response_no_files
-):
-    _, question = create_question_response_no_files
-    quid = question["id"]
-    # print("This is the quid", quid)
-    bad_id = uuid4()
-    response = test_client.delete(f"/question_crud/delete_question/{bad_id}")
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Question does not exist"
 
-
-@pytest.mark.asyncio
-async def test_delete_question(test_client, create_question_response_no_files):
-    create_resp, _ = create_question_response_no_files
-    qid = create_resp.json()["question"]["id"]
-    response = test_client.delete(f"/question_crud/delete_question/{qid}")
-
-    assert response.status_code == 200
-    assert "Question Deleted" in response.json()["detail"]
-
-    # Try getting the data
-    response = test_client.get(f"/question_crud/get_question_data_meta/{qid}")
-    assert response.status_code == 404
-    assert "Question not found" in response.json()["detail"]
 
 
 # Testing getting all the questions

@@ -1,23 +1,23 @@
 # --- Standard Library ---
-from typing import List, Optional
-from uuid import UUID
 import asyncio
+from typing import List, Optional, Sequence, Union
+from uuid import UUID
 
 # --- Third-Party ---
-from fastapi import APIRouter, Form, HTTPException, UploadFile, File
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from pydantic import ValidationError
 from starlette import status
 
 # --- Internal ---
+from src.api.core import logger
 from src.api.database import SessionDep
 from src.api.dependencies import QuestionManagerDependency
 from src.api.models import Question
 from src.api.models.question_model import QuestionMeta
 from src.api.response_models import *
-from src.utils import serialized_to_dict
 from src.api.service import file_management as fm
-from src.api.core import logger
-from typing import Sequence
+from src.utils import normalize_kwargs, serialized_to_dict
+
 
 router = APIRouter(prefix="/questions", tags=["Questions"])
 
@@ -103,7 +103,7 @@ async def get_question_metadata(
     qid: str | UUID, session: SessionDep, qm: QuestionManagerDependency
 ) -> QuestionReadResponse:
     try:
-        question = await qm.get_question(qid, session)
+        question = await qm.get_question_data(qid, session)
         try:
             qmeta = QuestionMeta.model_validate(question)
         except ValidationError as e:
@@ -205,7 +205,7 @@ async def get_question_files_data(
         )
 
 
-@router.get("/get_all/{offset}/{limit}/minimal")
+@router.get("/get_all/{offset}/{limit}/minimal", status_code=200)
 async def get_all_questions_minimal(
     session: SessionDep,
     qm: QuestionManagerDependency,
@@ -214,6 +214,25 @@ async def get_all_questions_minimal(
 ) -> Sequence[Question]:
     try:
         results = await qm.get_all_questions(offset, limit, session)
+        if results is None:
+            raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+        return results
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not retrieve all questions: {e}",
+        )
+
+
+@router.get("/get_all/{offset}/{limit}/full", status_code=200)
+async def get_all_questions_full(
+    session: SessionDep,
+    qm: QuestionManagerDependency,
+    limit: int = 100,
+    offset: int = 0,
+):
+    try:
+        results = await qm.get_all_questions_full(offset, limit, session)
         if results is None:
             raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
         return results
@@ -245,6 +264,93 @@ async def update_file(
         )
 
 
+# TODO add test web
+@router.patch("/update_question/{quid}")
+async def update_question(
+    quid: Union[str, UUID],
+    session: SessionDep,
+    updates: QuestionMeta,
+    qm: QuestionManagerDependency,
+):
+    try:
+        kwargs = updates.model_dump(exclude_none=True)
+        norm_k = normalize_kwargs(kwargs)
+        result = await qm.update_question(question_id=quid, session=session, **norm_k)
+        return result
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
+# Special
+# TODO add test web
+@router.post("/filter_questions/")
+async def filter_questions(
+    session: SessionDep,
+    filters: QuestionMeta,
+    qm: QuestionManagerDependency,
+):
+    """
+    Filter questions based on metadata.
+
+    Args:
+        session (SessionDep): Database session dependency.
+        filters (QuestionMeta): Filter criteria.
+    """
+    try:
+        kwargs = filters.model_dump(exclude_none=True)
+        norm_k = normalize_kwargs(kwargs)
+        result = await qm.filter_questions(session, **norm_k)
+        return result
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
+@router.delete("/{quid}")
+async def delete_question_by_id(
+    quid: Union[str, UUID],
+    session: SessionDep,
+    qm: QuestionManagerDependency,
+) -> Response:
+    """
+    Delete a question by ID.
+
+    Args:
+        quid (str | UUID): Question ID.
+        session (SessionDep): Database session dependency.
+    """
+    try:
+        r = await qm.delete_question(quid, session)
+        return Response(detail="Question Deleted", status=status.HTTP_200_OK)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        )
+
+
+# TODO add test web
+@router.delete("/delete_all_questions", status_code=200)
+async def delete_all_questions(session: SessionDep, qm: QuestionManagerDependency):
+    try:
+        deleted_count = await qm.delete_all_questions(session)
+        return {"detail": f"Successfully deleted {deleted_count} questions"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to delete all questions: {str(e)}"
+        )
+
+
+# TODO complete this
 @router.post("/{qid}/files")
 async def upload_files_to_question(
     qid: str | UUID,
@@ -262,7 +368,6 @@ async def upload_files_to_question(
     except HTTPException:
         raise
     except Exception as e:
-        # Log here if possible
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Could not upload files to question: {e}",

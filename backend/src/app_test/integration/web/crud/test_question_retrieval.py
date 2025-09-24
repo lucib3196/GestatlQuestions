@@ -9,12 +9,12 @@ import pytest
 from src.api.core import logger
 from src.utils.test_utils import prepare_file_uploads
 from src.api.response_models import FileData
-
+from src.utils.normalization_utils import to_serializable
 
 QUESTION_KEYS = ["title", "ai_generated", "isAdaptive", "createdBy"]
 
 
-@pytest.mark.parametrize("payload_fixture", ["qpayload_min"])
+@pytest.mark.parametrize("payload_fixture", ["question_payload_minimal_dict"])
 @pytest.mark.parametrize("additional_metadata", ["", "question_additional_metadata"])
 def test_question_metadata_retrieval(
     request, test_client, db_session, payload_fixture, additional_metadata
@@ -22,7 +22,7 @@ def test_question_metadata_retrieval(
     """
     Integration test: create a question with optional metadata and ensure retrieval works.
 
-    - Uses a minimal valid payload (`qpayload_min`).
+    - Uses a minimal valid payload (`question_payload_minimal_dict`).
     - Runs twice: once with no metadata, and once with valid `question_additional_metadata`.
     - Valid creation should return 201 Created and allow retrieval of the created question.
     """
@@ -61,13 +61,13 @@ def test_question_metadata_retrieval(
 # File Retrieval
 @pytest.mark.parametrize("file_fixture", ["file_data_payload", "question_file_payload"])
 def test_list_question_files(
-    request, test_client, db_session, qpayload_min, file_fixture
+    request, test_client, db_session, question_payload_minimal_dict, file_fixture
 ):
     """
     Ensure that uploaded files for a question are listed correctly.
     """
     # Arrange: create a question with uploaded files
-    data = {"question": json.dumps(qpayload_min)}
+    data = {"question": json.dumps(question_payload_minimal_dict)}
     files_data = request.getfixturevalue(file_fixture)
     files = prepare_file_uploads(files_data)
     creation_resp = test_client.post("/questions/", data=data, files=files)
@@ -90,13 +90,13 @@ def test_list_question_files(
 
 @pytest.mark.parametrize("file_fixture", ["file_data_payload", "question_file_payload"])
 def test_list_question_files_data(
-    request, test_client, db_session, qpayload_min, file_fixture
+    request, test_client, db_session, question_payload_minimal_dict, file_fixture
 ):
     """
     Ensure that uploaded files are returned with their data (filename + content).
     """
     # Arrange
-    data = {"question": json.dumps(qpayload_min)}
+    data = {"question": json.dumps(question_payload_minimal_dict)}
     files_data = request.getfixturevalue(file_fixture)
     files = prepare_file_uploads(files_data)
     creation_resp = test_client.post("/questions/", data=data, files=files)
@@ -117,13 +117,13 @@ def test_list_question_files_data(
 
 @pytest.mark.parametrize("file_fixture", ["file_data_payload", "question_file_payload"])
 def test_read_question_file(
-    request, test_client, db_session, qpayload_min, file_fixture
+    request, test_client, db_session, question_payload_minimal_dict, file_fixture
 ):
     """
     Ensure that each uploaded file can be retrieved individually by filename.
     """
     # Arrange
-    data = {"question": json.dumps(qpayload_min)}
+    data = {"question": json.dumps(question_payload_minimal_dict)}
     files_data: List[FileData] = request.getfixturevalue(file_fixture)
     files = prepare_file_uploads(files_data)
     creation_resp = test_client.post("/questions/", data=data, files=files)
@@ -159,10 +159,34 @@ def test_read_question_file(
 
 
 # Batch get all questions
+def test_get_question_data_minimal(db_session, all_question_payloads, test_client):
+    """Test batch creation of questions and retrieval in minimal format."""
+    # Create questions
+    for q in all_question_payloads:
+        data = {"question": json.dumps(to_serializable(q))}
+        logger.debug("Creating question with payload: %s", data)
+
+        creation_resp = test_client.post("/questions/", data=data)
+        logger.debug("Created question response: %s", creation_resp.json())
+
+        assert creation_resp.status_code == 201, "Question creation failed"
+
+    # Retrieve minimal list of questions
+    offset, limit = 0, 100
+    response = test_client.get(f"/questions/get_all/{offset}/{limit}/minimal")
+
+    logger.debug("Retrieved minimal questions response: %s", response.json())
+    assert response.status_code == 200, "Failed to fetch minimal questions list"
+
+    questions = response.json()
+    assert isinstance(questions, list), "Expected response to be a list"
+    assert len(questions) == len(
+        all_question_payloads
+    ), f"Expected {len(all_question_payloads)} questions, got {len(questions)}"
 
 
 # Misc
-@pytest.mark.parametrize("payload_fixture", ["qpayload_min"])
+@pytest.mark.parametrize("payload_fixture", ["question_payload_minimal_dict"])
 @pytest.mark.parametrize("file_fixture", ["file_data_payload", "question_file_payload"])
 @pytest.mark.parametrize("additional_metadata", ["", "question_additional_metadata"])
 def test_question_metadata_retrieval_full(
@@ -171,7 +195,7 @@ def test_question_metadata_retrieval_full(
     """
     Integration test: create a question with optional metadata and ensure retrieval works.
 
-    - Uses a minimal valid payload (`qpayload_min`).
+    - Uses a minimal valid payload (`question_payload_minimal_dict`).
     - Runs twice: once with no metadata, and once with valid `question_additional_metadata`.
     - Valid creation should return 201 Created and allow retrieval of the created question.
     """

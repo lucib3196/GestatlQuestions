@@ -12,13 +12,15 @@ from src.api.response_models import FileData
 
 
 @pytest.mark.parametrize("file_fixture", ["file_data_payload", "question_file_payload"])
-def test_update_file(request, test_client, db_session, qpayload_min, file_fixture):
+def test_update_file(
+    request, test_client, db_session, question_payload_minimal_dict, file_fixture
+):
     """
     Ensure that uploaded files for a question can be updated (overwritten)
     and that the new content is retrievable.
     """
     # Arrange: create a question with uploaded files
-    data = {"question": json.dumps(qpayload_min)}
+    data = {"question": json.dumps(question_payload_minimal_dict)}
     files_data: List[FileData] = request.getfixturevalue(file_fixture)
     files = prepare_file_uploads(files_data)
 

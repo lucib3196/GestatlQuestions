@@ -1,6 +1,7 @@
-# --- Standard Library ---
 import json
-from typing import Any, Iterable, List, Optional, Sequence, Type
+from datetime import date, datetime, time
+from typing import Any, List, Iterable
+from uuid import UUID
 
 # --- Third-Party ---
 from pydantic import BaseModel
@@ -43,3 +44,24 @@ def normset(seq: Iterable[str]) -> set[str]:
 def names(objs: Iterable[Any]) -> set[str]:
     """Return a set of `.name` attributes from an iterable of objects."""
     return {o.name for o in objs}
+
+
+def to_serializable(obj: Any) -> Any:
+    """
+    Recursively convert Pydantic models (and nested dicts/lists thereof)
+    into plain Python data structures.
+    """
+    if isinstance(obj, BaseModel):
+        return obj.model_dump()
+    if isinstance(obj, dict):
+        return {k: to_serializable(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [to_serializable(v) for v in obj]
+
+    # --- Special cases ---
+    if isinstance(obj, (datetime, date, time)):
+        return obj.isoformat()
+    if isinstance(obj, UUID):
+        return str(obj)
+
+    return obj

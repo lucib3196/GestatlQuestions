@@ -81,6 +81,15 @@ class QuestionManager:
             logger.error("Failed to retrieve question %s: %s", question_id, e)
             raise
 
+    # Retrieving all Questions
+    # TODO: Add a test for this
+    async def get_question_data(self, question_id: UUID | str, session: SessionDep):
+        try:
+            return await qc.get_question_data(question_id, session)
+        except Exception as e:
+            logger.error("Failed to retrieve question data %s: %s", question_id, e)
+            raise
+
     async def get_question_identifier(
         self, question_id: str | UUID, session: SessionDep
     ):
@@ -100,19 +109,43 @@ class QuestionManager:
             raise
 
     # Retrieving all Questions
-    # TODO: Add a test for this 
+    # TODO: Add a test for this
     async def get_all_questions(
         self, offset: int, limit: int, session: SessionDep
     ) -> Sequence[Question] | None:
-        if self.storage_type == "cloud":
-            filter = Question.blob_name != None
-        else:
-            filter = Question.local_path != None
+        try:
+            if self.storage_type == "cloud":
+                filter = Question.blob_name != None
+            else:
+                filter = Question.local_path != None
 
-        results = session.exec(
-            select(Question).where(filter).offset(offset).limit(limit)
-        ).all()
-        return results
+            results = session.exec(
+                select(Question).where(filter).offset(offset).limit(limit)
+            ).all()
+            return results
+        except Exception as e:
+            logger.error("Error while getting questions %s: %s", e)
+            raise
+
+    # TODO: Add a test for this service
+    async def get_all_questions_full(
+        self, offset: int, limit: int, session: SessionDep
+    ):
+        try:
+            all_questions = await self.get_all_questions(offset, limit, session)
+            results = await asyncio.gather(
+                *[self.get_question_data(q.id, session) for q in all_questions or []]
+            )
+            return results
+        except Exception as e:
+            raise
+
+    # TODO Add a test for this service
+    async def filter_questions(self, session: SessionDep, **kwargs):
+        try:
+            return await qc.filter_questions_meta(session, **kwargs)
+        except Exception as e:
+            raise
 
     # ---------------------------
     # File Operations
@@ -223,6 +256,7 @@ class QuestionManager:
                 raise ValueError("Could not resolve question identifier")
             await qc.delete_question_by_id(question_id, session)
             self.storage.delete_all(qidentifier)
+            return True
         except Exception as e:
             logger.error("Failed to delete question %s: %s", question_id, e)
             raise
@@ -239,6 +273,45 @@ class QuestionManager:
         except Exception as e:
             logger.error("Failed to delete file %s %s: %s", question_id, filename, e)
             raise
+
+    async def delete_all_questions(self, session: SessionDep):
+        try:
+            all_questions = await self.get_all_questions(
+                offset=0, limit=100, session=session
+            )
+            logger.debug(f"These are all the questions, %s", all_questions)
+            if not all_questions:
+                logger.info("No questions found to delete.")
+                return {"deleted_count": 0, "detail": "No questions to delete"}
+
+            logger.debug("Deleting %d questions: %s", len(all_questions), all_questions)
+            question_ids = [
+                q["id"] if isinstance(q, dict) else q.id for q in all_questions
+            ]
+            results = await asyncio.gather(
+                *[
+                    self.delete_question(UUID(str(qid)), session)
+                    for qid in question_ids
+                ],
+                return_exceptions=True,
+            )
+            deleted_count = sum(1 for r in results if r is True)
+            errors = [str(r) for r in results if isinstance(r, Exception)]
+
+            if errors:
+                logger.error("Errors occurred while deleting questions: %s", errors)
+                return {
+                    "deleted_count": deleted_count,
+                    "errors": errors,
+                    "detail": "Some deletions failed",
+                }
+
+            return {
+                "deleted_count": deleted_count,
+                "detail": "All questions deleted successfully",
+            }
+        except Exception as e:
+            raise e
 
     # ---------------------------
     # Helpers

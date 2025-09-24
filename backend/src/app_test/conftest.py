@@ -29,6 +29,7 @@ from src.api.service.storage.cloud_storage import FireCloudStorageService
 from src.api.service.storage.local_storage import LocalStorageService
 from src.api.service.question_manager import QuestionManager
 from src.api.dependencies import get_question_manager
+from src.api.models import Question
 
 
 @asynccontextmanager
@@ -236,16 +237,9 @@ def mark_logs_in_test():
     in_test_ctx.reset(token)
 
 
-# Question Fixture
-@pytest.fixture
-def qpayload_min():
-    return {
-        "title": "SomeTitle",
-        "ai_generated": True,
-        "isAdaptive": True,
-        "createdBy": "John Doe",
-        "user_id": 1,
-    }
+
+from src.app_test.fixtures.fixture_question_crud import *
+
 
 
 @pytest.fixture
