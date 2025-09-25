@@ -18,6 +18,7 @@ from src.api.models.question_model import (
 from src.api.database import question_db as qdata
 from src.api.core.logging import logger
 from src.utils import convert_uuid
+from src.api.response_models import Response
 
 
 async def safe_refresh_question(question: Question, session: SessionDep):
@@ -128,7 +129,7 @@ async def delete_all_questions(session: SessionDep) -> None:
 
 async def delete_question_by_id(
     question_id: Union[str, UUID], session: SessionDep
-) -> dict[str, str]:
+) -> Response:
     """
     Delete a Question by ID.
 
@@ -147,9 +148,9 @@ async def delete_question_by_id(
     try:
         question = await get_question_by_id(question_id, session)
         if question is None:
-            return {"detail": f"Question Does Not Exist"}
+            return Response(status=status.HTTP_200_OK, detail="Question Does Not Exist")
         qdata.delete_question_by_id(question.id, session)
-        return {"detail": f"Question Deleted {question.title}"}
+        return Response(status=status.HTTP_200_OK, detail="Question Deleted")
     except HTTPException as e:
         raise e
     except Exception as e:

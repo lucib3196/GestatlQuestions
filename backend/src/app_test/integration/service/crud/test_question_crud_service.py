@@ -65,10 +65,9 @@ async def test_create_question_minimal(
 @pytest.mark.asyncio
 async def test_get_all_questions_empty(db_session):
     # When DB has no questions
-    with pytest.raises(HTTPException) as excinfo:
-        await qcrud_service.get_all_questions(db_session)
-    assert excinfo.value.status_code == 204
-    assert "No Questions in DB" in str(excinfo.value.detail)
+    results = await qcrud_service.get_all_questions(db_session)
+    assert isinstance(results, list)
+    assert len(results) == 0
 
 
 @pytest.mark.asyncio
@@ -114,17 +113,16 @@ async def test_delete_all_questions(seed_questions, db_session):
     await qcrud_service.delete_all_questions(db_session)
 
     # Now empty
-    with pytest.raises(HTTPException) as excinfo:
-        await qcrud_service.get_all_questions(db_session)
-    assert excinfo.value.status_code == 204
-    assert "No Questions in DB" in excinfo.value.detail
+    retrieved = await qcrud_service.get_all_questions(db_session)
+
+    assert retrieved == []
 
 
 @pytest.mark.asyncio
 async def test_delete_question_by_id(db_session, seed_questions):
     # Not found
     result = await qcrud_service.delete_question_by_id(uuid.uuid4(), db_session)
-    assert "Does Not Exist" in result["detail"]
+    assert ("Does Not Exist").lower() in result.detail.lower()
 
     # Bad UUID
     with pytest.raises(HTTPException) as excinfo:
@@ -137,12 +135,11 @@ async def test_delete_question_by_id(db_session, seed_questions):
     # Delete all seeded one-by-one
     for q in await qcrud_service.get_all_questions(db_session):
         detail = await qcrud_service.delete_question_by_id(q.id, db_session)
-        assert "Question Deleted" in str(detail.get("detail"))
+        assert "Question Deleted" in str(detail.detail)
 
     # Confirm empty
-    with pytest.raises(HTTPException) as excinfo:
-        await qcrud_service.get_all_questions(db_session)
-    assert excinfo.value.status_code == 204
+    result = await qcrud_service.get_all_questions(db_session)
+    assert result == []
 
 
 # ---------------------------

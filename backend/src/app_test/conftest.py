@@ -334,6 +334,7 @@ def question_manager(request,question_manager_local, question_manager_cloud):
         qm = question_manager_local
     else:
         raise ValueError("Incorrect storage type")
+    return qm
 
 # ---------------------------------------------------------------------------
 # Debug Run
