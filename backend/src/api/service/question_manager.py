@@ -13,6 +13,8 @@ from src.api.service.crud import question_crud as qc
 from src.api.service.storage import StorageService
 from src.utils import safe_dir_name
 from sqlmodel import select
+from fastapi import HTTPException
+from starlette import status
 
 
 class QuestionManager:
@@ -53,7 +55,9 @@ class QuestionManager:
                 qname = f"{qname}_{q.id}"
 
             self.storage.create_directory(qname)
-            self.set_question_path(q, qname)
+            q = self.set_question_path(q, qname)
+
+            q = await qc.safe_refresh_question(q, session)
             return q
         except Exception as e:
             logger.error(
@@ -143,7 +147,16 @@ class QuestionManager:
     # TODO Add a test for this service
     async def filter_questions(self, session: SessionDep, **kwargs):
         try:
-            return await qc.filter_questions_meta(session, **kwargs)
+            if self.storage_type == "cloud":
+                filter = Question.blob_name != None
+            else:
+                filter = Question.local_path != None
+
+            return await qc.filter_questions_meta(
+                session,
+                [filter],
+                **kwargs,
+            )
         except Exception as e:
             raise
 
@@ -274,6 +287,7 @@ class QuestionManager:
             logger.error("Failed to delete file %s %s: %s", question_id, filename, e)
             raise
 
+    # TODO: Test
     async def delete_all_questions(self, session: SessionDep):
         try:
             all_questions = await self.get_all_questions(
@@ -313,9 +327,20 @@ class QuestionManager:
         except Exception as e:
             raise e
 
+    # Download
+    # TODO: Test
+    async def download_question(
+        self, session: SessionDep, question_id: UUID | str
+    ) -> bytes:
+        qidentifier = await self.get_question_identifier(question_id, session)
+        if not qidentifier:
+            raise ValueError("Could not resolve question identifier")
+        return await self.storage.download_question(qidentifier)
+
     # ---------------------------
     # Helpers
     # ---------------------------
+    # TODO: Test
     def get_question_path(self, q: Question):
         """Return the stored path (local or cloud) for a question."""
         try:
@@ -329,20 +354,32 @@ class QuestionManager:
             )
             raise
 
-    def set_question_path(self, q: Question, qname: str):
+    # TODO: Test
+    def set_question_path(self, q: Question, qname: str) -> Question:
         """Assign storage path to a question object."""
+        logger.info("Setting question path")
         try:
             path = self.storage.get_directory(qname).as_posix()
             if self.storage_type == "local":
                 q.local_path = str(path)
+                logger.info(f"Local question path set {q.local_path}")
+                return q
             elif self.storage_type == "cloud":
                 q.blob_name = str(path)
+                logger.info(f"Cloud question path set {q.blob_name}")
+                return q
+            else:
+                raise ValueError("Could not determine storage type")
         except Exception as e:
             logger.error(
                 "Failed to set question path for %s: %s", getattr(q, "title", None), e
             )
-            raise
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to set question path for {getattr(q, "title", None)}: {str(e)}",
+            )
 
+    # TODO: Test
     def get_basename(self) -> str | Path:
         """Return the base directory/bucket name from storage."""
         try:

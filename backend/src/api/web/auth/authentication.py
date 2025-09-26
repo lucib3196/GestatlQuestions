@@ -28,7 +28,7 @@ from src.api.core.logging import logger
 from src.api.database.database import get_session, SessionDep
 from src.api.models import users_model as users_model
 from src.api.models import token_model as token_model
-from src.api.service import user as service
+from src.api.service.auth import user as service
 
 # ==================
 # Router Declaration

@@ -10,9 +10,10 @@ from pydantic import BaseModel
 
 # --- Internal ---
 from src.api.database.database import get_session, SessionDep
-from src.api.service import user
+from src.api.service.auth import user
 from src.api.service.ai_generation.code_generation import run_text, run_image
 from fastapi import UploadFile
+from src.api.dependencies import QuestionManagerDependency
 
 router = APIRouter(prefix="/codegenerator", tags=["code_generator"])
 
@@ -25,6 +26,7 @@ class TextGenInput(BaseModel):
 
 @router.post("/v5/text_gen")
 async def generate_question_v5(
+    qm: QuestionManagerDependency,
     data: TextGenInput = Body(..., embed=True),
     current_user=Depends(user.get_current_user),
     session=Depends(get_session),
@@ -46,7 +48,7 @@ async def generate_question_v5(
     }
     try:
         return await run_text(
-            text=data.question, session=session, additional_meta=additional_meta
+            text=data.question, session=session, additional_meta=additional_meta, qm=qm
         )
     except HTTPException as e:
         raise e
@@ -54,6 +56,7 @@ async def generate_question_v5(
 
 @router.post("/v5/image_gen")
 async def generate_question_image_v5(
+    qm: QuestionManagerDependency,
     files: List[UploadFile],
     current_user=Depends(user.get_current_user),
     session=Depends(get_session),
@@ -73,6 +76,11 @@ async def generate_question_image_v5(
         "user_id": user_id,
     }
     try:
-        return await run_image(files, session, additional_meta)
+        return await run_image(
+            files,
+            session,
+            qm=qm,
+            meta=additional_meta,
+        )
     except HTTPException as e:
         raise e

@@ -1,4 +1,4 @@
-from src.api.service import user as service
+from src.api.service.auth import user as service
 from fastapi import APIRouter, Depends
 from src.api.models.users_model import User
 from src.api.database import SessionDep

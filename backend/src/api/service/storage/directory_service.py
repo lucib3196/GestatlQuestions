@@ -10,6 +10,7 @@ class DirectoryService:
 
     def __init__(self, base_dir: Union[str, Path] = "questions"):
         self.base_dir = Path(base_dir).resolve()
+    
 
     def ensure_base_exist(self) -> None:
         self.base_dir.mkdir(parents=True, exist_ok=True)
@@ -53,3 +54,4 @@ class DirectoryService:
                 if f.is_file():
                     f.unlink()
             os.rmdir(q_dir)
+    

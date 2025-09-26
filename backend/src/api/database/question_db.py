@@ -129,7 +129,9 @@ def delete_question_by_id(question_id: Union[str, UUID], session: SessionDep):
 
 
 def get_all_questions(
-    session: SessionDep, offset: int = 0, limit: int = 100, 
+    session: SessionDep,
+    offset: int = 0,
+    limit: int = 100,
 ) -> Sequence[Question]:
     """
     Retrieve a paginated list of Question rows.
@@ -309,7 +311,12 @@ def update_question(
 
 
 # # Todo make this a bit more general and handle
-def filter_questions(session, partial_match=True, **kwargs):
+def filter_questions(
+    session,
+    filters,
+    partial_match=True,
+    **kwargs,
+):
     """
     Filter Question rows by scalar columns and/or related labels.
 
@@ -322,7 +329,8 @@ def filter_questions(session, partial_match=True, **kwargs):
         A list of Question instances matching the combined filters (AND across fields, OR within values).
     """
     mapper = sa_inspect(Question)
-    filters = []
+    if not filters:
+        filters = []
 
     # Deconstruct the mapping
     for key, value in kwargs.items():

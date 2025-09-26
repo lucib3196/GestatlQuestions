@@ -5,12 +5,19 @@ from pathlib import Path
 import pytest
 
 # --- Internal ---
+from src.api.core import logger
+
 
 @pytest.mark.asyncio
-async def test_create_question(question_manager, db_session, question_payload_minimal_dict, tmp_path):
-    qcreated = await question_manager.create_question(question_payload_minimal_dict, db_session)
+async def test_create_question(
+    question_manager, db_session, question_payload_minimal_dict, tmp_path
+):
+    qcreated = await question_manager.create_question(
+        question_payload_minimal_dict, db_session
+    )
     assert qcreated
     assert qcreated.title == question_payload_minimal_dict["title"]
+    logger.info(f"Testing QM creation this is the created question {qcreated}")
 
     if question_manager.storage_type == "cloud":
         expected = Path("integration_test") / question_payload_minimal_dict["title"]
@@ -21,13 +28,22 @@ async def test_create_question(question_manager, db_session, question_payload_mi
 
 
 @pytest.mark.asyncio
-async def test_create_question_duplicate(question_manager, db_session, question_payload_minimal_dict, tmp_path):
+async def test_create_question_duplicate(
+    question_manager, db_session, question_payload_minimal_dict, tmp_path
+):
     await question_manager.create_question(question_payload_minimal_dict, db_session)
-    q2 = await question_manager.create_question(question_payload_minimal_dict, db_session)
+    q2 = await question_manager.create_question(
+        question_payload_minimal_dict, db_session
+    )
 
     if question_manager.storage_type == "cloud":
-        expected = Path("integration_test") / f"{question_payload_minimal_dict['title']}_{q2.id}"
+        expected = (
+            Path("integration_test")
+            / f"{question_payload_minimal_dict['title']}_{q2.id}"
+        )
         assert Path(q2.blob_name) == expected
     else:  # local
-        expected = tmp_path / "questions" / f"{question_payload_minimal_dict['title']}_{q2.id}"
+        expected = (
+            tmp_path / "questions" / f"{question_payload_minimal_dict['title']}_{q2.id}"
+        )
         assert Path(q2.local_path) == expected

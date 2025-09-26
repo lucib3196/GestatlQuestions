@@ -4,6 +4,9 @@ from src.api.core import logger
 import pytest
 from typing import Type, Tuple, Dict
 from pathlib import Path
+import io
+import zipfile
+import json
 
 
 @pytest.fixture
@@ -26,6 +29,8 @@ def fake_cloud_storage(
         "src.api.service.storage.cloud_storage.storage.bucket",
         lambda *args, **kwargs: fake_bucket,
     )
+    
+    
 
     data = {
         "cred_path": "fake.json",
@@ -85,3 +90,21 @@ def test_get_file(fake_cloud_storage, dummy_data, save_dummy_data):
     fake_blob.download_as_bytes.return_value = b"Hello World"
     content = service.get_file(dummy_data["identifier"], dummy_data["filename"])
     assert content == b"Hello World"
+
+
+#TODO: Clean up this file have a better unit test and make this test more robuts
+
+# @pytest.mark.asyncio
+# async def test_download_question(save_dummy_data, fake_cloud_storage, dummy_data):
+#     service = fake_cloud_storage[0]
+#     data = await service.download_question("TestFolder")
+    
+#     fake_bucket.list_blobs.return_value = [fake_blob]
+
+#     assert isinstance(data, bytes)
+#     assert len(data) > 0
+#     buffer = io.BytesIO(data)
+#     with zipfile.ZipFile(buffer, "r") as z:
+#         names = z.namelist()
+
+#         assert f"TestFolder/{dummy_data["filename"]}" in names

@@ -7,6 +7,9 @@ from uuid import UUID
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from pydantic import ValidationError
 from starlette import status
+import io
+from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 
 # --- Internal ---
 from src.api.core import logger
@@ -15,8 +18,9 @@ from src.api.dependencies import QuestionManagerDependency
 from src.api.models import Question
 from src.api.models.question_model import QuestionMeta
 from src.api.response_models import *
-from src.api.service import file_management as fm
+from src.api.service.file_handler import FileService
 from src.utils import normalize_kwargs, serialized_to_dict
+from src.api.response_models import SuccessDataResponse
 
 
 router = APIRouter(prefix="/questions", tags=["Questions"])
@@ -34,7 +38,7 @@ def parse_question_payload(
 
 
 async def parse_file_upload(file: UploadFile) -> FileData:
-    f = await fm.validate_file(file)
+    f = await FileService("").validate_file(file)
     content = await f.read()
     await f.seek(0)
     fd = FileData(filename=str(f.filename), content=content)
@@ -159,9 +163,16 @@ async def get_question_data_full(
 @router.get("/{qid}/files", status_code=status.HTTP_200_OK)
 async def get_question_files(
     qid: str | UUID, session: SessionDep, qm: QuestionManagerDependency
-) -> List[str]:
+) -> SuccessFileResponse:
     try:
-        return await qm.get_all_files(qid, session)
+        files = await qm.get_all_files(qid, session)
+        return SuccessFileResponse(
+            status=200,
+            detail="Retrieved files succesfully",
+            files=[],
+            file_paths=files,
+        )
+
     except HTTPException:
         raise
     except Exception as e:
@@ -175,9 +186,14 @@ async def get_question_files(
 @router.get("/{qid}/files/{filename}", status_code=status.HTTP_200_OK)
 async def read_question_file(
     qid: str | UUID, filename: str, session: SessionDep, qm: QuestionManagerDependency
-) -> bytes | None:
+) -> SuccessDataResponse:
     try:
-        return await qm.read_file(qid, session, filename)
+        data = await qm.read_file(qid, session, filename)
+        assert data
+        data = data.decode("utf-8")
+        return SuccessDataResponse(
+            status=status.HTTP_200_OK, detail="Successful", data=data
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -191,10 +207,17 @@ async def read_question_file(
 @router.get("/{qid}/files_data", status_code=status.HTTP_200_OK)
 async def get_question_files_data(
     qid: str | UUID, session: SessionDep, qm: QuestionManagerDependency
-) -> List[FileData]:
+) -> SuccessFileResponse:
     try:
         logger.debug("Attempting to retrieve filedata")
-        return await qm.read_all_files(qid, session)
+
+        filedata = await qm.read_all_files(qid, session)
+        return SuccessFileResponse(
+            status=200,
+            detail="Retrieved files succesfully",
+            files=filedata,
+            file_paths=[],
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -287,6 +310,7 @@ async def update_question(
 
 # Special
 
+
 @router.post("/filter_questions")
 async def filter_questions(
     session: SessionDep,
@@ -372,4 +396,26 @@ async def upload_files_to_question(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Could not upload files to question: {e}",
+        )
+
+
+@router.post("/{qid}/download")
+async def download_question(
+    qid: str | UUID, session: SessionDep, qm: QuestionManagerDependency
+):
+    try:
+        data = await qm.download_question(session, qid)
+        buffer = io.BytesIO(data)
+
+        zip_name = await qm.get_question_identifier(qid, session)
+
+        return StreamingResponse(
+            buffer,
+            media_type="application/zip",
+            headers={"Content-Disposition": f'attachment; filename="{zip_name}.zip"'},
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not download question",
         )

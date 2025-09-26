@@ -1,6 +1,6 @@
 # --- Standard Library ---
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 from uuid import UUID
 
 # --- Third-Party ---
@@ -29,7 +29,7 @@ class SuccessfulResponse(BaseModel):
 class SuccessDataResponse(SuccessfulResponse):
     """Success response with a file system path included."""
 
-    data: str | None
+    data: Union[str, bytes, None]
 
 
 class SuccessFileResponse(SuccessfulResponse):

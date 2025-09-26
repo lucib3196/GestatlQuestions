@@ -194,7 +194,9 @@ async def edit_question_meta(
         )
 
 
-async def filter_questions_meta(session: SessionDep, **kwargs) -> List[Dict[str, Any]]:
+async def filter_questions_meta(
+    session: SessionDep, filters, **kwargs
+) -> List[Dict[str, Any]]:
     """
     Filter questions by provided criteria and return full data for each match.
 
@@ -209,7 +211,7 @@ async def filter_questions_meta(session: SessionDep, **kwargs) -> List[Dict[str,
         HTTPException: Propagates any HTTPExceptions from filtering or retrieval.
     """
     try:
-        questions = qdata.filter_questions(session, **kwargs)
+        questions = qdata.filter_questions(session, filters, True, **kwargs)
         tasks = [
             qdata.get_question_data(question_id=r.id, session=session)
             for r in questions

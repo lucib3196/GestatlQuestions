@@ -26,7 +26,6 @@ from src.api.response_models import FileData
 from src.utils import to_bool
 
 from src.api.service.crud import question_crud
-from src.api.service import question_storage_service
 from src.api.dependencies import QuestionManagerDependency
 
 
@@ -80,12 +79,12 @@ async def process_output(
             FileData(filename=filename, content=to_serializable(content))
             for filename, content in files_data.items()
         ]
-        results = await question_storage_service.write_files_to_directory(
-            q.id, fd_list, session
+        results = await qm.save_files_to_question(
+            q.id,
+            session,
+            fd_list,
         )
-        created = await question_crud.get_question_data(
-            question_id=q.id, session=session
-        )
+        created = await qm.get_question_data(question_id=q.id, session=session)
         return created
     except HTTPException:
         raise

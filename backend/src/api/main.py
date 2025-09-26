@@ -87,12 +87,9 @@ def get_application(test_mode: bool = False):
 app = get_application()
 
 
-
-
-
 def main():
     uvicorn.run(
-        "backend_api.main:app",
+        "src.api.main:app",
         host=os.getenv("HOST", "0.0.0.0"),
         port=int(os.getenv("PORT", 8000)),
         reload=False,

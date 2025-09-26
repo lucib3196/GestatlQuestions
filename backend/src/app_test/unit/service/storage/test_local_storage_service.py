@@ -5,13 +5,12 @@ from typing import Tuple
 
 # --- Third-Party ---
 import pytest
+import io
 
 # --- Internal ---
 from src.api.service.storage import local_storage as ls
 from src.api.core import logger
-
-
-
+import zipfile
 
 
 @pytest.fixture
@@ -102,3 +101,16 @@ def test_get_file(create_test_dir, local_storage, save_multiple_files):
 
         else:
             raise TypeError(f"Unsupported type: {type(expected)}")
+
+
+@pytest.mark.asyncio
+async def test_download_zip(tmp_path, local_storage, save_multiple_files):
+    data = await local_storage.download_question("TestFolder")
+
+    assert isinstance(data, bytes)
+    assert len(data) > 0
+    buffer = io.BytesIO(data)
+    with zipfile.ZipFile(buffer, "r") as z:
+        names = z.namelist()
+        for f in save_multiple_files:
+            assert f"TestFolder/{f[0]}" in names

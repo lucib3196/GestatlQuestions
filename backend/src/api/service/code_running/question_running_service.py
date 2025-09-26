@@ -17,12 +17,14 @@ from src.code_runner.run_server import run_generate
 from src.utils import convert_uuid
 from src.api.service import question_storage_service as qs
 from src.api.response_models import SuccessFileResponse, FileData
+from src.api.dependencies import QuestionManagerDependency
 
 
 async def run_server(
     question_id: Union[str, UUID],
     code_language: Literal["python", "javascript"],
     session: SessionDep,
+    qm: QuestionManagerDependency,
 ):
     mapping_db = {"python": "server.py", "javascript": "server.js"}
     mapping_filename = {"python": "server.py", "javascript": "server.js"}
@@ -37,16 +39,16 @@ async def run_server(
         )
 
     try:
-        response = await qs.get_file_content(
-            question_id, mapping_db[code_language], session
+        response = await qm.read_file(
+            question_id,
+            session,
+            mapping_db[code_language],
         )
+        assert response
     except HTTPException:
         raise
 
-    file_data = response.filedata[0]
-    file_data = cast(FileData, file_data)
-
-    server_content = file_data.content
+    server_content = response.decode("utf-8")
 
     if isinstance(server_content, (dict, list)):
         try:
