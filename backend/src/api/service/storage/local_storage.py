@@ -34,8 +34,7 @@ class LocalStorageService(StorageService):
     # --- Directory Management ---
 
     def get_basename(self) -> str | Path:
-        """Return the base name of the storage system."""
-        return super().get_basename()
+        return self.base_dir
 
     def get_directory(self, identifier: str) -> Path:
         """Return the directory path for a given identifier."""

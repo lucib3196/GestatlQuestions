@@ -2,7 +2,7 @@
 import * as math from "mathjs";
 import _ from "lodash";
 import * as mathhelper from "./mathHelpers";
-import { imageUrl } from "../api/api.js";
+import { imageUrl } from "./imageHandling";
 /**
  * Safer / clearer param replacement:
  *  - Supports {{ params.foo.bar }}, {{ param_labels.x }}, {{ correct_answers.y }}

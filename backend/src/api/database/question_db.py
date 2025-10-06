@@ -217,10 +217,7 @@ async def get_question_data(
     stmt = select(Question).where(Question.id == convert_uuid(question_id))
     result = session.exec(stmt).first()
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Question not found",
-        )
+        raise ValueError("Question is None")
     data = result.model_dump()
     for r in rels:
         data[r] = get_models_relationship_data(result, r)

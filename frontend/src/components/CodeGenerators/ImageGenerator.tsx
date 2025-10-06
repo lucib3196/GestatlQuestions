@@ -1,9 +1,9 @@
 
 import React, { useState } from "react";
 import ModGenerators from "./BaseTemplate";
-import api from "../../api/api";
+import api from "../../api/client";
 import { toast } from "react-toastify";
-import UploadFilesButton from "../Generic/UploadFilesButton";
+import UploadFilesButton from "../Generic/UploadFiles";
 const ImageGeneratorConst = {
     name: "Visual Extract",
 };

@@ -2,7 +2,7 @@ import pytest
 from pathlib import Path
 from src.api.models import Question
 from src.api.database import question_db
-from src.api.service import question_storage_service as qs
+from src.api.service import refactor_question_storage_service as qs
 from src.app_test.conftest import test_config
 
 

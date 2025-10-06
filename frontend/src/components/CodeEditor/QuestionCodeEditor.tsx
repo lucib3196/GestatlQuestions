@@ -1,6 +1,6 @@
 //  React core
 import { useContext, useEffect, useMemo, useState } from "react";
-
+import { questionApi } from "../../api";
 //  Context
 import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
 
@@ -18,7 +18,8 @@ import { LogOutput } from "./LogPrint";
 import { CodeEditorOptions } from "./CodeEditorOptions";
 
 function QuestionCodeEditor() {
-    const { selectedQuestion } = useContext(RunningQuestionSettingsContext);
+    // const { selectedQuestion } = useContext(RunningQuestionSettingsContext);
+    const selectedQuestion = "ab019cad37e0460b802f1af1786822d3";
     const [filesData, setFileData] = useState<FileData[]>([]);
     const [selectedFile, setSelectedFile] = useState<string>("");
     const [showLogOutput, setShowLogOutput] = useState(false)

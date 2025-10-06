@@ -1,4 +1,4 @@
-import api from "../../../api/api";
+import api from "../../../api/client";
 import type { AxiosError } from "axios";
 
 type CodeRunResponse = {
@@ -62,7 +62,6 @@ export async function runQuestionTest(
   }
 }
 
-
 export function filenameFromDisposition(
   cd?: string | null,
   fallback = "questions.zip"
@@ -101,37 +100,43 @@ export async function downloadQuestions(
   const {
     signal,
     onProgress,
-    filename: fallbackName = "questions.zip",
+    filename: fallbackName = "question.zip",
   } = opts ?? {};
 
-  const res = await api.post(
-    "/db_questions/download_questions", // make sure this path matches your FastAPI route
-    { question_ids: ids },
-    {
-      responseType: "blob",
-      signal,
-      onDownloadProgress: (e) => {
-        if (onProgress && e.total)
-          onProgress(Math.round((e.loaded / e.total) * 100));
-      },
-    }
-  );
+  for (let i = 0; i < ids.length; i++) {
+    const qid = ids[i];
 
-  const blob: Blob = res.data;
+    const res = await api.post(
+      `/questions/${encodeURIComponent(qid)}/download`, // <-- matches your route
+      null, // no body, qid is in path
+      {
+        responseType: "blob",
+        signal,
+        onDownloadProgress: (e) => {
+          if (onProgress && e.total) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            onProgress(pct);
+          }
+        },
+      }
+    );
 
-  // If the server returned an error JSON as a blob, surface it
-  if (blob.type && blob.type.includes("application/json")) {
-    const text = await blob.text();
-    try {
-      const err = JSON.parse(text);
-      throw new Error(err.detail || err.message || "Download failed");
-    } catch {
-      throw new Error(text || "Download failed");
+    const blob: Blob = res.data;
+
+    // If server responded with JSON instead of zip, surface error
+    if (blob.type && blob.type.includes("application/json")) {
+      const text = await blob.text();
+      try {
+        const err = JSON.parse(text);
+        throw new Error(err.detail || err.message || "Download failed");
+      } catch {
+        throw new Error(text || "Download failed");
+      }
     }
+
+    const cd = res.headers["content-disposition"] as string | undefined;
+    const fileName = filenameFromDisposition(cd, `${qid}-${fallbackName}`);
+
+    downloadBlob(blob, fileName);
   }
-
-  const cd = res.headers["content-disposition"] as string | undefined;
-  const filename = filenameFromDisposition(cd, fallbackName);
-
-  downloadBlob(blob, filename);
 }

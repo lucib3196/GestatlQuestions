@@ -1,0 +1,10 @@
+{
+  "title": "Sample Non-Adaptive Question",
+  "ai_generated": false,
+  "isAdaptive": false,
+  "createdBy": "user@email.com",
+  "user_id": null,
+  "topics": ["General"],
+  "languages": [],
+  "qtypes": ["Conceptual"]
+}

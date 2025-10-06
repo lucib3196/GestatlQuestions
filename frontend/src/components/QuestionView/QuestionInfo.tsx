@@ -1,5 +1,5 @@
 import type { QuestionMeta } from "../../types/types";
-import Pill from "../Generic/Pill";
+import { Pill, PillContainer } from "../Base/Pill";
 
 
 type GenericInfoProps = {
@@ -14,10 +14,7 @@ const GenericInfo = ({ title, data }: GenericInfoProps) => {
                 {(data ?? []).map((val, id) => (
                     <Pill
                         key={id}
-                        content={val}
-                        bgColor="bg-red-100"
-                        textColor="text-red-800"
-                    />
+                    >{val}</Pill>
                 ))}
             </div>
         </div>

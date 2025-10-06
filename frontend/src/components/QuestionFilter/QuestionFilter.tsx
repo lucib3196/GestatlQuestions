@@ -7,7 +7,7 @@ import { searchQuestions } from "../../api";
 import { useQuestionContext } from "../../context/QuestionContext";
 
 // Types
-import type { QuestionMeta } from "../../types/types";
+
 
 // Components
 import AdaptiveDropDown from "./IndividualSearchForms/Adaptive";
@@ -17,7 +17,7 @@ import { ShowAllQuestionsCheckBox } from "./IndividualSearchForms/ShowAllQuestio
 
 
 type QuestionFilterProps = {
-    setSearchResults: (val: QuestionMeta[]) => void
+    setSearchResults: () => void
 }
 
 const QuestionFilter = ({ setSearchResults }: QuestionFilterProps) => {
@@ -27,7 +27,7 @@ const QuestionFilter = ({ setSearchResults }: QuestionFilterProps) => {
     const [questionType, setQuestionType] = useState<string>("Numerical")
     const [isSearching, setIsSearching] = useState<boolean>(false)
 
-    const qTypes = ["Numerical", "Multiple Choice", "Extra Option"]
+    const qTypes = ["Numerical", "Multiple Choice", "Other"]
 
     useEffect(() => {
         const fetchQuestions = async () => {
@@ -41,9 +41,10 @@ const QuestionFilter = ({ setSearchResults }: QuestionFilterProps) => {
                     },
                     showAllQuestions: ctx.showAllQuestions,
                 });
-                console.log("This is the retrieved", retrievedQuestions)
-                setSearchResults(retrievedQuestions);
+                
             } catch (error) {
+                console.log("error")
+                setSearchResults([]);
 
             } finally {
                 setIsSearching(false); // optional: cleanup loading state

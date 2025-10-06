@@ -2,7 +2,7 @@ import pytest
 import pytest_asyncio
 from src.api.models.file_model import File
 from src.api.models.question_model import Question
-from src.api.service import question_storage_service as qs
+from src.api.service import refactor_question_storage_service as qs
 from src.api.response_models import FileData
 from src.api.core import settings
 from pathlib import Path

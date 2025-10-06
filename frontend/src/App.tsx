@@ -4,10 +4,14 @@ import QuestionSettingsProvider from "./context/GeneralSettingsContext";
 import RunningQuestionProvider from "./context/RunningQuestionContext";
 import { AuthProvider } from "./context/AuthContext";
 import { QuestionDBProvider } from "./context/QuestionContext";
-import NavBar from "./components/NavBar";
+import NavBar from "./components/NavBar/NavBar";
 import { ToastContainer } from "react-toastify";
 import LogsProvider from "./context/CodeLogsContext";
-import CreateQuestion from "./components/CreateQuestion/CreateQuestion";
+import QuestionRendererContainer from "./components/Question/DynamicQuestionMetaEditor";
+import UpdateQuestionMetaForm from "./components/Question/DynamicQuestionMetaEditor";
+import { QuestionView } from "./pages/QuestionView";
+
+
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {
@@ -28,7 +32,10 @@ function App() {
                   {/* Main Content */}
                   <NavBar />
                   <ToastContainer />
+                  <QuestionView />
+                  {/* <UpdateQuestionMetaForm /> */}
 
+                  {/* <LegacyQuestion /> */}
                   {/* End of Main Content */}
                 </LogsProvider>
               </RunningQuestionProvider>

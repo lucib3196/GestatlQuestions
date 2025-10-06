@@ -15,6 +15,14 @@ from src.utils import safe_dir_name
 from sqlmodel import select
 from fastapi import HTTPException
 from starlette import status
+import io
+from typing import Dict, Any
+from pydantic import ValidationError
+from src.api.database import question_db as qdb
+from src.api.service.file_handler import FileService
+
+
+from src.api.core import settings
 
 
 class QuestionManager:
@@ -25,13 +33,16 @@ class QuestionManager:
     ):
         """Initialize with a storage backend and storage type."""
         self.storage = storage_service
-        self.storage_type = storage_type
+        self.storage_type: Literal["local", "cloud"] = storage_type
+        # TODO: Need to make this a bit better
+        ## General file service mostly just used for the starter template download
+        self.file_service = FileService(settings.BASE_PATH)
 
     # ---------------------------
     # Question Lifecycle
     # ---------------------------
     async def create_question(
-        self, question: Question | dict, session: SessionDep, existing: bool = False
+        self, question: Question | dict, session: SessionDep, exists: bool = False
     ) -> Question:
         """Create a new question in DB and storage."""
         try:
@@ -40,6 +51,7 @@ class QuestionManager:
         except Exception as e:
             logger.error("Failed to create question in DB: %s", e)
             raise
+
         try:
             logger.info("Setting up Question")
             qname = safe_dir_name((q.title or "").strip())
@@ -48,17 +60,20 @@ class QuestionManager:
                 logger.error("Question title is None")
                 raise ValueError("Question title cannot be None")
 
-            if self.storage.does_directory_exist(qname) and not self.get_question_path(
-                q
-            ):
-                logger.info("Question title duplicate found creating a new title")
-                qname = f"{qname}_{q.id}"
+            # Always append the ID to guarantee uniqueness
+            qname = f"{qname}_{q.id}"
 
-            self.storage.create_directory(qname)
+            # Create directory if it doesn’t exist already
+            if not exists and not self.storage.does_directory_exist(qname):
+                self.storage.create_directory(qname)
+
+            # Point DB record to the correct directory
             q = self.set_question_path(q, qname)
 
+            # Refresh DB object
             q = await qc.safe_refresh_question(q, session)
             return q
+
         except Exception as e:
             logger.error(
                 "Failed to set up storage for question %s: %s",
@@ -87,9 +102,23 @@ class QuestionManager:
 
     # Retrieving all Questions
     # TODO: Add a test for this
-    async def get_question_data(self, question_id: UUID | str, session: SessionDep):
+    async def get_question_data(
+        self, question_id: UUID | str, session: SessionDep
+    ) -> Question:
         try:
-            return await qc.get_question_data(question_id, session)
+            retrieved_question = await qdb.get_question_data(question_id, session)
+            return Question.model_validate(retrieved_question)
+        except ValidationError as e:
+            # Log the validation issue for debugging
+            logger.error("Validation failed for Question %s: %s", question_id, e)
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Invalid question data: {e.errors()}",
+            )
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Question not Found"
+            )
         except Exception as e:
             logger.error("Failed to retrieve question data %s: %s", question_id, e)
             raise
@@ -331,11 +360,38 @@ class QuestionManager:
     # TODO: Test
     async def download_question(
         self, session: SessionDep, question_id: UUID | str
-    ) -> bytes:
+    ) -> bytes | io.BytesIO:
         qidentifier = await self.get_question_identifier(question_id, session)
         if not qidentifier:
             raise ValueError("Could not resolve question identifier")
         return await self.storage.download_question(qidentifier)
+
+    # TODO Fix this and add a test for this
+    async def download_starter_templates(self) -> Dict[str, bytes]:
+        try:
+            adaptive_template = (
+                Path(settings.BASE_PATH) / "starter_templates" / "AdaptiveStarter"
+            )
+            nonadaptive_template = (
+                Path(settings.BASE_PATH) / "starter_templates" / "NonAdaptive"
+            )
+            adaptive_bytes = await self.file_service.download_zip(
+                [p for p in adaptive_template.iterdir()],
+                folder_name="Adaptive Template",
+            )
+            nonadaptive_bytes = await self.file_service.download_zip(
+                [p for p in nonadaptive_template.iterdir()],
+                folder_name="NonAdaptiveStarter",
+            )
+            return {
+                "adaptiveTemplate": adaptive_bytes,
+                "NonAdaptiveTemplate": nonadaptive_bytes,
+            }
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Could not download starter template {str(e)}",
+            )
 
     # ---------------------------
     # Helpers
@@ -356,28 +412,39 @@ class QuestionManager:
 
     # TODO: Test
     def set_question_path(self, q: Question, qname: str) -> Question:
-        """Assign storage path to a question object."""
-        logger.info("Setting question path")
+        """Assign storage path (local or cloud) to a question object."""
+        logger.info("Setting question path for %s", q.title)
         try:
-            path = self.storage.get_directory(qname).as_posix()
+            # Resolve directory path
+            dir_path = self.storage.get_directory(qname)
+
+            # Normalize to relative path under "/questions"
+            relative_path = dir_path.relative_to(
+                Path(self.storage.get_basename()).parent
+            ).as_posix()
+
+            # Assign based on storage type
             if self.storage_type == "local":
-                q.local_path = str(path)
-                logger.info(f"Local question path set {q.local_path}")
-                return q
+                q.local_path = relative_path
+                logger.info("Local question path set → %s", q.local_path)
+
             elif self.storage_type == "cloud":
-                q.blob_name = str(path)
-                logger.info(f"Cloud question path set {q.blob_name}")
-                return q
+                q.blob_name = relative_path
+                logger.info("Cloud question path set → %s", q.blob_name)
+
             else:
-                raise ValueError("Could not determine storage type")
+                raise ValueError(f"Unknown storage type: {self.storage_type}")
+
+            return q
+
         except Exception as e:
-            logger.error(
-                "Failed to set question path for %s: %s", getattr(q, "title", None), e
-            )
+            title = getattr(q, "title", "<unknown>")
+            msg = f"Failed to set question path for '{title}': {str(e)}"
+            logger.error(msg)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Failed to set question path for {getattr(q, "title", None)}: {str(e)}",
-            )
+                detail=msg,
+            ) from e
 
     # TODO: Test
     def get_basename(self) -> str | Path:

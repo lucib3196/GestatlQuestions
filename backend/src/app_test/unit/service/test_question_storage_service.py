@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from src.api.service import question_storage_service as qs
+from src.api.service import refactor_question_storage_service as qs
 from starlette import status
 import json
 from typing import List

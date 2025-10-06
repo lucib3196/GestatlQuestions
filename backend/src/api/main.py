@@ -47,6 +47,9 @@ def get_application(test_mode: bool = False):
         raise ValueError("Cannot Find Local Path")
 
     questions_dir = Path(settings.QUESTIONS_PATH).resolve()
+    
+    if not questions_dir.exists():
+        questions_dir.mkdir(parents=True, exist_ok=True)
 
     app.mount(
         f"/{questions_dir.name}",  # -> "/questions"

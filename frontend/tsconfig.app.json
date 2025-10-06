@@ -23,5 +23,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "src/pages/QuestionDashBoard.tsx"]
+  "include": ["src", "src/pages/QuestionDashBoard.tsx", "src/components/NavBar/NavBar.tsx", "src/types"]
 }

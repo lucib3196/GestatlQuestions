@@ -8,7 +8,6 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from pydantic import ValidationError
 from starlette import status
 import io
-from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
 # --- Internal ---
@@ -390,6 +389,10 @@ async def upload_files_to_question(
             else []
         )
         await qm.save_files_to_question(qid, session, fd_list, overwrite=True)
+        return SuccessfulResponse(
+            status=200,
+            detail="Uploaded files succesfully",
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -405,7 +408,10 @@ async def download_question(
 ):
     try:
         data = await qm.download_question(session, qid)
-        buffer = io.BytesIO(data)
+        if not isinstance(data, io.BytesIO):
+            buffer = io.BytesIO(data)
+        else:
+            buffer = data
 
         zip_name = await qm.get_question_identifier(qid, session)
 
@@ -418,4 +424,45 @@ async def download_question(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Could not download question",
+        )
+
+
+import zipfile
+
+
+# TODO: Add test
+@router.post("/download_starter")
+async def download_starter(qm: QuestionManagerDependency):
+    try:
+        data = await qm.download_starter_templates()
+
+        # Create a new in-memory buffer
+        buffer = io.BytesIO()
+
+        # Open a ZipFile to write into that buffer
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+            for folder, bdata in data.items():
+                # Ensure bdata is BytesIO or bytes
+                if isinstance(bdata, io.BytesIO):
+                    content = bdata.getvalue()
+                else:
+                    content = bdata
+
+                # Write it into the zip archive
+                zf.writestr(f"{folder}.zip", content)
+
+        # Reset pointer so StreamingResponse can read from start
+        buffer.seek(0)
+
+        return StreamingResponse(
+            buffer,
+            media_type="application/zip",
+            headers={
+                "Content-Disposition": 'attachment; filename="starter_templates.zip"'
+            },
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not download starter: {e}",
         )

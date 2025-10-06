@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Union, Optional, List
 from google.cloud.storage.blob import Blob
-
+import io
 
 class StorageService:
     """
@@ -64,7 +64,7 @@ class StorageService:
         """Remove the entire storage base (irreversible)."""
         raise NotImplementedError("hard_delete must be implemented by subclass")
 
-    async def download_question(self, identifier: str) -> bytes:
+    async def download_question(self, identifier: str) -> bytes | io.BytesIO:
         """Download a single question file by identifier."""
         raise NotImplementedError("download_question must be implemented by subclass")
 

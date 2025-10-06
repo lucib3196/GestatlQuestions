@@ -1,73 +1,143 @@
-// questionApi.ts
-import api from "./api";
+import api from "./client";
 import type { QuestionMeta } from "../types/types";
 import { toast } from "react-toastify";
 import type { QuestionFormData } from "../types/types";
+import type { Question, QuestionFull, FileName } from "../types/questionTypes";
+
+export const questionApi = {
+  async getbyId(id: string): Promise<Question> {
+    const res = await api.get(`/questions/${encodeURIComponent(id)}`);
+    return res.data.question;
+  },
+  async getbyIdFull(id: string): Promise<QuestionFull> {
+    const res = await api.get(`/questions/${encodeURIComponent(id)}/full`);
+    return res.data;
+  },
+
+  async getFileNames(id: string): Promise<FileName> {
+    const res = await api.get(`/questions/${encodeURIComponent(id)}/files`);
+    return res.data;
+  },
+  async uploadFiles(id: string, files: File[]): Promise<GeneralResponse> {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+    const res = await api.post(
+      `/questions/${encodeURIComponent(id)}/files`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return res.data;
+  },
+
+  async readQuestionFile(
+    id: string,
+    filename: string
+  ): Promise<GeneralDataResponse> {
+    const response = await api.get<SuccessDataResponse>(
+      `/questions/${encodeURIComponent(id)}/files/${encodeURIComponent(
+        filename
+      )}`
+    );
+    return response.data;
+  },
+};
+
+import type {
+  SuccessDataResponse,
+  SuccessFileResponse,
+} from "../types/responseModels";
+import type {
+  GeneralDataResponse,
+  GeneralResponse,
+} from "../types/responseTypes";
 
 type searchQuestionProps = {
   filter?: QuestionMeta;
   showAllQuestions: boolean;
 };
 
+type Settings = {
+  storage_type: "cloud" | "local";
+};
+export const getSettings = async () => {
+  try {
+    const response = await api.get<Settings>("/settings");
+    return response.data.storage_type;
+  } catch (error) {
+    console.error("Could not fetch question settings", error);
+  }
+};
+
 export const searchQuestions = async ({
   filter,
-  showAllQuestions,
+  showAllQuestions = true,
 }: searchQuestionProps) => {
   let retrievedQuestions: any[] = [];
   try {
     const data = await api.post(
-      "/question_crud/filter_questions/",
+      "/questions/filter_questions",
       !showAllQuestions ? filter : {}
     );
     retrievedQuestions = data.data || [];
     return retrievedQuestions;
   } catch (error) {
-    console.log(error);
+    console.error(
+      "There was an error retrieving the questions returning an empty list",
+      error
+    );
+    return [];
   }
 };
 
-export async function getQuestionHTML(questionId: string) {
+export const downloadStart = async () => {
+  try {
+    const data = await api.post("/questions/download_starter");
+  } catch (error) {
+    console.log("There was an error", error);
+    toast.error("Could not download Starter Template");
+  }
+};
+export async function getQuestionFile(questionId: string, filename: string) {
   if (!questionId) return;
   try {
-    const response = await api.get(
-      `/question_crud/get_question/${encodeURIComponent(
-        questionId
-      )}}/file/question.html` // kept as-is (note the double `}}`)
+    const response = await api.get<SuccessDataResponse>(
+      `/questions/${encodeURIComponent(questionId)}/files/${encodeURIComponent(
+        filename
+      )}`
     );
-    return response.data;
+    console.log("This is the response of getting the files", response);
+    return response.data.data;
   } catch (error) {
-    console.log(error);
+    console.log("Could not get question file ", error);
   }
 }
 
+export async function getQuestionHTML(questionId: string) {
+  const data = await getQuestionFile(questionId, "question.html");
+  console.log("This is the question html", data);
+  return data;
+}
 export async function getSolutionHTML(questionId: string) {
-  if (!questionId) return;
-  try {
-    const response = await api.get(
-      `/question_crud/get_question/${encodeURIComponent(
-        questionId
-      )}}/file/solution.html` // kept as-is (note the double `}}`)
-    );
-    return response.data;
-  } catch (error) {
-    console.log(error);
-  }
+  return await getQuestionFile(questionId, "solution.html");
 }
 
 export async function deleteQuestions(ids: string[]): Promise<void> {
   if (!ids.length) return;
-  await Promise.all(
-    ids.map((id) => api.delete(`/question_crud/delete_question/${id}`))
-  );
+  await Promise.all(ids.map((id) => api.delete(`/questions/${id}`)));
 }
 
 export async function getFiles(id: string) {
   try {
-    const res = await api.get(
-      `/question_crud/get_question/${encodeURIComponent(id)}/get_all_files`
+    const res = await api.get<SuccessFileResponse>(
+      `/questions/${encodeURIComponent(id)}/files_data`
     );
-    console.log("these are all the files");
-    console.log(res.data.files);
+    console.log("This is the response", res)
     return Array.isArray(res.data.files) ? res.data.files : [];
   } catch (error) {
     console.log(error);
@@ -81,7 +151,7 @@ export async function saveFileContent(
   id: string
 ): Promise<boolean> {
   try {
-    const result = await api.post("/question_crud/update_file_content", {
+    const result = await api.put("/questions/update_file", {
       question_id: id,
       filename,
       new_content: content,

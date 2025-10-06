@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MdDriveFolderUpload } from "react-icons/md";
-import JSZip, { file } from "jszip";
+import JSZip from "jszip";
 
 const formatBytes = (bytes: number, decimals = 2) => {
     if (bytes === 0) {

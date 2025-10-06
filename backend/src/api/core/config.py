@@ -57,7 +57,7 @@ class AppSettings(BaseSettings):
         case_sensitive = True
         env_file = ".env"
 
-
+# TODO Change this to an environment variable
 BASE_DIR = Path(__file__).resolve().parents[4]
 
 settings = AppSettings(

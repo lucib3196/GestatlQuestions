@@ -11,7 +11,7 @@ import useQuestionRender from "./utils/useQuestionRender";
 
 import { QuestionPanel } from "./QuestionPanel";
 import QuestionInfo from "../QuestionView/QuestionInfo";
-import { SolutionPanel } from "../QuestionView/SolutionPanel";
+import { SolutionPanel } from "../Question/SolutionPanel";
 import {
   SubmitAnswerButton,
   ResetQuestionButton,

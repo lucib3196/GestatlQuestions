@@ -25,7 +25,7 @@ type Options = {
 };
 
 import { roundToSigFigs } from "./mathHelpers";
-function flattenParams(
+export function flattenParams(
   obj: unknown,
   prefix = "",
   out: Record<any, any> = {},

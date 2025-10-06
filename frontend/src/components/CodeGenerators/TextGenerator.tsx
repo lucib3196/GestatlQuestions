@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import ModGenerators from "./BaseTemplate";
 import PopUpHelp from "../PopUpHelp";
-import api from "../../api/api";
+import api from "../../api/client";
 import { toast } from "react-toastify";
 import { AddQuestionInput } from "./AddQuestionInput";
 

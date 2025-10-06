@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MyModal } from "../Generic/MyModal";
+import { MyModal } from "../Base/MyModal";
 import QuestionCreationForm from "./QuestionForm";
 import { TableToolBarButton } from "../QuestionTable/TableToolBarButtons";
 import { FiUpload } from "react-icons/fi";

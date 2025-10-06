@@ -1,7 +1,7 @@
 // src/features/questions/TableToolbar.tsx
 import { TableToolBarButton } from "../QuestionTable/TableToolBarButtons";
 import { useState } from "react";
-import { MyModal } from "../Generic/MyModal";
+import { MyModal } from "../Base/MyModal";
 import { FiUpload } from "react-icons/fi";
 import CreateQuestion from "../CreateQuestion/CreateQuestion";
 import { MdDriveFolderUpload } from "react-icons/md";

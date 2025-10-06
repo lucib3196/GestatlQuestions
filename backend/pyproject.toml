@@ -1,0 +1,43 @@
+[project]
+name = "src"
+version = "0.1.0"
+description = "Project focused on generating content for mechanical engineering students"
+authors = [
+    {name = "Luciano Bermudez",email = "lucianobmecheng69@gmail.com"}
+]
+readme = "README.md"
+requires-python =">=3.13,<3.15"
+
+dependencies = [
+    "fastapi (>=0.118.0,<0.119.0)",
+    "uvicorn (>=0.37.0,<0.38.0)",
+    "sqlmodel (>=0.0.25,<0.0.26)",
+    "watchdog (>=6.0.0,<7.0.0)",
+    "langchain-core (>=0.3.76,<0.4.0)",
+    "pandas (>=2.3.2,<3.0.0)",
+    "dotenv (>=0.9.9,<0.10.0)",
+    "python-dotenv (>=1.1.1,<2.0.0)",
+    "pydantic (>=2.11.9,<3.0.0)",
+    "pydantic-settings (>=2.11.0,<3.0.0)",
+    "pytest (>=8.4.2,<9.0.0)",
+    "google-cloud-storage (>=3.4.0,<4.0.0)",
+    "firebase-admin (>=7.1.0,<8.0.0)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "python-jose (>=3.5.0,<4.0.0)",
+    "passlib[bcrypt] (>=1.7.4,<2.0.0)",
+    "langgraph (>=0.6.8,<0.7.0)",
+    "langchain-openai (>=0.3.33,<0.4.0)",
+    "langchain-community (>=0.3.30,<0.4.0)",
+    "pypdf (>=6.1.1,<7.0.0)",
+    "pymupdf (>=1.26.4,<2.0.0)",
+    "ipython (>=9.6.0,<10.0.0)",
+    "faiss-cpu (>=1.12.0,<2.0.0)",
+    "json5 (>=0.12.1,<0.13.0)",
+    "pyexecjs (>=1.5.1,<2.0.0)",
+    "pytest-asyncio (>=1.2.0,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

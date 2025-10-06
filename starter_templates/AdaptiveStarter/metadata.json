@@ -1,0 +1,10 @@
+{
+  "title": "Sample Adaptive Question",
+  "ai_generated": false,
+  "isAdaptive": true,
+  "createdBy": "user@email.com",
+  "user_id": null,
+  "topics": ["Math", "Computation"],
+  "languages": ["python", "javascript"],
+  "qtypes": ["Numerical"]
+}

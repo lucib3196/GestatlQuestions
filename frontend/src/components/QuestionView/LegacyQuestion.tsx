@@ -17,9 +17,9 @@ import { trueish } from "../../utils";
 
 // Components
 import QuestionInfo from "./QuestionInfo";
-import { SolutionPanel } from "./SolutionPanel";
+import { SolutionPanel } from "../Question/SolutionPanel";
 import showCorrectAnswer from "../QuestionRendering/utils/formatCorrectAnswersLegacy";
-import { Loading } from "../Generic/Loading";
+import { Loading } from "../Base/Loading";
 import { Error } from "../Generic/Error";
 import Alerts from "./QuestionAlerts";
 import ActionBar from "./LegacyActionBar";
@@ -34,8 +34,14 @@ const QuestionHtml: React.FC<{ html: string }> = ({ html }) => (
     />
 );
 
+
+
+
+
+
 export function LegacyQuestion() {
-    const { selectedQuestion } = useContext(RunningQuestionSettingsContext);
+    // const { selectedQuestion } = useContext(RunningQuestionSettingsContext);
+    const selectedQuestion = "ab019cad37e0460b802f1af1786822d3"
     const { codeRunningSettings } = useContext(QuestionSettingsContext);
 
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -65,8 +71,6 @@ export function LegacyQuestion() {
     );
 
     const questionTitle = qdata?.title;
-
-    console.log("This is the title outside", qdata?.title)
 
     const { questionHtml, solutionHTML } = useFormattedLegacy(
         selectedQuestion ?? null,
@@ -116,7 +120,7 @@ export function LegacyQuestion() {
 
     return (
         <MathJax>
-            <div className="max-w-5xl mx-auto my-8 px-4">
+            <div className="max-w-5xl mx-auto my-8 px-4 bg-white">
                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm">
                     <div className="p-4">
                         <QuestionInfo qmetadata={qdata} />

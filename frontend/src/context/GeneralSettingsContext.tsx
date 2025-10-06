@@ -1,35 +1,54 @@
 import React, { createContext, useState } from "react";
-
+import { getSettings } from "../api";
+import type { CodeLanguage, QuestionStorage, RenderingType } from "../types/settingsType";
 // Define proper union types
-type RenderingType = "legacy" | "new";
-type CodeRunningType = "javascript" | "python";
+
+
+import { useEffect } from "react";
 
 type GeneralSettingsContextType = {
-    renderingSettings: RenderingType;
-    setRenderingSettings: React.Dispatch<React.SetStateAction<RenderingType>>;
-    codeRunningSettings: CodeRunningType;
-    setCodeRunningSettings: React.Dispatch<React.SetStateAction<CodeRunningType>>;
+    renderingType: RenderingType;
+    setRenderingType: React.Dispatch<React.SetStateAction<RenderingType>>;
+    codeRunningSettings: CodeLanguage;
+    setCodeRunningSettings: React.Dispatch<React.SetStateAction<CodeLanguage>>;
+    questionStorage: QuestionStorage,
 };
 
 // Create context with default values
 export const QuestionSettingsContext = createContext<GeneralSettingsContextType>({
-    renderingSettings: "legacy",
-    setRenderingSettings: () => { },
+    renderingType: "legacy",
+    setRenderingType: () => { },
     codeRunningSettings: "javascript",
     setCodeRunningSettings: () => { },
+    questionStorage: null
+
 });
 
 const QuestionSettingsProvider = ({ children }: { children: React.ReactNode }) => {
-    const [renderingSettings, setRenderingSettings] = useState<RenderingType>("legacy");
-    const [codeRunningSettings, setCodeRunningSettings] = useState<CodeRunningType>("javascript");
+    const [renderingType, setRenderingType] = useState<RenderingType>("legacy");
+    const [codeRunningSettings, setCodeRunningSettings] = useState<CodeLanguage>("javascript");
+    const [questionStorage, setQuestionStorage] = useState<QuestionStorage>(null)
 
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const data = await getSettings();
+                setQuestionStorage(data);
+            } catch (err) {
+                console.error("Failed to fetch settings", err);
+            }
+        };
+
+        fetchSettings();
+    }, []); // run once 
     return (
         <QuestionSettingsContext.Provider
             value={{
-                renderingSettings,
-                setRenderingSettings,
+                renderingType,
+                setRenderingType,
                 codeRunningSettings,
                 setCodeRunningSettings,
+                questionStorage
             }}
         >
             {children}

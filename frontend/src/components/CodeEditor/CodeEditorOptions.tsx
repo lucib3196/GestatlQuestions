@@ -33,11 +33,11 @@ export const CodeEditorOptions: React.FC<CodeEditorOptionsProps> = ({
     return (
         <div className="flex flex-row justify-start gap-x-5">
             <SaveCodeButton onClick={saveCode} />
-            <CreateFileButton onClick={() => setShowAddFile((prev) => !prev)} />
-            <UploadFileButton onClick={() => setUploadFile((prev) => !prev)} />
+            {/* <CreateFileButton onClick={() => setShowAddFile((prev) => !prev)} />
+            <UploadFileButton onClick={() => setUploadFile((prev) => !prev)} /> */}
 
-            {showAddFile && <CreateFileModal showModal={setShowAddFile} />}
-            {uploadFile && <UploadFileModal setShowModal={setUploadFile} />}
+            {/* {showAddFile && <CreateFileModal showModal={setShowAddFile} />}
+            {uploadFile && <UploadFileModal setShowModal={setUploadFile} />} */}
         </div>
     );
 };

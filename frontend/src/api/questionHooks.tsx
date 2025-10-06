@@ -1,7 +1,7 @@
 // questionHooks.ts
 import { useState, useCallback, useEffect, useRef, useContext } from "react";
 import type { QuestionMeta, QuestionParams } from "../types/types";
-import api from "./api";
+import api from "./client";
 import LogsProvider, { CodeLogsSettings } from "../context/CodeLogsContext";
 
 
@@ -29,7 +29,7 @@ export function getQuestionMeta(selectedQuestion?: string | null): any {
         setLoading(true);
         setError(null);
         const res = await api.get(
-          `/question_crud/get_question_data_meta/${encodeURIComponent(
+          `/questions/${encodeURIComponent(
             selectedQuestion
           )}`,
           { signal: controller.signal }
