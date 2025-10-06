@@ -60,7 +60,7 @@ const escText = (s: any) =>
  *  Widget renderers
  * ========================= */
 
-export const pl_symbolic_input = ($: any, qdata: any, el: any): string => {
+export const pl_symbolic_input = ($: any, _: any, el: any): string => {
   const att = $(el).attr() || {};
   const name = att["answers-name"] ?? "symbolic";
   const label = att["label"] ?? "Answer";
@@ -274,7 +274,7 @@ export const pl_number_input = ($: any, qdata: any, el: any) => {
   const label = att["label"] ?? "Answer";
   const val =
     att["correct-answer"] ?? _.get(qdata, ["correct_answers", name], undefined);
-
+  console.log("Handle this val", val);
   const html = `
 <form class="pl-form pl-form--number answers" name="${escAttr(
     name
