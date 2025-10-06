@@ -47,7 +47,7 @@ export function QuestionView() {
     const { codeRunningSettings } = useContext(QuestionSettingsContext);
     const [showSolution, setShowSolution] = useState<boolean>(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const [showCodeEditor, setShowCodeEditor] = useState(false)
+    
 
     // Question metadata
     const {

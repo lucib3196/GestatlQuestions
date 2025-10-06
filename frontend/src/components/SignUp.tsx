@@ -15,7 +15,7 @@ export default function SignUp() {
     const [role, setRole] = useState<Role>("developer");
     const [roleAuth, setRoleAuth] = useState("")
     const [error, setError] = useState("");
-
+    console.log(error)
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
