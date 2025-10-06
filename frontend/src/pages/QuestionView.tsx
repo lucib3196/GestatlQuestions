@@ -23,10 +23,8 @@ import {
     PanelGroup,
     PanelResizeHandle,
 } from "react-resizable-panels";
-import CodeEditor from "../components/CodeEditor/CodeEditor";
 import { trueish } from "../utils";
 import DisplayCorrectAnswer from "../components/Question/DisplayCorrectAnswer";
-import QuestionCodeEditor from "../components/CodeEditor/QuestionCodeEditor";
 
 type SolutionProps = {
     solution?: string[] | null;
