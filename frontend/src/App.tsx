@@ -7,8 +7,6 @@ import { QuestionDBProvider } from "./context/QuestionContext";
 import NavBar from "./components/NavBar/NavBar";
 import { ToastContainer } from "react-toastify";
 import LogsProvider from "./context/CodeLogsContext";
-import QuestionRendererContainer from "./components/Question/DynamicQuestionMetaEditor";
-import UpdateQuestionMetaForm from "./components/Question/DynamicQuestionMetaEditor";
 import { QuestionView } from "./pages/QuestionView";
 
 
