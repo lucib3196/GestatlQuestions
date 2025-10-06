@@ -15,7 +15,7 @@ type QuestionStorageProps = {
 export const QuestionStorageSettings = ({ questionStorageType }: QuestionStorageProps) => {
     const [showHelp, setShowHelp] = useState<boolean>(false);
     const iconSize = "15px";
-    const theme = useTheme()
+    const [theme] = useTheme()
 
     return (
         <div className="flex-1 flex flex-col items-center gap-y-2">

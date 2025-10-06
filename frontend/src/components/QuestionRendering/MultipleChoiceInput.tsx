@@ -4,7 +4,7 @@ import Checkbox from "@mui/material/Checkbox";
 import { useState, useEffect } from "react";
 import type { MultipleChoiceOption } from "../../types/types";
 import CorrectIndicator from "../Generic/CorrectIndicator";
-
+import { trueish } from "../../utils";
 type MultipleChoiceProps = {
     name: string;
     label: string;
@@ -91,7 +91,7 @@ export const MultipleChoiceInput: React.FC<MultipleChoiceProps> = ({
                         >
                             <p className="text-gray-800">• {value.name}</p>
                             <CorrectIndicator
-                                answeredCorrectly={value.isCorrect}
+                                answeredCorrectly={trueish(value.isCorrect)}
                                 submitted={isSubmitted}
                             />
                         </div>

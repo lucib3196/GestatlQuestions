@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { Question } from "../../types/questionTypes";
-import QuestionMeta from "./QuestionMeta";
 import { MinimalToggle } from "../Toggles/MinimalToggle";
 import { MyButton } from "../Base/Button";
 import { MyModal } from "../Base/MyModal";
@@ -60,7 +59,7 @@ export function QuestionHeader({ question }: QuestionProps) {
       {/* Show metadata only in full view */}
       {viewMode === "full" && (
         <div className="grid grid-cols-2">
-          <QuestionMeta question={question} />
+          
 
           <div className="flex justify-end">
             <MyButton

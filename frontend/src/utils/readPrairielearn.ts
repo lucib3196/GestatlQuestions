@@ -11,8 +11,8 @@ export const processPrairielearnTags = (
   choiceParams: { fracQuestions?: [number, number] } = { fracQuestions: [1, 1] }
 ) => {
   try {
-    const $ = cheerio.load(html, { xmlMode: false, decodeEntities: false });
-
+    const $ = cheerio.load(html, { xmlMode: false });
+    console.log(qdir);
     let htmlString: string | undefined;
     let formattedSolution: string | undefined;
     const solutionsStrings: Record<string | number, string> = {};
@@ -74,7 +74,7 @@ export const processPrairielearnTags = (
 
     const mask = Array(numQuestions)
       .fill(0)
-      .map((v, i) => (i < numSelQuestions ? 1 : 0));
+      .map((_, i) => (i < numSelQuestions ? 1 : 0));
     mathhelper.shuffleArray(mask);
 
     $quests.each((i, el) => {
@@ -119,7 +119,7 @@ export const processPrairielearnTags = (
 
       solutionsStrings[res.level] = res.htmlString;
       formattedSolution = Object.entries(solutionsStrings)
-        .map(([k, v]) => `<div class='pl-hint'>${v}</div>`)
+        .map(([_, v]) => `<div class='pl-hint'>${v}</div>`)
         .join("");
       $(el).remove(); // if hints are collected elsewhere
     });
@@ -130,7 +130,7 @@ export const processPrairielearnTags = (
       }
       solutionsStrings[res.level] = res.htmlString;
       formattedSolution = Object.entries(solutionsStrings)
-        .map(([k, v]) => `<div class='pl-hint'>${v}</div>`)
+        .map(([_, v]) => `<div class='pl-hint'>${v}</div>`)
         .join("");
       $(el).remove(); // if hints are collected elsewhere
     });
