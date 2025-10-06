@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { CloseButton } from "../CloseButton";
-import api from "../../api/client";
-import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
 
-import { useContext } from "react";
 
 
 
@@ -14,7 +11,7 @@ type CreateFileProps = {
 
 function CreateFileModal({ showModal }: CreateFileProps) {
     const [fileName, setFileName] = useState("");
-    const { selectedQuestion } = useContext(RunningQuestionSettingsContext)
+    
     const handleSubmit = async () => {
         try {
             console.log("Submitted File")

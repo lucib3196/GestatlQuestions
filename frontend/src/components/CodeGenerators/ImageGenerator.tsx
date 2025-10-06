@@ -58,6 +58,8 @@ const FileUploadForm: React.FC = () => {
                     },
                 }
             );
+            console.log(response)
+
             toast.success("Generation Successful")
         } catch (error) {
             toast.error(`Error submitting form ${error}`);
