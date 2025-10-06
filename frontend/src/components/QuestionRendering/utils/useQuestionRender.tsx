@@ -11,7 +11,7 @@ import type {
 import { MultipleChoiceInput } from "../MultipleChoiceInput";
 import NumberInputDynamic from "../QuestionInputs/NumberInput";
 import applyPlaceHolders from '../../../utils/flattenParams';
-import Markdown from "react-markdown";
+
 
 function renderQuestionInputs(
   inputs: QuestionInput[],

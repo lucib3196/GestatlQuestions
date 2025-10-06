@@ -1,12 +1,11 @@
 // src/features/questions/TableToolbar.tsx
 import { TableToolBarButton } from "../QuestionTable/TableToolBarButtons";
 import { useState } from "react";
-import { MyModal } from "../Base/MyModal";
 import { FiUpload } from "react-icons/fi";
 import CreateQuestion from "../CreateQuestion/CreateQuestion";
 import { MdDriveFolderUpload } from "react-icons/md";
 
-const UploadQuestion: React.FC = () => {
+export const UploadQuestion: React.FC = () => {
     const handleClick = () => {
         const data = document.getElementById('file-input')?.click();
         console.log("This is the data", data)
@@ -51,7 +50,7 @@ const UploadQuestion: React.FC = () => {
 
 
 export const UploadQuestionButton = () => {
-    const [showPopUp, setShowPopUp] = useState(false)
+    const [_, setShowPopUp] = useState(false)
     return (
         <>
             <TableToolBarButton
