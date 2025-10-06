@@ -10,11 +10,11 @@ import Panel from "../Base/Panel";
 type SolutionPanelProps = {
     title?: string;
     subtitle?: string;
-    solution: Array<string>;
+    solution: Array<string> | Array<React.ReactNode>;
 };
 
 type SolutionListProps = {
-    solution: string[];
+    solution: string[] | Array<React.ReactNode>;
 };
 
 export function SolutionList({ solution }: SolutionListProps) {
@@ -38,7 +38,7 @@ export function SolutionList({ solution }: SolutionListProps) {
                                 ),
                             }}
                         >
-                            {val.trim()}
+                            {typeof val === "string" ? val.trim() : String(val)}
                         </Markdown>
                     </div>
                 </li>

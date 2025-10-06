@@ -7,7 +7,6 @@ import { MathJax } from "better-react-mathjax";
 
 // Context
 import { QuestionSettingsContext } from "../../context/GeneralSettingsContext";
-import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
 
 // API
 import { getAdaptiveParams, getQuestionMeta } from "../../api/questionHooks";

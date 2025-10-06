@@ -12,7 +12,7 @@ import { useQuestionContext } from "../../context/QuestionContext";
 // Components
 import AdaptiveDropDown from "./IndividualSearchForms/Adaptive";
 import QuestionTypeDropDown from "./IndividualSearchForms/QuestionType";
-import SearchTitle from "./IndividualSearchForms/SearchTitle";
+
 import { ShowAllQuestionsCheckBox } from "./IndividualSearchForms/ShowAllQuestions";
 
 
@@ -22,10 +22,10 @@ type QuestionFilterProps = {
 
 const QuestionFilter = ({ setSearchResults }: QuestionFilterProps) => {
     const ctx = useQuestionContext();
-    const [searchTitle, setSearchTitle] = useState<string>("")
+    const [searchTitle, _] = useState<string>("")
     const debouncedSearchTerm = useDebounce(searchTitle, 300)
     const [questionType, setQuestionType] = useState<string>("Numerical")
-    const [isSearching, setIsSearching] = useState<boolean>(false)
+    const [__, setIsSearching] = useState<boolean>(false)
 
     const qTypes = ["Numerical", "Multiple Choice", "Other"]
 
@@ -41,10 +41,12 @@ const QuestionFilter = ({ setSearchResults }: QuestionFilterProps) => {
                     },
                     showAllQuestions: ctx.showAllQuestions,
                 });
-                
+
+                console.log(retrievedQuestions)
+
             } catch (error) {
                 console.log("error")
-                setSearchResults([]);
+                setSearchResults();
 
             } finally {
                 setIsSearching(false); // optional: cleanup loading state
@@ -58,7 +60,7 @@ const QuestionFilter = ({ setSearchResults }: QuestionFilterProps) => {
             <ShowAllQuestionsCheckBox checked={ctx.showAllQuestions} onChange={(checked) => ctx.setShowAllQuestions(checked)} />
             <QuestionTypeDropDown disabled={ctx.showAllQuestions} questionType={questionType} questionTypeOptions={qTypes} setQuestionType={setQuestionType} />
             <AdaptiveDropDown adaptiveValue={ctx.isAdaptive} setIsAdaptive={ctx.setIsAdaptive} disabled={ctx.showAllQuestions} />
-            <SearchTitle searchTerm={searchTitle} setSearchTerm={setSearchTitle} isSearching={isSearching} disabled={ctx.showAllQuestions} />
+
         </div>
     )
 }

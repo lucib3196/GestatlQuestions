@@ -12,7 +12,7 @@ export default function SignUpForm({ setErrorMessage, onSuccess }: LogInFormProp
     const [firstName, setFirstName] = useState<string>("");
     const [lastName, setLastName] = useState<string>("")
     const [email, setEmail] = useState<string>("");
-    const [disabled, setDisabled] = useState<boolean>(false);
+    const [disabled, _] = useState<boolean>(false);
     const { signUp } = useContext(AuthContext);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -49,7 +49,7 @@ export default function SignUpForm({ setErrorMessage, onSuccess }: LogInFormProp
                         setFirstName(e.target.value);
                         setErrorMessage("");
                     }}
-                    className="mt-2 block w-full rounded-md bg-white/5 px-3 py-2 text-sm text-black placeholder:text-gray-500 outline outline-1 outline-black focus:outline-2 focus:outline-indigo-500"
+                    className="mt-2 block w-full rounded-md bg-white/5 px-3 py-2 text-sm text-black placeholder:text-gray-500   outline-black focus:outline-2 focus:outline-indigo-500"
                 />
             </div>
 
@@ -69,7 +69,7 @@ export default function SignUpForm({ setErrorMessage, onSuccess }: LogInFormProp
                         setLastName(e.target.value);
                         setErrorMessage("");
                     }}
-                    className="mt-2 block w-full rounded-md bg-white/5 px-3 py-2 text-sm text-black placeholder:text-gray-500 outline outline-1 outline-black focus:outline-2 focus:outline-indigo-500"
+                    className="mt-2 block w-full rounded-md bg-white/5 px-3 py-2 text-sm text-black placeholder:text-gray-500  outline-1outline outline-black focus:outline-2 focus:outline-indigo-500"
                 />
             </div>
 
@@ -89,7 +89,7 @@ export default function SignUpForm({ setErrorMessage, onSuccess }: LogInFormProp
                         setUserName(e.target.value);
                         setErrorMessage("");
                     }}
-                    className="mt-2 block w-full rounded-md bg-white/5 px-3 py-2 text-sm text-black placeholder:text-gray-500 outline outline-1 outline-black focus:outline-2 focus:outline-indigo-500"
+                    className="mt-2 block w-full rounded-md bg-white/5 px-3 py-2 text-sm text-black placeholder:text-gray-500  outline-black focus:outline-2 focus:outline-indigo-500"
                 />
             </div>
 
@@ -109,7 +109,7 @@ export default function SignUpForm({ setErrorMessage, onSuccess }: LogInFormProp
                         setEmail(e.target.value);
                         setErrorMessage("");
                     }}
-                    className="mt-2 block w-full rounded-md bg-white/5 px-3 py-2 text-sm text-black placeholder:text-gray-500 outline outline-1 outline-black focus:outline-2 focus:outline-indigo-500"
+                    className="mt-2 block w-full rounded-md bg-white/5 px-3 py-2 text-sm text-black placeholder:text-gray-500   outline-black focus:outline-2 focus:outline-indigo-500"
                 />
             </div>
 
@@ -130,7 +130,7 @@ export default function SignUpForm({ setErrorMessage, onSuccess }: LogInFormProp
                         setPassword(e.target.value);
                         setErrorMessage("");
                     }}
-                    className="mt-2 block w-full rounded-md bg-white/5 px-3 py-2 text-sm text-black placeholder:text-gray-500 outline outline-1 outline-black focus:outline-2 focus:outline-indigo-500"
+                    className="mt-2 block w-full rounded-md bg-white/5 px-3 py-2 text-sm text-black placeholder:text-gray-500  outline-black focus:outline-2 focus:outline-indigo-500"
                 />
             </div>
 

@@ -1,5 +1,5 @@
 import type { QuestionMeta } from "../../types/types";
-import { Pill, PillContainer } from "../Base/Pill";
+import { Pill } from "../Base/Pill";
 
 
 type GenericInfoProps = {

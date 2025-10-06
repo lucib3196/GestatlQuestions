@@ -1,12 +1,9 @@
-import RenderAdaptiveQuestion from "../components/QuestionRendering/RenderAdaptiveQuestion";
 import { RunningQuestionSettingsContext } from "../context/RunningQuestionContext";
-import { useContext, useState } from "react";
-import { Panel, PanelGroup } from "react-resizable-panels";
-import QuestionCodeEditor from "../components/CodeEditor/QuestionCodeEditor";
+import { useContext,  } from "react";
 
 function QuestionPage() {
     const { selectedQuestion } = useContext(RunningQuestionSettingsContext);
-    const [editCode, setEditCode] = useState(false);
+   
 
     if (!selectedQuestion) return null;
 

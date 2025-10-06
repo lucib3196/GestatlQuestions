@@ -8,7 +8,7 @@ type Renderer<T> = Partial<
     ) => JSX.Element }
 >;
 
-const questionRenderer: Renderer<Question> = {
+export const questionRenderer: Renderer<Question> = {
     title: (value, onChange) => (
         <input
             type="text"
@@ -82,6 +82,3 @@ const questionRenderer: Renderer<Question> = {
 
 
 
-function QuestionForm() {
-    const questionKeys: QuestionKeys = ["title", "ai_generated", "createdBy", "languages",]
-}

@@ -169,7 +169,7 @@ const InputForm: React.FC = () => {
                 )
             );
             const responses = await Promise.all(requests);
-
+            console.log(responses)
 
             toast.success("Generated successfully");
         } catch (error: any) {

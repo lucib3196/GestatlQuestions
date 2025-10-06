@@ -20,19 +20,22 @@ export const QuestionSettingsContext = createContext<GeneralSettingsContextType>
     setRenderingType: () => { },
     codeRunningSettings: "javascript",
     setCodeRunningSettings: () => { },
-    questionStorage: null
+    questionStorage: "local"
 
 });
 
 const QuestionSettingsProvider = ({ children }: { children: React.ReactNode }) => {
     const [renderingType, setRenderingType] = useState<RenderingType>("legacy");
     const [codeRunningSettings, setCodeRunningSettings] = useState<CodeLanguage>("javascript");
-    const [questionStorage, setQuestionStorage] = useState<QuestionStorage>(null)
+    const [questionStorage, setQuestionStorage] = useState<QuestionStorage>("local")
 
     useEffect(() => {
         const fetchSettings = async () => {
             try {
                 const data = await getSettings();
+                if (!data) {
+                    throw "Error could not determine settings"
+                }
                 setQuestionStorage(data);
             } catch (err) {
                 console.error("Failed to fetch settings", err);

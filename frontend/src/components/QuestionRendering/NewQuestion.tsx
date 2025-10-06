@@ -118,7 +118,7 @@ export function NewQuestion() {
             />
             {formattedInputs[idx]}
             {formattedSolution.length > 0 && showSolution ? (
-              <SolutionPanel solution={formattedSolution} />
+              <SolutionPanel solution={formattedSolution as React.ReactNode[]} />
             ) : null}
           </MathJax>
         </div>

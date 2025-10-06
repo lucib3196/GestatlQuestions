@@ -16,7 +16,7 @@ type MyButtonProps = {
     name: string;
     variant?: ButtonVariant;
     className?: string;
-    onClick?: () => void;
+    onClick?: (() => void) | ((e: any) => void);
     disabled?: boolean;
     btype?: "button" | "submit" | "reset";
 };

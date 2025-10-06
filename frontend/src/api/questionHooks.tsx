@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect, useRef, useContext } from "react";
 import type { QuestionMeta, QuestionParams } from "../types/types";
 import api from "./client";
-import LogsProvider, { CodeLogsSettings } from "../context/CodeLogsContext";
+import { CodeLogsSettings } from "../context/CodeLogsContext";
 
 
 // Kept name & logic the same (though this is a hook in practice)

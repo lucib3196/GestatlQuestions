@@ -1,10 +1,9 @@
 import type { QuestionParams } from "../types/types";
 import { roundToSigFigs } from "./mathHelpers";
 
-
 export function checkObject(obj: Object, errorMessage: string) {
   if (typeof obj !== "object" || obj === null || Array.isArray(obj)) {
-    console.log(errorMessage)
+    console.log(errorMessage);
     throw new TypeError(errorMessage);
   }
 }
@@ -41,7 +40,6 @@ export function replaceParameters(
       String(replacement)
     );
 
-
     updatedTemplate = updatedTemplate.replaceAll(
       legacyPlaceholder,
       String(replacement)
@@ -53,7 +51,7 @@ export function replaceParameters(
 
 function formatTemplateWithParams(
   template: string,
-  params: QuestionParams| {},
+  params: QuestionParams | {},
   round = false
 ): string {
   const requiredKeys = ["params", "correct_answers"] as const;
@@ -65,9 +63,12 @@ function formatTemplateWithParams(
 
   let templateCopy = template;
 
+  if (!('params' in params) || !('correct_answers' in params)) {
+    throw new TypeError("Error: The generate function did not return a valid QuestionParams object.");
+  }
 
   for (const key of requiredKeys) {
-    const paramGroup = params[key];
+    const paramGroup = (params as QuestionParams)[key];
 
     checkObject(
       paramGroup,
@@ -79,7 +80,7 @@ function formatTemplateWithParams(
       key,
       templateCopy,
       round,
-      params.sigfigs
+      (params as QuestionParams).sigfigs
     );
   }
 

@@ -23,10 +23,8 @@ import {
     PanelGroup,
     PanelResizeHandle,
 } from "react-resizable-panels";
-import CodeEditor from "../components/CodeEditor/CodeEditor";
 import { trueish } from "../utils";
 import DisplayCorrectAnswer from "../components/Question/DisplayCorrectAnswer";
-import QuestionCodeEditor from "../components/CodeEditor/QuestionCodeEditor";
 
 type SolutionProps = {
     solution?: string[] | null;
@@ -49,7 +47,7 @@ export function QuestionView() {
     const { codeRunningSettings } = useContext(QuestionSettingsContext);
     const [showSolution, setShowSolution] = useState<boolean>(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const [showCodeEditor, setShowCodeEditor] = useState(false)
+    
 
     // Question metadata
     const {

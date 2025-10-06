@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import UploadFilesButton from "../Generic/UploadFiles";
-import { MyButton } from "../Generic/Buttons";
+import { MyButton } from "../Base/Button";
 import type { QuestionFormData } from "../../types/types";
 import { createQuestion } from "../../api";
 
@@ -68,7 +68,7 @@ function QuestionCreationForm({ onFinish }: FormProps) {
     };
 
     const handleToggleChange = (
-        event: React.MouseEvent<HTMLElement>,
+        _: React.MouseEvent<HTMLElement>,
         newAlignment: string | null
     ) => {
         if (newAlignment !== null) {
@@ -96,6 +96,7 @@ function QuestionCreationForm({ onFinish }: FormProps) {
         try {
             const result = await createQuestion(submission);
             onFinish()
+            console.log(result)
 
         } catch (error) {
             console.log(error)

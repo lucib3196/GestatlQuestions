@@ -1,12 +1,10 @@
 // --- Core React ---
-import React, { useState } from "react";
+import React from "react";
 
 // --- API ---
 import { saveFileContent } from "../../api";
 
-import CreateFileModal from "./CreateFileModal";
-import { CreateFileButton, SaveCodeButton, UploadFileButton } from "../Generic/Buttons";
-import { UploadFileModal } from "./UploadFileModal";
+import { SaveCodeButton } from "../Generic/Buttons";
 
 
 // --- Props Interface ---
@@ -22,8 +20,7 @@ export const CodeEditorOptions: React.FC<CodeEditorOptionsProps> = ({
     fileContent,
     selectedQuestion,
 }) => {
-    const [showAddFile, setShowAddFile] = useState<boolean>(false);
-    const [uploadFile, setUploadFile] = useState<boolean>(false);
+
 
     const saveCode = async () => {
         const qs = String(selectedQuestion ?? "").trim();

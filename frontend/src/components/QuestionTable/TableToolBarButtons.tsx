@@ -1,6 +1,6 @@
 
 import clsx from "clsx";
-import type { IconType } from "react-icons/lib";
+
 
 type TableToolBarProps = {
     value: string;

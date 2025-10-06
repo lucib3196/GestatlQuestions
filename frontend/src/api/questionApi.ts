@@ -98,6 +98,7 @@ export const searchQuestions = async ({
 export const downloadStart = async () => {
   try {
     const data = await api.post("/questions/download_starter");
+    console.log(data);
   } catch (error) {
     console.log("There was an error", error);
     toast.error("Could not download Starter Template");
@@ -137,7 +138,7 @@ export async function getFiles(id: string) {
     const res = await api.get<SuccessFileResponse>(
       `/questions/${encodeURIComponent(id)}/files_data`
     );
-    console.log("This is the response", res)
+    console.log("This is the response", res);
     return Array.isArray(res.data.files) ? res.data.files : [];
   } catch (error) {
     console.log(error);
@@ -197,14 +198,17 @@ export async function createQuestion({
     formData.append("question", JSON.stringify(qData));
     formData.append("additional_metadata", JSON.stringify(additionalMeta));
 
-    files.forEach((file) => {
-      formData.append("files", file, file.name);
-    });
+    if (files) {
+      files.forEach((file) => {
+        formData.append("files", file, file.name);
+      });
+    }
 
     const response = await api.post(
       "/file_uploads/create_question/upload",
       formData
     );
+    console.log(response);
     toast.success("Question created succesfully");
   } catch (error) {
     console.log(error);
