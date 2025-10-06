@@ -85,7 +85,7 @@ export const pl_symbolic_input = ($: any, qdata: any, el: any): string => {
 export const pl_figure = ($: any, qname: string, el: any): string => {
   const att = $(el).attr() || {};
   const nm = att["file-name"] ?? "";
-  console.log("This is the question title", qname)
+  console.log("This is the question title", qname);
   const imFileName = `/questions/${qname}/${nm}`;
   const imgURL = imageUrl(imFileName);
   return `
