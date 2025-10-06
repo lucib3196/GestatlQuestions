@@ -1,10 +1,10 @@
-import type { FormEvent } from "react";
+
 import { MyButton } from "../Base/Button";
 
 type ButtonActionsProps = {
   isSubmitted: boolean;
   showSolution: () => void;
-  handleSubmit: (e: FormEvent) => void;
+  handleSubmit: () => void;
   generateVarient: () => void;
 };
 export function ButtonActions({
