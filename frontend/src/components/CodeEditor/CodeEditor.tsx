@@ -30,7 +30,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     // Handle changes in the editor
     const handleEditorChange: OnChange = useCallback(
         (value) => {
-            onChange?.(value);
+            onChange?.(value??"");
         },
         [onChange]
     );
