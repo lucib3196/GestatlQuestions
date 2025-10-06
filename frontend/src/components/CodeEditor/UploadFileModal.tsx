@@ -1,7 +1,6 @@
 import { MyModal } from "../Base/MyModal";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import api from "../../api/client";
-import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
 type UploadFileModalProps = {
     setShowModal: (visible: boolean) => void;
 };
@@ -10,7 +9,7 @@ type UploadFileModalProps = {
 export function UploadFileModal({ setShowModal }: UploadFileModalProps) {
     const [isImage, setIsImage] = useState(false);
     const [fileList, setFileList] = useState<FileList | null>(null);
-    const { selectedQuestion } = useContext(RunningQuestionSettingsContext);
+
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFileList(e.target.files);

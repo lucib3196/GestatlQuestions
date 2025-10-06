@@ -1,8 +1,6 @@
 //  React core
-import { useContext, useEffect, useMemo, useState } from "react";
-import { questionApi } from "../../api";
+import { useEffect, useMemo, useState } from "react";
 //  Context
-import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
 
 //  API
 import { getFiles } from "../../api";
