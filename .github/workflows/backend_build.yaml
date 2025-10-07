@@ -24,6 +24,7 @@ jobs:
       LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
       TAVILY_API_KEY: ${{secrets.TAVILY_API_KEY}}
       STORAGE_BUCKET: ${{secrets.STORAGE_BUCKET}}
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${{secrets.FIREBASE_SERVICE_ACCOUNT_JSON}}
 
     steps:
       - uses: actions/checkout@v5
@@ -36,7 +37,7 @@ jobs:
       - name: Decode Firebase config
         run: |
           mkdir -p secrets
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" | base64 --decode > secrets/gestaltquestiondata-firebase-adminsdk-fbsvc-21f3d16399.json
+          echo "${{ secrets.FIREBASE_B64 }}" | base64 --decode > secrets/gestaltquestiondata-firebase-adminsdk-fbsvc-21f3d16399.json
 
       - name: Install Poetry
         run: |
