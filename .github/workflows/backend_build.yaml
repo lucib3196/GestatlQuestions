@@ -41,7 +41,6 @@ jobs:
           ls -l
           cat gestaltquestiondata-firebase-adminsdk-fbsvc-21f3d16399.json
 
-
       - name: Install Poetry
         run: |
           python -m pip install --upgrade pip
