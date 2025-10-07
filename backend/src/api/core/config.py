@@ -69,7 +69,7 @@ settings = AppSettings(
         "http://127.0.0.1:5173",
     ],
     SECRET_KEY=os.getenv("SECRET_KEY", ""),
-    FIREBASE_PATH=str(firebase_env),
+    FIREBASE_PATH="Fake path",
     STORAGE_BUCKET=os.getenv("STORAGE_BUCKET"),
     QUESTIONS_DIRNAME="questions",  # relative folder name only
     QUESTIONS_PATH=BASE_DIR / "questions",  # absolute path resolved against BASE_DIR
