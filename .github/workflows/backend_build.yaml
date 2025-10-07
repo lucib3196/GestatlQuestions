@@ -36,7 +36,7 @@ jobs:
       - name: Decode Firebase credentials
         run: |
           mkdir -p secrets
-          echo '${{ secrets.FIREBASE_JSON }}' > secrets/gestaltquestiondata-firebase-adminsdk-fbsvc-21f3d16399.json
+          echo '${{ secrets.FIREBASE_JSON }}' > ${{vars.FIREBASE_JSON_PATH}}
           cd secrets
           ls -l
           cat gestaltquestiondata-firebase-adminsdk-fbsvc-21f3d16399.json
@@ -51,5 +51,5 @@ jobs:
         working-directory: ./backend
 
       - name: Run Test
-        run: poetry run python -m pytest src/app_test/unit/service/storage/test_local_storage_service.py -s
+        run: poetry run python -m pytest src/app_test/unit -s
         working-directory: ./backend
