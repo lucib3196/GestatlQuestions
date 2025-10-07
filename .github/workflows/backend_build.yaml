@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
+      
     defaults:
       run:
         working-directory: ./backend
@@ -19,6 +21,9 @@ jobs:
 
     env:
       MODE: "dev"
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
+      TAVILY_API_KEY: ${{secrets.TAVILY_API_KEY}}
 
     steps:
       - uses: actions/checkout@v5
