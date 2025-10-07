@@ -59,27 +59,31 @@ class FireCloudStorageService(StorageService):
             raise ValueError(f"Could not set up firebase credentials {str(e)}")
 
         self.bucket = storage.bucket(bucket_name)
-        self.base_dir: str = base_name
+        self.base_name: str = base_name
 
     # --- Directory Management ---
+    def get_base_path(self) -> str | Path:
+        return self.base_name
 
-    def get_directory(self, identifier: str) -> Path:
-        """Return the directory path for a given identifier."""
-        return Path(self.base_dir) / safe_dir_name(identifier)
+    def get_base_name(self) -> str:
+        return self.base_name
 
-    def create_directory(self, identifier: str) -> Blob:
-        """Create a 'directory' placeholder in Firebase (really just a blob prefix)."""
-        blob = self.bucket.blob(self.get_directory(identifier).as_posix())
-        blob.upload_from_string("")  # empty marker file
+    def get_storage_path(self, identifier: str) -> Path:
+        return Path(self.base_name) / safe_dir_name(identifier)
+
+    def create_storage_path(self, identifier: str) -> Blob:
+        blob = self.bucket.blob(self.get_relative_storage_path(identifier))
+        blob.upload_from_string("")
         return blob
 
-    def does_directory_exist(self, identifier: str) -> bool:
-        """Check whether a directory (prefix) exists in the bucket."""
-        prefix = f"{self.get_directory(identifier).as_posix().rstrip('/')}/"
-        logger.debug("Checking if blob exists with prefix %s", prefix)
-        blobs = list(self.bucket.list_blobs(prefix=prefix, max_results=1))
+    def get_relative_storage_path(self, identifier: str) -> str:
+        return self.get_storage_path(identifier).as_posix()
 
-        blob = self.bucket.blob(self.get_directory(identifier).as_posix())
+    def does_storage_path_exist(self, identifier: str) -> bool:
+        target = f"{self.get_relative_storage_path(identifier).rstrip('/')}/"
+        logger.debug("Checking if blob exists with target %s", target)
+        blobs = list(self.bucket.list_blobs(prefix=target, max_results=1))
+        blob = self.bucket.blob(target)
         if blob.exists():
             logger.debug("Found directory marker blob.")
             return True
@@ -89,14 +93,19 @@ class FireCloudStorageService(StorageService):
 
     def get_filepath(self, identifier: str, filename: str) -> Path:
         """Return the full path (prefix + identifier + filename)."""
-        return self.get_directory(identifier) / filename
+        return self.get_storage_path(identifier) / filename
 
     def get_blob(self, identifier: str, filename: str) -> Blob:
         """Return a Blob object for the given identifier and filename."""
         file_path = self.get_filepath(identifier, filename)
         return self.bucket.blob(file_path.as_posix())
 
-    # TODO: Add the public url for download
+    def get_file(self, identifier: str, filename: str) -> bytes | None:
+        """Download a file as bytes if it exists, else return None."""
+        if self.does_file_exist(identifier, filename):
+            return self.get_blob(identifier, filename).download_as_bytes()
+        return None
+
     def save_file(
         self,
         identifier: str,
@@ -123,40 +132,19 @@ class FireCloudStorageService(StorageService):
 
         return self.get_filepath(identifier, filename)
 
-    def get_file(self, identifier: str, filename: str) -> bytes | None:
-        """Download a file as bytes if it exists, else return None."""
-        if self.does_file_exist(identifier, filename):
-            return self.get_blob(identifier, filename).download_as_bytes()
-        return None
-
-    def get_files_names(self, identifier: str) -> List[str]:
-        """List all file names under the given identifier prefix."""
-        prefix = self.get_directory(identifier).as_posix()
+    def list_file_names(self, identifier: str) -> List[str]:
+        target = self.get_storage_path(identifier).as_posix()
         files: List[str] = []
-        for blob in self.bucket.list_blobs(prefix=prefix):
+        for blob in self.bucket.list_blobs(prefix=target):
             logger.debug("Found blob: %s", blob.name)
-            relative_path = blob.name[len(prefix) :]
+            relative_path = blob.name[len(target) :]
             if relative_path:
                 files.append(relative_path.split("/")[-1])
         return files
 
-    # --- Existence Checks ---
-
-    def does_file_exist(self, identifier: str, filename: str) -> bool:
-        """Check if a specific file exists in Firebase storage."""
-        return self.get_blob(identifier, filename).exists()
-
-    # --- File Deletion ---
-
-    def delete_file(self, identifier: str, filename: str) -> None:
-        """Delete a file if it exists."""
-        if self.does_file_exist(identifier, filename):
-            self.get_blob(identifier, filename).delete()
-
-    def delete_all(self, identifier: str) -> None:
-        """Delete all files under the given identifier prefix."""
-        prefix = self.get_directory(identifier).as_posix()
-        for blob in self.bucket.list_blobs(prefix=prefix):
+    def delete_storage(self, identifier: str) -> None:
+        target = self.get_storage_path(identifier).as_posix()
+        for blob in self.bucket.list_blobs(prefix=target):
             try:
                 logger.info("Deleting %s", blob.name)
                 blob.delete()
@@ -164,21 +152,22 @@ class FireCloudStorageService(StorageService):
                 logger.error("Blob not found, nothing to delete.")
         return None
 
-    def hard_delete(self) -> None:
-        """Delete all files under the base directory prefix."""
-        blobs = self.bucket.list_blobs(prefix=str(self.base_dir))
-        try:
-            for blob in blobs:
-                logger.info("Deleting %s", blob.name)
-                blob.delete()
-        except NotFound:
-            logger.warning("Base directory not found, nothing to delete.")
+    def delete_file(self, identifier: str, filename: str) -> None:
+        """Delete a file if it exists."""
+        if self.does_file_exist(identifier, filename):
+            self.get_blob(identifier, filename).delete()
+
+    # --- Existence Checks ---
+
+    def does_file_exist(self, identifier: str, filename: str) -> bool:
+        """Check if a specific file exists in Firebase storage."""
+        return self.get_blob(identifier, filename).exists()
 
     # --- Download Helpers ---
     # TODO: Make this a function of the filehandler
     async def download_question(self, identifier: str) -> io.BytesIO:
         """Download all files for an identifier as a zipped BytesIO stream."""
-        prefix = self.get_directory(identifier).as_posix()
+        prefix = self.get_storage_path(identifier).as_posix()
         blobs = list(self.bucket.list_blobs(prefix=prefix))
 
         if not blobs:
