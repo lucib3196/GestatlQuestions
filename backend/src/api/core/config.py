@@ -1,7 +1,7 @@
 # --- Standard Library ---
 import os
 from pathlib import Path
-from typing import Optional, Literal
+from typing import Optional, Literal, Union
 
 # --- Third-Party ---
 from dotenv import load_dotenv
@@ -29,13 +29,13 @@ class AppSettings(BaseSettings):
     DATABASE_URL: Optional[str] = None
 
     # Cloud Storage
-    FIREBASE_PATH: Optional[str | Path] = None
+    FIREBASE_PATH: Optional[Union[str, Path]] = None
     STORAGE_BUCKET: Optional[str] = None
 
     # Static Directory
-    QUESTIONS_DIRNAME: str | Path
-    QUESTIONS_PATH: str | Path
-    BASE_PATH: str | Path
+    QUESTIONS_DIRNAME: Union[str, Path]
+    QUESTIONS_PATH: Union[str, Path]
+    BASE_PATH: Union[str, Path]
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
@@ -73,6 +73,6 @@ settings = AppSettings(
     FIREBASE_PATH=(Path(BASE_DIR) / str(firebase_env)).resolve().as_posix(),
     STORAGE_BUCKET=os.getenv("STORAGE_BUCKET"),
     QUESTIONS_DIRNAME="questions",  # relative folder name only
-    QUESTIONS_PATH=BASE_DIR / "questions",  # absolute path resolved against BASE_DIR
+    QUESTIONS_PATH=BASE_DIR / "questions",  
     BASE_PATH=BASE_DIR,
 )
