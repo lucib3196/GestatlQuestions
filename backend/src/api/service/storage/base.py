@@ -58,7 +58,7 @@ class StorageService:
         """
         raise NotImplementedError("get_storage_path must be implemented by subclass")
 
-    def create_storage_path(self, identifier: str) -> Path:
+    def create_storage_path(self, identifier: str) -> Path | Blob:
         """
         Create a new directory or container for the given resource identifier.
 
@@ -74,7 +74,7 @@ class StorageService:
         """
         raise NotImplementedError("create_storage_path must be implemented by subclass")
 
-    def get_relative_storage_path(self, identifier: str) -> Path:
+    def get_relative_storage_path(self, identifier: str) -> str | Path:
         """
         Return the relative path (from the base directory) for the given identifier.
 
@@ -216,6 +216,9 @@ class StorageService:
             The name of the file to delete.
         """
         raise NotImplementedError("delete_file must be implemented by subclass")
+
+    def hard_delete(self):
+        raise NotImplementedError("hard_delete must be implemented by subclass")
 
     # -------------------------------------------------------------------------
     # Async download utilities
