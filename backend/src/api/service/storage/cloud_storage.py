@@ -46,9 +46,12 @@ class FireCloudStorageService(StorageService):
             bucket_name (str): Name of the Firebase (GCS) bucket.
             base_name (str): Base directory (prefix) for organizing files.
         """
-        if not firebase_admin._apps:
-            cred = credentials.Certificate(cred_path)
-            firebase_admin.initialize_app(cred, {"storageBucket": bucket_name})
+        try:
+            if not firebase_admin._apps:
+                cred = credentials.Certificate(cred_path)
+                firebase_admin.initialize_app(cred, {"storageBucket": bucket_name})
+        except Exception as e:
+            raise ValueError(f"Could not set up firebase credentials {str(e)}")
 
         self.bucket = storage.bucket(bucket_name)
         self.base_dir: str = base_name
