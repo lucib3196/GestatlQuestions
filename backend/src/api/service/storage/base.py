@@ -177,7 +177,7 @@ class StorageService:
         """
         raise NotImplementedError("save_file must be implemented by subclass")
 
-    def get_files_names(self, identifier: str) -> List[str]:
+    def list_file_names(self, identifier: str) -> List[str]:
         """
         List all file names under a given identifier directory.
 
@@ -191,7 +191,7 @@ class StorageService:
         List[str]
             A list of file names within the identifier directory.
         """
-        raise NotImplementedError("get_files_names must be implemented by subclass")
+        raise NotImplementedError("list_file_names must be implemented by subclass")
 
     def delete_storage(self, identifier: str) -> None:
         """

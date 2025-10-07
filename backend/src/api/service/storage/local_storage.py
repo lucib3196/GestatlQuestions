@@ -77,7 +77,7 @@ class LocalStorageService(StorageService):
         """
         return self.root / safe_dir_name(identifier)
 
-    def create_storate_path(self, identifier: str) -> Path:
+    def create_storage_path(self, identifier: str) -> Path:
         """
         Create a directory for the given identifier if it does not exist.
 
@@ -101,7 +101,7 @@ class LocalStorageService(StorageService):
         Returns:
             Path: Relative path to the storage directory.
         """
-        return self.get_storage_path(identifier).relative_to(self.root)
+        return self.get_storage_path(identifier).relative_to(self.root.parent)
 
     def does_storage_path_exist(self, identifier: str) -> bool:
         """
