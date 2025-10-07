@@ -35,5 +35,5 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      # - name: Run Test
-      #   run: poetry run python -m pytest
+      - name: Run Test
+        run: poetry run python -m pytest src/app_test/unit/service/storage/test_local_storage_service.py
