@@ -193,6 +193,7 @@ def dummy_session():
 @pytest.fixture
 def dummy_storage(tmp_path):
     path = Path(tmp_path) / "questions"
+    logger.debug("Initialized dummy storage with path %s ", path)
     return DummyStorage(path)
 
 

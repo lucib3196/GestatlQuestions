@@ -310,7 +310,7 @@ def update_question(
 # # Todo make this a bit more general and handle
 def filter_questions(
     session,
-    filters,
+    filters=None,
     partial_match=True,
     **kwargs,
 ):

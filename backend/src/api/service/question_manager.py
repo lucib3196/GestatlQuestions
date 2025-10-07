@@ -34,6 +34,7 @@ class QuestionManager:
         """Initialize with a storage backend and storage type."""
         self.storage = storage_service
         self.storage_type: Literal["local", "cloud"] = storage_type
+        self.question_dir = Path(self.storage.get_basename()).resolve().parent
         # TODO: Need to make this a bit better
         ## General file service mostly just used for the starter template download
         self.file_service = FileService(settings.BASE_PATH)
@@ -416,9 +417,15 @@ class QuestionManager:
         logger.info("Setting question path for %s", q.title)
         try:
             # Resolve directory path
-            dir_path = self.storage.get_directory(qname)
-
+            dir_path = self.storage.get_directory(qname).resolve()
             # Normalize to relative path under "/questions"
+
+            logger.debug(
+                "This is the base path and the dirpath %s, %s",
+                self.base_path,
+                dir_path,
+            )
+
             relative_path = dir_path.relative_to(
                 Path(self.storage.get_basename()).parent
             ).as_posix()

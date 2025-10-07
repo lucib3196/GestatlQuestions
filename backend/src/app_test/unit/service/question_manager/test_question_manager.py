@@ -1,6 +1,7 @@
 # Stdlib
 import uuid
 from pathlib import Path
+from src.api.core import logger
 
 # Third-party
 import pytest
@@ -20,7 +21,9 @@ from src.app_test.conftest import FakeQuestion, DummyStorage
 @pytest.fixture
 def local_qm(dummy_storage):
     """Provide a QuestionManager instance backed by DummyStorage."""
-    return QuestionManager(dummy_storage, storage_type="local")
+    qm = QuestionManager(storage_service=dummy_storage, storage_type="local")
+    logger.info("Initialized local question manager dummy %s", qm.question_dir)
+    return qm
 
 
 @pytest.fixture
@@ -56,6 +59,9 @@ def create_question(local_qm, dummy_session, monkeypatch, fake_qpayload):
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_initialization(local_qm, tmp_path):
+    logger.info("This is the question dir %s", local_qm.question_dir)
 
 
 @pytest.mark.asyncio
@@ -65,6 +71,7 @@ async def test_create_question(local_qm, tmp_path, create_question, fake_qpayloa
 
     # When: deriving the expected local path
     basename = local_qm.get_basename()
+    logger.info("Testing the create question local this is the base name %s", basename)
     expected_path = tmp_path / basename / fake_qpayload["title"]
 
     # Then: assertions
@@ -139,4 +146,3 @@ async def test_get_question_identifier(
     assert qidentifier == f'{fake_qpayload["title"]}_{fake_qpayload["id"]}'
     assert isinstance(qidentifier, str)
     assert qidentifier == Path(q2.local_path).name
-
