@@ -128,39 +128,24 @@ class DummyStorage(StorageService):
         self.path = Path(path)
         self.basename = self.path.name
 
-    def get_basename(self) -> str | Path:
-        return self.basename
+    def get_base_path(self) -> str | Path:
+        return self.path
 
-    def does_directory_exist(self, identifier: str) -> bool:
-        return self.get_directory(identifier).exists()
+    def get_base_name(self) -> str:
+        return self.path.name
 
-    def create_directory(self, identifier: str) -> Path:
-        Path.mkdir(self.get_directory(identifier), parents=True, exist_ok=True)
-        return self.get_directory(identifier)
-
-    def get_directory(self, identifier: str) -> Path:
+    def get_storage_path(self, identifier: str) -> Path:
         return self.path / identifier
 
+    def does_storage_path_exist(self, identifier: str) -> bool:
+        return self.path.exists()
+
+    def create_storage_path(self, identifier: str) -> Path:
+        Path.mkdir(self.get_storage_path(identifier), parents=True, exist_ok=True)
+        return self.get_storage_path(identifier)
+
     def get_filepath(self, identifier: str, filename: str) -> Path:
-        return super().get_filepath(identifier, filename)
-
-    def save_file(
-        self,
-        identifier: str,
-        filename: str,
-        content: str | dict | list | bytes | bytearray,
-        overwrite: bool = True,
-    ) -> Path:
-        return super().save_file(identifier, filename, content, overwrite)
-
-    def get_files_names(self, identifier: str) -> list[str]:
-        return super().get_files_names(identifier)
-
-    def get_file(self, identifier: str, filename: str) -> bytes | None:
-        return super().get_file(identifier, filename)
-
-    def delete_file(self, identifier: str, filename: str) -> None:
-        return super().delete_file(identifier, filename)
+        return self.get_storage_path(identifier) / filename
 
 
 def make_qc_stub(question: FakeQuestion, session: DummySession):
@@ -193,6 +178,7 @@ def dummy_session():
 @pytest.fixture
 def dummy_storage(tmp_path):
     path = Path(tmp_path) / "questions"
+    logger.debug("Initialized dummy storage with path %s ", path)
     return DummyStorage(path)
 
 
@@ -237,9 +223,7 @@ def mark_logs_in_test():
     in_test_ctx.reset(token)
 
 
-
 from src.app_test.fixtures.fixture_crud import *
-
 
 
 @pytest.fixture
@@ -325,8 +309,9 @@ def question_manager_local(local_storage):
 def question_manager_cloud(cloud_storage_service):
     return QuestionManager(cloud_storage_service, "cloud")
 
+
 @pytest.fixture(scope="function", params=["local", "cloud"])
-def question_manager(request,question_manager_local, question_manager_cloud):
+def question_manager(request, question_manager_local, question_manager_cloud):
     storage_type = request.param
     if storage_type == "cloud":
         qm = question_manager_cloud
@@ -335,6 +320,7 @@ def question_manager(request,question_manager_local, question_manager_cloud):
     else:
         raise ValueError("Incorrect storage type")
     return qm
+
 
 # ---------------------------------------------------------------------------
 # Debug Run
