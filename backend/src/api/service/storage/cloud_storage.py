@@ -182,7 +182,7 @@ class FireCloudStorageService(StorageService):
         with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as z:
             for blob in blobs:
                 # strip prefix to avoid double-nested paths
-                relative_name = blob.name[len(prefix):].lstrip("/")
+                relative_name = blob.name[len(prefix) :].lstrip("/")
                 data = blob.download_as_bytes()
                 z.writestr(f"downloads/{identifier}/{relative_name}", data)
                 manifest.append({"file": relative_name, "size": len(data)})

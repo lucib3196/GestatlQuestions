@@ -10,10 +10,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./backend
-
     strategy:
       matrix:
         python-version: [3.13]
@@ -28,25 +24,27 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{matrix.python-version}}
 
-      - name: Decode Firebase config
+      - name: Debug Check Directory
         run: |
-          mkdir -p ../secrets
-          echo "${{ secrets.FIREBASE_B64 }}" | base64 --decode > ../secrets/gestaltquestiondata-firebase-adminsdk-fbsvc-21f3d16399.json
-          echo "Listing contents of ../secrets:"
-          ls -l ../secrets
+          pwd
+          mkdir -p secrets
+      - name: Decode Firebase credentials
+        run: echo "${{ secrets.FIREBASE_B64 }}" | base64 --decode > secrets/firebase.json
 
       - name: Install Poetry
         run: |
           python -m pip install --upgrade pip
           pip install poetry
+        working-directory: ./backend
       - name: Install dependencies
         run: poetry install
+        working-directory: ./backend
 
       - name: Run Test
         run: poetry run python -m pytest src/app_test/unit/service/storage/test_local_storage_service.py
+        working-directory: ./backend
