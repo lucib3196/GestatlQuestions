@@ -35,6 +35,7 @@ class QuestionManager:
         self.storage = storage_service
         self.storage_type: Literal["local", "cloud"] = storage_type
         self.base_path = self.storage.get_base_path()
+        self.base_name = self.storage.get_base_name()
 
         # TODO: Need to make this a bit better
         ## General file service mostly just used for the starter template download
