@@ -191,19 +191,21 @@ async def test_filter_questions_meta(db_session, seed_questions):
     """
     # Filter by scalar (AND across keys in your implementation)
     only_false = await qcrud_service.filter_questions_meta(
-        db_session, ai_generated=False
+        db_session, ai_generated=False, filters=None
     )
     assert isinstance(only_false, list)
     assert len(only_false) == 1
     assert only_false[0]["ai_generated"] is False
 
     # Filter by title substring (case-insensitive, depends on your filter logic)
-    titled = await qcrud_service.filter_questions_meta(db_session, title="SomeTitle")
+    titled = await qcrud_service.filter_questions_meta(
+        db_session, title="SomeTitle", filters=None
+    )
     assert all("sometitle" in q["title"].lower() for q in titled)  # type: ignore # fix:ignore
 
     # Filter by relationship name (expects your filter to support .any on Topic.name)
     with_topics = await qcrud_service.filter_questions_meta(
-        db_session, topics=["Topic1", "topic2"]
+        db_session, topics=["Topic1", "topic2"], filters=None
     )
     # At least the full dict question should match (has both Topic1/Topic2); depending on OR/AND within-key,
     # this may include others. We assert that at least one has one of those topics.
