@@ -417,19 +417,13 @@ class QuestionManager:
     def set_question_path(self, q: Question, qname: str) -> Question:
         """Assign storage path (local or cloud) to a question object."""
         logger.info("Setting question path for %s", q.title)
+
+        relative_path = self.storage.get_relative_storage_path(qname)
+
+        if isinstance(relative_path, Path):
+            relative_path = relative_path.as_posix()
+
         try:
-            # Resolve directory path
-            dir_path = self.storage.get_storage_path(qname).resolve()
-            # Normalize to relative path under "/questions"
-
-            logger.debug(
-                "This is the base path and the dirpath %s, %s",
-                self.base_path,
-                dir_path,
-            )
-
-            relative_path = dir_path.relative_to(Path(self.base_path).parent).as_posix()
-
             # Assign based on storage type
             if self.storage_type == "local":
                 q.local_path = relative_path

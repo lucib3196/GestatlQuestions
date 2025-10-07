@@ -74,7 +74,7 @@ class StorageService:
         """
         raise NotImplementedError("create_storage_path must be implemented by subclass")
 
-    def get_relative_storage_path(self, identifier: str) -> Path | str:
+    def get_relative_storage_path(self, identifier: str) -> str | Path:
         """
         Return the relative path (from the base directory) for the given identifier.
 
