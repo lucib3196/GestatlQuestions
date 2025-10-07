@@ -9,6 +9,7 @@ from firebase_admin import credentials, storage
 from google.cloud.exceptions import NotFound
 from google.cloud.storage.blob import Blob
 from src.api.core import logger
+
 # --- Internal ---
 from .base import StorageService
 from src.api.core import settings, logger
@@ -23,6 +24,7 @@ if not settings.FIREBASE_PATH:
     raise ValueError("Firebase Credentials Not Found")
 
 logger.debug("This is the firebase path %s", settings.FIREBASE_PATH)
+
 
 class FireCloudStorageService(StorageService):
     """
@@ -48,6 +50,8 @@ class FireCloudStorageService(StorageService):
         """
         try:
             if not firebase_admin._apps:
+                if isinstance(cred_path, Path):
+                    cred_path = cred_path.as_posix()
                 cred = credentials.Certificate(cred_path)
                 firebase_admin.initialize_app(cred, {"storageBucket": bucket_name})
         except Exception as e:
