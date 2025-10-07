@@ -254,13 +254,15 @@ class QuestionManager:
             logger.error("Failed to get file %s for question %s", filename, question_id)
             raise
 
-    async def get_all_files(self, question_id: str | UUID, session: SessionDep):
+    async def get_all_files(
+        self, question_id: str | UUID, session: SessionDep
+    ) -> List[str]:
         """Retrieve all file names for a given question."""
         try:
             qidentifier = await self.get_question_identifier(question_id, session)
             if not qidentifier:
                 raise ValueError("Could not resolve question identifier")
-            return self.storage.get_files_names(qidentifier)
+            return self.storage.list_file_names(qidentifier)
         except Exception as e:
             logger.error("Failed to get files for question %s", question_id)
             raise
