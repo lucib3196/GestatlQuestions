@@ -8,7 +8,7 @@ import firebase_admin
 from firebase_admin import credentials, storage
 from google.cloud.exceptions import NotFound
 from google.cloud.storage.blob import Blob
-from src.api.core
+from src.api.core import logger
 # --- Internal ---
 from .base import StorageService
 from src.api.core import settings, logger
