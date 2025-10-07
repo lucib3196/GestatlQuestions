@@ -62,6 +62,9 @@ class AppSettings(BaseSettings):
 BASE_DIR = Path(__file__).resolve().parents[4]
 firebase_env = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
 
+
+
+
 settings = AppSettings(
     PROJECT_NAME="gestalt_question_review",
     BACKEND_CORS_ORIGINS=[
@@ -69,7 +72,7 @@ settings = AppSettings(
         "http://127.0.0.1:5173",
     ],
     SECRET_KEY=os.getenv("SECRET_KEY", ""),
-    FIREBASE_PATH="Fake path",
+    FIREBASE_PATH=str(firebase_env),
     STORAGE_BUCKET=os.getenv("STORAGE_BUCKET"),
     QUESTIONS_DIRNAME="questions",  # relative folder name only
     QUESTIONS_PATH=BASE_DIR / "questions",  # absolute path resolved against BASE_DIR
