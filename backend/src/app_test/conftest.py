@@ -135,6 +135,9 @@ class DummyStorage(StorageService):
     def get_base_name(self) -> str:
         return self.path.name
 
+    def get_relative_storage_path(self, identifier: str) -> str | Path:
+        return self.get_storage_path(identifier).relative_to(self.path.parent)
+
     def get_storage_path(self, identifier: str) -> Path:
         return self.path / identifier
 
