@@ -6,31 +6,36 @@ import json
 
 # --- Internal ---
 
+
 @pytest.mark.asyncio
-async def test_get_question(question_manager, db_session, question_payload_minimal_dict):
-    q1 = await question_manager.create_question(question_payload_minimal_dict, db_session)
+async def test_get_question(
+    question_manager, db_session, question_payload_minimal_dict
+):
+    q1 = await question_manager.create_question(
+        question_payload_minimal_dict, db_session
+    )
     qretrieved = await question_manager.get_question(q1.id, db_session)
     assert qretrieved == q1
 
 
 @pytest.mark.asyncio
-async def test_get_question_identifier(question_manager, db_session, question_payload_minimal_dict):
-    q1 = await question_manager.create_question(question_payload_minimal_dict, db_session)
+async def test_get_question_identifier(
+    question_manager, db_session, question_payload_minimal_dict
+):
+    q1 = await question_manager.create_question(
+        question_payload_minimal_dict, db_session
+    )
     identifier = await question_manager.get_question_identifier(q1.id, db_session)
-    assert identifier == q1.title
+    assert identifier == f"{q1.title}_{q1.id}"
 
 
 @pytest.mark.asyncio
-async def test_get_question_identifier_duplicate(question_manager, db_session, question_payload_minimal_dict):
-    await question_manager.create_question(question_payload_minimal_dict, db_session)
-    q2 = await question_manager.create_question(question_payload_minimal_dict, db_session)
-    identifier = await question_manager.get_question_identifier(q2.id, db_session)
-    assert identifier == f"{q2.title}_{q2.id}"
-
-
-@pytest.mark.asyncio
-async def test_get_file(question_manager, db_session, question_payload_minimal_dict, file_data_payload):
-    q1 = await question_manager.create_question(question_payload_minimal_dict, db_session)
+async def test_get_file(
+    question_manager, db_session, question_payload_minimal_dict, file_data_payload
+):
+    q1 = await question_manager.create_question(
+        question_payload_minimal_dict, db_session
+    )
     await question_manager.save_files_to_question(q1.id, db_session, file_data_payload)
 
     for f in file_data_payload:
@@ -43,8 +48,12 @@ async def test_get_file(question_manager, db_session, question_payload_minimal_d
 
 
 @pytest.mark.asyncio
-async def test_get_all_files(question_manager, db_session, question_payload_minimal_dict, file_data_payload):
-    q1 = await question_manager.create_question(question_payload_minimal_dict, db_session)
+async def test_get_all_files(
+    question_manager, db_session, question_payload_minimal_dict, file_data_payload
+):
+    q1 = await question_manager.create_question(
+        question_payload_minimal_dict, db_session
+    )
     await question_manager.save_files_to_question(q1.id, db_session, file_data_payload)
 
     all_files = await question_manager.get_all_files(q1.id, db_session)

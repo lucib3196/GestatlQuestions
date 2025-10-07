@@ -20,30 +20,14 @@ async def test_create_question(
     logger.info(f"Testing QM creation this is the created question {qcreated}")
 
     if question_manager.storage_type == "cloud":
-        expected = Path("integration_test") / question_payload_minimal_dict["title"]
-        assert Path(qcreated.blob_name) == expected
-    else:  # local
-        expected = tmp_path / "questions" / question_payload_minimal_dict["title"]
-        assert Path(qcreated.local_path) == expected
-
-
-@pytest.mark.asyncio
-async def test_create_question_duplicate(
-    question_manager, db_session, question_payload_minimal_dict, tmp_path
-):
-    await question_manager.create_question(question_payload_minimal_dict, db_session)
-    q2 = await question_manager.create_question(
-        question_payload_minimal_dict, db_session
-    )
-
-    if question_manager.storage_type == "cloud":
         expected = (
             Path("integration_test")
-            / f"{question_payload_minimal_dict['title']}_{q2.id}"
+            / f"{question_payload_minimal_dict["title"]}_{qcreated.id}"
         )
-        assert Path(q2.blob_name) == expected
+        assert Path(qcreated.blob_name) == expected
     else:  # local
         expected = (
-            tmp_path / "questions" / f"{question_payload_minimal_dict['title']}_{q2.id}"
+            Path("questions")
+            / f"{question_payload_minimal_dict["title"]}_{qcreated.id}"
         )
-        assert Path(q2.local_path) == expected
+        assert Path(qcreated.local_path) == Path(expected)
