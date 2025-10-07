@@ -36,8 +36,10 @@ jobs:
 
       - name: Decode Firebase config
         run: |
-          mkdir -p secrets
-          echo "${{ secrets.FIREBASE_B64 }}" | base64 --decode > secrets/gestaltquestiondata-firebase-adminsdk-fbsvc-21f3d16399.json
+          mkdir -p ../secrets
+          echo "${{ secrets.FIREBASE_B64 }}" | base64 --decode > ../${{secrets.FIREBASE_SERVICE_ACCOUNT_JSON}}
+          echo "Listing contents of secrets:"
+          ls -l ../secrets
 
       - name: Install Poetry
         run: |
