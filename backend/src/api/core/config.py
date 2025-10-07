@@ -63,8 +63,6 @@ BASE_DIR = Path(__file__).resolve().parents[4]
 firebase_env = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
 
 
-
-
 settings = AppSettings(
     PROJECT_NAME="gestalt_question_review",
     BACKEND_CORS_ORIGINS=[
