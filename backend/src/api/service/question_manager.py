@@ -34,7 +34,8 @@ class QuestionManager:
         """Initialize with a storage backend and storage type."""
         self.storage = storage_service
         self.storage_type: Literal["local", "cloud"] = storage_type
-        self.question_dir = Path(self.storage.get_basename()).resolve().parent
+        self.base_path = self.storage.get_base_path()
+
         # TODO: Need to make this a bit better
         ## General file service mostly just used for the starter template download
         self.file_service = FileService(settings.BASE_PATH)
@@ -65,8 +66,8 @@ class QuestionManager:
             qname = f"{qname}_{q.id}"
 
             # Create directory if it doesn’t exist already
-            if not exists and not self.storage.does_directory_exist(qname):
-                self.storage.create_directory(qname)
+            if not exists and not self.storage.does_storage_path_exist(qname):
+                self.storage.create_storage_path(qname)
 
             # Point DB record to the correct directory
             q = self.set_question_path(q, qname)
@@ -298,7 +299,7 @@ class QuestionManager:
             if not qidentifier:
                 raise ValueError("Could not resolve question identifier")
             await qc.delete_question_by_id(question_id, session)
-            self.storage.delete_all(qidentifier)
+            self.storage.delete_storage(qidentifier)
             return True
         except Exception as e:
             logger.error("Failed to delete question %s: %s", question_id, e)
@@ -417,7 +418,7 @@ class QuestionManager:
         logger.info("Setting question path for %s", q.title)
         try:
             # Resolve directory path
-            dir_path = self.storage.get_directory(qname).resolve()
+            dir_path = self.storage.get_storage_path(qname).resolve()
             # Normalize to relative path under "/questions"
 
             logger.debug(
@@ -426,9 +427,7 @@ class QuestionManager:
                 dir_path,
             )
 
-            relative_path = dir_path.relative_to(
-                Path(self.storage.get_basename()).parent
-            ).as_posix()
+            relative_path = dir_path.relative_to(Path(self.base_path).parent).as_posix()
 
             # Assign based on storage type
             if self.storage_type == "local":
@@ -457,7 +456,7 @@ class QuestionManager:
     def get_basename(self) -> str | Path:
         """Return the base directory/bucket name from storage."""
         try:
-            return self.storage.get_basename()
+            return self.storage.get_base_path()
         except Exception as e:
             logger.error("Failed to get basename from storage: %s", e)
             raise

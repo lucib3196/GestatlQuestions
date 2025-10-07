@@ -22,7 +22,7 @@ from src.app_test.conftest import FakeQuestion, DummyStorage
 def local_qm(dummy_storage):
     """Provide a QuestionManager instance backed by DummyStorage."""
     qm = QuestionManager(storage_service=dummy_storage, storage_type="local")
-    logger.info("Initialized local question manager dummy %s", qm.question_dir)
+    logger.info("Initialized local question manager dummy %s", qm.base_path)
     return qm
 
 
