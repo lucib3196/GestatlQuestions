@@ -15,7 +15,6 @@ async def test_running_server_js_check_response_model(
         question_id=question.id,
         code_language="javascript",
         session=db_session,
-        qm=
     )
     assert CodeRunResponse.model_validate(result)
 
