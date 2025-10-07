@@ -2,12 +2,14 @@
 import json
 from pathlib import Path
 from typing import List, Tuple, Union
+import os
 
 # --- Third-Party ---
 import firebase_admin
 from firebase_admin import credentials, storage
 from google.cloud.exceptions import NotFound
 from google.cloud.storage.blob import Blob
+from src.api.core import logger
 
 # --- Internal ---
 from .base import StorageService
@@ -21,6 +23,8 @@ from src.api.service.file_handler.content_type import get_content_type
 # Define the credentials
 if not settings.FIREBASE_PATH:
     raise ValueError("Firebase Credentials Not Found")
+
+logger.debug("This is the firebase path %s", settings.FIREBASE_PATH)
 
 
 class FireCloudStorageService(StorageService):
@@ -45,9 +49,14 @@ class FireCloudStorageService(StorageService):
             bucket_name (str): Name of the Firebase (GCS) bucket.
             base_name (str): Base directory (prefix) for organizing files.
         """
-        if not firebase_admin._apps:
-            cred = credentials.Certificate(cred_path)
-            firebase_admin.initialize_app(cred, {"storageBucket": bucket_name})
+        try:
+            if not firebase_admin._apps:
+                cred_path = os.path.normpath(cred_path)
+
+                cred = credentials.Certificate(cred_path)
+                firebase_admin.initialize_app(cred, {"storageBucket": bucket_name})
+        except Exception as e:
+            raise ValueError(f"Could not set up firebase credentials {str(e)}")
 
         self.bucket = storage.bucket(bucket_name)
         self.base_dir: str = base_name
@@ -182,7 +191,7 @@ class FireCloudStorageService(StorageService):
         with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as z:
             for blob in blobs:
                 # strip prefix to avoid double-nested paths
-                relative_name = blob.name[len(prefix):].lstrip("/")
+                relative_name = blob.name[len(prefix) :].lstrip("/")
                 data = blob.download_as_bytes()
                 z.writestr(f"downloads/{identifier}/{relative_name}", data)
                 manifest.append({"file": relative_name, "size": len(data)})

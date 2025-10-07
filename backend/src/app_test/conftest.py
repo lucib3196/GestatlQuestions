@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
 from uuid import UUID
-
+import os
 # Testing logs
 from src.api.core.logging import in_test_ctx
 
@@ -271,7 +271,7 @@ def cloud_storage_service():
     """
     Provides a FireCloudStorageService connected to the configured test bucket.
     """
-    cred_path = settings.FIREBASE_PATH
+    cred_path = Path(os.path.normpath(str(settings.FIREBASE_PATH))).resolve()
     bucket_name = settings.STORAGE_BUCKET
     base_name = "integration_test"
 
