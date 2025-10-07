@@ -34,7 +34,10 @@ jobs:
           pwd
           mkdir -p secrets
       - name: Decode Firebase credentials
-        run: echo "${{ secrets.FIREBASE_B64 }}" | base64 --decode > secrets/firebase.json
+        run: |
+          echo "${{ secrets.FIREBASE_B64 }}" | base64 --decode > secrets/firebase.json
+          cd secrets
+          ls
 
       - name: Install Poetry
         run: |
