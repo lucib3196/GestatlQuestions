@@ -39,7 +39,7 @@ jobs:
           echo "${{ secrets.FIREBASE_B64 }}" | base64 --decode > secrets/gestaltquestiondata-firebase-adminsdk-fbsvc-21f3d16399.json
           cd secrets
           ls -l
-
+          cat gestaltquestiondata-firebase-adminsdk-fbsvc-21f3d16399.json
 
       - name: Install Poetry
         run: |
@@ -51,5 +51,5 @@ jobs:
         working-directory: ./backend
 
       - name: Run Test
-        run: poetry run python -m pytest src/app_test/unit/service/storage/test_local_storage_service.py
+        run: poetry run python -m pytest src/app_test/unit/service/storage/test_local_storage_service.py -s
         working-directory: ./backend

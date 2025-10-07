@@ -8,7 +8,7 @@ import firebase_admin
 from firebase_admin import credentials, storage
 from google.cloud.exceptions import NotFound
 from google.cloud.storage.blob import Blob
-
+from src.api.core
 # --- Internal ---
 from .base import StorageService
 from src.api.core import settings, logger
@@ -22,6 +22,7 @@ from src.api.service.file_handler.content_type import get_content_type
 if not settings.FIREBASE_PATH:
     raise ValueError("Firebase Credentials Not Found")
 
+logger.debug("This is the firebase path %s", settings.FIREBASE_PATH)
 
 class FireCloudStorageService(StorageService):
     """
