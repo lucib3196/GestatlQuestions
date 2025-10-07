@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 from typing import List, Tuple, Union
+import os
 
 # --- Third-Party ---
 import firebase_admin
@@ -50,8 +51,10 @@ class FireCloudStorageService(StorageService):
         """
         try:
             if not firebase_admin._apps:
+                cred_path = os.path.normpath(str(cred_path))
                 cred_path = Path(cred_path).resolve()
-                cred = credentials.Certificate(cred_path.as_posix())
+                logger.debug(f"Resolved Firebase path: {cred_path}")
+                cred = credentials.Certificate(str(cred_path))
                 firebase_admin.initialize_app(cred, {"storageBucket": bucket_name})
         except Exception as e:
             raise ValueError(f"Could not set up firebase credentials {str(e)}")
