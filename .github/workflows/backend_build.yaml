@@ -10,7 +10,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-      
     defaults:
       run:
         working-directory: ./backend
@@ -24,6 +23,8 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
       TAVILY_API_KEY: ${{secrets.TAVILY_API_KEY}}
+      STORAGE_BUCKET: ${{secrets.STORAGE_BUCKET}}
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${{secrets.FIREBASE_SERVICE_ACCOUNT_JSON}}
 
     steps:
       - uses: actions/checkout@v5
