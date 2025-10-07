@@ -52,7 +52,8 @@ class FireCloudStorageService(StorageService):
         try:
             if not firebase_admin._apps:
                 cred_path = os.path.normpath(cred_path)
-                cred = credentials.Certificate(str(cred_path))
+
+                cred = credentials.Certificate(cred_path)
                 firebase_admin.initialize_app(cred, {"storageBucket": bucket_name})
         except Exception as e:
             raise ValueError(f"Could not set up firebase credentials {str(e)}")
