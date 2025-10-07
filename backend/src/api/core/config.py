@@ -60,6 +60,8 @@ class AppSettings(BaseSettings):
 
 # TODO Change this to an environment variable
 BASE_DIR = Path(__file__).resolve().parents[4]
+firebase_env = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+firebase_env = os.path.normpath(str(firebase_env))
 
 settings = AppSettings(
     PROJECT_NAME="gestalt_question_review",
@@ -68,7 +70,7 @@ settings = AppSettings(
         "http://127.0.0.1:5173",
     ],
     SECRET_KEY=os.getenv("SECRET_KEY", ""),
-    FIREBASE_PATH=Path(BASE_DIR) / str(os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")),
+    FIREBASE_PATH=(Path(BASE_DIR) / firebase_env).resolve(),
     STORAGE_BUCKET=os.getenv("STORAGE_BUCKET"),
     QUESTIONS_DIRNAME="questions",  # relative folder name only
     QUESTIONS_PATH=BASE_DIR / "questions",  # absolute path resolved against BASE_DIR
