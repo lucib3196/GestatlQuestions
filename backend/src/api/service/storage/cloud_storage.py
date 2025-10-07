@@ -24,8 +24,6 @@ from src.api.service.file_handler.content_type import get_content_type
 if not settings.FIREBASE_PATH:
     raise ValueError("Firebase Credentials Not Found")
 
-logger.debug("This is the firebase path %s", settings.FIREBASE_PATH)
-
 
 class FireCloudStorageService(StorageService):
     """
@@ -156,6 +154,16 @@ class FireCloudStorageService(StorageService):
         """Delete a file if it exists."""
         if self.does_file_exist(identifier, filename):
             self.get_blob(identifier, filename).delete()
+
+    def hard_delete(self) -> None:
+        """Delete all files under the base directory prefix."""
+        blobs = self.bucket.list_blobs(prefix=str(self.base_name))
+        try:
+            for blob in blobs:
+                logger.info("Deleting %s", blob.name)
+                blob.delete()
+        except NotFound:
+            logger.warning("Base directory not found, nothing to delete.")
 
     # --- Existence Checks ---
 
