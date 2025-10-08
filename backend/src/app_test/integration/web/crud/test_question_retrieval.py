@@ -12,15 +12,18 @@ from src.api.core import logger
 from src.utils.test_utils import prepare_file_uploads
 from src.api.response_models import FileData
 from src.utils.normalization_utils import to_serializable
-from src.api.response_models import QuestionReadResponse, SuccessFileResponse, FileData
+from src.api.response_models import (
+    QuestionReadResponse,
+    SuccessFileResponse,
+    FileData,
+    SuccessDataResponse,
+)
 from typing import Literal
 
 QUESTION_KEYS = ["title", "ai_generated", "isAdaptive", "createdBy"]
 
 
 # Helpers
-
-
 def normalize_content(content):
     """Ensure content is a dict for reliable comparison."""
     if isinstance(content, str):
@@ -56,6 +59,14 @@ def retrieve_question(client, qid):
     validated = QuestionReadResponse.model_validate(response_data)
     assert validated
     return validated.question
+
+
+def retrieve_single_file(client, qid, filename):
+    resp = client.get(f"/questions/{qid}/files/{filename}")
+    assert resp.status_code == 200, resp.text
+    response_data = resp.json()
+    validated = SuccessDataResponse.model_validate(response_data)
+    return normalize_content(validated.data)
 
 
 def retrieve_files(
@@ -178,47 +189,29 @@ def test_list_question_files_data(
     logger.info("File data validated successfully for %d files.", len(retrieved_files))
 
 
-# @pytest.mark.parametrize("file_fixture", ["file_data_payload", "question_file_payload"])
-# def test_read_question_file(
-#     request, test_client, db_session, question_payload_minimal_dict, file_fixture
-# ):
-#     """
-#     Ensure that each uploaded file can be retrieved individually by filename.
-#     """
-#     # Arrange
-#     data = {"question": json.dumps(question_payload_minimal_dict)}
-#     files_data: List[FileData] = request.getfixturevalue(file_fixture)
-#     files = prepare_file_uploads(files_data)
-#     creation_resp = test_client.post("/questions/", data=data, files=files)
+@pytest.mark.parametrize("file_fixture", ["file_data_payload", "question_file_payload"])
+def test_read_question_file(
+    request, test_client, db_session, question_payload_minimal_dict, file_fixture
+):
+    """
+    Ensure that each uploaded file can be retrieved individually by filename.
+    """
+    files_data: List[FileData] = request.getfixturevalue(file_fixture)
+    files = prepare_file_uploads(files_data)
 
-#     body = creation_resp.json()
-#     qid = body["question"]["id"]
+    # Create the question with attached files
+    question = create_question(
+        test_client,
+        payload=question_payload_minimal_dict,
+        files=files,
+    )
 
-#     logger.debug("Created question: %s", body["question"])
-
-#     # Act & Assert
-#     for f in files_data:
-#         retrieval_resp = test_client.get(f"/questions/{qid}/files/{f.filename}")
-#         assert retrieval_resp.status_code == 200
-
-#         retrieved_content = retrieval_resp.json()
-
-#         # Normalize comparison depending on type
-#         if isinstance(f.content, dict):
-#             # API might return dict OR stringified JSON, normalize both
-#             if isinstance(retrieved_content, str):
-#                 retrieved_content = json.loads(retrieved_content)
-#             assert retrieved_content == f.content
-
-#         elif isinstance(f.content, (bytes, bytearray)):
-#             # Binary content may come back base64-encoded or raw string
-#             if isinstance(retrieved_content, str):
-#                 retrieved_content = retrieved_content.encode()
-#             assert retrieved_content == f.content
-
-#         else:
-#             # Assume plain text
-#             assert retrieved_content == f.content
+    # Act & Assert
+    for f in files_data:
+        retrieved_content = retrieve_single_file(
+            test_client, question.id, filename=f.filename
+        )
+        assert retrieved_content == normalize_content(f.content)
 
 
 # # Batch get all questions
