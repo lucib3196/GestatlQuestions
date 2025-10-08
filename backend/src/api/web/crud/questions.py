@@ -168,8 +168,8 @@ async def get_question_files(
         return SuccessFileResponse(
             status=200,
             detail="Retrieved files succesfully",
-            files=[],
-            file_paths=files,
+            filedata=[],
+            filepaths=files,
         )
 
     except HTTPException:
@@ -214,8 +214,8 @@ async def get_question_files_data(
         return SuccessFileResponse(
             status=200,
             detail="Retrieved files succesfully",
-            files=filedata,
-            file_paths=[],
+            filedata=filedata,
+            filepaths=[],
         )
     except HTTPException:
         raise
