@@ -28,6 +28,8 @@ def normalize_content(content):
             return json.loads(content)
         except json.JSONDecodeError:
             return content
+    if isinstance(content, bytes):
+        return content.decode("utf-8")
     return content
 
 
