@@ -168,8 +168,8 @@ async def get_question_files(
         return SuccessFileResponse(
             status=200,
             detail="Retrieved files succesfully",
-            files=[],
-            file_paths=files,
+            filedata=[],
+            filepaths=files,
         )
 
     except HTTPException:
@@ -214,8 +214,8 @@ async def get_question_files_data(
         return SuccessFileResponse(
             status=200,
             detail="Retrieved files succesfully",
-            files=filedata,
-            file_paths=[],
+            filedata=filedata,
+            filepaths=[],
         )
     except HTTPException:
         raise
@@ -287,7 +287,7 @@ async def update_file(
 
 
 # TODO add test web
-@router.patch("/update_question/{quid}")
+@router.patch("/update_question/{quid}", status_code=200)
 async def update_question(
     quid: Union[str, UUID],
     session: SessionDep,

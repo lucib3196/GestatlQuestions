@@ -2,6 +2,7 @@ import json
 from typing import List
 from src.api.response_models import FileData
 
+
 # Helpers
 def logs_contain(logs, *substrs) -> bool:
     """True if any single log line contains all given substrings."""
@@ -10,6 +11,7 @@ def logs_contain(logs, *substrs) -> bool:
         if all(s in line for s in substrs):
             return True
     return False
+
 
 def prepare_file_uploads(file_data: List[FileData]):
     """
@@ -43,5 +45,3 @@ def prepare_file_uploads(file_data: List[FileData]):
 
         files.append(("files", (f.filename, content, content_type)))
     return files
-
-

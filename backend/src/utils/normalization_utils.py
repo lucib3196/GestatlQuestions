@@ -65,3 +65,15 @@ def to_serializable(obj: Any) -> Any:
         return str(obj)
 
     return obj
+
+
+def normalize_content(content):
+    """Ensure content is a dict for reliable comparison."""
+    if isinstance(content, str):
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            return content
+    if isinstance(content, bytes):
+        return content.decode("utf-8")
+    return content

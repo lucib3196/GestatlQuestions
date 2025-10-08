@@ -37,12 +37,10 @@ class SuccessFileResponse(SuccessfulResponse):
 
     filedata: List[FileData] = Field(
         default_factory=list,
-        alias="files",
         description="List of file objects or file strings",
     )
     filepaths: List[str] | List[Path] = Field(
         default_factory=list,
-        alias="file_paths",
         description="List of relative file paths",
     )
 

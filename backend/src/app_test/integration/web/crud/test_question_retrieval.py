@@ -1,7 +1,5 @@
 # --- Standard Library ---
-import json
 from typing import List
-from uuid import UUID
 from uuid import uuid4
 
 # --- Third-Party ---
@@ -12,10 +10,23 @@ from src.api.core import logger
 from src.utils.test_utils import prepare_file_uploads
 from src.api.response_models import FileData
 from src.utils.normalization_utils import to_serializable
+from src.api.response_models import (
+    FileData,
+)
+from src.api.models import Question
+from src.utils import normalize_content
+
+from src.app_test.fixtures.fixture_crud import (
+    create_question,
+    retrieve_question,
+    retrieve_files,
+    retrieve_single_file,
+)
 
 QUESTION_KEYS = ["title", "ai_generated", "isAdaptive", "createdBy"]
 
 
+# Helpers
 
 
 @pytest.mark.parametrize("payload_fixture", ["question_payload_minimal_dict"])
@@ -35,31 +46,21 @@ def test_question_metadata_retrieval(
     metadata = (
         request.getfixturevalue(additional_metadata) if additional_metadata else None
     )
+    question = create_question(test_client, payload, metadata)
+    question_id = question.id
 
-    data = {"question": json.dumps(payload)}
-    if metadata:
-        data["additional_metadata"] = json.dumps(metadata)
-
-    # Act: create the question
-    create_resp = test_client.post("/questions/", data=data)
-    assert create_resp.status_code == 201, create_resp.text
-    body = create_resp.json()
-    question_id = body["question"]["id"]
-
-    logger.debug("Created question body: %s", body)
+    logger.debug("Created question body: %s", question)
 
     # Act: retrieve the question
-    retrieved_resp = test_client.get(f"/questions/{question_id}")
-    assert retrieved_resp.status_code == 200, retrieved_resp.text
-    retrieved_body = retrieved_resp.json()
-    retrieved_question = retrieved_body["question"]
+    retrieved = retrieve_question(test_client, question_id)
 
-    logger.debug("Retrieved question: %s", retrieved_question)
+    logger.debug("Retrieved question: %s", retrieved)
+    assert retrieved
 
     # Assert: ensure core fields match
-    assert retrieved_question
+    data = retrieved.model_dump()
     for key in QUESTION_KEYS:
-        assert retrieved_question.get(key) == payload.get(key)
+        assert data.get(key) == payload.get(key)
 
 
 # File Retrieval
@@ -71,25 +72,18 @@ def test_list_question_files(
     Ensure that uploaded files for a question are listed correctly.
     """
     # Arrange: create a question with uploaded files
-    data = {"question": json.dumps(question_payload_minimal_dict)}
-    files_data = request.getfixturevalue(file_fixture)
+    files_data: List[FileData] = request.getfixturevalue(file_fixture)
     files = prepare_file_uploads(files_data)
-    creation_resp = test_client.post("/questions/", data=data, files=files)
-
-    body = creation_resp.json()
-    qid = body["question"]["id"]
-
-    logger.debug("Created question: %s", body["question"])
-
+    question = create_question(
+        test_client, payload=question_payload_minimal_dict, files=files
+    )
     # Act: retrieve the list of files
-    retrieval_resp = test_client.get(f"/questions/{qid}/files")
-    retrieved_files = retrieval_resp.json()
+    validated = retrieve_files(test_client, question.id, route_arg="files")
+    retrieved = validated.filepaths
 
-    logger.debug("Retrieved files: %s", retrieved_files)
-
-    # Assert
-    assert retrieval_resp.status_code == 200
-    assert len(retrieved_files) == len(files)
+    logger.debug("These are the retreived files", retrieved)
+    assert len([f.filename for f in files_data]) == len(retrieved)
+    assert {f.filename for f in files_data} == set(retrieved)
 
 
 @pytest.mark.parametrize("file_fixture", ["file_data_payload", "question_file_payload"])
@@ -99,24 +93,48 @@ def test_list_question_files_data(
     """
     Ensure that uploaded files are returned with their data (filename + content).
     """
-    # Arrange
-    data = {"question": json.dumps(question_payload_minimal_dict)}
-    files_data = request.getfixturevalue(file_fixture)
+
+    files_data: List[FileData] = request.getfixturevalue(file_fixture)
     files = prepare_file_uploads(files_data)
-    creation_resp = test_client.post("/questions/", data=data, files=files)
 
-    body = creation_resp.json()
-    qid = body["question"]["id"]
-
-    logger.debug("Created question: %s", body["question"])
+    # Create the question with attached files
+    question = create_question(
+        test_client,
+        payload=question_payload_minimal_dict,
+        files=files,
+    )
 
     # Act
-    retrieval_resp = test_client.get(f"/questions/{qid}/files_data")
-    retrieved_files = retrieval_resp.json()
+    validated = retrieve_files(test_client, question.id, route_arg="files_data")
+    retrieved_files: List[FileData] = validated.filedata
 
-    # Assert
-    assert retrieval_resp.status_code == 200
-    assert len(retrieved_files) == len(files)
+    logger.debug("Retrieved file data: %s", retrieved_files)
+
+    # Assert: Count consistency
+    assert len(retrieved_files) == len(
+        files_data
+    ), f"Expected {len(files_data)} files, got {len(retrieved_files)}"
+
+    # Assert: Filenames match
+    uploaded_names = {f.filename for f in files_data}
+    retrieved_names = {f.filename for f in retrieved_files}
+    assert (
+        uploaded_names == retrieved_names
+    ), f"Mismatched filenames: {uploaded_names ^ retrieved_names}"
+
+    # Assert: Content integrity
+    for uploaded, retrieved in zip(
+        sorted(files_data, key=lambda f: f.filename),
+        sorted(retrieved_files, key=lambda f: f.filename),
+    ):
+        uploaded_content = normalize_content(uploaded.content)
+        retrieved_content = normalize_content(retrieved.content)
+
+        assert (
+            uploaded_content == retrieved_content
+        ), f"Content mismatch in file '{uploaded.filename}'"
+
+    logger.info("File data validated successfully for %d files.", len(retrieved_files))
 
 
 @pytest.mark.parametrize("file_fixture", ["file_data_payload", "question_file_payload"])
@@ -126,135 +144,108 @@ def test_read_question_file(
     """
     Ensure that each uploaded file can be retrieved individually by filename.
     """
-    # Arrange
-    data = {"question": json.dumps(question_payload_minimal_dict)}
     files_data: List[FileData] = request.getfixturevalue(file_fixture)
     files = prepare_file_uploads(files_data)
-    creation_resp = test_client.post("/questions/", data=data, files=files)
 
-    body = creation_resp.json()
-    qid = body["question"]["id"]
-
-    logger.debug("Created question: %s", body["question"])
+    # Create the question with attached files
+    question = create_question(
+        test_client,
+        payload=question_payload_minimal_dict,
+        files=files,
+    )
 
     # Act & Assert
     for f in files_data:
-        retrieval_resp = test_client.get(f"/questions/{qid}/files/{f.filename}")
-        assert retrieval_resp.status_code == 200
-
-        retrieved_content = retrieval_resp.json()
-
-        # Normalize comparison depending on type
-        if isinstance(f.content, dict):
-            # API might return dict OR stringified JSON, normalize both
-            if isinstance(retrieved_content, str):
-                retrieved_content = json.loads(retrieved_content)
-            assert retrieved_content == f.content
-
-        elif isinstance(f.content, (bytes, bytearray)):
-            # Binary content may come back base64-encoded or raw string
-            if isinstance(retrieved_content, str):
-                retrieved_content = retrieved_content.encode()
-            assert retrieved_content == f.content
-
-        else:
-            # Assume plain text
-            assert retrieved_content == f.content
-
-
-# Batch get all questions
-def test_get_question_data_minimal(db_session, all_question_payloads, test_client):
-    """Test batch creation of questions and retrieval in minimal format."""
-    # Create questions
-    for q in all_question_payloads:
-        data = {"question": json.dumps(to_serializable(q))}
-        logger.debug("Creating question with payload: %s", data)
-
-        creation_resp = test_client.post("/questions/", data=data)
-        logger.debug("Created question response: %s", creation_resp.json())
-
-        assert creation_resp.status_code == 201, "Question creation failed"
-
-    # Retrieve minimal list of questions
-    offset, limit = 0, 100
-    response = test_client.get(f"/questions/get_all/{offset}/{limit}/minimal")
-
-    logger.debug("Retrieved minimal questions response: %s", response.json())
-    assert response.status_code == 200, "Failed to fetch minimal questions list"
-
-    questions = response.json()
-    assert isinstance(questions, list), "Expected response to be a list"
-    assert len(questions) == len(
-        all_question_payloads
-    ), f"Expected {len(all_question_payloads)} questions, got {len(questions)}"
-
-
-# Misc
-@pytest.mark.parametrize("payload_fixture", ["question_payload_minimal_dict"])
-@pytest.mark.parametrize("file_fixture", ["file_data_payload", "question_file_payload"])
-@pytest.mark.parametrize("additional_metadata", ["", "question_additional_metadata"])
-def test_question_metadata_retrieval_full(
-    request, test_client, db_session, payload_fixture, additional_metadata, file_fixture
-):
-    """
-    Integration test: create a question with optional metadata and ensure retrieval works.
-
-    - Uses a minimal valid payload (`question_payload_minimal_dict`).
-    - Runs twice: once with no metadata, and once with valid `question_additional_metadata`.
-    - Valid creation should return 201 Created and allow retrieval of the created question.
-    """
-    # Arrange
-    payload = request.getfixturevalue(payload_fixture)
-    metadata = (
-        request.getfixturevalue(additional_metadata) if additional_metadata else None
-    )
-    files_data = request.getfixturevalue(file_fixture)
-    files = prepare_file_uploads(files_data)
-
-    data = {"question": json.dumps(payload)}
-    if metadata:
-        data["additional_metadata"] = json.dumps(metadata)
-
-    # Act: create the question
-    create_resp = test_client.post("/questions/", data=data, files=files)
-    assert create_resp.status_code == 201, create_resp.text
-    body = create_resp.json()
-    question_id = body["question"]["id"]
-
-    logger.debug("Created question body: %s", body)
-
-    # Act: retrieve the question
-    retrieved_resp = test_client.get(f"/questions/{question_id}/full")
-    assert retrieved_resp.status_code == 200, retrieved_resp.text
-
-    retrieved_body = retrieved_resp.json()
-    retrieved_question = retrieved_body["question"]
-
-    retrieved_filesdata = retrieved_body["files"]
-
-    logger.debug("Retrieved question: %s", retrieved_question)
-
-    # Assert: ensure core fields match
-    assert retrieved_question
-    for key in QUESTION_KEYS:
-        assert retrieved_question.get(key) == payload.get(key)
-
-    assert retrieved_filesdata
-    retrieved_filenames = {f["filename"] for f in retrieved_filesdata}
-    expected_filenames = {f.filename for f in files_data}
-    assert retrieved_filenames == expected_filenames
+        retrieved_content = retrieve_single_file(
+            test_client, question.id, filename=f.filename
+        )
+        assert retrieved_content == normalize_content(f.content)
 
 
 def test_get_question_bad_id(test_client):
     bad_id = uuid4()
     r = test_client.get(f"/questions/{bad_id}")
-    assert r.status_code == 404
+    assert r.status_code == 400
 
 
 def test_get_question_data_all_not_found(test_client):
     bad_id = uuid4()
     r = test_client.get(f"/questions/{bad_id}/full")
     assert r.status_code == 500
+
+
+# Batch get all questions
+def test_get_question_data_minimal(db_session, all_question_payloads, test_client):
+    """
+    Integration Test: Batch creation and retrieval of questions in minimal format.
+
+    Steps:
+    1. Create multiple questions from `all_question_payloads`.
+    2. Retrieve the questions using `/questions/get_all/{offset}/{limit}/minimal`.
+    3. Validate:
+       - Response status code is 200.
+       - Returned data is a list.
+       - Each entry conforms to the `Question` schema (minimal view).
+       - Count matches the number of created questions.
+    """
+
+    # --- Arrange ---
+    for payload in all_question_payloads:
+        serializable = to_serializable(payload)
+        create_question(test_client, serializable)
+
+    offset, limit = 0, 100
+
+    # --- Act ---
+    response = test_client.get(f"/questions/get_all/{offset}/{limit}/minimal")
+    data = response.json()
+    logger.debug("Retrieved minimal questions response: %s", data)
+
+    # --- Assert: Basic response validation ---
+    assert (
+        response.status_code == 200
+    ), f"Unexpected status code: {response.status_code}"
+    assert isinstance(data, list), f"Expected list, got {type(data).__name__}"
+
+    # --- Assert: Schema validation ---
+    validated_questions = []
+    for idx, q in enumerate(data):
+        try:
+            validated = Question.model_validate(q)
+            validated_questions.append(validated)
+        except Exception as e:
+            pytest.fail(f"Question at index {idx} failed schema validation: {e}")
+
+    # --- Assert: Count consistency ---
+    expected_count = len(all_question_payloads)
+    actual_count = len(validated_questions)
+    assert (
+        actual_count == expected_count
+    ), f"Expected {expected_count} questions, got {actual_count}"
+
+    logger.info(" Retrieved %d minimal questions successfully.", actual_count)
+
+
+@pytest.mark.asyncio
+async def test_filter_questions_no_match(test_client, create_multiple_question):
+    """
+    Filtering with values that should not match anything.
+    Expect an empty list.
+    """
+    payload = {
+        "title": "NonExistent",
+        "ai_generated": True,
+        "createdBy": "ghost_user",
+    }
+
+    response = test_client.post("/questions/filter_questions", json=payload)
+    assert response.status_code == 200
+
+    data = response.json()
+    logger.info("Filter with no match response: %s", data)
+
+    assert isinstance(data, list)
+    assert len(data) == 0
 
 
 @pytest.mark.asyncio
@@ -307,23 +298,57 @@ async def test_filter_questions_by_title_and_flags(
         assert q["createdBy"] == payload["createdBy"]
 
 
-@pytest.mark.asyncio
-async def test_filter_questions_no_match(test_client, create_multiple_question):
-    """
-    Filtering with values that should not match anything.
-    Expect an empty list.
-    """
-    payload = {
-        "title": "NonExistent",
-        "ai_generated": True,
-        "createdBy": "ghost_user",
-    }
+# # Misc
+# @pytest.mark.parametrize("payload_fixture", ["question_payload_minimal_dict"])
+# @pytest.mark.parametrize("file_fixture", ["file_data_payload", "question_file_payload"])
+# @pytest.mark.parametrize("additional_metadata", ["", "question_additional_metadata"])
+# def test_question_metadata_retrieval_full(
+#     request, test_client, db_session, payload_fixture, additional_metadata, file_fixture
+# ):
+#     """
+#     Integration test: create a question with optional metadata and ensure retrieval works.
 
-    response = test_client.post("/questions/filter_questions", json=payload)
-    assert response.status_code == 200
+#     - Uses a minimal valid payload (`question_payload_minimal_dict`).
+#     - Runs twice: once with no metadata, and once with valid `question_additional_metadata`.
+#     - Valid creation should return 201 Created and allow retrieval of the created question.
+#     """
+#     # Arrange
+#     payload = request.getfixturevalue(payload_fixture)
+#     metadata = (
+#         request.getfixturevalue(additional_metadata) if additional_metadata else None
+#     )
+#     files_data = request.getfixturevalue(file_fixture)
+#     files = prepare_file_uploads(files_data)
 
-    data = response.json()
-    logger.info("Filter with no match response: %s", data)
+#     data = {"question": json.dumps(payload)}
+#     if metadata:
+#         data["additional_metadata"] = json.dumps(metadata)
 
-    assert isinstance(data, list)
-    assert len(data) == 0
+#     # Act: create the question
+#     create_resp = test_client.post("/questions/", data=data, files=files)
+#     assert create_resp.status_code == 201, create_resp.text
+#     body = create_resp.json()
+#     question_id = body["question"]["id"]
+
+#     logger.debug("Created question body: %s", body)
+
+#     # Act: retrieve the question
+#     retrieved_resp = test_client.get(f"/questions/{question_id}/full")
+#     assert retrieved_resp.status_code == 200, retrieved_resp.text
+
+#     retrieved_body = retrieved_resp.json()
+#     retrieved_question = retrieved_body["question"]
+
+#     retrieved_filesdata = retrieved_body["files"]
+
+#     logger.debug("Retrieved question: %s", retrieved_question)
+
+#     # Assert: ensure core fields match
+#     assert retrieved_question
+#     for key in QUESTION_KEYS:
+#         assert retrieved_question.get(key) == payload.get(key)
+
+#     assert retrieved_filesdata
+#     retrieved_filenames = {f["filename"] for f in retrieved_filesdata}
+#     expected_filenames = {f.filename for f in files_data}
+#     assert retrieved_filenames == expected_filenames

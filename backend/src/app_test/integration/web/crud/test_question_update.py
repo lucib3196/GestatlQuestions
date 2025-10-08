@@ -1,15 +1,17 @@
 # --- Standard Library ---
-import json
 from typing import List
 
 # --- Third-Party ---
 import pytest
 
 # --- Internal ---
-from src.api.core import logger
 from src.utils.test_utils import prepare_file_uploads
 from src.api.response_models import FileData
-from fastapi.encoders import jsonable_encoder
+from src.app_test.fixtures.fixture_crud import (
+    create_question,
+    retrieve_single_file,
+)
+from src.utils import to_serializable, normalize_content
 
 
 @pytest.mark.parametrize("file_fixture", ["file_data_payload", "question_file_payload"])
@@ -21,19 +23,21 @@ def test_update_file(
     and that the new content is retrievable.
     """
     # Arrange: create a question with uploaded files
-    data = {"question": json.dumps(question_payload_minimal_dict)}
     files_data: List[FileData] = request.getfixturevalue(file_fixture)
     files = prepare_file_uploads(files_data)
 
-    creation_resp = test_client.post("/questions/", data=data, files=files)
-    body = creation_resp.json()
-    qid = body["question"]["id"]
+    # Create the question with attached files
+    question = create_question(
+        test_client,
+        payload=question_payload_minimal_dict,
+        files=files,
+    )
 
     # Act + Assert: update each file and verify new content
     for f in files_data:
         new_content = f"Updated content for {f.filename}"
         update_payload = {
-            "question_id": qid,
+            "question_id": to_serializable(question.id),
             "filename": f.filename,
             "new_content": new_content,
         }
@@ -42,27 +46,19 @@ def test_update_file(
         assert update_resp.status_code == 200, update_resp.text
 
         # Retrieve the updated file
-        retrieval_resp = test_client.get(f"/questions/{qid}/files/{f.filename}")
-        assert retrieval_resp.status_code == 200
-        retrieved_content = retrieval_resp.json()
-
-        logger.debug("File %s retrieved content: %s", f.filename, retrieved_content)
-        assert retrieved_content == new_content
+        retrieved_content = retrieve_single_file(test_client, question.id, f.filename)
+        assert retrieved_content == normalize_content(new_content)
 
 
 @pytest.mark.asyncio
 async def test_update_question_meta_title_and_isadaptive(
-    test_client, create_question_minimal_response
+    test_client, question_payload_minimal_dict
 ):
     """
     Creates a single question, then PATCHes metadata (title, isAdaptive).
     Verifies the route returns the updated object.
     """
-    create_resp = create_question_minimal_response
-    assert create_resp.status_code == 200
-    created = create_resp.json()
-    assert "question" in created
-    quid = created["question"]["id"]
+    question = create_question(test_client, question_payload_minimal_dict)
 
     # 2) Patch its metadata
     updates = {
@@ -70,13 +66,13 @@ async def test_update_question_meta_title_and_isadaptive(
         "isAdaptive": True,
     }
     patch_resp = test_client.patch(
-        f"/questions/update_question/{quid}",
+        f"/questions/update_question/{question.id}",
         json=updates,
     )
-    assert patch_resp.status_code == 201
+    assert patch_resp.status_code == 200
 
     updated = patch_resp.json()
     # Depending on your edit_question_meta return shape, this may be a dict with the fields
-    assert updated["id"] == quid
+    assert updated["id"] == str(question.id)
     assert updated["title"] == "Updated Title"
     assert updated["isAdaptive"] is True
