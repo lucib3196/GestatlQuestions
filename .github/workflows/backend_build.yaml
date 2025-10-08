@@ -51,5 +51,7 @@ jobs:
         working-directory: ./backend
 
       - name: Run Test
-        run: poetry run python -m pytest src/app_test/unit -s
+        run: |
+          poetry run python -m pytest src/app_test/unit 
+          poetry run python -m pytest src/app_test/integration/web/
         working-directory: ./backend
