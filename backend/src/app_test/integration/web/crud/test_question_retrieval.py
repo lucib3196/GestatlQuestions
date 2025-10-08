@@ -12,8 +12,36 @@ from src.api.core import logger
 from src.utils.test_utils import prepare_file_uploads
 from src.api.response_models import FileData
 from src.utils.normalization_utils import to_serializable
+from src.api.response_models import QuestionReadResponse
+
 
 QUESTION_KEYS = ["title", "ai_generated", "isAdaptive", "createdBy"]
+
+
+# Helpers
+def create_question(client, payload, metadata=None):
+    data = {"question": json.dumps(payload)}
+    if metadata:
+        data["additional_metadata"] = json.dumps(metadata)
+
+    resp = client.post("/questions/", data=data)
+    assert resp.status_code == 201, resp.text
+
+    # Re-validate response data against the schema
+    response_data = resp.json()
+    validated = QuestionReadResponse.model_validate(response_data)
+    assert validated
+
+    return validated.question
+
+
+def retrieve_question(client, qid):
+    resp = client.get(f"/questions/{qid}")
+    assert resp.status_code == 200, resp.text
+    response_data = resp.json()
+    validated = QuestionReadResponse.model_validate(response_data)
+    assert validated
+    return validated.question
 
 
 @pytest.mark.parametrize("payload_fixture", ["question_payload_minimal_dict"])
@@ -33,31 +61,21 @@ def test_question_metadata_retrieval(
     metadata = (
         request.getfixturevalue(additional_metadata) if additional_metadata else None
     )
+    question = create_question(test_client, payload, metadata)
+    question_id = question.id
 
-    data = {"question": json.dumps(payload)}
-    if metadata:
-        data["additional_metadata"] = json.dumps(metadata)
-
-    # Act: create the question
-    create_resp = test_client.post("/questions/", data=data)
-    assert create_resp.status_code == 201, create_resp.text
-    body = create_resp.json()
-    question_id = body["question"]["id"]
-
-    logger.debug("Created question body: %s", body)
+    logger.debug("Created question body: %s", question)
 
     # Act: retrieve the question
-    retrieved_resp = test_client.get(f"/questions/{question_id}")
-    assert retrieved_resp.status_code == 200, retrieved_resp.text
-    retrieved_body = retrieved_resp.json()
-    retrieved_question = retrieved_body["question"]
+    retrieved = retrieve_question(test_client, question_id)
 
-    logger.debug("Retrieved question: %s", retrieved_question)
+    logger.debug("Retrieved question: %s", retrieved)
+    assert retrieved
 
     # Assert: ensure core fields match
-    assert retrieved_question
+    data = retrieved.model_dump()
     for key in QUESTION_KEYS:
-        assert retrieved_question.get(key) == payload.get(key)
+        assert data.get(key) == payload.get(key)
 
 
 # File Retrieval
