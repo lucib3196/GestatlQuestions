@@ -16,8 +16,6 @@ from src.utils.normalization_utils import to_serializable
 QUESTION_KEYS = ["title", "ai_generated", "isAdaptive", "createdBy"]
 
 
-
-
 @pytest.mark.parametrize("payload_fixture", ["question_payload_minimal_dict"])
 @pytest.mark.parametrize("additional_metadata", ["", "question_additional_metadata"])
 def test_question_metadata_retrieval(
@@ -83,8 +81,8 @@ def test_list_question_files(
 
     # Act: retrieve the list of files
     retrieval_resp = test_client.get(f"/questions/{qid}/files")
-    retrieved_files = retrieval_resp.json()
-
+    data = retrieval_resp.json()
+    retrieved_files = data.files
     logger.debug("Retrieved files: %s", retrieved_files)
 
     # Assert
@@ -112,7 +110,8 @@ def test_list_question_files_data(
 
     # Act
     retrieval_resp = test_client.get(f"/questions/{qid}/files_data")
-    retrieved_files = retrieval_resp.json()
+    body = retrieval_resp.json()
+    retrieved_files = body.files
 
     # Assert
     assert retrieval_resp.status_code == 200

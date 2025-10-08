@@ -19,9 +19,6 @@ QUESTION_KEYS = ["title", "ai_generated", "isAdaptive", "createdBy"]
 ADDTIONAL_METAKEYS = ["topics", "languages", "qtypes"]
 
 
-
-
-
 # ----------------------------------------------------------------------
 # Helpers
 # ----------------------------------------------------------------------
