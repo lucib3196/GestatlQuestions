@@ -12,6 +12,8 @@ function Hero() {
                 <h1 className="font-extrabold text-4xl sm:text-6xl text-gray-900 dark:text-white">
                     Gestalt Generator
                     Hello some change i did 
+                    hello test
+                    hi hi
                 </h1>
 
                 <hr className="border-primary-yellow dark:border-primary-yellow/70 w-24 mx-auto" />
