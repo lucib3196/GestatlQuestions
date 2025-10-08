@@ -1,7 +1,5 @@
 # --- Standard Library ---
-import json
 from typing import List
-from uuid import UUID
 from uuid import uuid4
 
 # --- Third-Party ---
@@ -13,73 +11,22 @@ from src.utils.test_utils import prepare_file_uploads
 from src.api.response_models import FileData
 from src.utils.normalization_utils import to_serializable
 from src.api.response_models import (
-    QuestionReadResponse,
-    SuccessFileResponse,
     FileData,
-    SuccessDataResponse,
 )
-from typing import Literal
 from src.api.models import Question
+from src.utils import normalize_content
+
+from src.app_test.fixtures.fixture_crud import (
+    create_question,
+    retrieve_question,
+    retrieve_files,
+    retrieve_single_file,
+)
 
 QUESTION_KEYS = ["title", "ai_generated", "isAdaptive", "createdBy"]
 
 
 # Helpers
-def normalize_content(content):
-    """Ensure content is a dict for reliable comparison."""
-    if isinstance(content, str):
-        try:
-            return json.loads(content)
-        except json.JSONDecodeError:
-            return content
-    if isinstance(content, bytes):
-        return content.decode("utf-8")
-    return content
-
-
-def create_question(client, payload, metadata=None, files=None):
-    data = {"question": json.dumps(payload)}
-    if metadata:
-        data["additional_metadata"] = json.dumps(metadata)
-
-    resp = client.post("/questions/", data=data, files=files)
-    assert resp.status_code == 201, resp.text
-
-    # Re-validate response data against the schema
-    response_data = resp.json()
-    validated = QuestionReadResponse.model_validate(response_data)
-    assert validated
-
-    return validated.question
-
-
-def retrieve_question(client, qid):
-    resp = client.get(f"/questions/{qid}")
-    assert resp.status_code == 200, resp.text
-    response_data = resp.json()
-    validated = QuestionReadResponse.model_validate(response_data)
-    assert validated
-    return validated.question
-
-
-def retrieve_single_file(client, qid, filename):
-    resp = client.get(f"/questions/{qid}/files/{filename}")
-    assert resp.status_code == 200, resp.text
-    response_data = resp.json()
-    validated = SuccessDataResponse.model_validate(response_data)
-    return normalize_content(validated.data)
-
-
-def retrieve_files(
-    client, qid, route_arg: Literal["files", "files_data"]
-) -> SuccessFileResponse:
-    resp = client.get(f"/questions/{qid}/{route_arg}")
-    assert resp.status_code == 200, resp.text
-    body = resp.json()
-    validated = SuccessFileResponse.model_validate(body)
-    assert validated
-    logger.debug(f"This is the validated retrieved {validated}")
-    return validated
 
 
 @pytest.mark.parametrize("payload_fixture", ["question_payload_minimal_dict"])

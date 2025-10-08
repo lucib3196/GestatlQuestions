@@ -287,7 +287,7 @@ async def update_file(
 
 
 # TODO add test web
-@router.patch("/update_question/{quid}")
+@router.patch("/update_question/{quid}", status_code=200)
 async def update_question(
     quid: Union[str, UUID],
     session: SessionDep,

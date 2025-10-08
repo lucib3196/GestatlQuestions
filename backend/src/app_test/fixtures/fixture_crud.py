@@ -1,10 +1,16 @@
+from typing import Literal
 import pytest
 import pytest_asyncio
 
 
-from src.api.models.question_model import Question
+from src.api.core import logger
 from src.api.service.crud import question_crud as qcrud_service
 from src.utils import *
+from src.api.response_models import (
+    QuestionReadResponse,
+    SuccessFileResponse,
+    SuccessDataResponse,
+)
 
 
 @pytest.fixture
@@ -123,9 +129,57 @@ def invalid_question_payloads():
     ]
 
 
+# Helpers
+def create_question(client, payload, metadata=None, files=None):
+    data = {"question": json.dumps(payload)}
+    if metadata:
+        data["additional_metadata"] = json.dumps(metadata)
+
+    resp = client.post("/questions/", data=data, files=files)
+    assert resp.status_code == 201, resp.text
+
+    # Re-validate response data against the schema
+    response_data = resp.json()
+    validated = QuestionReadResponse.model_validate(response_data)
+    assert validated
+
+    return validated.question
+
+
+def retrieve_question(client, qid):
+    resp = client.get(f"/questions/{qid}")
+    assert resp.status_code == 200, resp.text
+    response_data = resp.json()
+    validated = QuestionReadResponse.model_validate(response_data)
+    assert validated
+    return validated.question
+
+
+def retrieve_single_file(client, qid, filename):
+    resp = client.get(f"/questions/{qid}/files/{filename}")
+    assert resp.status_code == 200, resp.text
+    response_data = resp.json()
+    validated = SuccessDataResponse.model_validate(response_data)
+    return normalize_content(validated.data)
+
+
+def retrieve_files(
+    client, qid, route_arg: Literal["files", "files_data"]
+) -> SuccessFileResponse:
+    resp = client.get(f"/questions/{qid}/{route_arg}")
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    validated = SuccessFileResponse.model_validate(body)
+    assert validated
+    logger.debug(f"This is the validated retrieved {validated}")
+    return validated
+
+
 # ----------------------------------------------------------------------
 # Fixtures
 # ----------------------------------------------------------------------
+
+
 @pytest.fixture
 def create_question_minimal_response(
     test_client, db_session, question_payload_minimal_dict
