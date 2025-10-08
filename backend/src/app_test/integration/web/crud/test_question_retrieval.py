@@ -214,6 +214,18 @@ def test_read_question_file(
         assert retrieved_content == normalize_content(f.content)
 
 
+def test_get_question_bad_id(test_client):
+    bad_id = uuid4()
+    r = test_client.get(f"/questions/{bad_id}")
+    assert r.status_code == 400
+
+
+def test_get_question_data_all_not_found(test_client):
+    bad_id = uuid4()
+    r = test_client.get(f"/questions/{bad_id}/full")
+    assert r.status_code == 500
+
+
 # # Batch get all questions
 # def test_get_question_data_minimal(db_session, all_question_payloads, test_client):
 #     """Test batch creation of questions and retrieval in minimal format."""
@@ -295,18 +307,6 @@ def test_read_question_file(
 #     retrieved_filenames = {f["filename"] for f in retrieved_filesdata}
 #     expected_filenames = {f.filename for f in files_data}
 #     assert retrieved_filenames == expected_filenames
-
-
-# def test_get_question_bad_id(test_client):
-#     bad_id = uuid4()
-#     r = test_client.get(f"/questions/{bad_id}")
-#     assert r.status_code == 404
-
-
-# def test_get_question_data_all_not_found(test_client):
-#     bad_id = uuid4()
-#     r = test_client.get(f"/questions/{bad_id}/full")
-#     assert r.status_code == 500
 
 
 # @pytest.mark.asyncio
