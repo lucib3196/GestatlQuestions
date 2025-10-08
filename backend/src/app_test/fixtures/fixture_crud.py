@@ -146,6 +146,7 @@ def create_question_bad_payload_response(test_client, db_session, qpayload_bad):
 def create_multiple_question(test_client, all_question_payloads):
     """Ensure multiple question payloads can be created sequentially."""
     for p in all_question_payloads:
-        data = {"question": json.dumps(p)}
+        serializable = to_serializable(p)
+        data = {"question": json.dumps(serializable)}
         response = test_client.post("/questions/", data=data)
         assert response.status_code == 201

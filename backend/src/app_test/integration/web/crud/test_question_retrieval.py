@@ -19,6 +19,7 @@ from src.api.response_models import (
     SuccessDataResponse,
 )
 from typing import Literal
+from src.api.models import Question
 
 QUESTION_KEYS = ["title", "ai_generated", "isAdaptive", "createdBy"]
 
@@ -226,31 +227,128 @@ def test_get_question_data_all_not_found(test_client):
     assert r.status_code == 500
 
 
-# # Batch get all questions
-# def test_get_question_data_minimal(db_session, all_question_payloads, test_client):
-#     """Test batch creation of questions and retrieval in minimal format."""
-#     # Create questions
-#     for q in all_question_payloads:
-#         data = {"question": json.dumps(to_serializable(q))}
-#         logger.debug("Creating question with payload: %s", data)
+# Batch get all questions
+def test_get_question_data_minimal(db_session, all_question_payloads, test_client):
+    """
+    Integration Test: Batch creation and retrieval of questions in minimal format.
 
-#         creation_resp = test_client.post("/questions/", data=data)
-#         logger.debug("Created question response: %s", creation_resp.json())
+    Steps:
+    1. Create multiple questions from `all_question_payloads`.
+    2. Retrieve the questions using `/questions/get_all/{offset}/{limit}/minimal`.
+    3. Validate:
+       - Response status code is 200.
+       - Returned data is a list.
+       - Each entry conforms to the `Question` schema (minimal view).
+       - Count matches the number of created questions.
+    """
 
-#         assert creation_resp.status_code == 201, "Question creation failed"
+    # --- Arrange ---
+    for payload in all_question_payloads:
+        serializable = to_serializable(payload)
+        create_question(test_client, serializable)
 
-#     # Retrieve minimal list of questions
-#     offset, limit = 0, 100
-#     response = test_client.get(f"/questions/get_all/{offset}/{limit}/minimal")
+    offset, limit = 0, 100
 
-#     logger.debug("Retrieved minimal questions response: %s", response.json())
-#     assert response.status_code == 200, "Failed to fetch minimal questions list"
+    # --- Act ---
+    response = test_client.get(f"/questions/get_all/{offset}/{limit}/minimal")
+    data = response.json()
+    logger.debug("Retrieved minimal questions response: %s", data)
 
-#     questions = response.json()
-#     assert isinstance(questions, list), "Expected response to be a list"
-#     assert len(questions) == len(
-#         all_question_payloads
-#     ), f"Expected {len(all_question_payloads)} questions, got {len(questions)}"
+    # --- Assert: Basic response validation ---
+    assert (
+        response.status_code == 200
+    ), f"Unexpected status code: {response.status_code}"
+    assert isinstance(data, list), f"Expected list, got {type(data).__name__}"
+
+    # --- Assert: Schema validation ---
+    validated_questions = []
+    for idx, q in enumerate(data):
+        try:
+            validated = Question.model_validate(q)
+            validated_questions.append(validated)
+        except Exception as e:
+            pytest.fail(f"Question at index {idx} failed schema validation: {e}")
+
+    # --- Assert: Count consistency ---
+    expected_count = len(all_question_payloads)
+    actual_count = len(validated_questions)
+    assert (
+        actual_count == expected_count
+    ), f"Expected {expected_count} questions, got {actual_count}"
+
+    logger.info(" Retrieved %d minimal questions successfully.", actual_count)
+
+
+@pytest.mark.asyncio
+async def test_filter_questions_no_match(test_client, create_multiple_question):
+    """
+    Filtering with values that should not match anything.
+    Expect an empty list.
+    """
+    payload = {
+        "title": "NonExistent",
+        "ai_generated": True,
+        "createdBy": "ghost_user",
+    }
+
+    response = test_client.post("/questions/filter_questions", json=payload)
+    assert response.status_code == 200
+
+    data = response.json()
+    logger.info("Filter with no match response: %s", data)
+
+    assert isinstance(data, list)
+    assert len(data) == 0
+
+
+@pytest.mark.asyncio
+async def test_question_filter_by_title(test_client, create_multiple_question):
+    """
+    Filter questions by a substring in the title.
+    Expects at least one match from create_multiple_questions fixture.
+    """
+    payload = {"title": "SomeTitle"}
+
+    response = test_client.post("/questions/filter_questions", json=payload)
+    assert response.status_code == 200
+
+    data = response.json()
+    logger.info("Filter by title response: %s", data)
+
+    assert isinstance(data, list)
+    assert len(data) > 0
+    for q in data:
+        assert "title" in q
+        assert payload["title"].lower() in q["title"].lower()
+
+
+@pytest.mark.asyncio
+async def test_filter_questions_by_title_and_flags(
+    test_client, create_multiple_question
+):
+    """
+    Filters by a substring in title + ai_generated + createdBy.
+    Uses the questions inserted by the create_multiple_questions fixture.
+    """
+    payload = {
+        "title": "Thermodynamics",
+        "ai_generated": False,
+        "createdBy": "tester_thermo",
+    }
+
+    response = test_client.post("/questions/filter_questions", json=payload)
+    assert response.status_code == 200
+
+    data = response.json()
+    logger.info("Filter by title + flags response: %s", data)
+
+    assert isinstance(data, list)
+    assert len(data) >= 1
+
+    for q in data:
+        assert payload["title"].lower() in q["title"].lower()
+        assert q["ai_generated"] == payload["ai_generated"]
+        assert q["createdBy"] == payload["createdBy"]
 
 
 # # Misc
@@ -307,75 +405,3 @@ def test_get_question_data_all_not_found(test_client):
 #     retrieved_filenames = {f["filename"] for f in retrieved_filesdata}
 #     expected_filenames = {f.filename for f in files_data}
 #     assert retrieved_filenames == expected_filenames
-
-
-# @pytest.mark.asyncio
-# async def test_question_filter_by_title(test_client, create_multiple_question):
-#     """
-#     Filter questions by a substring in the title.
-#     Expects at least one match from create_multiple_questions fixture.
-#     """
-#     payload = {"title": "SomeTitle"}
-
-#     response = test_client.post("/questions/filter_questions", json=payload)
-#     assert response.status_code == 200
-
-#     data = response.json()
-#     logger.info("Filter by title response: %s", data)
-
-#     assert isinstance(data, list)
-#     assert len(data) > 0
-#     for q in data:
-#         assert "title" in q
-#         assert payload["title"].lower() in q["title"].lower()
-
-
-# @pytest.mark.asyncio
-# async def test_filter_questions_by_title_and_flags(
-#     test_client, create_multiple_question
-# ):
-#     """
-#     Filters by a substring in title + ai_generated + createdBy.
-#     Uses the questions inserted by the create_multiple_questions fixture.
-#     """
-#     payload = {
-#         "title": "Thermodynamics",
-#         "ai_generated": False,
-#         "createdBy": "tester_thermo",
-#     }
-
-#     response = test_client.post("/questions/filter_questions", json=payload)
-#     assert response.status_code == 200
-
-#     data = response.json()
-#     logger.info("Filter by title + flags response: %s", data)
-
-#     assert isinstance(data, list)
-#     assert len(data) >= 1
-
-#     for q in data:
-#         assert payload["title"].lower() in q["title"].lower()
-#         assert q["ai_generated"] == payload["ai_generated"]
-#         assert q["createdBy"] == payload["createdBy"]
-
-
-# @pytest.mark.asyncio
-# async def test_filter_questions_no_match(test_client, create_multiple_question):
-#     """
-#     Filtering with values that should not match anything.
-#     Expect an empty list.
-#     """
-#     payload = {
-#         "title": "NonExistent",
-#         "ai_generated": True,
-#         "createdBy": "ghost_user",
-#     }
-
-#     response = test_client.post("/questions/filter_questions", json=payload)
-#     assert response.status_code == 200
-
-#     data = response.json()
-#     logger.info("Filter with no match response: %s", data)
-
-#     assert isinstance(data, list)
-#     assert len(data) == 0
