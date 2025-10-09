@@ -2,13 +2,16 @@ import pytest
 from pathlib import Path
 from src.api.models import Question
 from src.api.database import question_db
-from src.api.service import refactor_question_storage_service as qs
 from src.app_test.conftest import test_config
+from src.api.dependencies import QuestionManager
+from src.api.response_models import FileData
 
 
 @pytest.mark.asyncio
 @pytest.fixture
-async def create_question_with_code_file_serverjs(db_session, patch_questions_path):
+async def create_question_with_code_file_serverjs(
+    db_session, patch_questions_path, question_manager_test
+):
     q_title = "Test_JavaScriptCode"
     filename = "server.js"
     q = Question(
@@ -20,16 +23,17 @@ async def create_question_with_code_file_serverjs(db_session, patch_questions_pa
     )
     q_created = question_db.create_question(q, db_session)
     javascript_path = test_config.asset_path / "code_scripts" / "test.js"
-    filedata = qs.FileData(filename="server.js", content=javascript_path.read_text())
-    await qs.write_files_to_directory(
-        q_created.id, files_data=[filedata], session=db_session
+    await question_manager_test.save_file_to_question(
+        q_created.id,
+        session=db_session,
+        file=FileData(filename=filename, content=javascript_path.read_text()),
     )
     return q_created
 
 
 @pytest.mark.asyncio
 @pytest.fixture
-async def create_question_with_code_file_serverpy(db_session,patch_questions_path):
+async def create_question_with_code_file_serverpy(db_session, patch_questions_path):
     q_title = "Test_PythonCode"
     filename = "server.py"
     q = Question(
@@ -39,7 +43,10 @@ async def create_question_with_code_file_serverpy(db_session,patch_questions_pat
         createdBy="Luciano",
         user_id=1,
     )
-    q_created = question_db.create_question(q, db_session,)
+    q_created = question_db.create_question(
+        q,
+        db_session,
+    )
     python_path = test_config.asset_path / "code_scripts" / "test.py"
     filedata = qs.FileData(filename=filename, content=python_path.read_text())
     await qs.write_files_to_directory(
@@ -49,7 +56,7 @@ async def create_question_with_code_file_serverpy(db_session,patch_questions_pat
 
 
 @pytest.fixture
-def create_question_no_code(db_session,patch_questions_path):
+def create_question_no_code(db_session, patch_questions_path):
     q_title = "Test_NoCode"
     q = Question(
         title=q_title,
@@ -65,7 +72,7 @@ def create_question_no_code(db_session,patch_questions_path):
 
 @pytest.mark.asyncio
 @pytest.fixture
-async def create_question_empty_file_python(db_session,patch_questions_path):
+async def create_question_empty_file_python(db_session, patch_questions_path):
     """
     Uses the new storage service instead of file_db. Note:
     the service rejects truly empty content, so we write a single newline.
@@ -92,7 +99,7 @@ async def create_question_empty_file_python(db_session,patch_questions_path):
 
 @pytest.mark.asyncio
 @pytest.fixture
-async def create_question_empty_file_js(db_session,patch_questions_path):
+async def create_question_empty_file_js(db_session, patch_questions_path):
     """
     Uses the new storage service instead of file_db. Note:
     the service rejects truly empty content, so we write a single newline.
