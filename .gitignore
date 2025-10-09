@@ -7,3 +7,4 @@ venv
 /secrets
 /questions/
 /questions_copy/
+question_manager_test

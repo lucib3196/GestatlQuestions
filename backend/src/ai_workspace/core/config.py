@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
-
+from dotenv import load_dotenv
+load_dotenv()
 
 class LLMConfiguration(BaseSettings):
     """Configuration for LLM model and data paths."""

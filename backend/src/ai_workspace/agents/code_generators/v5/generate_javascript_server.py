@@ -18,6 +18,8 @@ from src.ai_workspace.utils import (
 from src.ai_workspace.retrievers import SemanticExamplesCSV
 
 
+import os
+api_key = os.getenv("OPENAI_API_KEY")
 client = Client()
 
 resources = init_generation(column_names=("question.html", "server.js"))
