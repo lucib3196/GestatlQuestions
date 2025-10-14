@@ -15,3 +15,19 @@ test_config = TestConfig(
 @pytest.fixture
 def get_asset_path():
     return test_config.asset_path
+
+
+@pytest.fixture
+def js_script_path(get_asset_path):
+    """Fixture: returns the path to the test JavaScript file."""
+    filepath = get_asset_path / "generate.js"
+    assert filepath.exists()
+    return filepath
+
+
+@pytest.fixture
+def py_script_path(get_asset_path):
+    """Fixture: returns the path to the test Python file."""
+    filepath = get_asset_path / "generate.py"
+    assert filepath.exists()
+    return filepath

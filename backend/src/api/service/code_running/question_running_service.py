@@ -12,7 +12,7 @@ import tempfile
 # Local
 from src.api.core.logging import logger
 from src.api.database import SessionDep
-from src.code_runner.run_server import run_generate
+from src.code_runner.runtime_switcher import run_generate
 from src.utils import convert_uuid
 from src.api.dependencies import QuestionManagerDependency, QuestionManager
 from src.utils import convert_uuid

@@ -324,4 +324,4 @@ def question_manager_test(request, question_manager_local, question_manager_clou
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    print(test_config)
+    pass
