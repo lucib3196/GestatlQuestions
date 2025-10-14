@@ -207,11 +207,6 @@ def patch_questions_path(monkeypatch, tmp_path, patch_question_dir):
     return questions_path
 
 
-
-
-
-
-
 @pytest.fixture(autouse=True)
 def mark_logs_in_test():
     """Mark logs as being inside test context for duration of each test."""

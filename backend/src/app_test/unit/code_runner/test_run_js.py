@@ -12,9 +12,6 @@ from src.code_runner.models import CodeRunResponse
 from src.utils import logs_contain
 
 
-
-
-
 @pytest.fixture
 def js_execution_result(js_script_path):
     """Fixture: runs the JavaScript file and returns a validated response."""
@@ -48,4 +45,3 @@ def test_js_execution_logs_expected_output(js_execution_result):
         logs_contain(qr.logs, "Here is a structure", '"a"', "1")  # JSON-like
         or logs_contain(qr.logs, "Here is a structure", "a", "1")  # fallback
     )
-
