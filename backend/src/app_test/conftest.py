@@ -207,16 +207,9 @@ def patch_questions_path(monkeypatch, tmp_path, patch_question_dir):
     return questions_path
 
 
-class TestConfig(BaseSettings):
-    asset_path: Path
 
 
-test_config = TestConfig(asset_path=Path("./assets").resolve())
 
-
-@pytest.fixture
-def get_asset_path():
-    return test_config.asset_path
 
 
 @pytest.fixture(autouse=True)
@@ -324,7 +317,6 @@ def question_manager_test(request, question_manager_local, question_manager_clou
     else:
         raise ValueError("Incorrect storage type")
     return qm
-
 
 
 # ---------------------------------------------------------------------------

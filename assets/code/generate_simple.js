@@ -57,7 +57,7 @@ const generate = (usePredefinedValues = 0) => {
     distance = convertedSpeed * time; // Distance in feet
   }
 
-  console.log("This is me syaing hello")
+  console.log("This is me syaing hello");
 
   // Return structured data
   return {

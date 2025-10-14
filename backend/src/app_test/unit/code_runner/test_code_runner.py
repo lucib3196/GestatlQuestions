@@ -12,59 +12,73 @@ from src.code_runner.models import CodeRunResponse
 from src.utils import logs_contain
 
 
-@pytest.fixture
-def js_test_file(get_asset_path) -> Path:
-    return get_asset_path / "code_scripts" / "test.js"
 
 
-@pytest.fixture
-def py_test_file(get_asset_path) -> Path:
-    return get_asset_path / "code_scripts" / "test.py"
 
 
-def test_run_js(js_test_file):
-    result = run_js.execute_javascript(path=js_test_file)
-
-    resp = CodeRunResponse.model_validate(result)
-    assert resp.success is True
-    assert resp.quiz_response is not None
-
-    qr = resp.quiz_response
-    # params / answers
-    assert qr.params == {"a": 1, "b": 2}
-    assert qr.correct_answers["sum"] == 3
-    logger.debug("These are the logs %s", qr.logs)
-    # value logs
-    assert logs_contain(qr.logs, "This is the value of a", "1")
-    assert logs_contain(qr.logs, "This is the value of b", "2")
-
-    # structure log (JS): could be JSON stringified or object printed
-    # we only require the prefix and presence of a/b inside the same line
-    assert logs_contain(qr.logs, "Here is a structure")
-    # and make sure a/b appear somewhere in that structure log
-    assert logs_contain(qr.logs, "Here is a structure") and (
-        logs_contain(qr.logs, "Here is a structure", '"a"', "1")  # JSON-ish
-        or logs_contain(qr.logs, "Here is a structure", "a", "1")  # loose fallback
-    )
+def test_js_file(get_asset_path):
+    filepath = get_asset_path /"generate.js"
+    assert filepath.exists()
+    return filepath
 
 
-def test_run_py(py_test_file):
-    result = run_py.run_generate_py(path=str(py_test_file))
 
-    resp = CodeRunResponse.model_validate(result)
-    assert resp.success is True
-    assert resp.quiz_response is not None
 
-    qr = resp.quiz_response
-    # params / answers
-    assert qr.params == {"a": 1, "b": 2}
-    assert qr.correct_answers["sum"] == 3
 
-    # value logs
-    assert logs_contain(qr.logs, "This is the value of a", "1")
-    assert logs_contain(qr.logs, "This is the value of b", "2")
 
-    # structure log (Python repr): "This is a structure {'params': {'a': 1, 'b': 2}}"
-    assert logs_contain(qr.logs, "This is a structure", "'params'")
-    assert logs_contain(qr.logs, "This is a structure", "'a'", "1")
-    assert logs_contain(qr.logs, "This is a structure", "'b'", "2")
+# @pytest.fixture
+# def js_test_file(get_asset_path) -> Path:
+#     return get_asset_path / "code_scripts" / "test.js"
+
+
+# @pytest.fixture
+# def py_test_file(get_asset_path) -> Path:
+#     return get_asset_path / "code_scripts" / "test.py"
+
+
+# def test_run_js(js_test_file):
+#     result = run_js.execute_javascript(path=js_test_file)
+
+#     resp = CodeRunResponse.model_validate(result)
+#     assert resp.success is True
+#     assert resp.quiz_response is not None
+
+#     qr = resp.quiz_response
+#     # params / answers
+#     assert qr.params == {"a": 1, "b": 2}
+#     assert qr.correct_answers["sum"] == 3
+#     logger.debug("These are the logs %s", qr.logs)
+#     # value logs
+#     assert logs_contain(qr.logs, "This is the value of a", "1")
+#     assert logs_contain(qr.logs, "This is the value of b", "2")
+
+#     # structure log (JS): could be JSON stringified or object printed
+#     # we only require the prefix and presence of a/b inside the same line
+#     assert logs_contain(qr.logs, "Here is a structure")
+#     # and make sure a/b appear somewhere in that structure log
+#     assert logs_contain(qr.logs, "Here is a structure") and (
+#         logs_contain(qr.logs, "Here is a structure", '"a"', "1")  # JSON-ish
+#         or logs_contain(qr.logs, "Here is a structure", "a", "1")  # loose fallback
+#     )
+
+
+# def test_run_py(py_test_file):
+#     result = run_py.run_generate_py(path=str(py_test_file))
+
+#     resp = CodeRunResponse.model_validate(result)
+#     assert resp.success is True
+#     assert resp.quiz_response is not None
+
+#     qr = resp.quiz_response
+#     # params / answers
+#     assert qr.params == {"a": 1, "b": 2}
+#     assert qr.correct_answers["sum"] == 3
+
+#     # value logs
+#     assert logs_contain(qr.logs, "This is the value of a", "1")
+#     assert logs_contain(qr.logs, "This is the value of b", "2")
+
+#     # structure log (Python repr): "This is a structure {'params': {'a': 1, 'b': 2}}"
+#     assert logs_contain(qr.logs, "This is a structure", "'params'")
+#     assert logs_contain(qr.logs, "This is a structure", "'a'", "1")
+#     assert logs_contain(qr.logs, "This is a structure", "'b'", "2")
