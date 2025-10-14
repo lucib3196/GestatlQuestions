@@ -1,6 +1,4 @@
 
-import { useState } from "react";
-import { useContext } from "react";
 
 // Headless UI
 import {
@@ -20,19 +18,10 @@ import { BrowserRouter as Router, Routes, Link } from "react-router-dom";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
-// Context
-import { AuthContext } from "../../context/AuthContext";
-
-// Components
-import { Header } from "../Header";
-import LogInPage from "../Auth/Login";
 
 import { handleRoutes, navigation } from './navigationSettings';
 
 function NavBar() {
-  const { isLoggedIn, logout } = useContext(AuthContext);
-  const [showLogin, setShowLogin] = useState(false);
-
   return (
     <Router>
       <Disclosure as="nav" className="bg-gray-800">
@@ -82,19 +71,20 @@ function NavBar() {
                         </MenuItems>
                       </Menu>
                     ) : (
-                      <Link
-                        key={item.name}
-                        to={item.href}
-                        className={`px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white'
+                      item.includeNavbar && (
+                        <Link
+                          key={item.name}
+                          to={item.href}
+                          className={`px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white'
                         }`}
-                      >
-                        {item.name}
-                      </Link>
+                        >
+                          {item.name}
+                        </Link>)
                     )
                   )}
                 </div>
               </div>
-              <div className="flex ml-auto text-white items-center justify-center">
+              {/* <div className="flex ml-auto text-white items-center justify-center">
                 {isLoggedIn ? (
                   <p className="hover:text-bold hover:text-xl  transition delay-150 duration-300 ease-in-out " onClick={logout}>
                     Log Out
@@ -103,7 +93,7 @@ function NavBar() {
                   <p className="hover:text-bold hover:text-xl transition delay-150 duration-300 ease-in-out " onClick={() => setShowLogin(true)}>Log In</p>
                 )}
                 <LogInPage showModal={showLogin} setShowModal={setShowLogin} />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -124,7 +114,7 @@ function NavBar() {
           </div>
         </DisclosurePanel>
       </Disclosure>
-      <Header />
+
       <Routes>{handleRoutes(navigation)}</Routes>
     </Router>
   );

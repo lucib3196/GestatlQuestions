@@ -13,7 +13,7 @@ export const useToggleButtonSx = (mode?: Theme): SxProps => {
       backgroundColor:
         mode === "dark"
           ? "var(--color-accent-sky)"
-          : "var(--color-white)",
+          : "var(--color-black)",
       color:
         mode === "dark"
           ? "var(--text-primary)"

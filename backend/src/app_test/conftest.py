@@ -207,18 +207,6 @@ def patch_questions_path(monkeypatch, tmp_path, patch_question_dir):
     return questions_path
 
 
-class TestConfig(BaseSettings):
-    asset_path: Path
-
-
-test_config = TestConfig(asset_path=Path("./assets").resolve())
-
-
-@pytest.fixture
-def get_asset_path():
-    return test_config.asset_path
-
-
 @pytest.fixture(autouse=True)
 def mark_logs_in_test():
     """Mark logs as being inside test context for duration of each test."""
@@ -326,10 +314,9 @@ def question_manager_test(request, question_manager_local, question_manager_clou
     return qm
 
 
-
 # ---------------------------------------------------------------------------
 # Debug Run
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    print(test_config)
+    pass

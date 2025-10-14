@@ -11,4 +11,5 @@ export type navigationType = {
   dropdown?: boolean;
   dropdownItems?: dropDownItem[];
   requiresAccount: boolean;
+  includeNavbar: boolean;
 };
