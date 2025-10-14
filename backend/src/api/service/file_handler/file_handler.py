@@ -56,7 +56,6 @@ class SuccessFileServiceResponse(SuccessfulResponse):
 
 
 class FileService:
-
     def __init__(self, base_path: Path | str):
         self.base_path = Path(base_path)
         self.base_path.mkdir(parents=True, exist_ok=True)
