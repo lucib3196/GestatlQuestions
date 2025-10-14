@@ -1,6 +1,6 @@
 import { QuestionSettings } from "../components/QuestionFilter/QuestionSettings";
 import { useState } from "react";
-import { QuestionFiltering } from "./../components/QuestionFilterNew/QuestionFiltering";
+import { QuestionFiltering } from "../components/QuestionFilterNew/QuestionFiltering";
 import { QuestionTable } from "../components/QuestionTable/QuestionTablesDB";
 import QuestionPage from "./QuestionRenderPage";
 function QuestionDashBoardHeader() {

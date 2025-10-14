@@ -2,8 +2,7 @@
 import { Route } from "react-router-dom";
 
 // Types
-import { QuestionViewPage } from "../../pages/QuestionsViewPage";
-import CreateQuestionPage from "../../pages/CreateQuestion";
+import { QuestionViewPage } from "../../pages/QuestionsPage";
 import ImageGenerator from "../CodeGenerators/ImageGenerator";
 import TextGenerator from "../CodeGenerators/TextGenerator";
 import Home from "../../pages/Home";
@@ -34,14 +33,14 @@ export const navigation: navigationType[] = [
         requiresAccount: false,
         includeNavbar: true
     },
-    {
-        name: "Create Question",
-        href: "/createQuestion",
-        element: <CreateQuestionPage />,
-        current: false,
-        requiresAccount: false,
-        includeNavbar: true
-    },
+    // {
+    //     name: "Create Question",
+    //     href: "/createQuestion",
+    //     element: <CreateQuestionPage />,
+    //     current: false,
+    //     requiresAccount: false,
+    //     includeNavbar: true
+    // },
     {
         name: "Generators",
         href: "/generators",
