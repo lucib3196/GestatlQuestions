@@ -16,7 +16,6 @@ from src.code_runner.models import CodeRunException, CodeRunResponse, QuizData
 from src.code_runner.runtime_switcher import run_generate
 
 
-
 router = APIRouter(prefix="/question_running", tags=["dev", "code_running"])
 
 MAPPING_DB = {"python": "server.py", "javascript": "server.js"}
