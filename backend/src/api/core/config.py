@@ -73,6 +73,6 @@ settings = AppSettings(
     FIREBASE_PATH=(Path(BASE_DIR) / str(firebase_env)).resolve().as_posix(),
     STORAGE_BUCKET=os.getenv("STORAGE_BUCKET"),
     QUESTIONS_DIRNAME="questions",  # relative folder name only
-    QUESTIONS_PATH=BASE_DIR / "questions",  
+    QUESTIONS_PATH=BASE_DIR / "questions",
     BASE_PATH=BASE_DIR,
 )
