@@ -1,4 +1,4 @@
-from .run_js import run_js, execute_javascript
+from .run_js import  execute_javascript
 from .run_py import run_generate_py
 from src.code_runner.models import CodeRunResponse
 import os
