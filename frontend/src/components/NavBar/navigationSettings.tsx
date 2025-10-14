@@ -1,43 +1,52 @@
-
 // React Router
 import { Route } from "react-router-dom";
 
-// Types 
-import { QuestionViewPage } from '../../pages/QuestionsViewPage';
-import CreateQuestionPage from '../../pages/CreateQuestion';
-import ImageGenerator from '../CodeGenerators/ImageGenerator';
-import TextGenerator from '../CodeGenerators/TextGenerator';
+// Types
+import { QuestionViewPage } from "../../pages/QuestionsPage";
+import ImageGenerator from "../CodeGenerators/ImageGenerator";
+import TextGenerator from "../CodeGenerators/TextGenerator";
 import Home from "../../pages/Home";
-import type { navigationType } from "../../types/navbarTypes"
-
+import type { navigationType } from "../../types/navbarTypes";
 
 export const navigation: navigationType[] = [
+    {
+        name: "Home",
+        href: "/",
+        element: <Home />,
+        current: false,
+        requiresAccount: false,
+        includeNavbar: false
+    },
     {
         name: "Home",
         href: "/home",
         element: <Home />,
         current: false,
-        requiresAccount: false
+        requiresAccount: false,
+        includeNavbar: true
     },
     {
         name: "Questions",
         href: "/questions",
         element: <QuestionViewPage />,
         current: false,
-        requiresAccount: false
-    },
-    {
-        name: "Create Question",
-        href: "/createQuestion",
-        element: <CreateQuestionPage />,
-        current: false,
         requiresAccount: false,
+        includeNavbar: true
     },
+    // {
+    //     name: "Create Question",
+    //     href: "/createQuestion",
+    //     element: <CreateQuestionPage />,
+    //     current: false,
+    //     requiresAccount: false,
+    //     includeNavbar: true
+    // },
     {
         name: "Generators",
         href: "/generators",
         current: false,
         requiresAccount: true,
+        includeNavbar: true,
         dropdown: true,
         dropdownItems: [
             {
@@ -65,4 +74,3 @@ export function handleRoutes(navigation: navigationType[]) {
         )
     );
 }
-

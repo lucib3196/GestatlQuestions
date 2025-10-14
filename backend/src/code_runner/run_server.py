@@ -1,4 +1,4 @@
-from .run_js import run_js, execute_javascript
+from .run_js import execute_javascript
 from .run_py import run_generate_py
 from src.code_runner.models import CodeRunResponse
 import os
@@ -36,20 +36,3 @@ def run_generate(path: Union[str, Path], isTesting: bool = False) -> CodeRunResp
             quiz_response=None,
             http_status_code=500,
         )
-
-
-if __name__ == "__main__":
-    js_path = r"backend/processing/code_runners/test.js"
-    py_path = r"backend/processing/code_runners/test.py"
-
-    try:
-        print("JS Output:")
-        print(run_js(js_path))
-    except Exception as e:
-        print(f"JS Error: {e}")
-
-    try:
-        print("\nPython Output:")
-        print(run_generate_py(py_path))
-    except Exception as e:
-        print(f"Python Error: {e}")

@@ -4,16 +4,16 @@ import { HashLink } from "react-router-hash-link";
 import { GeneratorContainer } from "../components/CodeGenerators/AIGeneratorBox";
 import Card from "../components/Base/Card";
 import { Link } from "react-router-dom";
+
+
+
 function Hero() {
     return (
         <SectionContainer id="hero" style="hero" className="bg-gray-50 dark:bg-gray-900">
             <div className="text-center space-y-6 px-6 max-w-3xl mx-auto py-20">
                 {/* Title */}
                 <h1 className="font-extrabold text-4xl sm:text-6xl text-gray-900 dark:text-white">
-                    Gestalt Generator
-                    Hello some change i did 
-                    hello test
-                    hi hi
+                    Gestalt Questions
                 </h1>
 
                 <hr className="border-primary-yellow dark:border-primary-yellow/70 w-24 mx-auto" />
@@ -42,7 +42,7 @@ function AboutSection() {
             <div className="max-w-4xl mx-auto text-center space-y-8 px-6 py-16">
                 {/* Heading */}
                 <h2 className="text-3xl sm:text-5xl font-extrabold text-gray-900 dark:text-white">
-                    About Gestalt Generator
+                    About Gestalt
                 </h2>
 
                 <hr className="border-primary-yellow dark:border-primary-yellow/70 w-20 mx-auto" />
