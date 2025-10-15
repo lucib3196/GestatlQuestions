@@ -30,6 +30,8 @@ async def run_server(
     qm: QuestionManagerDependency,
 ) -> QuizData:
     # Mapping from language to filename
+    
+    logger.debug(f"Attemping to get question {qid}")
     try:
         server_file = MAPPPING_FILENAME[server_language]
     except KeyError:
