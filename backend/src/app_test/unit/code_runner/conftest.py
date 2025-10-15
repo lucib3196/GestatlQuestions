@@ -8,7 +8,7 @@ class TestConfig(BaseSettings):
 
 
 test_config = TestConfig(
-    asset_path=Path("src/app_test/unit/code_runner/test_assets").resolve()
+    asset_path=Path("src/app_test/test_assets/code").resolve()
 )
 
 
