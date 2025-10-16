@@ -66,9 +66,6 @@ def _clean_db(db_session, test_engine):
     Base.metadata.create_all(test_engine)
 
 
-
-
-
 class FakeQuestion(BaseModel):
     """A fake Question model for testing."""
 
@@ -180,7 +177,6 @@ def patch_questions_path(monkeypatch, tmp_path, patch_question_dir):
     return questions_path
 
 
-
 @pytest.fixture(autouse=True)
 def mark_logs_in_test():
     """Mark logs as being inside test context for duration of each test."""
@@ -277,7 +273,7 @@ def question_manager_cloud(cloud_storage_service):
 
 
 @pytest.fixture(scope="function", params=["local", "cloud"])
-def question_manager_test(request, question_manager_local, question_manager_cloud):
+def question_manager(request, question_manager_local, question_manager_cloud):
     storage_type = request.param
     if storage_type == "cloud":
         qm = question_manager_cloud
@@ -286,5 +282,3 @@ def question_manager_test(request, question_manager_local, question_manager_clou
     else:
         raise ValueError("Incorrect storage type")
     return qm
-
-

@@ -7,7 +7,7 @@ from src.api.service.crud import question_crud
 @pytest.mark.asyncio
 @pytest.mark.parametrize("payload_index", range(1))  # adjust to len(question_payloads)
 async def test_run_text_each(
-    db_session, question_payloads, payload_index, patch_questions_path, question_manager
+    db_session, question_payloads, payload_index, patch_questions_path, question_manager_test
 ):
     payload = question_payloads[payload_index]
 
@@ -15,7 +15,7 @@ async def test_run_text_each(
         text=payload["question"],
         session=db_session,
         additional_meta=payload["additional_meta"],
-        qm=question_manager,
+        qm=question_manager_test,
     )
 
     assert result["success"] is True
