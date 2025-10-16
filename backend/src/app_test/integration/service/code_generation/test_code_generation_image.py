@@ -12,7 +12,7 @@ class TestConfig(BaseSettings):
 
 
 test_config = TestConfig(
-    asset_path=Path("src/app_test/test_assets/images/mass_block.png").resolve()
+    asset_path=Path("src/app_test/test_assets").resolve()
 )
 
 
