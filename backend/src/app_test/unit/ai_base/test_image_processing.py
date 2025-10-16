@@ -19,7 +19,7 @@ from src.utils import encode_image
 @pytest.fixture
 def image_payload():
     # Relative to backend folder where i should be runnign this
-    test_image = Path(r"assets/images/mass_block.png").resolve()
+    test_image = Path(r"src/app_test/test_assets/images/test_image.png").resolve()
     assert test_image.exists()
     return encode_image(test_image.as_posix())
 
