@@ -1,25 +1,17 @@
 # --- Standard Library ---
 import asyncio
-from typing import List, Optional, Sequence, Union
-from uuid import UUID
+from typing import List, Union
 
 # --- Third-Party ---
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter
 from pydantic import ValidationError
-from starlette import status
-import io
-from fastapi.responses import StreamingResponse
 
 # --- Internal ---
 from src.api.core import logger
 from src.api.database import SessionDep
 from src.api.dependencies import QuestionManagerDependency
 from src.api.models import Question
-from src.api.models.question_model import QuestionMeta
 from src.api.response_models import *
-from src.api.service.file_handler import FileService
-from src.utils import normalize_kwargs, serialized_to_dict
-from src.api.response_models import SuccessDataResponse
 import json
 from typing import Literal
 from src.api.models import Question
@@ -274,3 +266,70 @@ async def sync_questions(session: SessionDep, qm: QuestionManagerDependency):
         skipped_questions=skipped_questions,
         failed_questions=failed_questions,
     )
+
+
+class FolderCheckMetrics(BaseModel):
+    total_checked: int
+    deleted_from_db: int
+    still_valid: int
+
+
+class FolderCheckResponse(BaseModel):
+    metrics: FolderCheckMetrics
+    remaining_questions: List[Question]
+
+
+@router.post("/prune_missing_questions")
+async def check_folders(session: SessionDep, qm: QuestionManagerDependency):
+    """
+    Verify that each question in the database still has a corresponding folder
+    on disk. If a folder no longer exists, the associated question record is
+    deleted from the database.
+
+    Returns a summary of the cleanup operation.
+    """
+    all_questions = await qm.get_all_questions(0, 1000, session)
+    deleted_count = 0
+    total_checked = 0
+
+    if not all_questions:
+        logger.info("No questions found in the database.")
+        return FolderCheckResponse(
+            metrics=FolderCheckMetrics(
+                total_checked=0, deleted_from_db=0, still_valid=0
+            ),
+            remaining_questions=[],
+        )
+    for q in all_questions:
+        total_checked += 1
+        folder_name = Path(str(q.local_path)).name
+        question_path = (Path(qm.base_path) / folder_name).resolve()
+        if question_path.exists():
+            logger.debug(f"Folder exists for {q.title} → {question_path}")
+            continue
+        logger.warning(
+            f"Folder missing for {q.title} "
+            f"(expected at: {question_path}) — removing from DB."
+        )
+        try:
+            await qm.delete_question(q.id, session)
+            deleted_count += 1
+        except Exception as e:
+            logger.error(f"⚠️ Failed to delete {q.title} from DB: {e}")
+
+    # Fetch updated list of remaining questions
+    remaining_questions = await qm.get_all_questions(0, 100, session) or []
+
+    metrics = FolderCheckMetrics(
+        total_checked=total_checked,
+        deleted_from_db=deleted_count,
+        still_valid=len(remaining_questions or []),
+    )
+
+    logger.info(
+        f"📊 Folder Check Summary — Checked: {metrics.total_checked}, "
+        f"Deleted: {metrics.deleted_from_db}, "
+        f"Still Valid: {metrics.still_valid}"
+    )
+
+    return FolderCheckResponse(metrics=metrics, remaining_questions=remaining_questions)
