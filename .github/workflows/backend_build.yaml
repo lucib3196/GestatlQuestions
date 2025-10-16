@@ -13,7 +13,6 @@ jobs:
     strategy:
       matrix:
         python-version: [3.13]
-        part: [1, 2, 3]
 
     env:
       MODE: "dev"
@@ -55,5 +54,5 @@ jobs:
 
       - name: Run Test
         run: |
-          poetry run python -m pytest -n auto --splits 3 --group ${{ matrix.part }}
+          poetry run python -m pytest 
         working-directory: ./backend
