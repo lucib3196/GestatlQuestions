@@ -3,6 +3,7 @@ from src.app_test.fixtures.fixture_code_generation import *
 from src.api.service.ai_generation import code_generation
 from src.api.service.crud import question_crud
 import asyncio
+from src.api.models import Question
 
 
 @pytest.mark.asyncio
@@ -61,9 +62,9 @@ async def test_run_test_check_db(
     )
     assert "questions" in result
 
-    question_list: list = result.get("questions", [])
+    question_list: list[Question] = result.get("questions", [])
     for q in question_list:
-        question_uuid = q.get("id")
+        question_uuid = q.id
         q_retrieved = await question_crud.get_question_by_id(
             question_uuid, session=db_session
         )
