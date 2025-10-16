@@ -16,6 +16,7 @@ import json
 from typing import Literal
 from src.api.models import Question
 from pydantic import ValidationError
+from typing import Sequence
 
 router = APIRouter(prefix="/questions", tags=["Questions", "local", "dev"])
 
@@ -47,7 +48,7 @@ class SyncMetrics(BaseModel):
 
 class SyncResponse(BaseModel):
     metrics: SyncMetrics
-    synced_questions: List["Question"]
+    synced_questions: Sequence["Question"]
     skipped_questions: List["UnsyncedQuestion"]
     failed_questions: List[str]  # store file name or reason
 
@@ -276,7 +277,7 @@ class FolderCheckMetrics(BaseModel):
 
 class FolderCheckResponse(BaseModel):
     metrics: FolderCheckMetrics
-    remaining_questions: List[Question]
+    remaining_questions: Sequence[Question]
 
 
 @router.post("/prune_missing_questions")
