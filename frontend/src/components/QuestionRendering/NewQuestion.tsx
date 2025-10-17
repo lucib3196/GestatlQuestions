@@ -10,7 +10,7 @@ import { getAdaptiveParams } from "../../api/questionHooks";
 import useQuestionRender from "./utils/useQuestionRender";
 
 import { QuestionPanel } from "./QuestionPanel";
-import QuestionInfo from "../QuestionView/QuestionInfo";
+import QuestionInfo from "../Question/QuestionHeader";
 import { SolutionPanel } from "../Question/SolutionPanel";
 import {
   SubmitAnswerButton,
