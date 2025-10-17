@@ -2,15 +2,15 @@ import { useContext, useCallback, useEffect } from "react";
 import type { FormEvent } from "react";
 import { MathJax } from "better-react-mathjax";
 
-import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
+
 import { QuestionSettingsContext } from "../../context/GeneralSettingsContext";
 import { trueish } from "../../utils";
 import { getQuestionMeta } from "../../api/questionHooks";
 import { getAdaptiveParams } from "../../api/questionHooks";
 import useQuestionRender from "./utils/useQuestionRender";
-
+import { useQuestion } from "../../context/QuestionSelectionContext";
 import { QuestionPanel } from "./QuestionPanel";
-import QuestionInfo from "../QuestionView/QuestionInfo";
+import QuestionInfo from "../Question/QuestionHeader";
 import { SolutionPanel } from "../Question/SolutionPanel";
 import {
   SubmitAnswerButton,
@@ -22,7 +22,7 @@ import {
 import { useState } from "react";
 
 export function NewQuestion() {
-  const { selectedQuestion } = useContext(RunningQuestionSettingsContext);
+  const { questionID: selectedQuestion } = useQuestion()
   const { codeRunningSettings } = useContext(QuestionSettingsContext);
 
   const [isSubmitted, setIsSubmitted] = useState(false);

@@ -5,7 +5,6 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeMathjax from "rehype-mathjax";
 
-import Panel from "../Base/Panel";
 
 type SolutionPanelProps = {
     title?: string;
@@ -54,27 +53,26 @@ export function SolutionPanel({
 }: SolutionPanelProps) {
     return (
         <MathJax>
-            <Panel >
-                {/* Header */}
-                <div>
-                    <h2 className="text-xl sm:text-2xl font-semibold">{title}</h2>
-                    {subtitle && (
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            {subtitle}
-                        </p>
-                    )}
-                </div>
+            {/* Header */}
+            <div className="w-full overflow-auto">
+                <h2 className="text-xl sm:text-2xl font-semibold">{title}</h2>
+                {subtitle && (
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {subtitle}
+                    </p>
+                )}
+            </div>
 
-                {/* Solution Steps */}
-                <div className="mt-4">
-                    <SolutionList solution={solution} />
-                </div>
+            {/* Solution Steps */}
+            <div className="mt-4">
+                <SolutionList solution={solution} />
+            </div>
 
-                {/* Footer Note */}
-                <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4 text-center text-xs text-gray-500 dark:text-gray-400">
-                    Review each step before proceeding.
-                </div>
-            </Panel>
+            {/* Footer Note */}
+            <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4 text-center text-xs text-gray-500 dark:text-gray-400">
+                Review each step before proceeding.
+            </div>
+
         </MathJax>
     );
 }

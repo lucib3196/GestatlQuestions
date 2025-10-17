@@ -4,16 +4,16 @@ import { HashLink } from "react-router-hash-link";
 import { GeneratorContainer } from "../components/CodeGenerators/AIGeneratorBox";
 import Card from "../components/Base/Card";
 import { Link } from "react-router-dom";
+
+
+
 function Hero() {
     return (
         <SectionContainer id="hero" style="hero" className="bg-gray-50 dark:bg-gray-900">
             <div className="text-center space-y-6 px-6 max-w-3xl mx-auto py-20">
                 {/* Title */}
                 <h1 className="font-extrabold text-4xl sm:text-6xl text-gray-900 dark:text-white">
-                    Gestalt Generator
-                    Hello some change i did 
-                    hello test
-                    hi hi
+                    Gestalt Questions
                 </h1>
 
                 <hr className="border-primary-yellow dark:border-primary-yellow/70 w-24 mx-auto" />
@@ -27,7 +27,7 @@ function Hero() {
                 <HashLink smooth to="/home/#about">
                     <MyButton
                         name="Get Started"
-                        variant="third"
+                        color="secondary"
                         className="px-8 py-4 mt-6 rounded-2xl text-xl sm:text-2xl font-extrabold shadow-lg hover:scale-105 transition-transform"
                     />
                 </HashLink>
@@ -42,7 +42,7 @@ function AboutSection() {
             <div className="max-w-4xl mx-auto text-center space-y-8 px-6 py-16">
                 {/* Heading */}
                 <h2 className="text-3xl sm:text-5xl font-extrabold text-gray-900 dark:text-white">
-                    About Gestalt Generator
+                    About Gestalt
                 </h2>
 
                 <hr className="border-primary-yellow dark:border-primary-yellow/70 w-20 mx-auto" />
@@ -68,7 +68,7 @@ function AboutSection() {
                 <HashLink smooth to="/home/#how-it-works">
                     <MyButton
                         name="How It Works"
-                        variant="primary"
+                        color="primary"
                         className="px-6 py-3 rounded-xl text-lg font-bold shadow hover:scale-105 transition-transform"
                     />
                 </HashLink>
@@ -85,7 +85,7 @@ function GeneratorSection() {
                 <HashLink smooth to="#learn-more">
                     <MyButton
                         name="Learn More"
-                        variant="secondary"
+                        color="secondary"
                         className="px-6 py-3 rounded-xl text-lg sm:text-xl font-bold shadow-md hover:scale-105 transition-transform"
                     />
                 </HashLink>
@@ -214,14 +214,14 @@ function HowItWorks() {
                     <HashLink smooth to="/home/#generator-section">
                         <MyButton
                             name="Start with Generators"
-                            variant="primary"
+                            color="primary"
                             className="px-6 py-3 rounded-xl text-lg font-bold shadow hover:scale-105 transition-transform"
                         />
                     </HashLink>
                     <HashLink smooth to="#questions">
                         <MyButton
                             name="Explore Questions"
-                            variant="secondary"
+                            color="secondary"
                             className="px-6 py-3 rounded-xl text-lg font-bold shadow-md hover:scale-105 transition-transform"
                         />
                     </HashLink>
@@ -275,14 +275,14 @@ function QuestionsSection() {
                     <Link to="/questions">
                         <MyButton
                             name="Go to Question Page"
-                            variant="primary"
+                            color="primary"
                             className="px-6 py-3 rounded-xl text-lg font-bold shadow hover:scale-105 transition-transform"
                         />
                     </Link>
                     <Link to="/createQuestion">"
                         <MyButton
                             name="Create Manual Question"
-                            variant="secondary"
+                            color="secondary"
                             className="px-6 py-3 rounded-xl text-lg font-bold shadow hover:scale-105 transition-transform"
                         />
                     </Link>

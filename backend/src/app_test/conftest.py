@@ -2,7 +2,6 @@
 
 # --- Standard Library ---
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
 from uuid import UUID
@@ -15,7 +14,6 @@ from src.api.core.logging import in_test_ctx
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from pydantic_settings import BaseSettings
 from sqlmodel import Session, SQLModel, create_engine
 from pydantic import BaseModel
 from typing import List
@@ -30,7 +28,6 @@ from src.api.service.storage.cloud_storage import FireCloudStorageService
 from src.api.service.storage.local_storage import LocalStorageService
 from src.api.service.question_manager import QuestionManager
 from src.api.dependencies import get_question_manager
-from src.api.models import Question
 
 
 @asynccontextmanager
@@ -67,33 +64,6 @@ def _clean_db(db_session, test_engine):
     logger.debug("Cleaning Database")
     Base.metadata.drop_all(test_engine)
     Base.metadata.create_all(test_engine)
-
-
-@pytest.fixture(scope="function", params=["local", "cloud"])
-def test_client(db_session, request, question_manager_cloud, question_manager_local):
-    app = get_application()
-
-    storage_type = request.param
-    if storage_type == "cloud":
-        qm = question_manager_cloud
-    elif storage_type == "local":
-        qm = question_manager_local
-    else:
-        raise ValueError("Incorrect storage type")
-
-    app.router.lifespan_context = on_startup_test
-
-    def override_get_db():
-        yield db_session
-
-    async def override_get_qm():
-        yield qm
-
-    app.dependency_overrides[get_session] = override_get_db
-    app.dependency_overrides[get_question_manager] = override_get_qm
-
-    with TestClient(app) as client:
-        yield client
 
 
 class FakeQuestion(BaseModel):
@@ -207,18 +177,6 @@ def patch_questions_path(monkeypatch, tmp_path, patch_question_dir):
     return questions_path
 
 
-class TestConfig(BaseSettings):
-    asset_path: Path
-
-
-test_config = TestConfig(asset_path=Path("./assets").resolve())
-
-
-@pytest.fixture
-def get_asset_path():
-    return test_config.asset_path
-
-
 @pytest.fixture(autouse=True)
 def mark_logs_in_test():
     """Mark logs as being inside test context for duration of each test."""
@@ -315,7 +273,7 @@ def question_manager_cloud(cloud_storage_service):
 
 
 @pytest.fixture(scope="function", params=["local", "cloud"])
-def question_manager_test(request, question_manager_local, question_manager_cloud):
+def question_manager(request, question_manager_local, question_manager_cloud):
     storage_type = request.param
     if storage_type == "cloud":
         qm = question_manager_cloud
@@ -324,12 +282,3 @@ def question_manager_test(request, question_manager_local, question_manager_clou
     else:
         raise ValueError("Incorrect storage type")
     return qm
-
-
-
-# ---------------------------------------------------------------------------
-# Debug Run
-# ---------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    print(test_config)
