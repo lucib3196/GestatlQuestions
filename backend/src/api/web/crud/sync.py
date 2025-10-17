@@ -17,6 +17,8 @@ from typing import Literal
 from src.api.models import Question
 from pydantic import ValidationError
 from typing import Sequence
+from src.utils import to_serializable
+
 
 router = APIRouter(prefix="/questions", tags=["Questions", "local", "dev"])
 
@@ -51,6 +53,17 @@ class SyncResponse(BaseModel):
     synced_questions: Sequence["Question"]
     skipped_questions: List["UnsyncedQuestion"]
     failed_questions: List[str]  # store file name or reason
+
+
+class FolderCheckMetrics(BaseModel):
+    total_checked: int
+    deleted_from_db: int
+    still_valid: int
+
+
+class FolderCheckResponse(BaseModel):
+    metrics: FolderCheckMetrics
+    remaining_questions: Sequence[Question]
 
 
 async def check_question_sync_status(
@@ -242,6 +255,17 @@ async def sync_questions(session: SessionDep, qm: QuestionManagerDependency):
             else:
                 logger.warning(f"Old path not found: {old_path}")
 
+            question_data = await qm.get_question_data(created_q.id, session)
+
+            meta_path = new_path / "metadata.json"
+            meta_path.write_text(
+                json.dumps(
+                    to_serializable(question_data.model_dump()),
+                    indent=2,
+                    ensure_ascii=False,
+                )
+            )
+
             logger.info(f"✅ Synced question: {uq.question_name}")
 
         except Exception as e:
@@ -269,19 +293,8 @@ async def sync_questions(session: SessionDep, qm: QuestionManagerDependency):
     )
 
 
-class FolderCheckMetrics(BaseModel):
-    total_checked: int
-    deleted_from_db: int
-    still_valid: int
-
-
-class FolderCheckResponse(BaseModel):
-    metrics: FolderCheckMetrics
-    remaining_questions: Sequence[Question]
-
-
 @router.post("/prune_missing_questions")
-async def check_folders(session: SessionDep, qm: QuestionManagerDependency):
+async def prune_missing_questions(session: SessionDep, qm: QuestionManagerDependency):
     """
     Verify that each question in the database still has a corresponding folder
     on disk. If a folder no longer exists, the associated question record is
@@ -289,42 +302,45 @@ async def check_folders(session: SessionDep, qm: QuestionManagerDependency):
 
     Returns a summary of the cleanup operation.
     """
-    all_questions = await qm.get_all_questions(0, 1000, session)
-    deleted_count = 0
-    total_checked = 0
 
+    all_questions = await qm.get_all_questions(0, 1000, session)
     if not all_questions:
-        logger.info("No questions found in the database.")
+        logger.info("📂 No questions found in the database.")
         return FolderCheckResponse(
             metrics=FolderCheckMetrics(
                 total_checked=0, deleted_from_db=0, still_valid=0
             ),
             remaining_questions=[],
         )
+
+    deleted_count = 0
+    total_checked = len(all_questions)
+
     for q in all_questions:
-        total_checked += 1
         folder_name = Path(str(q.local_path)).name
         question_path = (Path(qm.base_path) / folder_name).resolve()
+
         if question_path.exists():
-            logger.debug(f"Folder exists for {q.title} → {question_path}")
+            logger.debug(f"✅ Folder exists for '{q.title}' → {question_path}")
             continue
+
         logger.warning(
-            f"Folder missing for {q.title} "
+            f"🗑️ Folder missing for '{q.title}' "
             f"(expected at: {question_path}) — removing from DB."
         )
         try:
             await qm.delete_question(q.id, session)
             deleted_count += 1
         except Exception as e:
-            logger.error(f"⚠️ Failed to delete {q.title} from DB: {e}")
+            logger.exception(f"⚠️ Failed to delete '{q.title}' from DB: {e}")
 
     # Fetch updated list of remaining questions
-    remaining_questions = await qm.get_all_questions(0, 100, session) or []
+    remaining_questions = await qm.get_all_questions(0, 1000, session) or []
 
     metrics = FolderCheckMetrics(
         total_checked=total_checked,
         deleted_from_db=deleted_count,
-        still_valid=len(remaining_questions or []),
+        still_valid=len(remaining_questions),
     )
 
     logger.info(

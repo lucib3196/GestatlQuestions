@@ -4,8 +4,9 @@ import { QuestionFiltering } from "../components/QuestionFilterNew/QuestionFilte
 import { QuestionTable } from "../components/QuestionTable/QuestionTablesDB";
 
 import { SimpleToggle } from "../components/Base/SimpleToggle";
-import {QuestionView} from "./QuestionView";
+import { QuestionView } from "./QuestionView";
 import QuestionCard from "../components/Question/QuestionCard";
+import SyncQuestions from "../components/System/SyncQuestions";
 
 
 function QuestionDashBoardHeader() {
@@ -30,11 +31,17 @@ export function QuestionViewPage() {
 
         {/* Settings Toggle */}
         <div className="flex flex-col items-center w-full mb-6">
-          <SimpleToggle
-            setToggle={() => setShowSettings((prev) => !prev)}
-            label="Show Settings"
-            id="settings"
-          />
+          <div className="flex flex-row items-center gap-x-10">
+            <SimpleToggle
+              setToggle={() => setShowSettings((prev) => !prev)}
+              label="Show Settings"
+              id="settings"
+            />
+            <SyncQuestions />
+          </div>
+
+
+
           {showSettings && (
             <div className="mt-4 w-full">
               <QuestionSettings />
