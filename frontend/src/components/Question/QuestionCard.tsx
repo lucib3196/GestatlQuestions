@@ -24,6 +24,7 @@ import {
     PanelResizeHandle,
 } from "react-resizable-panels";
 import { SolutionPanel } from "./SolutionPanel";
+import { useQuestion } from "../../context/QuestionSelectionContext";
 
 
 type QuestionCardProps = {
@@ -35,7 +36,7 @@ export default function QuestionCard({
     setShowSolution,
     setSolution,
 }: QuestionCardProps) {
-    const selectedQuestion = "24685412-60c5-4c69-8bc6-483c061745a8";
+    const { questionID: selectedQuestion } = useQuestion()
     const { codeRunningSettings } = useContext(QuestionSettingsContext);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -115,6 +116,7 @@ export default function QuestionCard({
 export function ResizableQuestionContainer() {
     const [showSolution, setShowSolution] = useState(false);
     const [solution, setSolution] = useState<string[] | null>(null);
+
 
     return (
         <SectionContainer

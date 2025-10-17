@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
-import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
+import { useQuestion } from "../../context/QuestionSelectionContext";
 import { useSelection } from "./utils/useSelection";
 import { QuestionRow } from "./QuestionRow";
 import type { QuestionMeta } from "../../types/types";
@@ -22,9 +22,7 @@ type Props = { results: QuestionMeta[] };
 export function QuestionTable({ results }: Props) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const { selectedQuestion, setSelectedQuestion } = useContext(
-    RunningQuestionSettingsContext
-  );
+  const { questionID, setQuestionID } = useQuestion()
   const { isSelected, toggle } = useSelection();
   const [testResults] = useState<MinimalTestResult[]>([]);
   const [theme] = useTheme();
@@ -41,7 +39,8 @@ export function QuestionTable({ results }: Props) {
   };
 
   const handleQuestionClick = (id: string) => {
-    setSelectedQuestion((prev: string | null) => (prev === id ? null : id));
+    console.log("This is the id of clicked", id)
+    setQuestionID((prev: string | null) => (prev === id ? null : id));
   };
 
   return (
@@ -58,8 +57,8 @@ export function QuestionTable({ results }: Props) {
                 "Question Title",
                 "Question Type",
                 "Is Adaptive",
-                "Created By",
-                "Test Results",
+                // "Created By",
+                // "Test Results",
               ].map((h) => (
                 <TableCell key={h} sx={tableHeaderSx(theme)}>
                   {h}
@@ -73,7 +72,7 @@ export function QuestionTable({ results }: Props) {
               <QuestionRow
                 key={q.id}
                 question={q}
-                isActive={selectedQuestion === q.id}
+                isActive={questionID === q.id}
                 isChecked={isSelected(q.id ?? "")}
                 onToggleCheck={toggle}
                 onClickTitle={handleQuestionClick}
