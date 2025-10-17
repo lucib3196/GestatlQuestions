@@ -2,7 +2,7 @@ import { useContext, useCallback, useEffect } from "react";
 import type { FormEvent } from "react";
 import { MathJax } from "better-react-mathjax";
 
-import { RunningQuestionSettingsContext } from "../../context/RunningQuestionContext";
+import { RunningQuestionSettingsContext } from "../../context/QuestionSelectionContext";
 import { QuestionSettingsContext } from "../../context/GeneralSettingsContext";
 import { trueish } from "../../utils";
 import { getQuestionMeta } from "../../api/questionHooks";
