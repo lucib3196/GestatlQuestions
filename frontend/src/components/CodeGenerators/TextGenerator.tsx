@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import ModGenerators from "./BaseTemplate";
-import PopUpHelp from "../PopUpHelp";
+import { PopUpHelpIcon } from "../Base/PopUpHelper";
 import api from "../../api/client";
 import { toast } from "react-toastify";
 import { AddQuestionInput } from "./AddQuestionInput";
@@ -102,7 +102,7 @@ const QuestionInput: React.FC<QuestionInputProps> = ({ i, formData, setFormData 
                     className="flex items-center gap-2 text-sm font-semibold text-gray-800"
                 >
                     Enter Question
-                    <PopUpHelp message="Works best with one question at a time (numerical or multiple choice)." />
+                    <PopUpHelpIcon value="Works best with one question at a time (numerical or multiple choice)." />
                 </label>
                 <textarea
                     name="question"
