@@ -19,7 +19,7 @@ interface CodeEditorProps {
   content: string;
   language: string;
   onChange?: (value: string) => void;
-  theme: string
+  theme?: string
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = ({ content, language, onChange,theme="vs-light" }) => {
