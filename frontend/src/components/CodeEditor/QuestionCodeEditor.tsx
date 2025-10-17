@@ -57,11 +57,23 @@ function QuestionCodeEditor() {
   useEffect(() => {
     const fd = filesData.find((v) => v.filename === selectedFile);
     setFileContent(fd?.content ?? "");
-  }, [selectedFile, filesData,selectedQuestion]);
+  }, [selectedFile, filesData, selectedQuestion]);
 
+  const handleSave = async () => {
+    if (!selectedQuestion) return;
+    console.log("I am clicked")
+    try {
+      await questionApi.saveFileContent(
+        selectedFile,
+        fileContent,
+        selectedQuestion
+      );
+    } catch (error) {
+      toast.error("Could not save code");
+    }
+  };
 
-  if (loading)
-    return <Loading />
+  if (loading) return <Loading />;
 
   return (
     <>
@@ -82,6 +94,12 @@ function QuestionCodeEditor() {
           <MyButton
             name={showLogOutput ? "Hide Logs" : "Show Logs"}
             onClick={() => setShowLogOutput((prev) => !prev)}
+          />
+          <MyButton
+            name={"Save"}
+            color="secondary"
+            className="!bg-blue-500 text-white"
+            onClick={handleSave}
           />
         </div>
       </div>
