@@ -26,13 +26,15 @@ import {
 import { SolutionPanel } from "./SolutionPanel";
 
 
+type QuestionCardProps = {
+    setShowSolution: React.Dispatch<React.SetStateAction<boolean>>;
+    setSolution: React.Dispatch<React.SetStateAction<string[] | null>>;
+};
+
 export default function QuestionCard({
     setShowSolution,
     setSolution,
-}: {
-    setShowSolution: (val: boolean) => void;
-    setSolution: (val: string[] | null) => void;
-}) {
+}: QuestionCardProps) {
     const selectedQuestion = "24685412-60c5-4c69-8bc6-483c061745a8";
     const { codeRunningSettings } = useContext(QuestionSettingsContext);
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -112,7 +114,7 @@ export default function QuestionCard({
 
 export function ResizableQuestionContainer() {
     const [showSolution, setShowSolution] = useState(false);
-    const [solution, setSolution] = useState<string[] | null | undefined>(null);
+    const [solution, setSolution] = useState<string[] | null>(null);
 
     return (
         <SectionContainer
