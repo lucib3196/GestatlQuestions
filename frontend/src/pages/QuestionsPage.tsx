@@ -2,7 +2,6 @@ import { QuestionSettings } from "../components/QuestionFilter/QuestionSettings"
 import { useState } from "react";
 import { QuestionFiltering } from "../components/QuestionFilterNew/QuestionFiltering";
 import { QuestionTable } from "../components/QuestionTable/QuestionTablesDB";
-import QuestionCodeEditor from "../components/CodeEditor/QuestionCodeEditor";
 import { SimpleToggle } from "../components/Generic/SimpleToggle";
 import { ResizableQuestionContainer } from "../components/Question/ResizableQuestion";
 import SyncQuestions from "../components/System/SyncQuestions";
