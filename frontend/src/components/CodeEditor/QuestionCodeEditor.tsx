@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { getFiles } from "../../api";
 import { fetchFileContent, getFileNames, getLanguage } from "../../utils";
 import type { FileData } from "../../types/types";
