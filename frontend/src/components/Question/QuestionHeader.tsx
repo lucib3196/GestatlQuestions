@@ -1,6 +1,6 @@
 import type { Question } from "../../types/questionTypes";
 import { Pill, type PillTheme } from "../Base/Pill";
-import { SimpleToggle } from "../Base/SimpleToggle";
+import { SimpleToggle } from "../Generic/SimpleToggle";
 import { useState } from "react";
 
 

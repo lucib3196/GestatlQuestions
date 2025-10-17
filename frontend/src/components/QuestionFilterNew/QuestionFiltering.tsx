@@ -4,7 +4,7 @@ import type { Flag } from "./ModularFilter";
 import { useRetrievedFilteredQuestions } from "../../api";
 import { useDebounce } from "@uidotdev/usehooks";
 import SearchBar from "../Base/SearchBar";
-import { SimpleToggle } from "../Base/SimpleToggle";
+import { SimpleToggle } from "../Generic/SimpleToggle";
 
 type QuestionFilterProps = {
   setSearchResults: (val: any[]) => void; // ideally use: setSearchResults: (val: Question[]) => void
@@ -60,11 +60,13 @@ export function QuestionFiltering({ setSearchResults }: QuestionFilterProps) {
             setToggle={() => setToggle((prev) => !prev)}
             label="Show Additional Filters"
             id="showAllFilters"
+            checked={toggle}
           />
           <SimpleToggle
             setToggle={() => setShowAllQuestions((prev) => !prev)}
             label="Show All Questions"
             id="showAllQuestions"
+            checked={showAllQuestions}
           />
         </div>
       </div>
