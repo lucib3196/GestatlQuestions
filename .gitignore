@@ -1,6 +1,7 @@
 /questions
 /questions_copy
 /secrets
+/questions_old
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

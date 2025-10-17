@@ -27,7 +27,7 @@ function Hero() {
                 <HashLink smooth to="/home/#about">
                     <MyButton
                         name="Get Started"
-                        variant="third"
+                        color="secondary"
                         className="px-8 py-4 mt-6 rounded-2xl text-xl sm:text-2xl font-extrabold shadow-lg hover:scale-105 transition-transform"
                     />
                 </HashLink>
@@ -68,7 +68,7 @@ function AboutSection() {
                 <HashLink smooth to="/home/#how-it-works">
                     <MyButton
                         name="How It Works"
-                        variant="primary"
+                        color="primary"
                         className="px-6 py-3 rounded-xl text-lg font-bold shadow hover:scale-105 transition-transform"
                     />
                 </HashLink>
@@ -85,7 +85,7 @@ function GeneratorSection() {
                 <HashLink smooth to="#learn-more">
                     <MyButton
                         name="Learn More"
-                        variant="secondary"
+                        color="secondary"
                         className="px-6 py-3 rounded-xl text-lg sm:text-xl font-bold shadow-md hover:scale-105 transition-transform"
                     />
                 </HashLink>
@@ -214,14 +214,14 @@ function HowItWorks() {
                     <HashLink smooth to="/home/#generator-section">
                         <MyButton
                             name="Start with Generators"
-                            variant="primary"
+                            color="primary"
                             className="px-6 py-3 rounded-xl text-lg font-bold shadow hover:scale-105 transition-transform"
                         />
                     </HashLink>
                     <HashLink smooth to="#questions">
                         <MyButton
                             name="Explore Questions"
-                            variant="secondary"
+                            color="secondary"
                             className="px-6 py-3 rounded-xl text-lg font-bold shadow-md hover:scale-105 transition-transform"
                         />
                     </HashLink>
@@ -275,14 +275,14 @@ function QuestionsSection() {
                     <Link to="/questions">
                         <MyButton
                             name="Go to Question Page"
-                            variant="primary"
+                            color="primary"
                             className="px-6 py-3 rounded-xl text-lg font-bold shadow hover:scale-105 transition-transform"
                         />
                     </Link>
                     <Link to="/createQuestion">"
                         <MyButton
                             name="Create Manual Question"
-                            variant="secondary"
+                            color="secondary"
                             className="px-6 py-3 rounded-xl text-lg font-bold shadow hover:scale-105 transition-transform"
                         />
                     </Link>
