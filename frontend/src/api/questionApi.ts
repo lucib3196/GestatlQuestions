@@ -3,7 +3,7 @@ import type { QuestionMeta } from "../types/types";
 import { toast } from "react-toastify";
 import type { QuestionFormData } from "../types/types";
 import type { Question, QuestionFull, FileName } from "../types/questionTypes";
-
+import type { FileData } from "../types/types";
 type searchQuestionProps = {
   filter?: QuestionMeta;
   showAllQuestions: boolean;
@@ -32,6 +32,13 @@ type FolderCheckMetrics = {
 type PruneResponse = {
   metrics: FolderCheckMetrics;
   remaining_questions: Question[];
+};
+
+type FileDataResponse = {
+  status: number;
+  detail: string;
+  filedata: FileData[];
+  filepaths: string[];
 };
 
 export const questionApi = {
@@ -104,6 +111,17 @@ export const questionApi = {
   async PruneQuestions(): Promise<PruneResponse> {
     const response = await api.post("/questions/prune_missing_questions");
     return response.data;
+  },
+
+  async getQuestionFiles({
+    questionID,
+  }: {
+    questionID: string;
+  }): Promise<FileData[]> {
+    const response = await api.get<FileDataResponse>(
+      `/questions/${questionID}/files_data`
+    );
+    return response.data.filedata;
   },
 };
 

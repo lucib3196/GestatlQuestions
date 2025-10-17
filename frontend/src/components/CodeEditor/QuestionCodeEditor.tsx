@@ -1,66 +1,107 @@
 import { useEffect, useState } from "react";
-import { getFiles } from "../../api";
-import { fetchFileContent, getFileNames, getLanguage } from "../../utils";
+import { getLanguage } from "../../utils";
 import type { FileData } from "../../types/types";
 import CodeEditor from "./CodeEditorBase";
-
 import { LogOutput } from "./LogPrint";
-import { CodeEditorOptions } from "./CodeEditorOptions";
 import { useQuestion } from "../../context/QuestionSelectionContext";
+import { questionApi } from "../../api";
+import { toast } from "react-toastify";
+import FileDropDown from "../Generic/FileDropDown";
+import { MyButton } from "../Base/Button";
+import { Loading } from "../Base/Loading";
 
 function QuestionCodeEditor() {
-  // const { selectedQuestion } = useContext(RunningQuestionSettingsContext);
   const { questionID: selectedQuestion } = useQuestion();
   const [filesData, setFileData] = useState<FileData[]>([]);
+  const [fileNames, setFileNames] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<string>("");
   const [showLogOutput, setShowLogOutput] = useState(false);
-
   const [fileContent, setFileContent] = useState("");
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    const id = String(selectedQuestion ?? "").trim();
-    if (!id) {
+    const fetchFiles = async () => {
+      if (!selectedQuestion) {
+        setFileData([]);
+        setFileNames([]);
+        setFileContent("");
+        return;
+      }
+
+      setLoading(true);
       setFileData([]);
-      return;
-    }
-    (async () => {
-      const files = await getFiles(id);
-      setFileData(files ?? []);
-      const first = getFileNames(files ?? [])[0] ?? "";
-      setSelectedFile(first);
-    })();
+      setFileNames([]);
+      setFileContent("");
+
+      try {
+        const response = await questionApi.getQuestionFiles({
+          questionID: selectedQuestion,
+        });
+        setFileData(response);
+      } catch (error) {
+        console.error(error);
+        toast.error("Could not get question files");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFiles();
   }, [selectedQuestion]);
 
-  useEffect(
-    () => setFileContent(fetchFileContent(selectedFile, filesData) ?? ""),
-    [selectedFile, filesData]
-  );
+  useEffect(() => {
+    const names = filesData.map((v) => v.filename);
+    setFileNames(names);
+  }, [filesData]);
+
+  useEffect(() => {
+    const fd = filesData.find((v) => v.filename === selectedFile);
+    setFileContent(fd?.content ?? "");
+  }, [selectedFile, filesData,selectedQuestion]);
+
+
+  if (loading)
+    return <Loading />
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-6">
-      {/* Toolbar Options */}
-      <CodeEditorOptions
-        selectedFile={selectedFile}
-        selectedQuestion={selectedQuestion}
-        fileContent={fileContent}
-      />
+    <>
+      <div className="flex w-full items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3">
+        <div className="flex items-center gap-3">
+          <span className="text-base font-semibold text-gray-800 dark:text-gray-200">
+            Files
+          </span>
+          <FileDropDown
+            fileNames={fileNames}
+            selectedFile={selectedFile}
+            setSelectedFile={setSelectedFile}
+          />
+        </div>
 
-      {/* Editor */}
-      <CodeEditor
-        content={fileContent}
-        language={getLanguage(selectedFile)}
-        onChange={setFileContent}
-      />
+        <div className="flex items-center gap-2">
+          {/* Placeholder for upcoming toolbar buttons */}
+          <MyButton
+            name={showLogOutput ? "Hide Logs" : "Show Logs"}
+            onClick={() => setShowLogOutput((prev) => !prev)}
+          />
+        </div>
+      </div>
 
-      {/* Logs Toggle */}
-      <button
-        className="rounded-md border-2 border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
-        onClick={() => setShowLogOutput((prev) => !prev)}
-      >
-        {showLogOutput ? "Hide Logs" : "Show Logs"}
-      </button>
+      {/* Code Editor */}
+      <div className="w-full  rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
+        <CodeEditor
+          content={fileContent}
+          language={getLanguage(selectedFile)}
+          onChange={setFileContent}
+        />
+      </div>
 
-      {showLogOutput && <LogOutput />}
-    </div>
+      {/* Log Output */}
+      {showLogOutput && (
+        <div className="w-full mt-4">
+          <LogOutput />
+        </div>
+      )}
+    </>
   );
 }
 
