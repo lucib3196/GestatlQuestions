@@ -15,7 +15,7 @@ import { getAdaptiveParams, getQuestionMeta } from "../../api/questionHooks";
 import { trueish } from "../../utils";
 
 // Components
-import QuestionInfo from "./QuestionInfo";
+import QuestionInfo from "../Question/QuestionHeader";
 import { SolutionPanel } from "../Question/SolutionPanel";
 import showCorrectAnswer from "../QuestionRendering/utils/formatCorrectAnswersLegacy";
 import { Loading } from "../Base/Loading";
