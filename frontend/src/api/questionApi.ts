@@ -123,6 +123,19 @@ export const questionApi = {
     );
     return response.data.filedata;
   },
+  async saveFileContent(
+    filename: string,
+    content: string,
+    id: string | null
+  ): Promise<boolean> {
+    await api.put("/questions/update_file", {
+      question_id: id,
+      filename,
+      new_content: content,
+    });
+    toast.success("Code Saved Successfully");
+    return true;
+  },
 };
 
 export const searchQuestions = async ({
@@ -218,27 +231,7 @@ export async function getFiles(id: string) {
   }
 }
 
-export async function saveFileContent(
-  filename: string,
-  content: string,
-  id: string
-): Promise<boolean> {
-  try {
-    const result = await api.put("/questions/update_file", {
-      question_id: id,
-      filename,
-      new_content: content,
-    });
-    toast.success("Code Saved Successfully");
-    console.log(result);
 
-    return true;
-  } catch (err) {
-    console.error("Error saving file content:", err);
-    toast.error("Code Not Saved");
-    return false;
-  }
-}
 
 type QuestionFormInput = QuestionFormData & { files?: File[] };
 export async function createQuestion({

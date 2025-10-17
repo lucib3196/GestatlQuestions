@@ -1,96 +1,119 @@
 
----
 
 # Gestalt Question Review — Local Setup
 
 ## Prerequisites
 
-* Git
-* **Python ≥ 3.10**
-* **Node.js ≥ 18** and npm
+Before you begin, make sure you have the following installed:
 
-## 1) Clone the repo
+* **Git**
+* **Python ≥ 3.10**
+* **Node.js ≥ 18** (with npm)
+* **Poetry ≥ 1.8** → [Installation Guide](https://python-poetry.org/docs/#installation)
+
+---
+
+## 1️⃣ Clone the Repository
 
 ```bash
 git clone https://github.com/lucib3196/Gestalt_Question_Review.git
 cd Gestalt_Question_Review
 ```
 
-## 2) Environment variables
+---
 
-Create a `.env` file at the project root and add the secrets you were given.
+## 2️⃣ Environment Variables
 
-> Tip: commit a `.env.example` (no secrets) so others know what keys to set.
+Create a `.env` file in the project root with the required API keys and configuration settings.
+For a default env file email me at lberm007@ucr.edu
 
-## 3) Python virtual environment
+Example:
 
-```bash
-python -m venv .venv
+```env
+# Example .env file
+OPENAI_API_KEY=your_openai_api_key_here
+FIREBASE_API_KEY=your_firebase_key_here
+DATABASE_URL=sqlite:///./app.db
 ```
 
-**Activate it**
+---
 
-* macOS/Linux:
+## 3️⃣ Install Backend Dependencies with Poetry
 
-  ```bash
-  source .venv/bin/activate
-  ```
-* Windows (PowerShell):
+Poetry will automatically create and manage a virtual environment for the project.
 
-  ```powershell
-  .venv\Scripts\Activate.ps1
-  ```
-
-## 4) Install backend requirements
-
+Go into backend directory and install dependencies 
 ```bash
-pip install -r requirements.txt
+cd backend
+poetry install
 ```
 
-## 5) Install frontend dependencies
+
+---
+
+## 4️⃣ Install Frontend Dependencies
 
 ```bash
 cd frontend
 npm install
-cd ..
 ```
 
-## 6) Run the backend (FastAPI)
+---
 
-In one terminal (venv active):
+## 5️⃣ Run the Backend (FastAPI)
+
+Start the FastAPI backend:
 
 ```bash
-uvicorn backend_api.main:app --reload
+poetry run uvicorn backend_api.main:app --reload
 ```
 
-* API: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-* Docs (Swagger): [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+**Endpoints:**
 
-## 7) Run the frontend
+* API Root → [http://127.0.0.1:8000](http://127.0.0.1:8000)
+* Swagger Docs → [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-In a second terminal:
+---
+
+## 6️⃣ Run the Frontend (Vite)
+
+In a separate terminal:
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-* App dev server (Vite/Next): the terminal will print the local URL (often `http://localhost:5173`).
+Your local development server will start — usually at:
+👉 [http://localhost:5173](http://localhost:5173)
 
 ---
 
-### Notes / Troubleshooting
+## ⚙️ Notes & Troubleshooting
 
-* If port **8000** is in use, start the backend on another port:
+* To run the backend on a different port:
 
   ```bash
-  uvicorn backend_api.main:app --reload --port 8001
+  poetry run uvicorn backend_api.main:app --reload --port 8001
   ```
-* If `npm run dev` fails, ensure Node ≥ 18 and delete/reinstall `node_modules`:
+
+* If the frontend fails to start, try:
 
   ```bash
   rm -rf node_modules package-lock.json && npm install
   ```
-* If imports fail in Python, confirm the venv is activated.
 
+* If imports fail or commands don’t run, ensure you’re inside Poetry’s environment:
 
+  ```bash
+  poetry shell
+  ```
+
+---
+
+## 🧠 Need Help?
+
+If you run into issues or setup problems, feel free to reach out:
+📧 **[lberm007@ucr.edu](mailto:lberm007@ucr.edu)**
+
+---
