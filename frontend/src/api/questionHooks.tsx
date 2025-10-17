@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect, useRef, useContext } from "react";
 import type { QuestionMeta, QuestionParams } from "../types/types";
 import api from "./client";
 import { CodeLogsSettings } from "../context/CodeLogsContext";
-
+import { questionApi } from './questionApi';
 
 // Kept name & logic the same (though this is a hook in practice)
 export function getQuestionMeta(selectedQuestion?: string | null): any {
@@ -120,4 +120,45 @@ export function getAdaptiveParams(
   }, [reset]);
 
   return { params, loading, error, reset };
+}
+
+
+type UseRetrievedFilteredQuestionsProps = {
+  searchTitle: string;
+  showAllQuestions: boolean;
+  setSearchResults: (val: any[]) => void;
+  setIsSearching: (val: boolean) => void;
+};
+
+export function useRetrievedFilteredQuestions({
+  searchTitle,
+  showAllQuestions,
+  setSearchResults,
+  setIsSearching,
+}: UseRetrievedFilteredQuestionsProps) {
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      if (!showAllQuestions && !searchTitle) {
+        setSearchResults([]);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const retrievedQuestions = await questionApi.filterQuestions({
+          filter: { title: searchTitle ?? "" },
+          showAllQuestions,
+        });
+        setSearchResults(retrievedQuestions);
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    fetchQuestions();
+  }, [searchTitle, showAllQuestions, setSearchResults, setIsSearching]);
 }

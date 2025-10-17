@@ -43,11 +43,11 @@ export function SolutionResizable({ solution }: SolutionProps) {
 
 // --- Main Question View ---
 export function QuestionView() {
-    const selectedQuestion = "ab019cad37e0460b802f1af1786822d3";
+    const selectedQuestion = "9a317750-6a20-4cfe-aeb5-93f54dccb77a";
     const { codeRunningSettings } = useContext(QuestionSettingsContext);
     const [showSolution, setShowSolution] = useState<boolean>(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    
+
 
     // Question metadata
     const {
@@ -129,7 +129,7 @@ export function QuestionView() {
                     </Panel>
                 </RPanel>
             </PanelGroup>
-            
+
         </SectionContainer>
     );
 }

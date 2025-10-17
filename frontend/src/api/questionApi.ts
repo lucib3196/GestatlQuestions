@@ -4,6 +4,11 @@ import { toast } from "react-toastify";
 import type { QuestionFormData } from "../types/types";
 import type { Question, QuestionFull, FileName } from "../types/questionTypes";
 
+type searchQuestionProps = {
+  filter?: QuestionMeta;
+  showAllQuestions: boolean;
+};
+
 export const questionApi = {
   async getbyId(id: string): Promise<Question> {
     const res = await api.get(`/questions/${encodeURIComponent(id)}`);
@@ -46,32 +51,28 @@ export const questionApi = {
     );
     return response.data;
   },
-};
 
-import type {
-  SuccessDataResponse,
-  SuccessFileResponse,
-} from "../types/responseModels";
-import type {
-  GeneralDataResponse,
-  GeneralResponse,
-} from "../types/responseTypes";
-
-type searchQuestionProps = {
-  filter?: QuestionMeta;
-  showAllQuestions: boolean;
-};
-
-type Settings = {
-  storage_type: "cloud" | "local";
-};
-export const getSettings = async () => {
-  try {
-    const response = await api.get<Settings>("/settings");
-    return response.data.storage_type;
-  } catch (error) {
-    console.error("Could not fetch question settings", error);
-  }
+  async getAllQuestions(offset: number, limit: number): Promise<Question[]> {
+    const response = await api.get<Question[]>(
+      `/questions/get_all/${offset}/${limit}/minimal`
+    );
+    return response.data;
+  },
+  async filterQuestions({
+    filter,
+    showAllQuestions,
+  }: searchQuestionProps): Promise<Question[]> {
+    if (showAllQuestions) {
+      console.log("Getting all questions")
+      return await questionApi.getAllQuestions(0, 100);
+    } else {
+      const response = await api.post(
+        "/questions/filter_questions",
+        !showAllQuestions ? filter : {}
+      );
+      return response.data;
+    }
+  },
 };
 
 export const searchQuestions = async ({
@@ -92,6 +93,27 @@ export const searchQuestions = async ({
       error
     );
     return [];
+  }
+};
+
+import type {
+  SuccessDataResponse,
+  SuccessFileResponse,
+} from "../types/responseModels";
+import type {
+  GeneralDataResponse,
+  GeneralResponse,
+} from "../types/responseTypes";
+
+type Settings = {
+  storage_type: "cloud" | "local";
+};
+export const getSettings = async () => {
+  try {
+    const response = await api.get<Settings>("/settings");
+    return response.data.storage_type;
+  } catch (error) {
+    console.error("Could not fetch question settings", error);
   }
 };
 
