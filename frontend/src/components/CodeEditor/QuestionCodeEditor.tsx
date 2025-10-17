@@ -64,11 +64,7 @@ function QuestionCodeEditor() {
     return <Loading />
 
   return (
-    <div
-      className="flex flex-col w-full max-w-4xl border border-gray-200 dark:border-gray-700 rounded-xl 
-                    bg-white dark:bg-gray-900 shadow-sm p-6 space-y-6 transition-colors duration-200"
-    >
-      {/* Toolbar */}
+    <>
       <div className="flex w-full items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3">
         <div className="flex items-center gap-3">
           <span className="text-base font-semibold text-gray-800 dark:text-gray-200">
@@ -91,7 +87,7 @@ function QuestionCodeEditor() {
       </div>
 
       {/* Code Editor */}
-      <div className="w-full rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
+      <div className="w-full  rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
         <CodeEditor
           content={fileContent}
           language={getLanguage(selectedFile)}
@@ -105,7 +101,7 @@ function QuestionCodeEditor() {
           <LogOutput />
         </div>
       )}
-    </div>
+    </>
   );
 }
 

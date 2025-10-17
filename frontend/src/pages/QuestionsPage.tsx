@@ -62,7 +62,6 @@ export function QuestionViewPage() {
       {questionID && <div className="w-full px-4 sm:px-8">
         <ResizableQuestionContainer />
       </div>}
-      <QuestionCodeEditor />
     </section>
   );
 }
