@@ -88,21 +88,10 @@ export function getAdaptiveParams(
           undefined,
           { signal: controller.signal }
         );
-        if (!res.data.success) {
-          console.log("this is the error", res.data.error);
-          setError(res.data.error);
-          return;
-        }
 
-        const pData = res?.data?.quiz_response ?? null;
-        if (!pData) {
-          const raw = res?.data?.error || res?.data?.quiz_response?.error;
-          throw new Error(
-            typeof raw === "object" ? JSON.stringify(raw) : String(raw ?? "Unknown error")
-          );
-        }
-        setParams(pData);
-        setLogs(res.data.quiz_response.logs)
+        const quizData = res.data
+        setParams(quizData);
+        setLogs(quizData.logs)
 
       } catch (e: any) {
         if (e?.name !== "CanceledError")

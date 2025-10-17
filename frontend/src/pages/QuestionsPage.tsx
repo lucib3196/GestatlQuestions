@@ -4,10 +4,10 @@ import { QuestionFiltering } from "../components/QuestionFilterNew/QuestionFilte
 import { QuestionTable } from "../components/QuestionTable/QuestionTablesDB";
 
 import { SimpleToggle } from "../components/Base/SimpleToggle";
-import { QuestionView } from "./QuestionView";
-import QuestionCard from "../components/Question/QuestionCard";
+import {
+  ResizableQuestionContainer,
+} from "../components/Question/QuestionCard";
 import SyncQuestions from "../components/System/SyncQuestions";
-
 
 function QuestionDashBoardHeader() {
   return (
@@ -40,8 +40,6 @@ export function QuestionViewPage() {
             <SyncQuestions />
           </div>
 
-
-
           {showSettings && (
             <div className="mt-4 w-full">
               <QuestionSettings />
@@ -60,8 +58,8 @@ export function QuestionViewPage() {
       </div>
 
       {/* Question Detail View */}
-      <div className="w-full max-w-6xl px-4 sm:px-8">
-        <QuestionCard />
+      <div className="w-full px-4 sm:px-8">
+        <ResizableQuestionContainer />
       </div>
     </section>
   );

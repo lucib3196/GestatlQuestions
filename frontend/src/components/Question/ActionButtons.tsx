@@ -5,7 +5,7 @@ import { MyButton } from "../Base/Button";
 type ButtonActionsProps = {
   isSubmitted: boolean;
   showSolution: () => void;
-  handleSubmit: (e:FormEvent) => void;
+  handleSubmit: (e: FormEvent) => void;
   generateVarient: () => void;
 };
 export function ButtonActions({
@@ -15,18 +15,19 @@ export function ButtonActions({
   generateVarient,
 }: ButtonActionsProps) {
   return (
-    <div className="grid grid-cols-3 gap-10 mb-10">
+    <div className="grid sm:grid-cols-3 gap-10 mb-10">
       <MyButton
         name={"Generate Variation"}
         onClick={generateVarient}
-        variant="secondary"
+        color="generateVariant"
       />
-      <MyButton name={"Show Solution"} variant="third" onClick={showSolution} />
+      <MyButton name={"Show Solution"} color="showSolution" onClick={showSolution} />
       <MyButton
         name={"Submit"}
         btype="submit"
         onClick={handleSubmit}
         disabled={isSubmitted}
+        color="submitQuestion"
       />
     </div>
   );
