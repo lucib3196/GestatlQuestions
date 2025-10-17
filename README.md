@@ -111,6 +111,20 @@ Your local development server will start — usually at:
 
 ---
 
+Running Questions Locally
+
+When running questions locally, a questions folder is automatically created at the root of the project directory during startup.
+All questions are also stored in the database for persistence.
+
+To ensure full compatibility, each question inserted into the folder must include a metadata.json file containing at least the minimal required fields:
+
+title
+isAdaptive
+
+All other fields are optional for now.
+A template of the metadata.json file can be found here
+
+[Metadata Template](https://github.com/lucib3196/Gestalt_Question_Review/blob/main/starter_templates/AdaptiveStarter/metadata.json****)
 ## 🧠 Need Help?
 
 If you run into issues or setup problems, feel free to reach out:
