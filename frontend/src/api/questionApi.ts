@@ -123,6 +123,19 @@ export const questionApi = {
     );
     return response.data.filedata;
   },
+  async saveFileContent(
+    filename: string,
+    content: string,
+    id: string | null
+  ): Promise<boolean> {
+    await api.put("/questions/update_file", {
+      question_id: id,
+      filename,
+      new_content: content,
+    });
+    toast.success("Code Saved Successfully");
+    return true;
+  },
 };
 
 export const searchQuestions = async ({
