@@ -90,27 +90,6 @@ Your local development server will start — usually at:
 
 ---
 
-## ⚙️ Notes & Troubleshooting
-
-* To run the backend on a different port:
-
-  ```bash
-  poetry run uvicorn backend_api.main:app --reload --port 8001
-  ```
-
-* If the frontend fails to start, try:
-
-  ```bash
-  rm -rf node_modules package-lock.json && npm install
-  ```
-
-* If imports fail or commands don’t run, ensure you’re inside Poetry’s environment:
-
-  ```bash
-  poetry shell
-  ```
-
----
 
 ## 🧠 Need Help?
 
