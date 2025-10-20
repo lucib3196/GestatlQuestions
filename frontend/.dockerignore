@@ -3,7 +3,12 @@
 #
 # For more help, visit the .dockerignore file reference guide at
 # https://docs.docker.com/go/build-context-dockerignore/
-
+node_modules/
+dist/
+.vscode/
+.git/
+.gitignore
+.DS_Store
 **/.classpath
 **/.dockerignore
 **/.env
