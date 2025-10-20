@@ -20,9 +20,9 @@ class LLMConfiguration(BaseSettings):
     # Storage Paths
     # -------------------------------------------------------------------------
     vector_store_path: Path = Path("src/ai_workspace/vectorstores/QUESTIONMOD_VS").resolve()
-    ROOT_DIR: Path = Path(__file__).resolve().parents[4]
+    ROOT_DIR: Path = Path(__file__).resolve().parents[3]
     
-    question_csv_path: Path = (ROOT_DIR / "data" / "QuestionDataV2_06122025_classified.csv").resolve()
+    question_csv_path: Path|str = Path(r"src/data/QuestionDataV2_06122025_classified.csv").resolve()
 
     # -------------------------------------------------------------------------
     # Model Config
