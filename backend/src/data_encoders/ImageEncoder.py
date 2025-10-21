@@ -1,11 +1,12 @@
 from pathlib import Path
 import base64
-from .EncoderBase import EncoderBase
+from typing import List
+from .EncoderBase import EncoderBase, MimeType
+from typing import Literal
 
 
 class ImageEncoder(EncoderBase):
-    def __init__(self):
-        pass
+ 
 
     def encode_base64(self, path: str | Path) -> str:
         path = Path(path).resolve()
@@ -20,3 +21,20 @@ class ImageEncoder(EncoderBase):
         bytes = base64.b64decode(encoded_str.encode("utf-8"))
         output_path.write_bytes(bytes)
         return output_path
+
+    def prepare_llm_payload(self, paths: List[str | Path]):
+        encoded_payload = [
+            {
+                "type": "image_url",
+                "image_url": {"url": f"data:image/jpeg;base64,{self.encode_base64(p)}"},
+            }
+            for p in paths
+        ]
+        return encoded_payload
+
+
+if __name__ == "__main__":
+    image_path = Path(r"src\app_test\test_assets\images\test_image.png")
+    paylod = ImageEncoder().prepare_llm_payload(
+        paths=[image_path], 
+    )
