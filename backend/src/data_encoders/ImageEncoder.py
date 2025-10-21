@@ -2,18 +2,19 @@ from pathlib import Path
 import base64
 from typing import List
 from .EncoderBase import EncoderBase, MimeType
-from typing import Literal
+from typing import Literal, Sequence
 
 
 class ImageEncoder(EncoderBase):
- 
-
-    def encode_base64(self, path: str | Path) -> str:
-        path = Path(path).resolve()
-        if not path.exists():
-            raise ValueError(f"Image path {path} not found")
-        bytes = path.read_bytes()
-        encoded = base64.b64encode(bytes).decode("utf-8")
+    def encode_base64(self, path: str | Path | bytes) -> str:
+        if isinstance(path, (str, Path)):
+            path = Path(path).resolve()
+            if not path.exists():
+                raise ValueError(f"Image path {path} not found")
+            data_bytes = path.read_bytes()
+        else:
+            data_bytes = path
+        encoded = base64.b64encode(data_bytes).decode("utf-8")
         return encoded
 
     def decode_base64(self, encoded_str: str, output_path: str | Path) -> Path:
@@ -22,7 +23,7 @@ class ImageEncoder(EncoderBase):
         output_path.write_bytes(bytes)
         return output_path
 
-    def prepare_llm_payload(self, paths: List[str | Path]):
+    def prepare_llm_payload(self, paths: Sequence[str | Path | bytes]):
         encoded_payload = [
             {
                 "type": "image_url",
@@ -36,5 +37,5 @@ class ImageEncoder(EncoderBase):
 if __name__ == "__main__":
     image_path = Path(r"src\app_test\test_assets\images\test_image.png")
     paylod = ImageEncoder().prepare_llm_payload(
-        paths=[image_path], 
+        paths=[image_path],
     )

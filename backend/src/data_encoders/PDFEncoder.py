@@ -1,21 +1,19 @@
 from pathlib import Path
 import base64
+from typing import List
 from .EncoderBase import EncoderBase
 
-class PDFEncoder(EncoderBase):
-    def __init__(self):
-        pass
+import fitz  # PyMuPDF
+import io
 
-    def encode_base64(self, path: str | Path) -> str:
-        path = Path(path).resolve()
-        if not path.exists():
-            raise ValueError(f"PDF path {path} not found")
-        bytes = path.read_bytes()
-        encoded = base64.b64encode(bytes).decode("utf-8")
-        return encoded
 
-    def decode_base64(self, encoded_str: str, output_path: str | Path) -> Path:
-        output_path = Path(output_path).resolve()
-        bytes = base64.b64decode(encoded_str.encode("utf-8"))
-        output_path.write_bytes(bytes)
-        return output_path
+def pdf_page_to_image_bytes(pdf_path: str | Path, zoom: float = 2.0) -> List[bytes]:
+    doc = fitz.open(pdf_path)
+    image_bytes: List[bytes] = []
+    for page_num in range(len(doc)):
+        page = doc.load_page(page_num)
+        matrix = fitz.Matrix(zoom, zoom)
+        pix = page.get_pixmap(matrix=matrix)  # type: ignore
+        image_bytes.append(pix.tobytes("png"))
+    doc.close()
+    return image_bytes

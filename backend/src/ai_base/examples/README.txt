@@ -1,25 +1,74 @@
+
+---
+
 ### `messages_example.py`
 
-**Purpose:**  
+**Purpose:**
 Demonstrates the basics of how to pass messages to an AI BaseModel using LangChain’s chat interface.
 
-**Description:**  
-This example shows how to initialize and interact with a chat model through the `init_chat_model` function.  
-Model configuration details (such as provider, model name, and API key) are automatically loaded from the project’s environment using `get_settings()`.
+**Description:**
+This example shows how to initialize and interact with a chat model through the `init_chat_model` function.
+It highlights two input methods:
 
-Two interaction methods are illustrated:
-1. **Structured Message Objects** — Uses `SystemMessage` and `HumanMessage` to send a conversation and receive an `AIMessage` response.
-2. **Dictionary-Based Input** — Sends messages as dictionaries with explicit roles (`system`, `user`, `assistant`) for flexible input handling.
+1. **Structured Message Objects** — Uses `SystemMessage` and `HumanMessage` to exchange messages.
+2. **Dictionary-Based Input** — Sends messages as role-based dictionaries for flexible control.
 
-This script serves as a minimal reference for verifying model connectivity, configuration loading, and understanding message flow in multimodal or chat-based applications.
+Serves as a minimal reference for verifying model connectivity and understanding message flow.
 
+---
 
 ### `tool_call_example.py`
-**Purpose:**  
-Demonstrates how to bind and use external Python functions ("tools") with a LangChain chat model.
 
-**Description:**  
-This example initializes a chat model using environment-based configuration and then binds a custom Python function (`get_weather`) as a callable tool.  
-The model is prompted with a weather-related query, automatically detects the need for the tool, and invokes it with the appropriate arguments.  
+**Purpose:**
+Demonstrates how to bind and use external Python functions (“tools”) with a LangChain chat model.
 
-This example shows how to integrate external logic or APIs with a chat model—allowing it to execute real-world functions and return results.
+**Description:**
+Initializes a chat model using environment-based configuration, then binds a custom function (`get_weather`) as a callable tool.
+The model recognizes when to call the tool and executes it dynamically—showing how to integrate external logic or APIs into the model workflow.
+
+---
+
+### `image_multimodal_example.py`
+
+**Purpose:**
+Showcases how to send an image with a text prompt to a multimodal chat model and receive a standard text response.
+
+**Description:**
+Encodes an image to Base64 and passes it, along with a text prompt, through the `image_multimodal` function.
+Useful for validating multimodal input handling and visual reasoning capabilities of the model.
+
+---
+
+### `image_multimodal_structured_example.py`
+
+**Purpose:**
+Demonstrates multimodal image input with structured (Pydantic-validated) output.
+
+**Description:**
+Uses the same image-to-model workflow but requests a structured response conforming to a `BaseModel` schema (e.g., `title`, `key_concepts`).
+Highlights how to extract organized information from visual prompts.
+
+---
+
+### `pdf_multimodal_example.py`
+
+**Purpose:**
+Illustrates how to send a PDF document to a multimodal chat model for open-ended analysis or summarization.
+
+**Description:**
+Converts or uploads a PDF and sends it to the LLM alongside a text query using `pdf_multimodal`.
+The model produces a natural-language description or summary of the document’s contents.
+
+---
+
+### `pdf_multimodal_structured_example.py`
+
+**Purpose:**
+Demonstrates structured output generation from PDF-based multimodal input.
+
+**Description:**
+Similar to the basic PDF example but returns a structured response validated by a Pydantic schema (e.g., `title`, `key_concepts`).
+Ideal for extracting key information from academic or technical documents.
+
+---
+

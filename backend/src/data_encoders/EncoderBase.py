@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Literal, Dict
-
+from typing import Sequence
 
 MimeType = Literal["image/png", "image/jpeg", "application/pdf"]
 
@@ -9,7 +9,7 @@ MimeType = Literal["image/png", "image/jpeg", "application/pdf"]
 class EncoderBase(ABC):
 
     @abstractmethod
-    def encode_base64(self, path: str | Path) -> str:
+    def encode_base64(self, path: str | Path | bytes) -> str:
         """Convert input data into encoded form."""
         pass
 
@@ -19,5 +19,7 @@ class EncoderBase(ABC):
         pass
 
     @abstractmethod
-    def prepare_llm_payload(self, paths: List[str | Path]) -> List[Dict[str, str]]:
+    def prepare_llm_payload(
+        self, paths: Sequence[str | Path | bytes]
+    ) -> List[Dict[str, str]]:
         pass
