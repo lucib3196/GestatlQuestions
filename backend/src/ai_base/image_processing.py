@@ -11,11 +11,13 @@ from .base_models import BaseOutput
 from typing import Union
 
 # --- Internal ---
-from src.ai_base.settings import ai_settings
+from src.ai_base.settings import get_settings
 from src.utils import encode_image
 
 
 client = OpenAI()
+
+
 
 MODEL = ai_settings.MODEL
 MODEL_PROVIDER = ai_settings.PROVIDER

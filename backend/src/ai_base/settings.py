@@ -9,8 +9,7 @@ from pydantic import BaseModel, ValidationError
 # Points to the root directory C://User/GestaltQuestions adjust as needed
 ROOT_PATH = Path(__file__).parents[3]
 
-target = ROOT_PATH / "ai.env"
-print(target.exists())
+
 
 
 class AIModel(BaseModel):
