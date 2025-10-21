@@ -66,7 +66,7 @@ Start the FastAPI backend:
 
 ```bash
 cd backend // Ensure you're in the backend folder
-poetry run python -m  uvicorn src.bacekdn.main
+poetry run python -m  src.api.main
 ```
 
 **Endpoints:**
