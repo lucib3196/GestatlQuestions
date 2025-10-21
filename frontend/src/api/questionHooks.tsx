@@ -96,6 +96,10 @@ export function getAdaptiveParams(
       } catch (e: any) {
         if (e?.name !== "CanceledError")
           setError("Could not generate question data");
+        else {
+          setError(e as string)
+          console.log(error)
+        }
       } finally {
         setLoading(false);
       }
