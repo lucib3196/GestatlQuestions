@@ -4,6 +4,7 @@
 /questions_old
 *.db
 /.env
+ai.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
