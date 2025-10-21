@@ -10,8 +10,6 @@ from pydantic import BaseModel, ValidationError
 ROOT_PATH = Path(__file__).parents[3]
 
 
-
-
 class AIModel(BaseModel):
     name: Optional[str] = None  # A name such as (fast, long context etc)
     provider: str = Field(..., description="e.g. Openai, gemini, claude etc")

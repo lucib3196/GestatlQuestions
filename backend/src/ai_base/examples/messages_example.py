@@ -31,4 +31,3 @@ messages = [
 response = model.invoke(messages)
 
 print(f"Second response \n\n{'*'*n}\n\n{response}")
-
