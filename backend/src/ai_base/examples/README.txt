@@ -72,3 +72,9 @@ Ideal for extracting key information from academic or technical documents.
 
 ---
 
+
+## Notes
+
+- The PDF multimodal function converts all pages into images and sends them as a single payload. While this works, it can be inefficient for rich content extraction since it 
+consumes more tokens. The function currently processes one PDF at a time, though it could be extended to handle multiple PDFs — 
+in most cases, however, processing a single document per call is preferred.
