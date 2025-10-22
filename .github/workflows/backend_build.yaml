@@ -54,5 +54,5 @@ jobs:
 
       - name: Run Test
         run: |
-          poetry run python -m pytest 
+          poetry run python -m pytest -s --log-cli-level=INFO
         working-directory: ./backend
