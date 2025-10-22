@@ -1,4 +1,5 @@
-
+# Quick Links
+-  [ai_base](https://github.com/lucib3196/GestatlQuestions/tree/main/backend/src/ai_base) (in Progress) : A set of basic LLM features including multimodal inputs of image and pdf with code snippets. 
 
 # Gestalt Question Review — Local Setup
 
@@ -66,7 +67,7 @@ Start the FastAPI backend:
 
 ```bash
 cd backend // Ensure you're in the backend folder
-poetry run python -m  uvicorn src.bacekdn.main
+poetry run python -m  src.api.main
 ```
 
 **Endpoints:**
