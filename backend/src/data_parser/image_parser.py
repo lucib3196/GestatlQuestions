@@ -1,7 +1,7 @@
 from pathlib import Path
 import base64
 from typing import List
-from .EncoderBase import EncoderBase, MimeType
+from .encoder_base import EncoderBase, MimeType
 from typing import Literal, Sequence
 
 
