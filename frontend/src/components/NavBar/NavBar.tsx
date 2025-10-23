@@ -13,15 +13,17 @@ import {
 
 // React Router
 import { BrowserRouter as Router, Routes, Link } from "react-router-dom";
-
+import { useState } from "react";
 // Heroicons
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 
 import { handleRoutes, navigation } from './navigationSettings';
+import UserLoginPage from "../Auth/UserLoginPage";
 
 function NavBar() {
+  const [showLogin, setShowLogin] = useState(false)
   return (
     <Router>
       <Disclosure as="nav" className="bg-gray-800">
@@ -93,7 +95,15 @@ function NavBar() {
                   <p className="hover:text-bold hover:text-xl transition delay-150 duration-300 ease-in-out " onClick={() => setShowLogin(true)}>Log In</p>
                 )}
                 <LogInPage showModal={showLogin} setShowModal={setShowLogin} />
+
+
               </div> */}
+
+              <div className="flex ml-auto text-white items-center justify-center">
+                <p className=" cursor-pointer hover:text-bold hover:text-xl  transition (delay-300  duration-300 ease-in-out " onClick={() => setShowLogin(prev => !prev)}>LogIn</p>
+                {showLogin && <UserLoginPage show={showLogin} setShow={(() => setShowLogin(prev => !prev))} />}
+
+              </div>
             </div>
           </div>
         </div>

@@ -13,8 +13,12 @@ import { TitleHeader } from './../Base/TitleHeader';
 type State = "login" | "signup";
 
 
-export default function UserLoginPage() {
-    const [showModal, setShowModal] = useState<boolean>(true);
+type UserLoginProps = {
+    show: boolean
+    setShow: () => void
+}
+
+export default function UserLoginPage({ show, setShow }: UserLoginProps) {
     const [state, setState] = React.useState<State>("login");
 
     const handleAlignment = (_: React.MouseEvent<HTMLElement>, state: State) => {
@@ -23,8 +27,8 @@ export default function UserLoginPage() {
 
     return (
         <SectionContainer id="userLogin">
-            {showModal && (
-                <MyModal setShowModal={setShowModal} className="min-w-1/2 min-h-1/2">
+            {show && (
+                <MyModal setShowModal={setShow} className="min-w-1/2 min-h-1/2">
                     {/* Toggle For Login */}
                     <div>
                         <ToggleButtonGroup

@@ -1,6 +1,5 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
-
 import { CloseButton } from "../CloseButton";
 
 function UserLoggedIn(): React.ReactNode {
