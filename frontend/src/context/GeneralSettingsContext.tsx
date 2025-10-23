@@ -1,10 +1,6 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
 import { getSettings } from "../api";
 import type { CodeLanguage, QuestionStorage, RenderingType } from "../types/settingsType";
-// Define proper union types
-
-
-import { useEffect } from "react";
 
 type GeneralSettingsContextType = {
     renderingType: RenderingType;
