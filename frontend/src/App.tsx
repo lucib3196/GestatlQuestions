@@ -1,9 +1,7 @@
 import { MathJaxContext } from "better-react-mathjax";
-import QuestionProvider from "./context/QuestionFilterContext";
 import QuestionSettingsProvider from "./context/GeneralSettingsContext";
 import RunningQuestionProvider from "./context/QuestionSelectionContext";
 import { AuthProvider } from "./context/AuthContext";
-import { QuestionDBProvider } from "./context/QuestionContext";
 import NavBar from "./components/NavBar/NavBar";
 import { ToastContainer } from "react-toastify";
 import LogsProvider from "./context/CodeLogsContext";
@@ -21,9 +19,7 @@ function App() {
   return (
     <AuthProvider>
       <QuestionSelectionProvider>
-        <QuestionDBProvider>
           <MathJaxContext version={3} config={config}>
-            <QuestionProvider>
               <QuestionSettingsProvider>
                 <RunningQuestionProvider>
                   <LogsProvider>
@@ -36,9 +32,7 @@ function App() {
                   </LogsProvider>
                 </RunningQuestionProvider>
               </QuestionSettingsProvider>
-            </QuestionProvider>
           </MathJaxContext>
-        </QuestionDBProvider>
       </QuestionSelectionProvider>
     </AuthProvider>
   );
