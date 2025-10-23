@@ -9,7 +9,7 @@ import { ToastContainer } from "react-toastify";
 import LogsProvider from "./context/CodeLogsContext";
 import QuestionSelectionProvider from "./context/QuestionSelectionContext";
 import {LogInPage} from "./components/Auth/LoginPage";
-import { SignUpPage } from "./components/Auth/LoginPage";
+import { SignUpPage } from "./components/Auth/SignUpPage";
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {

@@ -1,6 +1,7 @@
 import FormInputTextBase from "../Forms/InputComponent";
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { MyButton } from "../Base/Button";
 
 type AuthProps = {
     onSubmit: (name: string, password: string, username: string) => void;
@@ -14,6 +15,7 @@ export default function AuthBase({ state, onSubmit }: AuthProps) {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
+        console.log(name);
         onSubmit(email, password, username);
     };
 
@@ -29,7 +31,7 @@ export default function AuthBase({ state, onSubmit }: AuthProps) {
                     name="name"
                     label="Name"
                     placeholder="Freddy"
-                    onChange={(e) => setUserName(e.target.value)}
+                    onChange={(e) => setName(e.target.value)}
                 />
             )}
             {state === "signup" && (
@@ -63,6 +65,8 @@ export default function AuthBase({ state, onSubmit }: AuthProps) {
                     Forgot password?
                 </a>
             )}
+
+            <MyButton btype="submit" name={state === "login" ? "Login" : "SignUp"} />
         </form>
     );
 }
