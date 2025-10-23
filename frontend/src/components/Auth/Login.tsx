@@ -1,8 +1,7 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import LogInForm from "./LogInForm";
+
 import { CloseButton } from "../CloseButton";
-import SignUpForm from "./SignUpForm";
 
 function UserLoggedIn(): React.ReactNode {
     const { logout, message } = useContext(AuthContext);

@@ -7,7 +7,6 @@ export function SignUpPage() {
     }
     return (
         <div className="flex flex-col items-center justify-center">
-            <h1>Sign Up</h1>
             <AuthBase state="signup" onSubmit={handleSubmit} />
         </div>
     )

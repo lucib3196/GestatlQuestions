@@ -8,8 +8,8 @@ import NavBar from "./components/NavBar/NavBar";
 import { ToastContainer } from "react-toastify";
 import LogsProvider from "./context/CodeLogsContext";
 import QuestionSelectionProvider from "./context/QuestionSelectionContext";
-import {LogInPage} from "./components/Auth/LoginPage";
-import { SignUpPage } from "./components/Auth/SignUpPage";
+
+import UserLoginPage from "./components/Auth/UserLoginPage";
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {
@@ -31,8 +31,7 @@ function App() {
                     {/* Main Content */}
                     <NavBar />
                     <ToastContainer />
-                    <LogInPage />
-                    <SignUpPage />
+                    <UserLoginPage />
                    
                     {/* <LegacyQuestion /> */}
                     {/* End of Main Content */}
