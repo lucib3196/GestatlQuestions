@@ -1,10 +1,7 @@
 from pathlib import Path
-import base64
 from typing import List
-from .EncoderBase import EncoderBase
 
 import fitz  # PyMuPDF
-import io
 
 
 def pdf_page_to_image_bytes(pdf_path: str | Path, zoom: float = 2.0) -> List[bytes]:
