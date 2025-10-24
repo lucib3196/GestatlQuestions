@@ -7,6 +7,7 @@ import ImageGenerator from "../CodeGenerators/ImageGenerator";
 import TextGenerator from "../CodeGenerators/TextGenerator";
 import Home from "../../pages/Home";
 import type { navigationType } from "../../types/navbarTypes";
+import UserPage from "../Auth/UserPage";
 
 export const navigation: navigationType[] = [
     {
@@ -61,6 +62,14 @@ export const navigation: navigationType[] = [
             },
         ],
     },
+    {
+        name: "My Account",
+        href: "/account",
+        element: <UserPage />,
+        current: false,
+        requiresAccount: true,
+        includeNavbar: false
+    }
 ];
 
 export function handleRoutes(navigation: navigationType[]) {

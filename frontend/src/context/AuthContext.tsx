@@ -1,136 +1,57 @@
-import { createContext, useState, useEffect } from "react";
-import type { ReactNode } from "react";
-import api from "../api/client";
+import { onAuthStateChanged } from "firebase/auth";
+import type { User } from "firebase/auth";
+import { auth } from "../config/firebaseClient";
+import { useState, useEffect } from "react";
+import { createContext, useContext } from "react";
 
+export function useStateAuth() {
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
 
-type LoggedInMessage = {
-    username: string,
-    email?: string,
-    success: string | boolean
-}
+    useEffect(() => {
+        const unSubscribe = onAuthStateChanged(auth, (fbUser) => {
+            if (fbUser) {
+                console.log("User Signed In", fbUser.uid);
+                setLoading(false);
+                setUser(fbUser);
+            } else {
+                console.log("No User Logged in");
+            }
+        });
+        return () => unSubscribe();
+    }, []);
 
-type SignUpProps = {
-    username: string;
-    fullname: string;
-    email: string;
-    disabled: boolean;
-    password: string;
-}
-
-type LogInProps = {
-    username: string,
-    password: string
+    return { user, loading };
 }
 
 type AuthContextType = {
-    isLoggedIn: boolean;
-    message: LoggedInMessage | null;
-    login: (message: LogInProps) => Promise<boolean>;
-    logout: () => void;
-    signUp: (message: SignUpProps) => Promise<boolean>;
+    user: User | null;
+    loading: boolean;
+    logout: () => Promise<void>;
 };
 
-export const AuthContext = createContext<AuthContextType>({
-    isLoggedIn: false,
-    message: null,
-    login: async (_message: LogInProps) => false,
-    logout: () => { },
-    signUp: async (_message: SignUpProps) => true
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-type AuthProviderProps = {
-    children: ReactNode;
-};
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+    const { user, loading } = useStateAuth();
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
-    const [isLoggedIn, setLoggedIn] = useState(false);
-    const [message, setMessage] = useState<LoggedInMessage | null>(null)
-
-
-    const login = async (message: LogInProps) => {
-        try {
-            const formData = new URLSearchParams();
-            formData.append("username", message.username);
-            formData.append("password", message.password);
-            const response = await api.post("/auth/login", formData.toString(), {
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-            });
-
-            const data = response.data;
-            console.log(data)
-            console.log("This is the login data", data)
-            localStorage.setItem("access_token", data.access_token);
-            setMessage({ username: data.username, email: data.email, success: true });
-            setLoggedIn(true)
-            return true
-        } catch (error) {
-            console.error("Login error:", error);
-            setLoggedIn(false)
-            setMessage(null)
-            setLoggedIn(false)
-            return false
-        }
-    }
-
-    const signUp = async (signUpMessage: SignUpProps) => {
-        try {
-            const formData = new FormData();
-
-            formData.append("username", signUpMessage.username)
-            formData.append("fullname", signUpMessage.fullname)
-            formData.append("email", signUpMessage.email)
-            formData.append("password", signUpMessage.password)
-            formData.append("disabled", signUpMessage.disabled ? "true" : "false");
-            const response = await api.post("/auth/signup", formData, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            const data = response.data;
-            setMessage({ username: data.username, success: true });
-            return true
-        } catch (error) {
-            console.error("Sign Up error:", error);
-            setMessage(null)
-            return false
-        }
+    const logout = async () => {
+        await auth.signOut()
+        window.location.reload();
 
     }
-
-    const logout = () => {
-        localStorage.setItem("access_token", "");
-        setLoggedIn(false);
-        setMessage(null);
-    }
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            const token = localStorage.getItem("access_token");
-            try {
-                const response = await api.get("/auth/current_user", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                console.log("Checking Auth ", response)
-
-                setMessage(response.data)
-                setLoggedIn(true);
-            } catch (err) {
-                console.error("Auth check failed:", err);
-                setLoggedIn(false);
-            }
-        };
-
-        checkAuth();
-    }, [isLoggedIn]);
-
     return (
-        <AuthContext.Provider value={{ isLoggedIn, message, login, logout, signUp }}>
+        <AuthContext.Provider value={{ user, loading, logout }}>
             {children}
         </AuthContext.Provider>
     );
-};
+}
+
+
+export function useAuth() {
+    const context = useContext(AuthContext);
+    if (context === undefined) {
+        throw new Error("useAuth must be used within an AuthProvider")
+    }
+    return context;
+}
