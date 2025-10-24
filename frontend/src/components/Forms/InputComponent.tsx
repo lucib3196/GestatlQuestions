@@ -2,6 +2,7 @@
 
 type InputComponentProps = {
   id: string;
+  type: React.HTMLInputTypeAttribute;
   name: string;
   label: string;
   placeholder?: string;
@@ -10,6 +11,7 @@ type InputComponentProps = {
 };
 export default function FormInputTextBase({
   id,
+  type,
   name,
   label,
   placeholder,
@@ -23,7 +25,7 @@ export default function FormInputTextBase({
           {label}
         </label>
         <input
-          type="text"
+          type={type}
           id={id}
           name={name}
           placeholder={placeholder}

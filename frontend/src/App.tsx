@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastify";
 import LogsProvider from "./context/CodeLogsContext";
 import QuestionSelectionProvider from "./context/QuestionSelectionContext";
 import { LecturePage } from "./pages/LecturePage";
+
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {
