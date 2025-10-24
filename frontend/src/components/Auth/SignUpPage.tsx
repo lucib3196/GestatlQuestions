@@ -12,7 +12,6 @@ export function SignUpPage() {
     const handleSubmit = async (
         email: string,
         password: string,
-        username: string
     ) => {
         try {
             const userCredential = await createUserWithEmailAndPassword(

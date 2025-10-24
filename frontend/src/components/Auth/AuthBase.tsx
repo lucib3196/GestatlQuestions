@@ -8,12 +8,12 @@ type State = "login" | "signup" | "resetPassword"
 
 
 type AuthProps = {
-    onSubmit: (email: string, password: string, username?: string) => void;
+    onSubmit: (email: string, password: string, username?: string) => Promise<void>;
     state: State;
     children?: React.ReactNode
 };
 export default function AuthBase({ state, onSubmit, children }: AuthProps) {
-    const [name, setName] = useState<string>("");
+    const [_, setName] = useState<string>("");
     const [username, setUserName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
