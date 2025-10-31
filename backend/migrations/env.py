@@ -6,21 +6,16 @@ from sqlmodel import SQLModel
 from pathlib import Path
 from alembic import context
 from dotenv import load_dotenv
-from api.models import *
-from src.api.core import settings
+from src.api.models import *
+from src.api.core.config import AppSettings
 import os
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-load_dotenv()
-# Get the database path from the settings
-try:
-    assert settings.DATABASE_URL
-    config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
-except Exception as e:
-    print("Could not determine database url")
-    raise e
+
+from src.api.database.database import DATABASE_URL
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 
 # Interpret the config file for Python logging.
@@ -78,7 +73,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(connection=connection, target_metadata=target_metadata,render_as_batch=True)
 
         with context.begin_transaction():
             context.run_migrations()
