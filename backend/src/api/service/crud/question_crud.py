@@ -12,7 +12,7 @@ from typing import Sequence, Dict, List, Any
 
 # Local
 from src.api.database import SessionDep
-from src.api.models.question_model import (
+from src.api.models.models import (
     Question,
 )
 from src.api.database import question_db as qdata

@@ -12,7 +12,7 @@ from src.utils import pick
 # --- Internal ---
 from src.api.core import settings
 from src.api.database import SessionDep, get_session
-from src.api.models.question_model import Question
+from src.api.models.models import Question
 from src.api.service import refactor_question_storage_service as qs
 from src.api.service.crud import question_crud as qc
 from src.utils import normalize_kwargs

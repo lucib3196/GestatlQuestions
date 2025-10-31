@@ -9,7 +9,7 @@ from starlette import status
 
 # --- Internal ---
 from src.api.database import SessionDep
-from src.api.models.question_model import Question, QuestionMeta
+from src.api.models.models import Question, QuestionMeta
 from src.api.response_models import *
 from src.api.service.crud import question_crud
 from src.api.service import refactor_question_storage_service as qs

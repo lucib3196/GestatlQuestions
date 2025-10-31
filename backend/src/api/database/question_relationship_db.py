@@ -4,7 +4,7 @@ from sqlalchemy import func
 from sqlmodel import select
 
 from src.api.database import SessionDep
-from src.api.models.question_model import Language, QType, Topic
+from src.api.models.models import Language, QType, Topic
 from src.utils import normalize_name
 
 

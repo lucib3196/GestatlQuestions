@@ -17,7 +17,7 @@ from starlette import status
 # --- Internal ---
 from src.api.core import settings
 from src.api.database import SessionDep, get_session
-from src.api.models.question_model import Question
+from src.api.models.models import Question
 from src.api.response_models import (
     FileData,
     SuccessDataResponse,

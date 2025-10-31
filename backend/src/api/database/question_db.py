@@ -13,7 +13,7 @@ from starlette import status
 
 # Internal
 from src.api.database import SessionDep
-from src.api.models.question_model import Language, QType, Question, Topic
+from src.api.models.models import Language, QType, Question, Topic
 from src.utils import *
 from src.api.core.logging import logger
 from src.utils import resolve_or_create
