@@ -1,5 +1,5 @@
 import pytest
-from src.api.models import Question
+from src.api.models.models import Question
 
 
 @pytest.fixture

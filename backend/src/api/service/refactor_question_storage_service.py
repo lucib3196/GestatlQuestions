@@ -34,7 +34,7 @@ IMAGE_MIMETYPES = {"image/png"}
 
 
 def reconstruct_path(relative_path: str | Path) -> Path:
-    return Path(settings.BASE_PATH) / Path(relative_path)
+    return Path(settings.ROOT_PATH) / Path(relative_path)
 
 
 

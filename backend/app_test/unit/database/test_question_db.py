@@ -1,7 +1,6 @@
 from src.api.database import question_db as question_db
 from app_test.unit.database.fixtures import *
 from src.utils import pick
-from src.utils import view_models_relationship
 from src.api.models.models import Topic, Language, Question, QType
 
 
