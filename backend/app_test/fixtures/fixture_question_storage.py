@@ -4,9 +4,10 @@ from src.api.models.file_model import File
 from src.api.models.models import Question
 from src.api.service import refactor_question_storage_service as qs
 from src.api.response_models import FileData
-from src.api.core import settings
+from src.api.core.config import get_settings
 from pathlib import Path
 
+settings = get_settings()
 
 @pytest.fixture
 def set_testing_directory(tmp_path: Path):

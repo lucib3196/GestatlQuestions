@@ -15,7 +15,7 @@ from sqlmodel import select
 from starlette import status
 
 # --- Internal ---
-from src.api.core import settings
+from src.api.core.config import get_settings
 from src.api.database import SessionDep, get_session
 from src.api.models.models import Question
 from src.api.response_models import (
@@ -28,6 +28,8 @@ from src.api.service.crud import question_crud as qc
 from src.utils import safe_dir_name
 from src.ai_workspace.utils import to_serializable
 
+
+settings = get_settings()
 IMAGE_MIMETYPES = {"image/png"}
 
 

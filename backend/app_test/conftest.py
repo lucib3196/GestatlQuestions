@@ -234,7 +234,7 @@ def cloud_storage_service():
     """
     Provides a FireCloudStorageService connected to the configured test bucket.
     """
-    cred_path = Path(os.path.normpath(str(settings.FIREBASE_PATH))).resolve()
+    cred_path = Path(os.path.normpath(str(settings.FIREBASE_CRED))).resolve()
     bucket_name = settings.STORAGE_BUCKET
     base_name = "integration_test"
 

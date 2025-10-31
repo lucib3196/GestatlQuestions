@@ -19,7 +19,7 @@ from fastapi import FastAPI, File, UploadFile
 from typing import Dict
 from fastapi import Form
 import json
-from src.api.models import Language
+from src.api.models.models import Language
 
 router = APIRouter(prefix="/file_uploads", tags=["file_uploads"])
 
