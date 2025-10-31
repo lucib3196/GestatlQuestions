@@ -22,9 +22,7 @@ from src.api.response_models import QuestionReadResponse
 from src.api.main import get_application
 from src.api.database.database import get_session
 from src.api.dependencies import get_question_manager
-from src.api.models.models import Question
 from src.api.response_models import FileData
-from src.utils.test_utils import prepare_file_uploads
 
 
 @asynccontextmanager

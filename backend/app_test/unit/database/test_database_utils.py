@@ -1,7 +1,7 @@
 import pytest
 from uuid import UUID, uuid4
 from src.utils.database_utils import *
-from src.api.models import Topic, Language, QType, Question
+from src.api.models.models import Topic, Language, QType, Question
 
 
 def test_convert_uuid_passes_uuid():
