@@ -7,7 +7,7 @@ import pytest
 # --- Internal ---
 from src.utils.test_utils import prepare_file_uploads
 from src.api.response_models import FileData
-from src.app_test.fixtures.fixture_crud import (
+from app_test.fixtures.fixture_crud import (
     create_question,
     retrieve_single_file,
 )

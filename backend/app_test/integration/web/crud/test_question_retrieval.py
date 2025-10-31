@@ -16,7 +16,7 @@ from src.api.response_models import (
 from src.api.models import Question
 from src.utils import normalize_content
 
-from src.app_test.fixtures.fixture_crud import (
+from app_test.fixtures.fixture_crud import (
     create_question,
     retrieve_question,
     retrieve_files,

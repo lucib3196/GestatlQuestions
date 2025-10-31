@@ -1,8 +1,8 @@
 import pytest
 from pathlib import Path
-from src.api.models import Question
+from src.api.models.models import Question
 from src.api.database import question_db
-from src.app_test.conftest import test_config
+from app_test.conftest import test_config
 from src.api.dependencies import QuestionManager
 from src.api.response_models import FileData
 

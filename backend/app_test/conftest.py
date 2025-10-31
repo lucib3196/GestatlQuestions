@@ -186,7 +186,7 @@ def mark_logs_in_test():
     in_test_ctx.reset(token)
 
 
-from src.app_test.fixtures.fixture_crud import *
+from app_test.fixtures.fixture_crud import *
 
 
 @pytest.fixture

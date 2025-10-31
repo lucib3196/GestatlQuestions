@@ -5,7 +5,7 @@ import pytest
 
 # --- Internal Imports ---
 from src.utils.test_utils import prepare_file_uploads
-from src.app_test.integration.web.conftest import create_question
+from app_test.integration.web.conftest import create_question
 from src.code_runner.models import QuizData
 
 # -----------------------------------------

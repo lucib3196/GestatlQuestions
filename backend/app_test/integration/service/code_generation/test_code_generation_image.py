@@ -3,7 +3,7 @@ from fastapi import UploadFile
 import pytest
 from pathlib import Path
 from pydantic_settings import BaseSettings
-from src.app_test.fixtures.fixture_code_generation import *
+from app_test.fixtures.fixture_code_generation import *
 from src.api.service.ai_generation import code_generation
 
 

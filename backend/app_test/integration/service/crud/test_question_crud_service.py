@@ -7,7 +7,7 @@ from fastapi import HTTPException
 
 from src.api.models.models import Question
 from src.api.service.crud import question_crud as qcrud_service
-from src.app_test.fixtures.fixture_crud import *
+from app_test.fixtures.fixture_crud import *
 from src.utils import *
 
 
