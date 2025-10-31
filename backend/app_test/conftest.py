@@ -19,7 +19,8 @@ from pydantic import BaseModel
 from typing import List
 
 # --- Internal ---
-from src.api.core import settings, logger
+from src.api.core import  logger
+from src.api.core.config import get_settings
 from src.api.database.database import Base, get_session
 from src.api.main import get_application
 from src.api.service.storage import StorageService
@@ -29,7 +30,7 @@ from src.api.service.storage.local_storage import LocalStorageService
 from src.api.service.question_manager import QuestionManager
 from src.api.dependencies import get_question_manager
 
-
+settings = get_settings()
 @asynccontextmanager
 async def on_startup_test(app: FastAPI):
     # skip init_db in tests
