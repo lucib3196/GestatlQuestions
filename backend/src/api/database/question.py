@@ -15,6 +15,7 @@ from pydantic import ValidationError
 # Internal
 from src.api.database import SessionDep
 from src.api.models.models import Question
+from src.api.models.question import QuestionMeta
 from src.utils import *
 from src.api.core.logging import logger
 from src.api.database.generic_db import create_or_resolve
@@ -26,6 +27,7 @@ from src.api.database.question_relationship_db import (
     create_qtype,
 )
 from src.api.models.question import QRelationshipData
+from src.api.database import generic_db as gdb
 
 
 def create_question(
@@ -135,40 +137,31 @@ def delete_question(id: str | UUID, session: SessionDep) -> bool:
         raise ValueError(f"[DB] failed to delete question {e}")
 
 
-# def create_question(
-#     payload: Union[Question, dict],
-#     session: SessionDep,
-# ) -> Question:
-#     """
-#     Create and persist a **base Question** object from either a `Question` instance
-#     or a `dict` payload. This only sets core fields and attaches basic relationships
-#     (topics, languages, qtypes). It does **not** upload files, set cloud storage
-#     metadata, or perform any advanced processing beyond establishing the base record.
-#     """
-#     payload = parse_question_payload(payload)
+def get_question_data(
+    id: Union[str, UUID],
+    session: SessionDep,
+) -> QuestionMeta|None:
+    """
+    Retrieve a Question as a dict and include specified relationship data.
 
-#     # Define the model
-#     question = Question(
-#         title=payload["title"],
-#         ai_generated=payload["ai_generated"],
-#         isAdaptive=to_bool(payload["is_adaptive"]),
-#         createdBy=payload["created_by"],
-#         user_id=payload["user_id"],
-#     )
+    Args:
+        question_id: The question's identifier (UUID or string convertible to UUID).
+        session: Database session dependency.
+        rels: Relationship names to include in the response (default: topics, qtypes, languages).
 
-#     # Handle relationships
-#     topic_objs = [resolve_or_create(session, Topic, t)[0] for t in payload["topics"]]
-#     language_objs = [
-#         resolve_or_create(session, Language, t)[0] for t in payload["languages"]
-#     ]
-#     qtype_objs = [resolve_or_create(session, QType, t)[0] for t in payload["qtypes"]]
+    Returns:
+        A dict representing the Question plus relationship values.
 
-#     question.topics = topic_objs
-#     question.languages = language_objs
-#     question.qtypes = qtype_objs
-
-#     question = safe_refresh_question(question, session)
-#     return question
+    Raises:
+        HTTPException(404): If the question is not found.
+    """
+    question = get_question(id, session)
+    if not question:
+        logger.info("Question is none")
+        return None
+    relationship_data = gdb.get_all_model_relationship_data(question, Question)
+    question_data = question.model_dump()
+    return QuestionMeta(**question_data, **relationship_data)
 
 
 # Utils
@@ -217,35 +210,6 @@ def parse_question_payload(
         }
     except ValueError as e:
         raise ValueError(f"Could not parse {str(e)}")
-
-
-async def get_question_data(
-    question_id: Union[str, UUID],
-    session: SessionDep,
-    rels: List[str] = ["topics", "qtypes", "languages"],
-) -> Dict[str, Any]:
-    """
-    Retrieve a Question as a dict and include specified relationship data.
-
-    Args:
-        question_id: The question's identifier (UUID or string convertible to UUID).
-        session: Database session dependency.
-        rels: Relationship names to include in the response (default: topics, qtypes, languages).
-
-    Returns:
-        A dict representing the Question plus relationship values.
-
-    Raises:
-        HTTPException(404): If the question is not found.
-    """
-    stmt = select(Question).where(Question.id == convert_uuid(question_id))
-    result = session.exec(stmt).first()
-    if result is None:
-        raise ValueError("Question is None")
-    data = result.model_dump()
-    for r in rels:
-        data[r] = get_models_relationship_data(result, r)
-    return data
 
 
 async def get_all_question_data(

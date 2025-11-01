@@ -13,6 +13,7 @@ from sqlmodel import SQLModel, select
 from src.api.database import SessionDep
 from datetime import datetime
 
+
 def convert_uuid(uuid: str | UUID) -> UUID:
     try:
         if isinstance(uuid, UUID):
@@ -27,15 +28,6 @@ T = TypeVar("T", bound=SQLModel)
 
 
 
-
-
-def is_relationship(model: Type[T], attr_name: str) -> bool:
-    """True if model.attr_name is a relationship."""
-    try:
-        prop = inspect(model).get_property(attr_name)
-        return isinstance(prop, RelationshipProperty)
-    except UnmappedInstanceError:
-        return False
 
 
 def view_models_relationship(

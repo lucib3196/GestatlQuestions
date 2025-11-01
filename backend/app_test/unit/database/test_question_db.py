@@ -5,32 +5,10 @@ from src.api.models.models import Topic, Language, Question, QType
 from src.api.core.logging import logger
 
 
-@pytest.fixture
-def question_payload():
-    return Question(
-        title="Sample Question",
-        ai_generated=True,
-        isAdaptive=False,
-    )
 
 
-@pytest.fixture
-def question_payload_2():
-    return Question(title="Question 2", ai_generated=False, isAdaptive=True)
 
 
-@pytest.fixture
-def relationship_payload():
-    return {
-        "topics": ["math", "science", "engineering"],
-        "languages": ["python"],
-        "qtypes": ["numerical", "multiple-choice"],
-    }
-
-
-@pytest.fixture
-def combined_payload(question_payload, question_payload_2):
-    return [question_payload, question_payload_2]
 
 
 # ----------------------
