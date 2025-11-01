@@ -9,3 +9,8 @@ class QuestionMeta(BaseModel):
     topics: List[str]
     languages: List[str]
     qtypes: List[str]
+
+class QRelationshipData(BaseModel):
+    topics: List[str]
+    qtypes: List[str]
+    languages: List[str]

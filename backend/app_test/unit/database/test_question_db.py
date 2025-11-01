@@ -2,6 +2,7 @@ from src.api.database import question as qdb
 import pytest
 from src.utils import pick
 from src.api.models.models import Topic, Language, Question, QType
+from src.api.core.logging import logger
 
 
 @pytest.fixture
@@ -19,6 +20,15 @@ def question_payload_2():
 
 
 @pytest.fixture
+def relationship_payload():
+    return {
+        "topics": ["math", "science", "engineering"],
+        "languages": ["python"],
+        "qtypes": ["numerical", "multiple-choice"],
+    }
+
+
+@pytest.fixture
 def combined_payload(question_payload, question_payload_2):
     return [question_payload, question_payload_2]
 
@@ -31,6 +41,21 @@ def test_create_question(db_session, question_payload):
     assert qcreated
     for key, _ in question_payload.model_dump().items():
         assert getattr(qcreated, key) == getattr(question_payload, key)
+
+
+def test_create_question_with_relationship_data(
+    db_session, question_payload, relationship_payload
+):
+    qcreated = qdb.create_question(question_payload, db_session, relationship_payload)
+    assert qcreated
+    for key, _ in question_payload.model_dump().items():
+        assert getattr(qcreated, key) == getattr(question_payload, key)
+
+    for key, _ in relationship_payload.items():
+        logger.info("Relationship data %s", getattr(qcreated, key))
+        qrel = getattr(qcreated, key)
+        # Convert to a list with just the names and set for comparing
+        assert set([r.name for r in qrel]) == set(relationship_payload[key])
 
 
 def test_get_question(db_session, question_payload):

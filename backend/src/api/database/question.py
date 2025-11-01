@@ -9,29 +9,59 @@ from sqlalchemy.inspection import inspect as sa_inspect
 from sqlalchemy.orm.properties import ColumnProperty, RelationshipProperty
 from sqlmodel import select
 from sqlalchemy.exc import SQLAlchemyError
-from sqlmodel import Session, create_engine, delete, SQLModel, Field
-from typing import Optional
+from sqlmodel import delete
+from pydantic import ValidationError
 
 # Internal
 from src.api.database import SessionDep
 from src.api.models.models import Question
 from src.utils import *
 from src.api.core.logging import logger
-from src.utils import resolve_or_create
+from src.api.database.generic_db import create_or_resolve
 from src.api.core import logger
 from src.utils import convert_uuid
+from src.api.database.question_relationship_db import (
+    create_language,
+    create_qtopic,
+    create_qtype,
+)
+from src.api.models.question import QRelationshipData
 
 
-def create_question(question: Question, session: SessionDep):
+def create_question(
+    question: Question,
+    session: SessionDep,
+    relationship_data: Optional[QRelationshipData | dict] = None,
+):
     try:
         session.add(question)
+        if relationship_data:
+            if isinstance(relationship_data, dict):
+                try:
+                    relationship_data = QRelationshipData.model_validate(
+                        relationship_data
+                    )
+                except ValidationError as e:
+                    raise ValueError(
+                        "Relationship data is not of type QRelationshipData"
+                    )
+            question.topics = [
+                create_qtopic(t, session) for t in relationship_data.topics
+            ]
+            question.languages = [
+                create_language(t, session) for t in relationship_data.languages
+            ]
+            question.qtypes = [
+                create_qtype(t, session) for t in relationship_data.qtypes
+            ]
+
         session.commit()
         session.refresh(question)
         return question
     except SQLAlchemyError as e:
         session.rollback()
         logger.error(f"[DB] could not create question {e}")
-        raise ValueError(f"[DB] failed to retrieve question an error occured {e}")
+        raise ValueError(f"[DB] failed to create question an error occured {e}")
 
 
 def get_question(id: str | UUID, session: SessionDep) -> Question | None:
@@ -282,7 +312,9 @@ def update_question(
                         raise TypeError(f"{key} expects list[{target_cls.__name__}]")
                     else:
                         value = [
-                            resolve_or_create(session, target_cls, v, create_field)[0]
+                            create_or_resolve(
+                                target_cls, v, session, create=create_field
+                            )[0]
                             for v in value
                         ]
                 setattr(question, key, list(value))
@@ -291,8 +323,8 @@ def update_question(
                     if not create_field:
                         raise TypeError(f"{key} expects {target_cls.__name__} or None")
                     else:
-                        value = resolve_or_create(
-                            session, target_cls, value, create_field
+                        value = create_or_resolve(
+                            target_cls, value, session, create=create_field
                         )[0]
                 setattr(question, key, value)
             continue
