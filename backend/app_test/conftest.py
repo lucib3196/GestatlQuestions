@@ -13,58 +13,27 @@ from src.api.core.logging import in_test_ctx
 # --- Third-Party ---
 import pytest
 from fastapi import FastAPI
-from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine
 from pydantic import BaseModel
 from typing import List
 
 # --- Internal ---
-from src.api.core import  logger
+from src.api.core import logger
 from src.api.core.config import get_settings
-from src.api.database.database import Base, get_session
-from src.api.main import get_application
 from src.api.service.storage import StorageService
 from src.api.response_models import FileData
 from src.api.service.storage.cloud_storage import FireCloudStorageService
 from src.api.service.storage.local_storage import LocalStorageService
 from src.api.service.question_manager import QuestionManager
-from src.api.dependencies import get_question_manager
+from src.firebase.storage import FirebaseStorage
+from src.firebase.core import initialize_firebase_app
 
 settings = get_settings()
+initialize_firebase_app()
+
 @asynccontextmanager
 async def on_startup_test(app: FastAPI):
     # skip init_db in tests
     yield
-
-
-## Setting up the database manually set to test, then
-## Add a clean up function
-@pytest.fixture(scope="function")
-def test_engine(tmp_path):
-    url = f"sqlite:///{tmp_path}/test.db"
-    engine = create_engine(
-        url,
-        echo=False,
-        connect_args={"check_same_thread": False},
-    )
-    SQLModel.metadata.create_all(engine)
-    yield engine
-    engine.dispose()
-
-
-@pytest.fixture(scope="function")
-def db_session(test_engine):
-    """Provide a new SQLModel session for each test."""
-    with Session(test_engine) as session:
-        yield session
-        session.rollback()  # rollback ensures isolation
-
-
-@pytest.fixture(autouse=True)
-def _clean_db(db_session, test_engine):
-    logger.debug("Cleaning Database")
-    Base.metadata.drop_all(test_engine)
-    Base.metadata.create_all(test_engine)
 
 
 class FakeQuestion(BaseModel):
@@ -234,16 +203,11 @@ def cloud_storage_service():
     """
     Provides a FireCloudStorageService connected to the configured test bucket.
     """
-    cred_path = Path(os.path.normpath(str(settings.FIREBASE_CRED))).resolve()
-    bucket_name = settings.STORAGE_BUCKET
-    base_name = "integration_test"
 
-    assert cred_path, "FIREBASE_PATH must be set in settings"
-    assert bucket_name, "STORAGE_BUCKET must be set in settings"
+    base_path = "integration_test"
+    settings.STORAGE_BUCKET
 
-    return FireCloudStorageService(
-        cred_path=cred_path, bucket_name=bucket_name, base_name=base_name
-    )
+    return FirebaseStorage(settings.STORAGE_BUCKET, base_path)
 
 
 @pytest.fixture(autouse=True)

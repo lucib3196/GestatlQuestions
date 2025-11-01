@@ -4,75 +4,35 @@ from uuid import UUID
 import asyncio
 
 # Third-party
-from fastapi import HTTPException
 from sqlalchemy import or_
 from sqlalchemy.inspection import inspect as sa_inspect
 from sqlalchemy.orm.properties import ColumnProperty, RelationshipProperty
 from sqlmodel import select
-from starlette import status
+from sqlalchemy.exc import SQLAlchemyError
 
 # Internal
 from src.api.database import SessionDep
-from src.api.models.models import Language, QType, Question, Topic
+from src.api.models.models import Question
 from src.utils import *
 from src.api.core.logging import logger
 from src.utils import resolve_or_create
 from src.api.core import logger
 from src.utils import convert_uuid
-from datetime import datetime
 
 
-def safe_refresh_question(question: Question, session: SessionDep):
+def create_question(question: Question, session: SessionDep):
     try:
         session.add(question)
         session.commit()
         session.refresh(question)
         return question
-    except Exception as e:
+    except SQLAlchemyError as e:
         session.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error updating Question {question.id}: {e}",
-        ) from e
+        logger.error(f"[DB] could not create question {e}")
+        raise ValueError(f"[DB] failed to retrieve question an error occured {e}")
 
 
-def create_question(
-    payload: Union[Question, dict],
-    session: SessionDep,
-) -> Question:
-    """
-    Create and persist a **base Question** object from either a `Question` instance
-    or a `dict` payload. This only sets core fields and attaches basic relationships
-    (topics, languages, qtypes). It does **not** upload files, set cloud storage
-    metadata, or perform any advanced processing beyond establishing the base record.
-    """
-    payload = parse_question_payload(payload)
-
-    # Define the model
-    question = Question(
-        title=payload["title"],
-        ai_generated=payload["ai_generated"],
-        isAdaptive=to_bool(payload["is_adaptive"]),
-        createdBy=payload["created_by"],
-        user_id=payload["user_id"],
-    )
-
-    # Handle relationships
-    topic_objs = [resolve_or_create(session, Topic, t)[0] for t in payload["topics"]]
-    language_objs = [
-        resolve_or_create(session, Language, t)[0] for t in payload["languages"]
-    ]
-    qtype_objs = [resolve_or_create(session, QType, t)[0] for t in payload["qtypes"]]
-
-    question.topics = topic_objs
-    question.languages = language_objs
-    question.qtypes = qtype_objs
-
-    question = safe_refresh_question(question, session)
-    return question
-
-
-def get_question_by_id(question_id: str | UUID, session: SessionDep):
+def get_question(id: str | UUID, session: SessionDep) -> Question | None:
     """
     Fetch a single Question by its ID.
 
@@ -83,49 +43,13 @@ def get_question_by_id(question_id: str | UUID, session: SessionDep):
     Returns:
         The matching Question instance, or None if not found.
     """
-
-    question_id = convert_uuid(question_id)
-    return session.exec(select(Question).where(Question.id == question_id)).first()
-
-
-def delete_all_questions(session: SessionDep):
-    """
-    Delete all Question rows from the database.
-
-    Args:
-        session: Database session dependency.
-
-    Side Effects:
-        Commits and flushes after deleting each row.
-    """
-    questions = session.exec(select(Question)).all()
-    for q in questions:
-        session.delete(q)
-        session.commit()
-        session.flush()
-
-
-def delete_question_by_id(question_id: Union[str, UUID], session: SessionDep):
-    """
-    Delete a single Question by its ID.
-
-    Args:
-        question_id: The question's identifier (UUID or string convertible to UUID).
-        session: Database session dependency.
-
-    Returns:
-        None if the question does not exist; otherwise None after deletion.
-
-    Side Effects:
-        Commits and flushes if a row was deleted.
-    """
-    question = get_question_by_id(question_id, session)
-    if not question:
-        return None
-    else:
-        session.delete(question)
-        session.commit()
-        session.flush()
+    try:
+        question_id = convert_uuid(id)
+        return session.exec(select(Question).where(Question.id == question_id)).first()
+    except SQLAlchemyError as e:
+        session.rollback()
+        logger.error(f"[DB] could not create question {e}")
+        raise ValueError(f"[DB] failed to retrieve question an error occured {e}")
 
 
 def get_all_questions(
@@ -144,7 +68,64 @@ def get_all_questions(
     Returns:
         A sequence of Question instances.
     """
-    return session.exec(select(Question).offset(offset).limit(limit)).all()
+    try:
+        return session.exec(select(Question).offset(offset).limit(limit)).all()
+    except SQLAlchemyError as e:
+        session.rollback()
+        logger.error(f"[DB] failed to retrieve all questions {e}")
+        raise ValueError(f"[DB] failed to retrieve all question {e}")
+
+
+def delete_question(id: str | UUID, session: SessionDep) -> bool:
+    try:
+        question = get_question(id, session)
+        if not question:
+            logger.warning("[DB] cannot delete question, question is not found")
+            return False
+        session.delete(question)
+        session.commit()
+        session.flush()
+        return True
+    except SQLAlchemyError as e:
+        session.rollback()
+        logger.error(f"[DB] failed to delete question {e}")
+        raise ValueError(f"[DB] failed to delete question {e}")
+
+
+# def create_question(
+#     payload: Union[Question, dict],
+#     session: SessionDep,
+# ) -> Question:
+#     """
+#     Create and persist a **base Question** object from either a `Question` instance
+#     or a `dict` payload. This only sets core fields and attaches basic relationships
+#     (topics, languages, qtypes). It does **not** upload files, set cloud storage
+#     metadata, or perform any advanced processing beyond establishing the base record.
+#     """
+#     payload = parse_question_payload(payload)
+
+#     # Define the model
+#     question = Question(
+#         title=payload["title"],
+#         ai_generated=payload["ai_generated"],
+#         isAdaptive=to_bool(payload["is_adaptive"]),
+#         createdBy=payload["created_by"],
+#         user_id=payload["user_id"],
+#     )
+
+#     # Handle relationships
+#     topic_objs = [resolve_or_create(session, Topic, t)[0] for t in payload["topics"]]
+#     language_objs = [
+#         resolve_or_create(session, Language, t)[0] for t in payload["languages"]
+#     ]
+#     qtype_objs = [resolve_or_create(session, QType, t)[0] for t in payload["qtypes"]]
+
+#     question.topics = topic_objs
+#     question.languages = language_objs
+#     question.qtypes = qtype_objs
+
+#     question = safe_refresh_question(question, session)
+#     return question
 
 
 # Utils

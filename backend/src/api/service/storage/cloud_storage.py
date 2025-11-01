@@ -142,8 +142,8 @@ class FireCloudStorageService(StorageService):
                 files.append(relative_path.split("/")[-1])
         return files
 
-    def delete_storage(self, identifier: str) -> None:
-        target = self.get_storage_path(identifier).as_posix()
+    def delete_storage(self, target: str) -> None:
+        target = self.get_storage_path(target).as_posix()
         for blob in self.bucket.list_blobs(prefix=target):
             try:
                 logger.info("Deleting %s", blob.name)
