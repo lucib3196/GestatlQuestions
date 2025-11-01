@@ -1,33 +1,26 @@
-# Stdlib
-from typing import Dict, List, Sequence, Union, Any
-from uuid import UUID
+# --- Standard Library ---
 import asyncio
+from typing import Optional, Sequence, Union
+from uuid import UUID
 
-# Third-party
-from sqlalchemy import or_
-from sqlalchemy.inspection import inspect as sa_inspect
-from sqlalchemy.orm.properties import ColumnProperty, RelationshipProperty
-from sqlmodel import select
-from sqlalchemy.exc import SQLAlchemyError
-from sqlmodel import delete
+# --- Third-Party ---
 from pydantic import ValidationError
+from sqlalchemy import or_
+from sqlalchemy.exc import SQLAlchemyError
+from sqlmodel import delete, select
 
-# Internal
-from src.api.database import SessionDep
-from src.api.models.models import Question
-from src.api.models.question import QuestionMeta, QuestionUpdate
-from src.utils import *
-from src.api.core.logging import logger
-from src.api.database.generic_db import create_or_resolve
+# --- Internal ---
 from src.api.core import logger
-from src.utils import convert_uuid
+from src.api.database import SessionDep, generic_db as gdb
+from src.api.database.generic_db import filter_conditional
 from src.api.database.question_relationship_db import (
     create_language,
     create_qtopic,
     create_qtype,
 )
-from src.api.models.question import QRelationshipData
-from src.api.database import generic_db as gdb
+from src.api.models.models import Question
+from src.api.models.question import QRelationshipData, QuestionMeta, QuestionUpdate
+from src.utils import convert_uuid
 
 
 def create_question(
@@ -220,73 +213,52 @@ async def update_question(
         raise ValueError(f"[DB] failed to update question {e}")
 
 
-# # Todo make this a bit more general and handle
-def filter_questions(
-    session,
-    filters=None,
-    partial_match=True,
-    **kwargs,
-):
-    """
-    Filter Question rows by scalar columns and/or related labels.
-
-    Args:
-        session: Database session.
-        partial_match: If True, string filters use a partial/LIKE-style match; otherwise exact.
-        **kwargs: Field -> value(s) mapping. For relationships, pass strings or related instances.
-
-    Returns:
-        A list of Question instances matching the combined filters (AND across fields, OR within values).
-    """
-    mapper = sa_inspect(Question)
-    if not filters:
-        filters = []
-
-    # Deconstruct the mapping
-    for key, value in kwargs.items():
-        # skip unknown attributes
-        try:
-            prop = mapper.get_property(key)
-        except Exception:
-            continue
-
-        values = value if isinstance(value, (list, tuple, set)) else [value]
-        values = normalize_values(values)
-        if not values:
-            continue
-
-        attr = getattr(Question, key)
-
-        # Handles relationships
-        if isinstance(prop, RelationshipProperty):
-            target_cls = prop.mapper.class_
-            label_col = pick_related_label_col(target_cls)
-            conds = []
-            for v in values:
-                if isinstance(v, str):
-                    inner = string_condition(label_col, v, partial=partial_match)
-                else:
-                    inner = label_col == v
-
-                if prop.uselist:  # many-to-many / one-to-many
-                    conds.append(attr.any(inner))
-                else:  # many-to-one / one-to-one
-                    conds.append(attr.has(inner))
-
-            filters.append(or_(*conds))
-            continue
-
-        if isinstance(prop, ColumnProperty):
-            col = attr
-            conds = []
-            for v in values:
-                if isinstance(v, str):
-                    conds.append(string_condition(col, v, partial=partial_match))
-                else:
-                    conds.append(col == v)
-            filters.append(or_(*conds))
-            continue
+async def filter_questions(
+    data: QuestionUpdate,
+    session: SessionDep,
+    relationship_field: str = "name",
+) -> Sequence[QuestionMeta]:
+    relationships = gdb.get_all_model_relationships(Question)
+    filters = []
     stmt = select(Question)
+
+    for key, value in data.model_dump(exclude_none=True).items():
+        if not value:
+            continue
+
+        conds = []
+
+        # --- Handle Relationship Filters ---
+        if key in relationships:
+            relationship_model = relationships[key]
+            stmt = stmt.join(getattr(Question, key))
+            if isinstance(value, list):
+                rel_conds = [
+                    filter_conditional(relationship_model, relationship_field, v)
+                    for v in value
+                ]
+                conds.append(or_(*rel_conds))
+            else:
+                conds.append(
+                    filter_conditional(relationship_model, relationship_field, value)
+                )
+
+        # --- Handle Regular Column Filters ---
+        else:
+            if isinstance(value, list):
+                conds.append(
+                    or_(*[filter_conditional(Question, key, v) for v in value])
+                )
+            else:
+                conds.append(filter_conditional(Question, key, value))
+
+        if conds:
+            filters.append(or_(*conds))
+
+    # --- Apply Filters ---
     if filters:
-        stmt = stmt.where(*filters)  # AND across keys, OR within each key
-    return session.exec(stmt).all()
+        stmt = stmt.where(*filters)
+
+    # --- Execute and Return ---
+    results = session.exec(stmt).all()
+    return await asyncio.gather(*[get_question_data(r.id, session) for r in results])

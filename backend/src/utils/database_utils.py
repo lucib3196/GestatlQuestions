@@ -1,11 +1,9 @@
 # Stdlib
-from typing import Dict, List, Optional, Type, TypeVar, Union
+from typing import TypeVar
 from uuid import UUID
 
 # Third-party
 from sqlalchemy import String, cast, func
-from sqlalchemy.inspection import inspect
-from sqlalchemy.orm.properties import RelationshipProperty
 from sqlmodel import SQLModel
 
 # Local

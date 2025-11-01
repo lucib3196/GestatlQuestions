@@ -1,6 +1,6 @@
 from typing import Type, TypeVar
 from sqlmodel import SQLModel, select
-from sqlalchemy import func
+from sqlalchemy import func, cast, String
 from src.api.database.database import SessionDep
 from sqlalchemy.exc import SQLAlchemyError
 from src.api.core import logger
@@ -76,3 +76,22 @@ def is_relationship(model: Type[SQLModel], attr_name: str) -> bool:
         return isinstance(prop, RelationshipProperty)
     except Exception as e:
         return False
+
+
+def filter_conditional(
+    model: Type[SQLModel], col_key: str, value: Any, partial: bool = True
+):
+    column = getattr(model, col_key)
+
+    if isinstance(value, bool):
+        return column.is_(value)
+
+    if isinstance(value, (int, float)):
+        return column == value
+
+    if partial:
+        # Case-insensitive partial match
+        return func.lower(column).like(f"%{value.lower()}%")
+    else:
+        # Case-insensitive exact match
+        return func.lower(column) == value.lower()

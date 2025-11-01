@@ -1,7 +1,6 @@
 from src.api.database import question as qdb
 import pytest
-from src.utils import pick
-from src.api.models.models import Topic, Language, Question, QType
+from src.api.models.models import Question
 from src.api.core.logging import logger
 from src.api.models.question import QuestionUpdate, QuestionMeta
 
@@ -97,3 +96,39 @@ async def test_question_update(db_session, question_payload):
 
     refetched = db_session.get(Question, qcreated.id)
     assert refetched.title == "new title"
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "update_data, expected_count, description",
+    [
+        (
+            QuestionUpdate(title="Sample", ai_generated=True),
+            1,
+            "Should find question with partial title 'Sample' and ai_generated=True",
+        ),
+        (
+            QuestionUpdate(topics=["math"]),
+            1,
+            "Should find question related to topic 'math'",
+        ),
+        (
+            QuestionUpdate(title="Unknown", topics=["history"]),
+            0,
+            "No question should match a wrong title and nonexistent topic",
+        ),
+    ],
+)
+async def test_filter_questions(create_question_with_relationship, db_session, update_data, expected_count, description):
+    """Test dynamic question filtering across key combinations."""
+    qcreated = create_question_with_relationship
+
+    results = await qdb.filter_questions(update_data, db_session)
+
+    print(f"\n{description}")
+    print(f"Input: {update_data}")
+    print(f"Results: {results}")
+
+    assert isinstance(results, list)
+    assert len(results) == expected_count
+    if expected_count:
+        assert all(isinstance(r, QuestionMeta) for r in results)

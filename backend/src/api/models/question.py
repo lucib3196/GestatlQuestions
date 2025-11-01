@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 from src.api.models.models import Topic, QType, Language
-
+from sqlalchemy import String, cast, func
 
 from typing import Optional, List
 from pydantic import BaseModel, Field
