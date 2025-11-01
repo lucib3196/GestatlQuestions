@@ -1,14 +1,17 @@
-from typing import Type, TypeVar
-from sqlmodel import SQLModel, select
-from sqlalchemy import func, cast, String
-from src.api.database.database import SessionDep
+# --- Standard Library ---
+from typing import Any, Dict, List, Type, TypeVar
+
+# --- Third-Party ---
+from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
-from src.api.core import logger
 from sqlalchemy.inspection import inspect
-from typing import Dict
 from sqlalchemy.orm.properties import RelationshipProperty
-from sqlalchemy.orm.exc import UnmappedInstanceError
-from typing import List, Any
+from sqlmodel import SQLModel, select
+
+# --- Internal ---
+from src.api.core import logger
+from src.api.database.database import SessionDep
+
 
 T = TypeVar("T", bound=SQLModel)
 
@@ -47,6 +50,7 @@ def create_or_resolve(
         f"Object of type '{target_cls.__name__}' with {lookup_field}='{target_value}' not found "
         f"and create_field=False"
     )
+    
 
 
 def get_all_model_relationships(model: Type[SQLModel]) -> Dict[str, Type[SQLModel]]:
