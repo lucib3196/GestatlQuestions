@@ -21,9 +21,8 @@ from src.utils import convert_uuid
 from src.api.response_models import Response
 
 
-
 async def safe_refresh_question(question: Question, session: SessionDep):
-    return qdata.safe_refresh_question(question, session)
+    return qdata.create_question(question, session)
 
 
 async def create_question(
