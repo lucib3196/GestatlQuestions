@@ -49,11 +49,11 @@ def create_or_resolve(
     )
 
 
-def get_all_model_relationships(model: Type[SQLModel]) -> Dict[str, str]:
+def get_all_model_relationships(model: Type[SQLModel]) -> Dict[str, Type[SQLModel]]:
     mapper = inspect(model)
     relationships = {}
     for name, rel in mapper.relationships.items():
-        relationships[name] = rel.mapper.class_.__name__
+        relationships[name] = rel.mapper.class_
     return relationships
 
 

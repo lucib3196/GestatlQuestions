@@ -3,12 +3,7 @@ import pytest
 from src.utils import pick
 from src.api.models.models import Topic, Language, Question, QType
 from src.api.core.logging import logger
-
-
-
-
-
-
+from src.api.models.question import QuestionUpdate, QuestionMeta
 
 
 # ----------------------
@@ -72,3 +67,33 @@ def test_delete_single(db_session, combined_payload):
         assert qdb.get_question(qcreated.id, db_session)
         qdb.delete_question(qcreated.id, db_session)
         assert qdb.get_question(qcreated.id, db_session) is None
+
+
+@pytest.mark.asyncio
+async def test_get_question_data(create_question_with_relationship, db_session):
+    qcreated = create_question_with_relationship
+    data = await qdb.get_question_data(qcreated.id, db_session)
+    assert data
+
+
+@pytest.mark.asyncio
+async def test_question_update(db_session, question_payload):
+
+    qcreated = qdb.create_question(question_payload, db_session)
+    assert qcreated is not None
+    assert isinstance(qcreated, Question)
+
+    update_data = QuestionUpdate(
+        title="new title", topics=["history", "math", "science"]
+    )
+
+    qupdate = await qdb.update_question(qcreated.id, update_data, db_session)
+    assert qupdate is not None
+    assert isinstance(qupdate, QuestionMeta)
+
+    assert qupdate.title == "new title"
+    assert isinstance(qupdate.topics, list)
+    assert len(qupdate.topics) == 3
+
+    refetched = db_session.get(Question, qcreated.id)
+    assert refetched.title == "new title"

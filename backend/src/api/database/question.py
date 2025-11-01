@@ -15,7 +15,7 @@ from pydantic import ValidationError
 # Internal
 from src.api.database import SessionDep
 from src.api.models.models import Question
-from src.api.models.question import QuestionMeta
+from src.api.models.question import QuestionMeta, QuestionUpdate
 from src.utils import *
 from src.api.core.logging import logger
 from src.api.database.generic_db import create_or_resolve
@@ -137,10 +137,10 @@ def delete_question(id: str | UUID, session: SessionDep) -> bool:
         raise ValueError(f"[DB] failed to delete question {e}")
 
 
-def get_question_data(
+async def get_question_data(
     id: Union[str, UUID],
     session: SessionDep,
-) -> QuestionMeta|None:
+) -> QuestionMeta:
     """
     Retrieve a Question as a dict and include specified relationship data.
 
@@ -158,63 +158,15 @@ def get_question_data(
     question = get_question(id, session)
     if not question:
         logger.info("Question is none")
-        return None
+        raise ValueError("Could not get question data question is None")
     relationship_data = gdb.get_all_model_relationship_data(question, Question)
     question_data = question.model_dump()
     return QuestionMeta(**question_data, **relationship_data)
 
 
-# Utils
-def parse_question_payload(
-    payload: Union["Question", Dict[str, Any]],
-) -> Dict[str, Any]:
-    """
-    Normalize incoming payload (Question model or dict) into a consistent dict.
-
-    Returns keys:
-      - title: Optional[str]
-      - ai_generated: Optional[bool]
-      - is_adaptive: Optional[bool]
-      - created_by: Optional[str]
-      - user_id: Optional[int]
-      - topics: List[Any]
-      - qtypes: List[Any]
-      - languages: List[Any]
-    """
-    try:
-        # Scalars (support snake_case and camelCase)
-        title = pick(payload, "title")
-        ai_generated = pick(payload, "ai_generated")
-        is_adaptive = pick(payload, "isAdaptive")
-        created_by = pick(payload, "created_by", "createdBy")
-        user_id = pick(payload, "user_id")
-
-        # Relationships; accept multiple key variants
-        t_incoming = pick(payload, "topics")
-        q_incoming = pick(payload, "qtypes", "qtype")
-        l_incoming = pick(payload, "languages")
-
-        # Normalize/clean
-        if isinstance(title, str):
-            title = title.strip()
-
-        return {
-            "title": title,
-            "ai_generated": ai_generated,
-            "is_adaptive": is_adaptive,
-            "created_by": created_by,
-            "user_id": user_id,
-            "topics": to_list(t_incoming),
-            "qtypes": to_list(q_incoming),
-            "languages": to_list(l_incoming),
-        }
-    except ValueError as e:
-        raise ValueError(f"Could not parse {str(e)}")
-
-
 async def get_all_question_data(
     session: SessionDep, offset: int = 0, limit: int = 100
-) -> List[Dict[str, Any]]:
+) -> Sequence[QuestionMeta]:
     """
     Retrieve paginated Questions and return each as a dict with relationships.
 
@@ -228,73 +180,44 @@ async def get_all_question_data(
     """
     results: Sequence[Question] = get_all_questions(session, offset=offset, limit=limit)
     logger.debug("These are the questions %s", results)
-    tasks = [get_question_data(question_id=r.id, session=session) for r in results]
+    tasks = [get_question_data(r.id, session=session) for r in results]
     return await asyncio.gather(*tasks)
 
 
-# Update
-def update_question(
-    session, question_id: Union[str, UUID], create_field=True, **kwargs
-) -> Question:
-    """
-    Update a Question's scalar fields and/or relationships.
-
-    Args:
-        session: Database session.
-        question_id: The question's identifier (UUID or string convertible to UUID).
-        create_field: If True, create related records on-the-fly when assigning relationships.
-        **kwargs: Field values to set on the Question (both columns and relationships).
-
-    Returns:
-        The updated Question instance.
-
-    Raises:
-        ValueError: If the Question does not exist.
-        TypeError: If relationship values are of incorrect types and create_field=False.
-    """
-    question = session.get(Question, question_id)
+async def update_question(
+    id: str | UUID, update_data: QuestionUpdate, session: SessionDep
+) -> QuestionMeta:
+    relationships = gdb.get_all_model_relationships(Question)
+    question = get_question(id, session)
     if not question:
-        raise ValueError("Question not found")
+        raise ValueError("Question is not found")
+    for key, value in update_data.model_dump(exclude_unset=True).items():
+        if key in relationships:
+            target_class = relationships[key]
+            if isinstance(value, list):
+                rel_val = [
+                    gdb.create_or_resolve(target_class, v, session)[0] for v in value
+                ]
 
-    mapper = sa_inspect(Question)
+            elif isinstance(value, str):
+                rel_val = gdb.create_or_resolve(target_class, value, session)[0]
 
-    for key, value in kwargs.items():
-        try:
-            prop = mapper.get_property(key)
-            is_rel = is_relationship(Question, key)
-        except Exception:
-            continue
-
-        if not is_rel:
-            setattr(question, key, value)
-            continue
-        else:
-            target_cls = prop.mapper.class_
-            if prop.uselist:
-                if not all(isinstance(v, target_cls) for v in value):
-                    if not create_field:
-                        raise TypeError(f"{key} expects list[{target_cls.__name__}]")
-                    else:
-                        value = [
-                            create_or_resolve(
-                                target_cls, v, session, create=create_field
-                            )[0]
-                            for v in value
-                        ]
-                setattr(question, key, list(value))
             else:
-                if value is not None and not isinstance(value, target_cls):
-                    if not create_field:
-                        raise TypeError(f"{key} expects {target_cls.__name__} or None")
-                    else:
-                        value = create_or_resolve(
-                            target_cls, value, session, create=create_field
-                        )[0]
-                setattr(question, key, value)
-            continue
-    session.commit()
-    session.refresh(question)
-    return question
+                raise ValueError(
+                    f"Got value of type {type(value)} not expected and not implemented yet"
+                )
+            setattr(question, key, rel_val)
+        else:
+            setattr(question, key, value)
+    try:
+        session.add(question)
+        session.commit()
+        session.refresh(question)
+        return await get_question_data(question.id, session)
+    except SQLAlchemyError as e:
+        session.rollback()
+        logger.error(f"[DB] failed to update question {e}")
+        raise ValueError(f"[DB] failed to update question {e}")
 
 
 # # Todo make this a bit more general and handle
