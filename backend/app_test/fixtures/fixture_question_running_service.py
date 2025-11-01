@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 from src.api.models.models import Question
-from src.api.database import question_db
+from src.api.database import question
 from app_test.conftest import test_config
 from src.api.dependencies import QuestionManager
 from src.api.response_models import FileData
@@ -21,7 +21,7 @@ async def create_question_with_code_file_serverjs(
         createdBy="Luciano",
         user_id=1,
     )
-    q_created = question_db.create_question(q, db_session)
+    q_created = question.create_question(q, db_session)
     javascript_path = test_config.asset_path / "code_scripts" / "test.js"
     await question_manager_test.save_file_to_question(
         q_created.id,
@@ -43,7 +43,7 @@ async def create_question_with_code_file_serverpy(db_session, patch_questions_pa
         createdBy="Luciano",
         user_id=1,
     )
-    q_created = question_db.create_question(
+    q_created = question.create_question(
         q,
         db_session,
     )
@@ -65,7 +65,7 @@ def create_question_no_code(db_session, patch_questions_path):
         createdBy="Luciano",
         user_id=1,
     )
-    q_created = question_db.create_question(q, db_session)
+    q_created = question.create_question(q, db_session)
     print("Created question succsefully")
     return q_created
 
@@ -86,7 +86,7 @@ async def create_question_empty_file_python(db_session, patch_questions_path):
         createdBy="Luciano",
         user_id=1,
     )
-    q_created = question_db.create_question(q, db_session)
+    q_created = question.create_question(q, db_session)
     print("Created question succsefully")
 
     filedata = qs.FileData(filename=filename, content="\n")  # minimal non-empty content
@@ -113,7 +113,7 @@ async def create_question_empty_file_js(db_session, patch_questions_path):
         createdBy="Luciano",
         user_id=1,
     )
-    q_created = question_db.create_question(q, db_session)
+    q_created = question.create_question(q, db_session)
     print("Created question succsefully")
 
     filedata = qs.FileData(filename=filename, content="\n")  # minimal non-empty content

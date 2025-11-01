@@ -5,7 +5,6 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from types import SimpleNamespace
 from uuid import UUID
-import os
 
 # Testing logs
 from src.api.core.logging import in_test_ctx
@@ -21,7 +20,6 @@ from src.api.core import logger
 from src.api.core.config import get_settings
 from src.api.service.storage import StorageService
 from src.api.response_models import FileData
-from src.api.service.storage.cloud_storage import FireCloudStorageService
 from src.api.service.storage.local_storage import LocalStorageService
 from src.api.service.question_manager import QuestionManager
 from src.firebase.storage import FirebaseStorage
@@ -29,6 +27,7 @@ from src.firebase.core import initialize_firebase_app
 
 settings = get_settings()
 initialize_firebase_app()
+
 
 @asynccontextmanager
 async def on_startup_test(app: FastAPI):

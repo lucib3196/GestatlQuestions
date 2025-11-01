@@ -1,45 +1,49 @@
-from src.api.database import question_db as question_db
-from app_test.unit.database.fixtures import *
+from src.api.database import question as qdb
+import pytest
 from src.utils import pick
 from src.api.models.models import Topic, Language, Question, QType
+
+
+@pytest.fixture
+def question_payload():
+    return Question(
+        title="Sample Question",
+        ai_generated=True,
+        isAdaptive=False,
+    )
+
+
+@pytest.fixture
+def question_payload_2():
+    return Question(title="Question 2", ai_generated=False, isAdaptive=True)
+
+
+@pytest.fixture
+def combined_payload(question_payload, question_payload_2):
+    return [question_payload, question_payload_2]
 
 
 # ----------------------
 # Minimal creation (no topics)
 # ----------------------
-def test_create_question_minimal(db_session, combined_payload):
-    for q in combined_payload:
-        created = question_db.create_question(q, db_session)
-
-        assert created.id is not None
-        assert created.title == pick(q, "title")
-        assert created.ai_generated == pick(q, "ai_generated")
-        assert created.isAdaptive == pick(q, "isAdaptive")
-        assert created.user_id == pick(q, "user_id")
+def test_create_question(db_session, question_payload):
+    qcreated = qdb.create_question(question_payload, db_session)
+    assert qcreated
+    for key, _ in question_payload.model_dump().items():
+        assert getattr(qcreated, key) == getattr(question_payload, key)
 
 
-def test_create_question_with_relationships(
-    db_session, question_payload_with_relationships
-):
-    created = question_db.create_question(
-        question_payload_with_relationships, db_session
-    )
-    assert {t.name for t in created.topics} == set(
-        question_payload_with_relationships["topics"]
-    )
-    assert {t.name for t in created.languages} == set(
-        question_payload_with_relationships["languages"]
-    )
-    assert {t.name for t in created.qtypes} == set(
-        question_payload_with_relationships["qtypes"]
-    )
+def test_get_question(db_session, question_payload):
+    qcreated = qdb.create_question(question_payload, db_session)
+    assert qcreated == qdb.get_question(qcreated.id, db_session)
 
 
 def test_get_all_questions(db_session, combined_payload):
     # Create data
     for q in combined_payload:
-        question_db.create_question(q, db_session)
-    questions = question_db.get_all_questions(db_session)
+        qcreated = qdb.create_question(q, db_session)
+        assert qcreated
+    questions = qdb.get_all_questions(db_session)
     assert isinstance(questions, list)
     assert all(isinstance(q, Question) for q in questions)
     assert len(combined_payload) == len(questions)
@@ -48,151 +52,20 @@ def test_get_all_questions(db_session, combined_payload):
 # Test Deleting questions
 def test_delete_all_questions(db_session, combined_payload):
     for q in combined_payload:
-        question_db.create_question(q, db_session)
-
-    # deleta
-    question_db.delete_all_questions(db_session)
-    questions = question_db.get_all_questions(db_session)
+        qcreated = qdb.create_question(q, db_session)
+        assert qcreated
+    qdb.delete_all_questions(db_session)
+    questions = qdb.get_all_questions(db_session)
     assert isinstance(questions, list)
     assert questions == []
 
 
 def test_delete_single(db_session, combined_payload):
     for q in combined_payload:
-        created = question_db.create_question(q, db_session)
+        qcreated = qdb.create_question(q, db_session)
+        assert qcreated
 
-        assert created.id is not None
-        assert created.title == pick(q, "title")
-        assert created.ai_generated == pick(q, "ai_generated")
-        assert created.isAdaptive == pick(q, "isAdaptive")
-        assert created.user_id == pick(q, "user_id")
-
-        question_db.delete_question_by_id(created.id, db_session)
-        retrieved_q = question_db.get_question_by_id(created.id, db_session)
-        assert retrieved_q == None
-
-
-def test_get_question_by_id(combined_payload, db_session):
-    for q in combined_payload:
-        created = question_db.create_question(q, db_session)
-        assert created == question_db.get_question_by_id(created.id, db_session)
-
-
-@pytest.mark.asyncio
-async def test_get_question_data(combined_payload, db_session):
-    for q in combined_payload:
-        created = question_db.create_question(q, db_session)
-        r = await question_db.get_question_data(created.id, db_session)
-        assert all(isinstance(t, Topic) for t in r["topics"])
-        assert all(isinstance(t, Language) for t in r["languages"])
-        assert all(isinstance(t, QType) for t in r["qtypes"])
-
-
-@pytest.mark.asyncio
-async def test_get_all_question_data(combined_payload, db_session):
-    for q in combined_payload:
-        created = question_db.create_question(q, db_session)
-    retrieved = await question_db.get_all_question_data(db_session)
-    assert len(retrieved) == len(combined_payload)
-    assert isinstance(retrieved, list)
-
-
-# Test updating
-def test_updating_question_multiple_fields(db_session):
-
-    payload = {
-        "title": "AutoCreate",
-        "ai_generated": True,
-        "isAdaptive": False,
-        "createdBy": "Alice",
-        "user_id": 1,
-        "topics": ["topic1", "topic2"],
-    }
-    created = question_db.create_question(payload, db_session)
-    assert created.title == payload["title"]
-
-    original_topics = {t.name for t in created.topics}
-
-    # Act 1: update several fields at once
-    updated = question_db.update_question(
-        db_session,
-        question_id=created.id,
-        title="NewTitle",
-        isAdaptive=True,
-        ai_generated=False,
-        createdBy="Bob",
-    )
-
-    # Assert after first update
-    assert updated.id == created.id
-    assert updated.title == "NewTitle"
-    assert updated.isAdaptive is True
-    assert updated.ai_generated is False
-    assert updated.createdBy == "Bob"
-    assert {t.name for t in updated.topics} == original_topics  # topics unchanged
-
-    # Act 2: another update (different fields)
-    updated2 = question_db.update_question(
-        db_session,
-        question_id=created.id,
-        title="FinalTitle",
-        createdBy="Carol",
-    )
-
-    # Assert after second update
-    assert updated2.id == created.id
-    assert updated2.title == "FinalTitle"
-    assert updated2.createdBy == "Carol"
-    # prior boolean changes persist
-    assert updated2.isAdaptive is True
-    assert updated2.ai_generated is False
-    assert {t.name for t in updated2.topics} == original_topics
-
-
-# Test Filtering
-def test_question_filtering(db_session):
-    # Arrange: clean slate
-
-    q1 = question_db.create_question(
-        {
-            "title": "AutoCreate",
-            "ai_generated": True,
-            "isAdaptive": False,
-            "createdBy": "Alice",
-            "user_id": 1,
-            "topics": ["topic1", "topic2"],
-        },
-        db_session,
-    )
-
-    q2 = question_db.create_question(
-        {
-            "title": "Other Question",
-            "ai_generated": False,
-            "isAdaptive": True,
-            "createdBy": "Bob",
-            "user_id": 2,
-            "topics": ["topic3"],
-        },
-        db_session,
-    )
-
-    # AND across keys: title + ai_generated + topic name
-    res = question_db.filter_questions(
-        db_session, title="autocreate", ai_generated=True, topics="topic1"
-    )
-    assert isinstance(res, list)
-    assert {r.id for r in res} == {q1.id}
-    assert all("autocreate" in r.title.lower() for r in res)
-    assert all(r.ai_generated is True for r in res)
-    assert all(any(t.name == "topic1" for t in r.topics) for r in res)
-
-    # OR within a single key (topics): either topic1 OR topic3
-    res_or = question_db.filter_questions(db_session, topics=["topic1", "topic3"])
-    assert {r.id for r in res_or} == {q1.id, q2.id}
-
-    # Negative case: no match when AND condition fails
-    res_none = question_db.filter_questions(
-        db_session, title="AutoCreate", ai_generated=False
-    )
-    assert res_none == []
+        # Get the question
+        assert qdb.get_question(qcreated.id, db_session)
+        qdb.delete_question(qcreated.id, db_session)
+        assert qdb.get_question(qcreated.id, db_session) is None

@@ -1,12 +1,13 @@
 from pathlib import Path
 import json
-from src.api.core import logger
-from src.api.core.config import get_settings
 from firebase_admin import credentials
 import firebase_admin
 from functools import lru_cache
+from src.api.core import logger
+from src.api.core.config import get_settings
 
 app_settings = get_settings()
+
 
 @lru_cache
 def initialize_firebase_app():
@@ -28,6 +29,3 @@ def initialize_firebase_app():
         firebase_admin.initialize_app(cred, {"storageBucket": bucket_name})
     except Exception as e:
         raise ValueError(f"Could not initialize creditionals error {str(e)}")
-
-
-# Store credientials as a paht for local but in deployment load in as a string

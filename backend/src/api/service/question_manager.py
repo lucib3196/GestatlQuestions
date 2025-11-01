@@ -18,7 +18,7 @@ from starlette import status
 import io
 from typing import Dict, Any
 from pydantic import ValidationError
-from src.api.database import question_db as qdb
+from src.api.database import question as qdb
 from src.api.service.file_handler import FileService
 
 

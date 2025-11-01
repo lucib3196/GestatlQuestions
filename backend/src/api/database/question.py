@@ -9,6 +9,8 @@ from sqlalchemy.inspection import inspect as sa_inspect
 from sqlalchemy.orm.properties import ColumnProperty, RelationshipProperty
 from sqlmodel import select
 from sqlalchemy.exc import SQLAlchemyError
+from sqlmodel import Session, create_engine, delete, SQLModel, Field
+from typing import Optional
 
 # Internal
 from src.api.database import SessionDep
@@ -50,6 +52,17 @@ def get_question(id: str | UUID, session: SessionDep) -> Question | None:
         session.rollback()
         logger.error(f"[DB] could not create question {e}")
         raise ValueError(f"[DB] failed to retrieve question an error occured {e}")
+
+
+def delete_all_questions(session: SessionDep):
+    try:
+        statement = delete(Question)
+        session.exec(statement)
+        session.commit()
+    except SQLAlchemyError as e:
+        session.rollback()
+        logger.error(f"[DB] failed to delete all questions {e}")
+        raise ValueError(f"[DB] failed todelete all questions an error occured {e}")
 
 
 def get_all_questions(
