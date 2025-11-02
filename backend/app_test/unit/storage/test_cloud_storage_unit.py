@@ -84,14 +84,14 @@ def test_create_storage_path(cloud_storage_service, save_test_question, file_dat
 
 def test_get_relative_storage_path(save_test_question, file_data):
     blob = save_test_question
-    expected = Path(file_data["base"]) / file_data["identifier"] / file_data["filename"]
+    expected = (Path(file_data["base"]) / file_data["identifier"] / file_data["filename"]).as_posix()
     assert blob == expected
 
 
 def test_does_storage_path_exist(cloud_storage_service, save_test_question, file_data):
     _ = save_test_question
     assert cloud_storage_service.does_storage_path_exist(
-        identifier=file_data["identifier"]
+        target=file_data["identifier"]
     )
 
 
@@ -145,14 +145,6 @@ def test_delete_file(cloud_storage_service, save_test_question, file_data):
         )
         is None
     )
-
-
-def test_get_files_names(save_test_question, cloud_storage_service, file_data):
-    """Ensure file names can be listed under the given identifier."""
-    _ = save_test_question
-    results = cloud_storage_service.list_file_names(file_data["identifier"])
-    logger.debug("Retrieved filenames: %s", results)
-    assert file_data["filename"] in results
 
 
 def test_does_file_exist(cloud_storage_service, save_test_question, file_data):

@@ -91,13 +91,15 @@ class FirebaseStorage(StorageService):
 
         return self.get_filepath(target, filename)
 
-    def does_file_exist(self, target_path: str, filename: str):
+    def does_file_exist(self, target_path: str|Path, filename: str|None):
         return self.get_blob(target_path, filename).exists()
 
     def get_file(
         self, target: str | Path, filename: Optional[str] = None
     ) -> bytes | None:
-        return self.get_blob(target, filename).download_as_bytes()
+        if self.does_file_exist(target,filename):
+            return self.get_blob(target, filename).download_as_bytes()
+        return None
 
     def get_blob(self, blob_name: str | Path, filename: Optional[str] = None) -> Blob:
         if isinstance(blob_name, Path):
@@ -110,6 +112,7 @@ class FirebaseStorage(StorageService):
         target = Path(self.get_storage_path(target)).as_posix()
         blobs = self.bucket.list_blobs(prefix=target)
         return [b.name for b in blobs]
+    
 
     def delete_storage(self, target: str | Path) -> None:
         target = Path(self.get_storage_path(target)).as_posix()
@@ -120,6 +123,11 @@ class FirebaseStorage(StorageService):
             except NotFound:
                 logger.error("Blob not found, nothing to delete.")
         return None
+
+    def delete_file(self, target: str | Path, filename: str) -> None:
+        b = self.get_blob(target, filename)
+        if b.exists():
+            b.delete()
 
     def hard_delete(self):
         blobs = self.bucket.list_blobs(prefix=str(self.base_path))
