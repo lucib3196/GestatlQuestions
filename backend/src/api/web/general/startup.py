@@ -7,8 +7,8 @@ from pydantic import BaseModel
 from starlette import status
 
 # --- Internal ---
-from src.api.dependencies import QuestionManagerDependency
-from src.api.response_models import *
+from src.api.service.question_manager import QuestionManagerDependency
+from src.api.models import *
 
 
 router = APIRouter()

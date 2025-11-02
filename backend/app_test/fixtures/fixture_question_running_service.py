@@ -2,9 +2,7 @@ import pytest
 from pathlib import Path
 from src.api.models.models import Question
 from src.api.database import question
-from app_test.conftest import test_config
-from src.api.dependencies import QuestionManager
-from src.api.response_models import FileData
+
 
 
 @pytest.mark.asyncio
