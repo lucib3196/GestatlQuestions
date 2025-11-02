@@ -18,9 +18,10 @@ from typing import List
 # --- Internal ---
 from src.api.core import logger
 from src.api.core.config import get_settings
-from src.api.service.storage import StorageService
+from src.storage.directory_service import DirectoryService
+from src.storage import StorageService,DirectoryService, LocalStorageService
+from src.storage.local_storage import LocalStorageService
 from src.api.response_models import FileData
-from src.api.service.storage.local_storage import LocalStorageService
 from src.api.service.question_manager import QuestionManager
 from src.firebase.storage import FirebaseStorage
 from src.firebase.core import initialize_firebase_app
@@ -61,34 +62,6 @@ class DummySession:
         pass
 
 
-class DummyStorage(StorageService):
-    """A fake storage service used for testing."""
-
-    def __init__(self, path: Path):
-        self.path = Path(path)
-        self.basename = self.path.name
-
-    def get_base_path(self) -> str | Path:
-        return self.path
-
-    def get_base_name(self) -> str:
-        return self.path.name
-
-    def get_relative_storage_path(self, identifier: str) -> str | Path:
-        return self.get_storage_path(identifier).relative_to(self.path.parent)
-
-    def get_storage_path(self, identifier: str) -> Path:
-        return self.path / identifier
-
-    def does_storage_path_exist(self, identifier: str) -> bool:
-        return self.path.exists()
-
-    def create_storage_path(self, identifier: str) -> Path:
-        Path.mkdir(self.get_storage_path(identifier), parents=True, exist_ok=True)
-        return self.get_storage_path(identifier)
-
-    def get_filepath(self, identifier: str, filename: str) -> Path:
-        return self.get_storage_path(identifier) / filename
 
 
 def make_qc_stub(question: FakeQuestion, session: DummySession):
@@ -118,11 +91,7 @@ def dummy_session():
     return DummySession()
 
 
-@pytest.fixture
-def dummy_storage(tmp_path):
-    path = Path(tmp_path) / "questions"
-    logger.debug("Initialized dummy storage with path %s ", path)
-    return DummyStorage(path)
+
 
 
 @pytest.fixture
@@ -196,53 +165,3 @@ def question_additional_metadata():
     }
 
 
-# Storage Fixtures
-@pytest.fixture(scope="function")
-def cloud_storage_service():
-    """
-    Provides a FireCloudStorageService connected to the configured test bucket.
-    """
-
-    base_path = "integration_test"
-    settings.STORAGE_BUCKET
-
-    return FirebaseStorage(settings.STORAGE_BUCKET, base_path)
-
-
-@pytest.fixture(autouse=True)
-def clean_up_cloud(cloud_storage_service):
-    # Setup code (before test runs)
-    yield
-    # Teardown code (after test finishes)
-    cloud_storage_service.hard_delete()
-    logger.debug("Deleting Bucket Cleaning Up")
-
-
-@pytest.fixture
-def local_storage(tmp_path):
-    """Provide a LocalStorageService rooted in a temp directory."""
-    base = tmp_path / "questions"
-    return LocalStorageService(base)
-
-
-@pytest.fixture
-def question_manager_local(local_storage):
-    """Provide a QuestionManager using LocalStorageService."""
-    return QuestionManager(local_storage, "local")
-
-
-@pytest.fixture
-def question_manager_cloud(cloud_storage_service):
-    return QuestionManager(cloud_storage_service, "cloud")
-
-
-@pytest.fixture(scope="function",)
-def question_manager(request, question_manager_local, question_manager_cloud):
-    storage_type = request.param
-    if storage_type == "cloud":
-        qm = question_manager_cloud
-    elif storage_type == "local":
-        qm = question_manager_local
-    else:
-        raise ValueError("Incorrect storage type")
-    return qm

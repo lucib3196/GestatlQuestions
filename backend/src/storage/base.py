@@ -29,7 +29,6 @@ class StorageService:
         """
         raise NotImplementedError("get_base_path must be implemented by subclass")
 
-
     # -------------------------------------------------------------------------
     # Storage path operations
     # -------------------------------------------------------------------------
@@ -157,7 +156,7 @@ class StorageService:
         filename: str,
         content: Union[str, dict, list, bytes, bytearray],
         overwrite: bool = True,
-    ) -> Path:
+    ) -> Path | str:
         """
         Save a file under the given identifier directory.
 

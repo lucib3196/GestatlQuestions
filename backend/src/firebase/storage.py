@@ -1,16 +1,15 @@
 # --- Standard Library ---
 from pathlib import Path
-from typing import IO, List, Optional
-
+from typing import IO, List, Optional, Union
+import json
 # --- Third-Party ---
 from firebase_admin import storage
 from google.cloud.exceptions import NotFound
 from google.cloud.storage.blob import Blob
-
 # --- Local Modules ---
 from src.api.core.logging import logger
-from src.api.service.storage.base import StorageService
-
+from src.storage.base import StorageService
+from src.api.service.file_handler.content_type import get_content_type
 
 class FirebaseStorage(StorageService):
     def __init__(self, bucket, base_path):
@@ -62,6 +61,31 @@ class FirebaseStorage(StorageService):
                 pass  # not all IO objects support seek
         blob.upload_from_file(file_obj, content_type=content_type)
         return blob
+    def save_file(
+        self,
+        identifier: str,
+        filename: str,
+        content: Union[str, dict, list, bytes, bytearray],
+        overwrite: bool = True,
+    ) -> str:
+        """
+        Save a file to Firebase storage.
+
+        Dicts/lists are serialized as JSON. Bytes/bytearray are decoded.
+        """
+        blob = self.get_blob(identifier, filename)
+
+        if isinstance(content, (dict, list)):
+            content = json.dumps(content, indent=2)
+        elif isinstance(content, (bytes, bytearray)):
+            content = content.decode()
+        elif not isinstance(content, str):
+            raise ValueError(f"Unsupported content type: {type(content)}")
+
+        content_type = get_content_type(filename)
+        blob.upload_from_string(data=content, content_type=content_type)
+
+        return self.get_filepath(identifier, filename)
 
     def does_file_exist(self, target_path: str, filename: str):
         return self.get_blob(target_path, filename).exists()

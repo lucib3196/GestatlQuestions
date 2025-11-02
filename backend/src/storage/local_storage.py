@@ -7,7 +7,7 @@ import os
 
 # --- Internal ---
 from .base import StorageService
-from src.api.service.storage.directory_service import DirectoryService
+from src.storage.directory_service import DirectoryService
 from src.api.core import logger
 from src.api.service.file_handler import FileService
 from src.utils import safe_dir_name

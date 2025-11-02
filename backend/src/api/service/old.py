@@ -211,3 +211,34 @@
 #         except Exception as e:
 #             logger.error("Failed to get basename from storage: %s", e)
 #             raise
+
+
+# # --- Download Helpers ---
+#     # TODO: Make this a function of the filehandler
+#     async def download_question(self, identifier: str) -> io.BytesIO:
+#         """Download all files for an identifier as a zipped BytesIO stream."""
+#         prefix = self.get_storage_path(identifier).as_posix()
+#         blobs = list(self.bucket.list_blobs(prefix=prefix))
+
+#         if not blobs:
+#             logger.warning("No files to download")
+#             return io.BytesIO()
+
+#         buffer = io.BytesIO()
+#         manifest: list[dict] = []
+
+#         with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as z:
+#             for blob in blobs:
+#                 # strip prefix to avoid double-nested paths
+#                 relative_name = blob.name[len(prefix) :].lstrip("/")
+#                 data = blob.download_as_bytes()
+#                 z.writestr(f"downloads/{identifier}/{relative_name}", data)
+#                 manifest.append({"file": relative_name, "size": len(data)})
+
+#             z.writestr(
+#                 "MANIFEST.json",
+#                 json.dumps({"count": len(manifest), "files": manifest}, indent=2),
+#             )
+
+#         buffer.seek(0)
+#         return buffer
