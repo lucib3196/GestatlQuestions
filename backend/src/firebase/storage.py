@@ -2,14 +2,17 @@
 from pathlib import Path
 from typing import IO, List, Optional, Union
 import json
+
 # --- Third-Party ---
 from firebase_admin import storage
 from google.cloud.exceptions import NotFound
 from google.cloud.storage.blob import Blob
+
 # --- Local Modules ---
 from src.api.core.logging import logger
 from src.storage.base import StorageService
 from src.api.service.file_handler.content_type import get_content_type
+
 
 class FirebaseStorage(StorageService):
     def __init__(self, bucket, base_path):
@@ -20,16 +23,16 @@ class FirebaseStorage(StorageService):
     def get_base_path(self) -> str | Path:
         return Path(self.base_path).as_posix()
 
-    def get_storage_path(self, destination: str) -> str:
-        return (Path(self.base_path) / destination).as_posix()
+    def get_storage_path(self, target: str | Path) -> str:
+        return (Path(self.base_path) / target).as_posix()
 
-    def create_storage_path(self, destination: str) -> Blob:
-        target_blob = self.get_storage_path(destination)
+    def create_storage_path(self, target: str | Path) -> Blob:
+        target_blob = self.get_storage_path(target)
         blob: Blob = self.bucket.blob(target_blob)
         blob.upload_from_string("")
         return blob
 
-    def does_storage_path_exist(self, target: str) -> bool:
+    def does_storage_path_exist(self, target: str | Path) -> bool:
         target = self.get_storage_path(target)
         blobs = list(self.bucket.list_blobs(prefix=target, max_results=1))
         blob = self.bucket.blob(target)
@@ -37,8 +40,8 @@ class FirebaseStorage(StorageService):
             return True
         return len(blobs) > 0
 
-    def get_filepath(self, target_path: str, filename: str | None = None) -> str:
-        target = self.get_storage_path(target_path)
+    def get_filepath(self, target: str | Path, filename: str | None = None) -> str:
+        target = self.get_storage_path(target)
         if filename:
             target = (Path(target) / filename).as_posix()
         return target
@@ -46,11 +49,11 @@ class FirebaseStorage(StorageService):
     def upload_file(
         self,
         file_obj: IO[bytes],
-        target_path: str,
+        target: str | Path,
         filename: str | None = None,
         content_type: str = "application/octet-stream",
     ) -> Blob:
-        destination_blob = self.get_filepath(target_path, filename)
+        destination_blob = self.get_filepath(target, filename)
         blob = self.bucket.blob(destination_blob)
         if isinstance(file_obj, bytes):
             blob.upload_from_string(file_obj, content_type=content_type)
@@ -61,9 +64,10 @@ class FirebaseStorage(StorageService):
                 pass  # not all IO objects support seek
         blob.upload_from_file(file_obj, content_type=content_type)
         return blob
+
     def save_file(
         self,
-        identifier: str,
+        target: str | Path,
         filename: str,
         content: Union[str, dict, list, bytes, bytearray],
         overwrite: bool = True,
@@ -73,7 +77,7 @@ class FirebaseStorage(StorageService):
 
         Dicts/lists are serialized as JSON. Bytes/bytearray are decoded.
         """
-        blob = self.get_blob(identifier, filename)
+        blob = self.get_blob(target, filename)
 
         if isinstance(content, (dict, list)):
             content = json.dumps(content, indent=2)
@@ -85,25 +89,29 @@ class FirebaseStorage(StorageService):
         content_type = get_content_type(filename)
         blob.upload_from_string(data=content, content_type=content_type)
 
-        return self.get_filepath(identifier, filename)
+        return self.get_filepath(target, filename)
 
     def does_file_exist(self, target_path: str, filename: str):
         return self.get_blob(target_path, filename).exists()
 
-    def get_file(self, target: str, filename: Optional[str] = None) -> bytes | None:
+    def get_file(
+        self, target: str | Path, filename: Optional[str] = None
+    ) -> bytes | None:
         return self.get_blob(target, filename).download_as_bytes()
 
-    def get_blob(self, blob_name: str, filename: Optional[str] = None) -> Blob:
+    def get_blob(self, blob_name: str | Path, filename: Optional[str] = None) -> Blob:
+        if isinstance(blob_name, Path):
+            blob_name = blob_name.as_posix()
         if not filename:
             return self.bucket.blob(blob_name)
         return self.bucket.blob(self.get_filepath(blob_name, filename))
 
-    def list_files(self, target: str) -> List[str]:
+    def list_files(self, target: str | Path) -> List[str]:
         target = Path(self.get_storage_path(target)).as_posix()
         blobs = self.bucket.list_blobs(prefix=target)
         return [b.name for b in blobs]
 
-    def delete_storage(self, target: str) -> None:
+    def delete_storage(self, target: str | Path) -> None:
         target = Path(self.get_storage_path(target)).as_posix()
         for blob in self.bucket.list_blobs(prefix=target):
             try:

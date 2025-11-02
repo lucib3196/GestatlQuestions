@@ -4,7 +4,9 @@ from pathlib import Path
 _filename_safe_re = re.compile(r"[^A-Za-z0-9._-]+")
 
 
-def safe_dir_name(name: str, max_length: int = 100) -> str:
+def safe_dir_name(name: str|Path, max_length: int = 100) -> str:
+    if isinstance(name, Path):
+        name = name.as_posix()
     name = Path(name).name
     name = name.strip().replace(" ", "_")
     name = name = _filename_safe_re.sub("-", name)

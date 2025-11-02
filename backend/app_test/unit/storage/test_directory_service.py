@@ -1,4 +1,4 @@
-from src.api.service.storage import directory_service as ds
+import src.storage.directory_service as ds
 import pytest
 from src.api.core import logger
 from pathlib import Path

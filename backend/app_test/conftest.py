@@ -19,7 +19,7 @@ from typing import List
 from src.api.core import logger
 from src.api.core.config import get_settings
 from src.storage.directory_service import DirectoryService
-from src.storage import StorageService,DirectoryService, LocalStorageService
+from src.storage import StorageService, DirectoryService, LocalStorageService
 from src.storage.local_storage import LocalStorageService
 from src.api.response_models import FileData
 from src.api.service.question_manager import QuestionManager
@@ -62,8 +62,6 @@ class DummySession:
         pass
 
 
-
-
 def make_qc_stub(question: FakeQuestion, session: DummySession):
     """Return a qc stub with async get_question_by_id and safe_refresh_question."""
 
@@ -89,9 +87,6 @@ def make_qc_stub(question: FakeQuestion, session: DummySession):
 @pytest.fixture
 def dummy_session():
     return DummySession()
-
-
-
 
 
 @pytest.fixture
@@ -163,5 +158,3 @@ def question_additional_metadata():
         "languages": ["python", "javascript"],
         "qtype": ["numeric"],
     }
-
-
