@@ -1,21 +1,16 @@
-# --- Standard Library ---
-from typing import Optional
 
 # --- Third-Party ---
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, HTTPException
 from starlette import status
 
 # --- Internal ---
-from src.api.core.config import get_settings
 from src.api.core import logger
 from src.api.service.question_manager import QuestionManagerDependency
 from src.api.service.storage_manager import StorageDependency
 from src.api.models.models import Question
 from src.api.models import *
-from src.api.service.file_service import FileService
-from src.utils import serialized_to_dict
 from src.utils import safe_dir_name
-
+from src.api.web.questions.utils import get_question_path, set_question_path
 
 router = APIRouter(
     prefix="/questions",
@@ -23,28 +18,6 @@ router = APIRouter(
         "questions",
     ],
 )
-
-
-app_settings = get_settings()
-
-
-def parse_question_payload(
-    question: str | dict | Question,
-    additional_metadata: Optional[str | AdditionalQMeta],
-):
-    logger.debug(f"Received question {question} type of {type(question)}")
-    question = serialized_to_dict(question, Question)
-    if additional_metadata:
-        question.update(serialized_to_dict(additional_metadata, AdditionalQMeta))
-    return question
-
-
-async def parse_file_upload(file: UploadFile) -> FileData:
-    f = await FileService("").validate_file(file)
-    content = await f.read()
-    await f.seek(0)
-    fd = FileData(filename=str(f.filename), content=content)
-    return fd
 
 
 @router.post("/")
@@ -84,10 +57,7 @@ async def create_question(
 
         # Storing the relative path in db
         relative_path = storage.get_relative_storage_path(path)
-        if app_settings.STORAGE_SERVICE == "local":
-            qcreated.local_path = Path(str(relative_path)).as_posix()
-        elif app_settings.STORAGE_SERVICE == "cloud":
-            qcreated.blob_path = Path(str(relative_path)).as_posix()
+        set_question_path(qcreated, relative_path)
         # Commit the changes
         qm.session.commit()
 
@@ -252,11 +222,7 @@ async def delete_question(
             raise HTTPException(
                 status_code=404, detail="Question not found nothing to delete"
             )
-        question_path = None
-        if app_settings.STORAGE_SERVICE == "cloud":
-            question_path = question.blob_path
-        elif app_settings.STORAGE_SERVICE == "local":
-            question_path = Path(str(question.local_path)).resolve()
+        question_path = get_question_path(question)
 
         assert qm.delete_question(id)
         if not question_path:
@@ -274,14 +240,90 @@ async def delete_question(
 
 @router.put("/{id}")
 async def update_question(
-    id: str | UUID, update: QuestionData, qm: QuestionManagerDependency
+    id: str | UUID,
+    update: QuestionData,
+    qm: QuestionManagerDependency,
+    storage: StorageDependency,
+    update_storage: bool,
 ):
+    """
+    Update a question in the database and optionally rename its associated storage directory.
+
+    This endpoint updates a question’s database record and, if `update_storage` is enabled,
+    renames the corresponding storage directory to reflect an updated title.
+    The storage update ensures that both local and cloud storage paths remain consistent
+    with the question’s current metadata.
+
+    Args:
+        id (str | UUID): Unique identifier of the question to update.
+        update (QuestionData): Updated data for the question.
+        qm (QuestionManagerDependency): Handles database operations related to questions.
+        storage (StorageDependency): Manages storage paths and renaming operations.
+        update_storage (bool): If True, renames the existing storage directory when the title changes.
+
+    Returns:
+        Question: The updated question model instance from the database.
+
+    Raises:
+        HTTPException: If the question cannot be found or an update operation fails.
+        Exception: For any other unexpected errors during the update or rename process.
+    """
     try:
-        return await qm.update_question(id, update)
-    except Exception:
+        existing_question = qm.get_question(id)
+        if not existing_question:
+            logger.warning(f"Question with ID {id} not found — cannot update.")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Question {id} not found.",
+            )
+
+        # Handle renaming the storage directory if required
+        if update_storage and update.title:
+            logger.info(
+                f"Updating storage directory for question '{existing_question.title}' → '{update.title}'"
+            )
+
+            old_storage_path = get_question_path(existing_question)
+            if not old_storage_path:
+                logger.error(f"No valid storage path found for question ID {id}")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Storage path missing for question {id}.",
+                )
+
+            # Generate a sanitized new directory name and resolve paths
+            new_storage_name = safe_dir_name(f"{update.title}_{str(id)[:8]}")
+            new_storage_path = storage.rename_storage(
+                old_storage_path, new_storage_name
+            )
+
+            # Update the question's stored path reference
+            updated_relative_path = storage.get_relative_storage_path(new_storage_path)
+            set_question_path(existing_question, updated_relative_path)
+            qm.session.commit()
+
+            logger.info(
+                f"Renamed storage path for question {id}: {old_storage_path} → {new_storage_path}"
+            )
+
+        # Proceed with updating database fields
+        updated_question = await qm.update_question(id, update)
+        logger.info(f"Successfully updated question {id}")
+
+        return updated_question
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Error while updating question {id}: {e}")
         raise
 
 
+@router.post("/filter")
+async def filter_questions(
+    filter_data: QuestionData, qm: QuestionManagerDependency
+) -> Sequence[QuestionMeta]:
+    return await qm.filter_questions(filter_data)
 
 
 # @router.get("/{qid}/files", status_code=status.HTTP_200_OK)
@@ -370,27 +412,6 @@ async def update_question(
 #         raise HTTPException(
 #             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
 #             detail=f"Could not write file content: {e}",
-#         )
-
-
-# # TODO add test web
-# @router.patch("/update_question/{quid}", status_code=200)
-# async def update_question(
-#     quid: Union[str, UUID],
-#     session: SessionDep,
-#     updates: QuestionMeta,
-#     qm: QuestionManagerDependency,
-# ):
-#     try:
-#         kwargs = updates.model_dump(exclude_none=True)
-#         norm_k = normalize_kwargs(kwargs)
-#         result = await qm.update_question(question_id=quid, session=session, **norm_k)
-#         return result
-#     except HTTPException as e:
-#         raise e
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
 #         )
 
 

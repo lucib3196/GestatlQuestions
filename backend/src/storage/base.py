@@ -92,3 +92,8 @@ class StorageService:
     def hard_delete(self) -> None:
         """Completely remove all storage contents (destructive operation)."""
         raise NotImplementedError("hard_delete must be implemented by subclass")
+
+    def rename_storage(self, old:str|Path, new: str|Path)->str:
+        raise NotImplementedError("rename must be implemented by subclass")
+
+        

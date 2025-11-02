@@ -238,3 +238,8 @@ class LocalStorageService(StorageService):
         target = Path(self.get_filepath(target, filename))
         if target and target.exists():
             target.unlink()
+
+    def rename_storage(self, old: str | Path, new: str | Path) -> str:
+        old = self.get_storage_path(old)
+        new = self.get_storage_path(new)
+        return Path(old).rename(new).as_posix()
