@@ -152,65 +152,7 @@
 #                 detail=f"Could not download starter template {str(e)}",
 #             )
 
-#     # ---------------------------
-#     # Helpers
-#     # ---------------------------
-#     # TODO: Test
-#     def get_question_path(self, q: Question):
-#         """Return the stored path (local or cloud) for a question."""
-#         try:
-#             if self.storage_type == "local":
-#                 return q.local_path
-#             elif self.storage_type == "cloud":
-#                 return q.blob_path
-#         except Exception as e:
-#             logger.error(
-#                 "Failed to get question path for %s: %s", getattr(q, "title", None), e
-#             )
-#             raise
 
-#     # TODO: Test
-#     def set_question_path(self, q: Question, qname: str) -> Question:
-#         """Assign storage path (local or cloud) to a question object."""
-#         logger.info("Setting question path for %s", q.title)
-
-#         relative_path = self.storage.get_relative_storage_path(qname)
-
-#         if isinstance(relative_path, Path):
-#             relative_path = relative_path.as_posix()
-
-#         try:
-#             # Assign based on storage type
-#             if self.storage_type == "local":
-#                 q.local_path = relative_path
-#                 logger.info("Local question path set → %s", q.local_path)
-
-#             elif self.storage_type == "cloud":
-#                 q.blob_name = relative_path
-#                 logger.info("Cloud question path set → %s", q.blob_path)
-
-#             else:
-#                 raise ValueError(f"Unknown storage type: {self.storage_type}")
-
-#             return q
-
-#         except Exception as e:
-#             title = getattr(q, "title", "<unknown>")
-#             msg = f"Failed to set question path for '{title}': {str(e)}"
-#             logger.error(msg)
-#             raise HTTPException(
-#                 status_code=status.HTTP_400_BAD_REQUEST,
-#                 detail=msg,
-#             ) from e
-
-#     # TODO: Test
-#     def get_basename(self) -> str | Path:
-#         """Return the base directory/bucket name from storage."""
-#         try:
-#             return self.storage.get_base_path()
-#         except Exception as e:
-#             logger.error("Failed to get basename from storage: %s", e)
-#             raise
 
 
 # # --- Download Helpers ---

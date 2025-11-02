@@ -1,8 +1,8 @@
-from .crud.questions import router as question_router
+from .questions.questions import router as question_router
 from .ai_generation.code_generator import router as code_generation_router
-from .general.startup import router as general_router
+from .startup import router as general_router
 from .run_question_server import router as question_runner
-from .crud.sync import router as question_loader
+from .questions.sync import router as question_loader
 
 routes = [
     question_router,
