@@ -23,56 +23,6 @@ from src.api.models.question import QuestionData
 from src.utils import to_bool
 
 
-import pytest
-
-
-@pytest.fixture
-def simple_question_text():
-    """Basic free-response style physics question."""
-    question = (
-        "A ball is traveling along a straight road at a constant speed of 20 miles per hour. "
-        "What is the total distance traveled after 5 hours?"
-    )
-    additional_metadata = {"user_id": 0, "created_by": "Luciano@gmail.com"}
-    return {"question": question, "additional_meta": additional_metadata}
-
-
-@pytest.fixture
-def multiple_choice_math_question():
-    """Multiple-choice algebra question."""
-    question = (
-        "What is the solution to the equation 2x + 3 = 7?\n"
-        "A) x = 1\nB) x = 2\nC) x = 3\nD) x = 4"
-    )
-    additional_metadata = {"user_id": 1, "created_by": "MathTeacher"}
-    return {"question": question, "additional_meta": additional_metadata}
-
-
-@pytest.fixture
-def conceptual_physics_question():
-    """Conceptual physics (no numbers, reasoning based)."""
-    question = "Why does an object in motion stay in motion unless acted upon by an external force?"
-    additional_metadata = {"user_id": 2, "created_by": "PhysicsDept"}
-    return {"question": question, "additional_meta": additional_metadata}
-
-
-@pytest.fixture
-def question_payloads(
-    simple_question_text,
-    multiple_choice_math_question,
-    conceptual_physics_question,
-):
-    """
-    Aggregate all individual question fixtures into a single list
-    so tests can iterate over them.
-    """
-    return [
-        simple_question_text,
-        multiple_choice_math_question,
-        conceptual_physics_question,
-    ]
-
-
 def validate_data(gc: CodeGenFinal | dict) -> CodeGenFinal:
     """
     Validates or converts the input into a CodeGenFinal model.
