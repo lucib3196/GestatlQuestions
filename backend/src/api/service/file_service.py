@@ -12,7 +12,7 @@ from fastapi import UploadFile, HTTPException
 from starlette import status
 
 # --- Internal ---
-from src.api.response_models import SuccessfulResponse
+from src.api.models import SuccessfulResponse
 
 
 # Donwload Utilits

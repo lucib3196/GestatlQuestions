@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from src.api.response_models import QuestionReadResponse
+from src.api.models import QuestionReadResponse
 
 # ==============================
 # Local Application Imports
@@ -22,7 +22,7 @@ from src.api.response_models import QuestionReadResponse
 from src.api.main import get_application
 from src.api.database.database import get_session
 from src.api.service.storage_manager import get_storage_manager
-from src.api.response_models import FileData
+from src.api.models import FileData
 
 
 @asynccontextmanager

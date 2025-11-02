@@ -11,7 +11,7 @@ from google.cloud.storage.blob import Blob
 # --- Local Modules ---
 from src.api.core.logging import logger
 from src.storage.base import StorageService
-from src.api.service.content_type import get_content_type
+from src.api.service.file_service import get_content_type
 
 
 class FirebaseStorage(StorageService):

@@ -1,6 +1,6 @@
 import json
 from typing import List
-from src.api.response_models import FileData
+from src.api.models import FileData
 
 
 # Helpers
