@@ -1,1 +1,1 @@
-from src.api.response_models.models import *
+from src.api.models.response_models import *
