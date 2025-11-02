@@ -236,7 +236,7 @@ def question_manager_cloud(cloud_storage_service):
     return QuestionManager(cloud_storage_service, "cloud")
 
 
-@pytest.fixture(scope="function", params=["local", "cloud"])
+@pytest.fixture(scope="function",)
 def question_manager(request, question_manager_local, question_manager_cloud):
     storage_type = request.param
     if storage_type == "cloud":

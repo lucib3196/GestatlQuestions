@@ -1,7 +1,7 @@
 import pytest
 from app_test.fixtures.fixture_code_generation import *
 from src.api.service.ai_generation import code_generation
-from src.api.service.crud import question_crud
+
 import asyncio
 from src.api.models.models import Question
 
