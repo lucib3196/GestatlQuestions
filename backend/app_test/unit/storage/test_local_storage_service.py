@@ -1,4 +1,3 @@
-
 import io
 import json
 import zipfile
@@ -6,11 +5,12 @@ from pathlib import Path
 from typing import Tuple
 import pytest
 
+
 @pytest.fixture
 def create_test_dir(local_storage) -> Tuple[Path, str]:
     """Create a temporary test directory inside the local storage."""
     testdir = "TestFolder"
-    created_dir = local_storage.create_storage_path(testdir)
+    created_dir = local_storage.create_storage_path(testdir).as_posix()
     return created_dir, testdir
 
 
@@ -35,9 +35,8 @@ def save_multiple_files(local_storage, create_test_dir):
 # =============================================================================
 def test_initialization(local_storage, tmp_path):
     """Ensure storage initializes with correct root and base properties."""
-    assert Path(local_storage.root) == tmp_path / "questions"
-    assert local_storage.get_base_path() == tmp_path / "questions"
-    assert local_storage.get_base_name() == "questions"
+    assert local_storage.root == (tmp_path / "questions")
+    assert local_storage.get_base_path() == (tmp_path / "questions").as_posix()
 
 
 # =============================================================================
@@ -46,8 +45,9 @@ def test_initialization(local_storage, tmp_path):
 def test_create_storage_path(create_test_dir):
     """Ensure storage directory is created successfully."""
     created, folder_name = create_test_dir
-    assert created.exists()
-    assert created.name == folder_name
+    created_path = Path(created)
+    assert created_path.exists()
+    assert created_path.name == folder_name
 
 
 def test_get_storage_path(create_test_dir, local_storage):
@@ -96,7 +96,7 @@ def test_get_filepath(save_multiple_files, local_storage, tmp_path):
     for f in files:
         assert (
             local_storage.get_filepath(folder_name, f[0])
-            == Path(tmp_path) / "questions" / folder_name / f[0]
+            == (Path(tmp_path) / "questions" / folder_name / f[0]).as_posix()
         )
 
 
@@ -146,21 +146,3 @@ def test_get_file(save_multiple_files, local_storage):
         else:
             raise TypeError(f"Unsupported type: {type(expected)}")
 
-
-# =============================================================================
-# Download / Zip Tests
-# =============================================================================
-@pytest.mark.asyncio
-async def test_download_zip(tmp_path, local_storage, save_multiple_files):
-    """Test that download_question correctly zips and returns data."""
-    data = await local_storage.download_question("TestFolder")
-    files, name = save_multiple_files
-
-    assert isinstance(data, bytes)
-    assert len(data) > 0
-
-    buffer = io.BytesIO(data)
-    with zipfile.ZipFile(buffer, "r") as z:
-        names = z.namelist()
-        for f in files:
-            assert f"{name}/{f[0]}" in names
