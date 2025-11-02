@@ -54,10 +54,10 @@ class QuestionManager:
     def get_question(
         self,
         question_id: str | UUID,
-    ) -> Question:
+    ) -> Question | None:
         try:
             question = qdb.get_question(question_id, self.session)
-            assert question
+
             return question
         except ValueError as e:
             raise HTTPException(
@@ -145,9 +145,9 @@ class QuestionManager:
 
     def get_question_path(
         self, question_id: str | UUID, storage_type: Literal["cloud", "local"]
-    ):
+    ) -> str | None:
         try:
-            qdb.get_question_path(question_id, storage_type, self.session)
+            return qdb.get_question_path(question_id, storage_type, self.session)
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -159,9 +159,9 @@ class QuestionManager:
         question_id: str | UUID,
         path: str | Path,
         storage_type: Literal["cloud", "local"],
-    ):
+    ) -> Question:
         try:
-            qdb.set_question_path(question_id, path, storage_type, self.session)
+            return qdb.set_question_path(question_id, path, storage_type, self.session)
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
