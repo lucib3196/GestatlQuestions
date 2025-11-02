@@ -4,7 +4,6 @@ import pytest_asyncio
 
 
 from src.api.core import logger
-from src.api.service.crud import question_crud as qcrud_service
 from src.utils import *
 from src.api.response_models import (
     QuestionReadResponse,
