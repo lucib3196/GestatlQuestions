@@ -8,7 +8,6 @@ from pydantic import BaseModel, ConfigDict
 from sqlmodel import Field, Relationship, SQLModel
 
 
-
 class QuestionTopicLink(SQLModel, table=True):
     question_id: UUID | None = Field(
         default=None, foreign_key="question.id", primary_key=True
@@ -74,7 +73,6 @@ class Question(SQLModel, table=True):
 
     created_by_id: UUID | None = Field(default=None, foreign_key="user.id")
     created_by: Optional["User"] = Relationship(back_populates="created_questions")
-
 
 
 class Language(SQLModel, table=True):
