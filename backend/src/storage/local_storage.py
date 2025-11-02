@@ -8,6 +8,7 @@ import shutil
 from .base import StorageService
 from src.api.core import logger
 from src.utils import safe_dir_name
+from google.cloud.storage.blob import Blob
 
 
 class LocalStorageService(StorageService):
@@ -50,7 +51,7 @@ class LocalStorageService(StorageService):
         """
         return (self.root).as_posix()
 
-    def get_storage_path(self, target: str | Path) -> str:
+    def get_storage_path(self, target: str | Path | Blob) -> str:
         """
         Build the absolute path for a resource based on its identifier.
 
@@ -60,7 +61,7 @@ class LocalStorageService(StorageService):
         Returns:
             Path: Path to the resource directory.
         """
-        return (self.root / safe_dir_name(target)).as_posix()
+        return (self.root / safe_dir_name(str(target))).as_posix()
 
     def create_storage_path(self, target: str | Path) -> Path:
         """
@@ -139,7 +140,7 @@ class LocalStorageService(StorageService):
 
     def save_file(
         self,
-        target: str|Path,
+        target: str | Path,
         filename: str,
         content: Union[str, dict, list, bytes, bytearray],
         overwrite: bool = True,
@@ -211,6 +212,15 @@ class LocalStorageService(StorageService):
             identifier: Unique identifier for the stored resource.
         """
         target = Path(self.get_storage_path(target))
+        logger.info(f"Target to delete {target}")
+        if target.exists():
+            for f in target.iterdir():
+                if f.is_file():
+                    f.unlink()
+            shutil.rmtree(target)
+
+    def hard_delete(self) -> None:
+        target = self.root
         if target.exists():
             for f in target.iterdir():
                 if f.is_file():

@@ -17,15 +17,14 @@ from src.api.core.config import get_settings
 
 settings = get_settings()
 
+
 class QuestionManager:
     """Manage creation, retrieval, and file operations for questions."""
 
     def __init__(self, session: SessionDep):
         self.session = session
 
-    async def create_question(
-        self, question: QuestionData | dict, exists: bool = False
-    ) -> Question:
+    async def create_question(self, question: QuestionData | dict) -> Question:
         """Create a new question in DB and storage."""
         if not question or (
             not isinstance(question, dict) and not isinstance(question, QuestionData)
@@ -83,7 +82,7 @@ class QuestionManager:
 
     def delete_question(self, question_id: str | UUID):
         try:
-            return qdb.delete_all_questions(self.session)
+            return qdb.delete_question(question_id, self.session)
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -1,11 +1,5 @@
 from pathlib import Path
-from typing import Union, Optional, List
-from google.cloud.storage.blob import Blob
-from typing import IO, Optional
-
-
-from pathlib import Path
-from typing import IO, List, Optional
+from typing import Optional, List, IO
 from google.cloud.storage.blob import Blob
 
 
@@ -36,7 +30,7 @@ class StorageService:
         """Create a new directory or container for the given storage target."""
         raise NotImplementedError("create_storage_path must be implemented by subclass")
 
-    def get_relative_storage_path(self, target: str | Path) -> str | Path:
+    def get_relative_storage_path(self, target: str | Path|Blob) -> str | Path:
         """Return the relative path (from the base directory) for the given storage target."""
         raise NotImplementedError(
             "get_relative_storage_path must be implemented by subclass"

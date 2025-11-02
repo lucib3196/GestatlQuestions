@@ -47,7 +47,7 @@ def create_db_and_tables(engine=engine):
 
 def get_session() -> Generator[Session, None, None]:
     """Yield a SQLModel session per request."""
-    with Session(engine) as session:
+    with Session(engine, expire_on_commit=False) as session:
         yield session
 
 
