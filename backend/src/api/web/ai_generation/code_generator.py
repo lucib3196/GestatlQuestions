@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 # --- Internal ---
 from src.api.database.database import get_session
-from src.api.service.ai_generation.code_generation import run_text, run_image
+from src.api.service.code_generation import run_text, run_image
 from fastapi import UploadFile
 from src.api.dependencies import QuestionManagerDependency
 

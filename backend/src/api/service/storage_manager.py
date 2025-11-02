@@ -5,6 +5,8 @@ from src.storage import FirebaseStorage, LocalStorageService, StorageService
 from typing import Annotated
 
 settings = get_settings()
+
+
 def get_storage_manager() -> StorageService:
     if settings.STORAGE_SERVICE == "cloud":
         if not (settings.FIREBASE_CRED and settings.STORAGE_BUCKET):
@@ -19,4 +21,4 @@ def get_storage_manager() -> StorageService:
     return storage_service
 
 
-QuestionManagerDependency = Annotated[StorageService, Depends(get_storage_manager)]
+StorageDependency = Annotated[StorageService, Depends(get_storage_manager)]

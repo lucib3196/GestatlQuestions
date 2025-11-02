@@ -21,7 +21,7 @@ from src.api.response_models import QuestionReadResponse
 # ==============================
 from src.api.main import get_application
 from src.api.database.database import get_session
-from src.api.dependencies import get_question_manager
+from src.api.service.storage_manager import get_storage_manager
 from src.api.response_models import FileData
 
 
@@ -66,7 +66,7 @@ def test_client(db_session, request, question_manager_cloud, question_manager_lo
         yield qm
 
     app.dependency_overrides[get_session] = override_get_db
-    app.dependency_overrides[get_question_manager] = override_get_qm
+    app.dependency_overrides[get_storage_manager] = override_get_qm
 
     with TestClient(app) as client:
         yield client

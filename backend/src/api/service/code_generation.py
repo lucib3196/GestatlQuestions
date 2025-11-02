@@ -24,75 +24,55 @@ from src.ai_workspace.utils import to_serializable, validate_llm_output
 from src.api.database import SessionDep
 from src.api.response_models import FileData
 from src.utils import to_bool
+from src.api.models.question import QuestionData
 
 
-def process_question(gc: CodeGenFinal | dict):
-    if (isinstance, gc):
-        gc = CodeGenFinal.model_validate(dict)
-    if not gc.metadata:
-        raise ValueError()
-
-
-async def a_process_output(
-    gc: CodeGenFinal,
-) -> Dict[str, Any]:
-    """Process a generated question, persist it, and return created question data.
-
-    Args:
-        gc: A CodeGenFinal object containing question files and metadata.
-        session: Database session dependency.
-        meta: Optional metadata dict (e.g., createdBy, user_id).
-
-    Returns:
-        A dictionary containing the created question data.
-
-    Raises:
-        ValueError: If the generated question lacks necessary metadata.
-    """
+def _validate_data(gc: CodeGenFinal | dict) -> CodeGenFinal:
     try:
+        if (isinstance, gc):
+            gc = CodeGenFinal.model_validate(gc)
+        else:
+            assert isinstance(gc, CodeGenFinal)
+        return gc
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not validate CodeGenFinal recevied type: {type(CodeGenFinal)}",
+        )
 
-        meta = deepcopy(meta) if meta else {}
+
+def process_question_data(gc: CodeGenFinal | dict) -> QuestionData:
+    gc = _validate_data(gc)
+    metadata = gc.metadata
+    if not metadata:
+        raise ValueError("Metadata for question is empty")
+    qpayload = QuestionData(
+        title=metadata.title,
+        ai_generated=True,
+        isAdaptive=to_bool(metadata.isAdaptive),
+        topics=metadata.topics,
+        languages=metadata.language or [],
+        qtypes=metadata.qtype or [],
+    )
+    return qpayload
+
+
+def process_code_files(gc: CodeGenFinal | dict) -> List[FileData]:
+    try:
+        gc = _validate_data(gc)
         files_data: Dict[str, Any] = dict(gc.files_data or {})
 
-        if not gc.metadata:
-            raise ValueError("Metadata not present in question")
-
-        metadata = gc.metadata
-        question_payload = gc.question_payload
-
-        files_data["metadata.json"] = to_serializable(metadata)
-        files_data["question_payload.json"] = to_serializable(question_payload)
-
-        q_payload: Dict[str, Any] = {
-            "title": meta.get("title") or metadata.title,
-            "ai_generated": True,
-            "isAdaptive": to_bool(metadata.isAdaptive),
-            "createdBy": meta.get("createdBy"),
-            "user_id": meta.get("user_id"),
-            "topics": metadata.topics,
-            "languages": metadata.language,
-            "qtypes": metadata.qtype,
-        }
-
-        q = await qm.create_question(q_payload, session)
-
+        # Get the question payload
+        files_data["raw_data.json"] = to_serializable(gc)
         fd_list: List[FileData] = [
             FileData(filename=filename, content=to_serializable(content))
             for filename, content in files_data.items()
         ]
-        results = await qm.save_files_to_question(
-            q.id,
-            session,
-            fd_list,
-        )
-        created = await qm.get_question_data(question_id=q.id, session=session)
-        return created
-    except HTTPException:
-        raise
+        return fd_list
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Could not process {str(e)}",
+            detail="Could not get filedata",
         )
 
 

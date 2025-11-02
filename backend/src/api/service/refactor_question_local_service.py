@@ -7,17 +7,14 @@ import json
 
 # --- Third-Party ---
 from sqlmodel import select
-from src.utils import pick
 
 # --- Internal ---
 from src.api.core.config import get_settings
 from src.api.database import SessionDep, get_session
 from src.api.models.models import Question
 from src.api.service import refactor_question_storage_service as qs
-from src.api.service.crud import question_crud as qc
 from src.utils import normalize_kwargs
 from fastapi import HTTPException
-from src.api.core import logger
 from src.api.response_models import FileData
 from src.utils import convert_uuid
 from src.utils import normalize_timestamps

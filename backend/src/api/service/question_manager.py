@@ -170,4 +170,4 @@ def get_question_manager(session: SessionDep) -> QuestionManager:
     return QuestionManager(session)
 
 
-SpriteDependency = Annotated[QuestionManager, Depends(get_question_manager)]
+QuestionManagerDependency = Annotated[QuestionManager, Depends(get_question_manager)]

@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from pydantic import BaseModel, Field
 from uuid import UUID
+from typing import Sequence
 
 class QuestionBase(BaseModel):
     title: Optional[str] = None
@@ -21,9 +22,9 @@ class QuestionMeta(QuestionBase):
 
 
 class QRelationshipData(BaseModel):
-    topics: List[str] = Field(default_factory=list)
-    qtypes: List[str] = Field(default_factory=list)
-    languages: List[str] = Field(default_factory=list)
+    topics: Sequence[str] = Field(default_factory=list)
+    qtypes: Sequence[str] = Field(default_factory=list)
+    languages: Sequence[str] = Field(default_factory=list)
 
 
 class QuestionData(QuestionBase, QRelationshipData):
