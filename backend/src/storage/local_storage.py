@@ -176,7 +176,7 @@ class LocalStorageService(StorageService):
 
         return file_path
 
-    def list_file_paths(self, identifier: str) -> List[Path]:
+    def list_file_paths(self, target: str | Path) -> List[Path]:
         """
         List all file paths under a given identifier directory.
 
@@ -186,13 +186,13 @@ class LocalStorageService(StorageService):
         Returns:
             List[Path]: List of file paths under the directory.
         """
-        target = Path(self.get_storage_path(identifier))
+        target = Path(self.get_storage_path(target))
         if not target.exists():
-            logger.warning(f"Target path does not exist for {identifier}")
+            logger.warning(f"Target path does not exist for {target}")
             return []
         return [f for f in target.iterdir() if f.is_file]
 
-    def list_file_names(self, identifier: str) -> List[str]:
+    def list_files(self, target: str | Path) -> List[str]:
         """
         List all file names under a given identifier directory.
 
@@ -202,7 +202,7 @@ class LocalStorageService(StorageService):
         Returns:
             List[str]: List of file names.
         """
-        return [f.name for f in self.list_file_paths(identifier)]
+        return [f.name for f in self.list_file_paths(target)]
 
     def delete_storage(self, target: str | Path) -> None:
         """

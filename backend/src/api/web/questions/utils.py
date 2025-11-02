@@ -2,7 +2,7 @@
 from typing import Optional
 
 # --- Third-Party ---
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 
 # --- Internal ---
 from src.api.core.config import get_settings
@@ -26,20 +26,26 @@ def parse_question_payload(
     return question
 
 
-async def parse_file_upload(file: UploadFile) -> FileData:
-    f = await FileService("").validate_file(file)
-    content = await f.read()
-    await f.seek(0)
-    fd = FileData(filename=str(f.filename), content=content)
-    return fd
+# async def parse_file_upload(file: UploadFile) -> FileData:
+#     f = await FileService("").validate_file(file)
+#     content = await f.read()
+#     await f.seek(0)
+#     fd = FileData(filename=str(f.filename), content=content)
+#     return fd
 
 
-def get_question_path(question: Question) -> str | Path | None:
+def get_question_path(question: Question) -> str | Path :
     question_path = None
     if app_settings.STORAGE_SERVICE == "cloud":
         question_path = question.blob_path
     elif app_settings.STORAGE_SERVICE == "local":
-        question_path = Path(str(question.local_path)).resolve()
+        question_path = Path(str(question.local_path))
+
+    if not question_path:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Cannot get question path it is not set for {app_settings.STORAGE_SERVICE}",
+        )
     return question_path
 
 

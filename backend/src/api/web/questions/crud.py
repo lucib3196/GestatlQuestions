@@ -1,4 +1,3 @@
-
 # --- Third-Party ---
 from fastapi import APIRouter, HTTPException
 from starlette import status
@@ -103,7 +102,7 @@ async def delete_all(
         raise
 
 
-@router.get("/{offset}/{limit}")
+@router.get("/{offset:int}/{limit:int}")
 async def get_all_questions(
     qm: QuestionManagerDependency, offset: int = 0, limit: int = 100
 ) -> Sequence[Question]:
@@ -326,48 +325,9 @@ async def filter_questions(
     return await qm.filter_questions(filter_data)
 
 
-# @router.get("/{qid}/files", status_code=status.HTTP_200_OK)
-# async def get_question_files(
-#     qid: str | UUID, session: SessionDep, qm: QuestionManagerDependency
-# ) -> SuccessFileResponse:
-#     try:
-#         files = await qm.get_all_files(qid, session)
-#         return SuccessFileResponse(
-#             status=200,
-#             detail="Retrieved files succesfully",
-#             filedata=[],
-#             filepaths=files,
-#         )
-
-#     except HTTPException:
-#         raise
-#     except Exception as e:
-#         # Log here if possible
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail=f"Could not retrieve files names: {e}",
-#         )
 
 
-# @router.get("/{qid}/files/{filename}", status_code=status.HTTP_200_OK)
-# async def read_question_file(
-#     qid: str | UUID, filename: str, session: SessionDep, qm: QuestionManagerDependency
-# ) -> SuccessDataResponse:
-#     try:
-#         data = await qm.read_file(qid, session, filename)
-#         assert data
-#         data = data.decode("utf-8")
-#         return SuccessDataResponse(
-#             status=status.HTTP_200_OK, detail="Successful", data=data
-#         )
-#     except HTTPException:
-#         raise
-#     except Exception as e:
-#         # Log here if possible
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail=f"Could not retrieve files names: {e}",
-#         )
+
 
 
 # @router.get("/{qid}/files_data", status_code=status.HTTP_200_OK)
@@ -394,83 +354,13 @@ async def filter_questions(
 #         )
 
 
-# # Update
-# @router.put("/update_file", status_code=200)
-# async def update_file(
-#     payload: UpdateFile, session: SessionDep, qm: QuestionManagerDependency
-# ):
-#     try:
-#         new_content = FileData(filename=payload.filename, content=payload.new_content)
-#         result = await qm.save_file_to_question(
-#             payload.question_id, session, new_content, overwrite=True
-#         )
-#         return {"success": True, "result": result}
-#     except HTTPException:
-#         raise
-#     except Exception as e:
-#         # Log here if possible
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail=f"Could not write file content: {e}",
-#         )
 
 
-# # Special
 
 
-# @router.post("/filter_questions")
-# async def filter_questions(
-#     session: SessionDep,
-#     filters: QuestionMeta,
-#     qm: QuestionManagerDependency,
-# ):
-#     """
-#     Filter questions based on metadata.
-
-#     Args:
-#         session (SessionDep): Database session dependency.
-#         filters (QuestionMeta): Filter criteria.
-#     """
-#     try:
-#         logger.debug("Filtering questions")
-#         kwargs = filters.model_dump(exclude_none=True)
-#         norm_k = normalize_kwargs(kwargs)
-#         result = await qm.filter_questions(session, **norm_k)
-#         return result
-#     except HTTPException as e:
-#         raise e
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-#         )
 
 
-# # TODO complete this
-# @router.post("/{qid}/files")
-# async def upload_files_to_question(
-#     qid: str | UUID,
-#     files: List[UploadFile],
-#     session: SessionDep,
-#     qm: QuestionManagerDependency,
-# ):
-#     try:
-#         fd_list = (
-#             await asyncio.gather(*[parse_file_upload(f) for f in files])
-#             if files
-#             else []
-#         )
-#         await qm.save_files_to_question(qid, session, fd_list, overwrite=True)
-#         return SuccessfulResponse(
-#             status=200,
-#             detail="Uploaded files succesfully",
-#         )
-#     except HTTPException:
-#         raise
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail=f"Could not upload files to question: {e}",
-#         )
+
 
 
 # @router.post("/{qid}/download")

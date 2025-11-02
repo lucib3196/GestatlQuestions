@@ -50,10 +50,14 @@ class QuestionManager:
     def get_question(
         self,
         question_id: str | UUID,
-    ) -> Question | None:
+    ) -> Question:
         try:
             question = qdb.get_question(question_id, self.session)
-
+            if not question:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Question does not exist",
+                )
             return question
         except ValueError as e:
             raise HTTPException(
