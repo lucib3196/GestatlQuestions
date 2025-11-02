@@ -17,6 +17,7 @@ from typing import Literal
 from pydantic import ValidationError
 from typing import Sequence
 from src.utils import to_serializable
+from src.api.service.question_manager import QuestionManagerDependency
 
 
 router = APIRouter(prefix="/questions", tags=["Questions", "local", "dev"])

@@ -2,7 +2,6 @@
 from typing import List, Optional
 from uuid import UUID, uuid4
 from enum import Enum
-from pydantic import BaseModel, ConfigDict
 
 # Third-party libraries
 from sqlmodel import Field, Relationship, SQLModel

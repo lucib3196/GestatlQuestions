@@ -8,11 +8,9 @@ import pytest
 # --- Internal ---
 from src.api.core import logger
 from src.utils.test_utils import prepare_file_uploads
-from src.api.response_models import FileData
+from src.api.models import FileData
 from src.utils.normalization_utils import to_serializable
-from src.api.response_models import (
-    FileData,
-)
+
 from src.api.models.models import Question
 from src.utils import normalize_content
 
