@@ -1,16 +1,17 @@
 from pydantic import BaseModel
 from typing import List
 from src.api.models.models import Topic, QType, Language
-from sqlalchemy import String, cast, func
-
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from pydantic import BaseModel, Field
-
+from uuid import UUID
 
 class QuestionBase(BaseModel):
     title: Optional[str] = None
     ai_generated: Optional[bool] = None
     isAdaptive: Optional[bool] = None
+    
+    model_config = ConfigDict(extra="ignore")
 
 
 class QuestionMeta(QuestionBase):
@@ -25,5 +26,5 @@ class QRelationshipData(BaseModel):
     languages: List[str] = Field(default_factory=list)
 
 
-class QuestionUpdate(QuestionBase, QRelationshipData):
+class QuestionData(QuestionBase, QRelationshipData):
     pass

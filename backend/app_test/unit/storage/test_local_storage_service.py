@@ -1,27 +1,11 @@
-# =============================================================================
-# Standard Library Imports
-# =============================================================================
+
 import io
 import json
 import zipfile
 from pathlib import Path
 from typing import Tuple
-
-# =============================================================================
-# Third-Party Imports
-# =============================================================================
 import pytest
 
-# =============================================================================
-# Internal Imports
-# =============================================================================
-from src.api.service.storage import local_storage as ls
-from src.api.core import logger
-
-
-# =============================================================================
-# Fixtures
-# =============================================================================
 @pytest.fixture
 def create_test_dir(local_storage) -> Tuple[Path, str]:
     """Create a temporary test directory inside the local storage."""

@@ -16,10 +16,15 @@ from sqlmodel import select
 from fastapi import HTTPException
 from starlette import status
 import io
-from typing import Dict, Any
+from typing import Dict
 from pydantic import ValidationError
 from src.api.database import question as qdb
 from src.api.service.file_handler import FileService
+from src.api.database import question as qdb
+
+
+# Goal of this class should be purely dealing with database function and nothing else
+# It can be used to set the storage path and other stuff but no uploading to firebase for instance
 
 
 from src.api.core.config import get_settings
@@ -37,11 +42,6 @@ class QuestionManager:
         self.storage = storage_service
         self.storage_type: Literal["local", "cloud"] = storage_type
         self.base_path = self.storage.get_base_path()
-        self.base_name = self.storage.get_base_name()
-
-        # TODO: Need to make this a bit better
-        ## General file service mostly just used for the starter template download
-        self.file_service = FileService(settings.ROOT_PATH)
 
     # ---------------------------
     # Question Lifecycle

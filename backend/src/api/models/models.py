@@ -2,9 +2,11 @@
 from typing import List, Optional
 from uuid import UUID, uuid4
 from enum import Enum
+from pydantic import BaseModel, ConfigDict
 
 # Third-party libraries
 from sqlmodel import Field, Relationship, SQLModel
+
 
 
 class QuestionTopicLink(SQLModel, table=True):
@@ -72,6 +74,7 @@ class Question(SQLModel, table=True):
 
     created_by_id: UUID | None = Field(default=None, foreign_key="user.id")
     created_by: Optional["User"] = Relationship(back_populates="created_questions")
+
 
 
 class Language(SQLModel, table=True):

@@ -7,7 +7,7 @@
 # from langchain.chat_models import init_chat_model
 
 # # --- Internal Imports ---
-# from src.ai_base.image_processing import (
+# from src.ai_base.multimodel_io import (
 #     langchain_multimodal,
 #     openai_multimodal,
 #     BaseOutput,

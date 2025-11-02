@@ -1,6 +1,6 @@
 # --- Standard Library ---
 import asyncio
-from typing import Optional, Sequence, Union
+from typing import Sequence, Union
 from uuid import UUID
 
 # --- Third-Party ---
@@ -13,46 +13,49 @@ from sqlmodel import delete, select
 from src.api.core import logger
 from src.api.database import SessionDep, generic_db as gdb
 from src.api.database.generic_db import filter_conditional
-from src.api.database.question_relationship_db import (
-    create_language,
-    create_qtopic,
-    create_qtype,
-)
 from src.api.models.models import Question
-from src.api.models.question import QRelationshipData, QuestionMeta, QuestionUpdate
+from src.api.models.question import QuestionMeta, QuestionData
 from src.utils import convert_uuid
 
 
-def create_question(
-    question: Question,
+async def create_question(
+    question: QuestionData | dict,
     session: SessionDep,
-    relationship_data: Optional[QRelationshipData | dict] = None,
 ):
-    try:
-        session.add(question)
-        if relationship_data:
-            if isinstance(relationship_data, dict):
-                try:
-                    relationship_data = QRelationshipData.model_validate(
-                        relationship_data
-                    )
-                except ValidationError as e:
-                    raise ValueError(
-                        "Relationship data is not of type QRelationshipData"
-                    )
-            question.topics = [
-                create_qtopic(t, session) for t in relationship_data.topics
-            ]
-            question.languages = [
-                create_language(t, session) for t in relationship_data.languages
-            ]
-            question.qtypes = [
-                create_qtype(t, session) for t in relationship_data.qtypes
-            ]
+    relationships = gdb.get_all_model_relationships(Question)
 
+    try:
+        if isinstance(question, dict):
+            question = QuestionData.model_validate(question)
+    except ValidationError as e:
+        raise ValueError("Relationship data is not of type QRelationshipData")
+    question = question.model_dump()
+
+    relation_values = {k: v for k, v in question.items() if k in relationships}
+    base_values = {k: v for k, v in question.items() if k not in relationships}
+
+    # Contains the basic fields for the question
+    question_base = Question.model_validate(base_values)
+    session.add(question_base)
+
+    for key, value in relation_values.items():
+        target_class = relationships[key]
+        if isinstance(value, list):
+            rel_val = [
+                gdb.create_or_resolve(target_class, v, session)[0] for v in value
+            ]
+        elif isinstance(value, str):
+            rel_val = gdb.create_or_resolve(target_class, value, session)[0]
+        else:
+            raise NotImplementedError(
+                "Have not implmeneted method to handle non list or string values "
+            )
+        setattr(Question, key, rel_val)
+
+    try:
         session.commit()
-        session.refresh(question)
-        return question
+        session.refresh(question_base)
+        return question_base
     except SQLAlchemyError as e:
         session.rollback()
         logger.error(f"[DB] could not create question {e}")
@@ -153,8 +156,11 @@ async def get_question_data(
         logger.info("Question is none")
         raise ValueError("Could not get question data question is None")
     relationship_data = gdb.get_all_model_relationship_data(question, Question)
+    logger.info("Getting relationship data %s", relationship_data)
     question_data = question.model_dump()
-    return QuestionMeta(**question_data, **relationship_data)
+    q = QuestionMeta(**question_data, **relationship_data)
+    logger.info("Getting data complete %s", q)
+    return q
 
 
 async def get_all_question_data(
@@ -178,7 +184,7 @@ async def get_all_question_data(
 
 
 async def update_question(
-    id: str | UUID, update_data: QuestionUpdate, session: SessionDep
+    id: str | UUID, update_data: QuestionData, session: SessionDep
 ) -> QuestionMeta:
     relationships = gdb.get_all_model_relationships(Question)
     question = get_question(id, session)
@@ -199,13 +205,14 @@ async def update_question(
                 raise ValueError(
                     f"Got value of type {type(value)} not expected and not implemented yet"
                 )
+
+            logger.info("Updating question %s %s %s", question, key, rel_val)
             setattr(question, key, rel_val)
         else:
             setattr(question, key, value)
     try:
-        session.add(question)
+        logger.info("Adding question after update %s", question)
         session.commit()
-        session.refresh(question)
         return await get_question_data(question.id, session)
     except SQLAlchemyError as e:
         session.rollback()
@@ -214,12 +221,13 @@ async def update_question(
 
 
 async def filter_questions(
-    data: QuestionUpdate,
+    data: QuestionData,
     session: SessionDep,
     relationship_field: str = "name",
 ) -> Sequence[QuestionMeta]:
     relationships = gdb.get_all_model_relationships(Question)
     filters = []
+    joins = set()
     stmt = select(Question)
 
     for key, value in data.model_dump(exclude_none=True).items():
@@ -231,16 +239,25 @@ async def filter_questions(
         # --- Handle Relationship Filters ---
         if key in relationships:
             relationship_model = relationships[key]
-            stmt = stmt.join(getattr(Question, key))
+            joins.add(key)
+            logger.info("This is join %s", joins)
             if isinstance(value, list):
                 rel_conds = [
-                    filter_conditional(relationship_model, relationship_field, v)
+                    filter_conditional(
+                        relationship_model,
+                        relationship_field,
+                        v,
+                    )
                     for v in value
                 ]
                 conds.append(or_(*rel_conds))
             else:
                 conds.append(
-                    filter_conditional(relationship_model, relationship_field, value)
+                    filter_conditional(
+                        relationship_model,
+                        relationship_field,
+                        value,
+                    )
                 )
 
         # --- Handle Regular Column Filters ---
@@ -256,8 +273,17 @@ async def filter_questions(
             filters.append(or_(*conds))
 
     # --- Apply Filters ---
+    # --- Apply Relationship Joins ---
     if filters:
         stmt = stmt.where(*filters)
+
+    stmt = stmt.distinct()  # prevent non uniqy
+
+    # IDK how to fix
+    # for rel in joins:
+    #     logger.info("joining on rel=%s type=%s", rel, type(rel))
+    #     print("Question type:", type(Question))
+    #     stmt = stmt.join(getattr(Question, rel))
 
     # --- Execute and Return ---
     results = session.exec(stmt).all()
