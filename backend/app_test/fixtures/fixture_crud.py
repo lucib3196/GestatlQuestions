@@ -48,34 +48,7 @@ def question_payload_mechanics():
     }
 
 
-@pytest.fixture
-def question_payload_thermo():
-    """Thermodynamics question payload with metadata."""
-    return {
-        "title": "Thermodynamics First Law",
-        "ai_generated": False,
-        "isAdaptive": False,
-        "createdBy": "tester_thermo",
-        "user_id": 2,
-        "topics": ["Thermodynamics", "Energy Balance"],
-        "languages": ["python", "javascript"],
-        "qtype": ["conceptual"],
-    }
 
-
-@pytest.fixture
-def question_payload_fluids():
-    """Fluid dynamics question payload with metadata."""
-    return {
-        "title": "Bernoulli Equation",
-        "ai_generated": True,
-        "isAdaptive": True,
-        "createdBy": "tester_fluids",
-        "user_id": 3,
-        "topics": ["Fluid Dynamics", "Flow Analysis"],
-        "languages": ["javascript"],
-        "qtype": ["multiple-choice"],
-    }
 
 
 # --- Aggregate Fixture ---
