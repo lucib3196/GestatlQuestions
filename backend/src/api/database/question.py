@@ -1,6 +1,6 @@
 # --- Standard Library ---
 import asyncio
-from typing import Sequence, Union
+from typing import Sequence, Union, Literal
 from uuid import UUID
 
 # --- Third-Party ---
@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import delete, select
+from pathlib import Path
 
 # --- Internal ---
 from src.api.core import logger
@@ -82,7 +83,7 @@ def get_question(id: str | UUID, session: SessionDep) -> Question | None:
         raise ValueError(f"[DB] failed to retrieve question an error occured {e}")
 
 
-def delete_all_questions(session: SessionDep)->bool:
+def delete_all_questions(session: SessionDep) -> bool:
     try:
         statement = delete(Question)
         session.exec(statement)
@@ -289,3 +290,33 @@ async def filter_questions(
     # --- Execute and Return ---
     results = session.exec(stmt).all()
     return await asyncio.gather(*[get_question_data(r.id, session) for r in results])
+
+
+def get_question_path(
+    id: str | UUID, storage_type: Literal["cloud", "local"], session: SessionDep
+) -> str | None:
+    question = get_question(id, session)
+    if not question:
+        raise ValueError("Question is none")
+    if storage_type == "cloud":
+        return question.blob_path
+    elif storage_type == "local":
+        return question.local_path
+
+
+def set_question_path(
+    id: str | UUID,
+    path: Path | str,
+    storage_type: Literal["cloud", "local"],
+    session: SessionDep,
+) -> Question:
+    question = get_question(id, session)
+    if not question:
+        raise ValueError("Question is none")
+    path = Path(path).as_posix()
+    if storage_type == "cloud":
+        question.blob_path = path
+        return question
+    elif storage_type == "local":
+        question.local_path = path
+        return question
