@@ -325,11 +325,6 @@ async def filter_questions(
     return await qm.filter_questions(filter_data)
 
 
-
-
-
-
-
 # @router.get("/{qid}/files_data", status_code=status.HTTP_200_OK)
 # async def get_question_files_data(
 #     qid: str | UUID, session: SessionDep, qm: QuestionManagerDependency
@@ -352,15 +347,6 @@ async def filter_questions(
 #             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
 #             detail=f"Could not retrieve files data: {e}",
 #         )
-
-
-
-
-
-
-
-
-
 
 
 # @router.post("/{qid}/download")
