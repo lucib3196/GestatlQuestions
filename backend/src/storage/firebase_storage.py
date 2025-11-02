@@ -23,8 +23,13 @@ class FirebaseStorage(StorageService):
     def get_base_path(self) -> str | Path:
         return Path(self.base_path).as_posix()
 
-    def get_storage_path(self, target: str | Path) -> str:
-        return (Path(self.base_path) / target).as_posix()
+    def get_storage_path(self, target: str | Path | Blob) -> str:
+        return (Path(self.base_path) / str(target)).as_posix()
+
+    def get_relative_storage_path(self, target: str | Path | Blob) -> str | Path:
+        return Path(self.get_storage_path(target)).relative_to(
+            Path(self.base_path).parent
+        )
 
     def create_storage_path(self, target: str | Path) -> Blob:
         target_blob = self.get_storage_path(target)
@@ -91,13 +96,13 @@ class FirebaseStorage(StorageService):
 
         return self.get_filepath(target, filename)
 
-    def does_file_exist(self, target_path: str|Path, filename: str|None):
+    def does_file_exist(self, target_path: str | Path, filename: str | None):
         return self.get_blob(target_path, filename).exists()
 
     def get_file(
         self, target: str | Path, filename: Optional[str] = None
     ) -> bytes | None:
-        if self.does_file_exist(target,filename):
+        if self.does_file_exist(target, filename):
             return self.get_blob(target, filename).download_as_bytes()
         return None
 
@@ -112,7 +117,6 @@ class FirebaseStorage(StorageService):
         target = Path(self.get_storage_path(target)).as_posix()
         blobs = self.bucket.list_blobs(prefix=target)
         return [b.name for b in blobs]
-    
 
     def delete_storage(self, target: str | Path) -> None:
         target = Path(self.get_storage_path(target)).as_posix()

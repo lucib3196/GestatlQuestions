@@ -236,9 +236,7 @@ def mark_logs_in_test():
 from app_test.fixtures.fixture_crud import *
 
 
-@pytest.fixture
-def qpayload_bad():
-    return {"Data": "Some Content"}
+
 
 
 @pytest.fixture

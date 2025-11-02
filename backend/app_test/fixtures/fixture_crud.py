@@ -12,16 +12,7 @@ from src.api.models import (
 )
 
 
-@pytest.fixture
-def question_payload_minimal_dict():
-    """Minimal question payload with required fields only."""
-    return {
-        "title": "SomeTitle",
-        "ai_generated": True,
-        "isAdaptive": True,
-        "createdBy": "John Doe",
-        "user_id": 1,
-    }
+
 
 
 @pytest.fixture
@@ -179,20 +170,9 @@ def retrieve_files(
 # ----------------------------------------------------------------------
 
 
-@pytest.fixture
-def create_question_minimal_response(
-    test_client, db_session, question_payload_minimal_dict
-):
-    """POST a minimal valid question payload to /questions/."""
-    data = {"question": json.dumps(question_payload_minimal_dict)}
-    return test_client.post("/questions/", data=data)
 
 
-@pytest.fixture
-def create_question_bad_payload_response(test_client, db_session, qpayload_bad):
-    """POST an invalid question payload to /questions/."""
-    data = {"question": json.dumps(qpayload_bad)}
-    return test_client.post("/questions/", data=data)
+
 
 
 @pytest.fixture
