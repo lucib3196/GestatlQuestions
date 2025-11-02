@@ -13,12 +13,9 @@ from src.api.database import SessionDep
 from src.api.database import question as qdb
 from src.api.models.models import Question
 from src.api.models.question import QuestionData, QuestionMeta
-
-
 from src.api.core.config import get_settings
 
 settings = get_settings()
-
 
 class QuestionManager:
     """Manage creation, retrieval, and file operations for questions."""
