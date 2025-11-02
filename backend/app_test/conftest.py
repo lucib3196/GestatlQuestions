@@ -1,30 +1,27 @@
-# Configuration file for tests – these are global and generic
-
-# --- Standard Library ---
 from contextlib import asynccontextmanager
-from pathlib import Path
 from types import SimpleNamespace
+from typing import List
 from uuid import UUID
 
-# Testing logs
-from src.api.core.logging import in_test_ctx
-
-# --- Third-Party ---
 import pytest
 from fastapi import FastAPI
+from fastapi.testclient import TestClient
 from pydantic import BaseModel
-from typing import List
+from sqlmodel import Session, create_engine
 
-# --- Internal ---
-from src.api.core import logger
+from src.api.core import logger, in_test_ctx
 from src.api.core.config import get_settings
-from src.storage.directory_service import DirectoryService
-from src.storage import StorageService, DirectoryService, LocalStorageService
-from src.storage.local_storage import LocalStorageService
+from src.api.database.database import Base, get_session
+from src.api.main import get_application
 from src.api.models import FileData
-from src.api.service.question_manager import QuestionManager
-from src.storage.firebase_storage import FirebaseStorage
+from src.api.service.question_manager import QuestionManager, get_question_manager
+from src.api.service.storage_manager import (
+    get_storage_manager,
+)
 from src.firebase.core import initialize_firebase_app
+from src.storage.firebase_storage import FirebaseStorage
+from src.storage.local_storage import LocalStorageService
+
 
 settings = get_settings()
 initialize_firebase_app()
@@ -32,8 +29,126 @@ initialize_firebase_app()
 
 @asynccontextmanager
 async def on_startup_test(app: FastAPI):
-    # skip init_db in tests
+    """Async startup context for tests (skips DB initialization)."""
     yield
+
+
+# -----------------------------
+# Database Fixtures
+# -----------------------------
+@pytest.fixture(scope="function")
+def test_engine(tmp_path):
+    """Provide a temporary SQLite engine for testing."""
+    url = f"sqlite:///{tmp_path}/test.db"
+    engine = create_engine(
+        url,
+        echo=False,
+        connect_args={"check_same_thread": False},
+    )
+    Base.metadata.create_all(engine)
+    yield engine
+    engine.dispose()
+
+
+@pytest.fixture(scope="function")
+def db_session(test_engine):
+    """Provide a new SQLModel session for each test with isolation."""
+    with Session(test_engine, expire_on_commit=False) as session:
+        yield session
+        session.rollback()
+
+
+@pytest.fixture(autouse=True)
+def _clean_db(db_session, test_engine):
+    """Automatically reset database tables between tests."""
+    logger.debug("Cleaning Database")
+    Base.metadata.drop_all(test_engine)
+    Base.metadata.create_all(test_engine)
+
+
+# -----------------------------
+# Question Manager Fixture
+# -----------------------------
+@pytest.fixture(scope="function")
+def question_manager(db_session):
+    """Provide a QuestionManager instance for database operations."""
+    return QuestionManager(db_session)
+
+
+# -----------------------------
+# Storage Fixtures
+# -----------------------------
+@pytest.fixture(scope="function")
+def cloud_storage_service():
+    """Provide a FirebaseStorage instance connected to the test bucket."""
+    base_path = "integration_test"
+    return FirebaseStorage(settings.STORAGE_BUCKET, base_path)
+
+
+@pytest.fixture(autouse=True)
+def clean_up_cloud(cloud_storage_service):
+    """Clean up the test bucket after each test."""
+    yield
+    cloud_storage_service.hard_delete()
+    logger.debug("Deleting Bucket - Cleaning Up")
+
+
+@pytest.fixture(scope="function")
+def local_storage(tmp_path):
+    """Provide a LocalStorageService rooted in a temporary directory."""
+    base = tmp_path / "questions"
+    return LocalStorageService(base)
+
+
+@pytest.fixture(scope="function", params=["local", "cloud"])
+def get_storage_service(request, cloud_storage_service, local_storage):
+    """Select either cloud or local storage for parameterized tests."""
+    storage_type = request.param
+    if storage_type == "cloud":
+        return cloud_storage_service
+    elif storage_type == "local":
+        return local_storage
+    raise ValueError(f"Invalid storage type: {storage_type}")
+
+
+# =========================================
+# API Fixtures
+# =========================================
+@pytest.fixture(scope="session")
+def test_app():
+    """Create the FastAPI app once for all tests."""
+    app = get_application()
+    app.router.lifespan_context = on_startup_test
+    return app
+
+
+@pytest.fixture(scope="function", params=["local", "cloud"])
+def test_client(db_session, request, get_storage_service):
+    """
+    Provide a configured FastAPI TestClient with overridden dependencies
+    for both local and cloud storage modes.
+    """
+    app = get_application()
+    app.router.lifespan_context = on_startup_test
+
+    # Override database session dependency
+    def override_get_db():
+        yield db_session
+
+    # Override QuestionManager dependency
+    async def override_qm():
+        yield QuestionManager(db_session)
+
+    # Override Storage dependency based on test parameter
+    async def override_storage():
+        yield get_storage_service
+
+    app.dependency_overrides[get_session] = override_get_db
+    app.dependency_overrides[get_question_manager] = override_qm
+    app.dependency_overrides[get_storage_manager] = override_storage
+
+    with TestClient(app) as client:
+        yield client
 
 
 class FakeQuestion(BaseModel):

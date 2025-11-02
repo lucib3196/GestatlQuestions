@@ -1,80 +1,9 @@
-# This conftest file sets up the FastAPI application and dependencies
-# used for integration testing.
-
-# ==============================
-# Standard Library
-# ==============================
 import json
-from contextlib import asynccontextmanager
 from pathlib import Path
-
-# ==============================
-# Third-Party Libraries
-# ==============================
 import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-from src.api.models import QuestionReadResponse
-
-# ==============================
-# Local Application Imports
-# ==============================
-from src.api.main import get_application
-from src.api.database.database import get_session
-from src.api.service.storage_manager import get_storage_manager
-from src.api.models import FileData
+from src.api.models import FileData, QuestionReadResponse
 
 
-@asynccontextmanager
-async def on_startup_test(app: FastAPI):
-    # skip init_db in tests
-    yield
-
-
-# -----------------------------------------
-# Application fixture
-# -----------------------------------------
-@pytest.fixture(scope="session")
-def test_app():
-    """Create the FastAPI app once for all tests."""
-    app = get_application()
-    app.router.lifespan_context = on_startup_test
-    return app
-
-
-# -----------------------------------------
-# Test client fixture (parametrized for local/cloud)
-# -----------------------------------------
-@pytest.fixture(scope="function", params=["local", "cloud"])
-def test_client(db_session, request, question_manager_cloud, question_manager_local):
-    app = get_application()
-
-    storage_type = request.param
-    if storage_type == "cloud":
-        qm = question_manager_cloud
-    elif storage_type == "local":
-        qm = question_manager_local
-    else:
-        raise ValueError("Incorrect storage type")
-
-    app.router.lifespan_context = on_startup_test
-
-    def override_get_db():
-        yield db_session
-
-    async def override_get_qm():
-        yield qm
-
-    app.dependency_overrides[get_session] = override_get_db
-    app.dependency_overrides[get_storage_manager] = override_get_qm
-
-    with TestClient(app) as client:
-        yield client
-
-
-# -----------------------------------------
-# Supporting data fixtures
-# -----------------------------------------
 @pytest.fixture
 def question_data():
     """Minimal question payload."""
@@ -115,7 +44,7 @@ def retrieve_question(client, qid):
 @pytest.fixture
 def server_files():
     """Static assets used by question endpoints."""
-    base = Path("src/app_test/test_assets/code")
+    base = Path("app_test/test_assets/code")
     return [
         FileData(filename="server.js", content=(base / "generate.js").read_bytes()),
         FileData(filename="server.py", content=(base / "generate.py").read_bytes()),
