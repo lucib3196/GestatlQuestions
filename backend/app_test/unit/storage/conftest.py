@@ -6,7 +6,7 @@ from src.api.core import logger
 from src.api.core.config import get_settings
 from src.storage import LocalStorageService
 from src.storage.local_storage import LocalStorageService
-from src.firebase.firebase_storage import FirebaseStorage
+from src.storage.firebase_storage import FirebaseStorage
 from src.firebase.core import initialize_firebase_app
 
 settings = get_settings()

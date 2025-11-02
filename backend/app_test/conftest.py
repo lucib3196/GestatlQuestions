@@ -23,7 +23,7 @@ from src.storage import StorageService, DirectoryService, LocalStorageService
 from src.storage.local_storage import LocalStorageService
 from src.api.response_models import FileData
 from src.api.service.question_manager import QuestionManager
-from src.firebase.firebase_storage import FirebaseStorage
+from src.storage.firebase_storage import FirebaseStorage
 from src.firebase.core import initialize_firebase_app
 
 settings = get_settings()
