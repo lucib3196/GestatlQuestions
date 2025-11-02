@@ -21,7 +21,7 @@ from src.utils import convert_uuid
 async def create_question(
     question: QuestionData | dict,
     session: SessionDep,
-):
+) -> Question:
     relationships = gdb.get_all_model_relationships(Question)
 
     try:
@@ -82,11 +82,12 @@ def get_question(id: str | UUID, session: SessionDep) -> Question | None:
         raise ValueError(f"[DB] failed to retrieve question an error occured {e}")
 
 
-def delete_all_questions(session: SessionDep):
+def delete_all_questions(session: SessionDep)->bool:
     try:
         statement = delete(Question)
         session.exec(statement)
         session.commit()
+        return True
     except SQLAlchemyError as e:
         session.rollback()
         logger.error(f"[DB] failed to delete all questions {e}")
