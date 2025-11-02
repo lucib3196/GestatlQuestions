@@ -4,7 +4,6 @@ from src.api.models.models import Topic, QType, Language
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from pydantic import BaseModel, Field
-from uuid import UUID
 from typing import Sequence
 
 class QuestionBase(BaseModel):
