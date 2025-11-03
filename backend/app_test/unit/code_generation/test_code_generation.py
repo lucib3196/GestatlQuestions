@@ -70,7 +70,7 @@ def question_payloads(
 
 @pytest.fixture()
 def load_mock_data():
-    data = Path(r"app_test/test_assets/ai_output/gestalt_output.json").as_posix()
+    data = Path(r"app_test/test_assets/ai_output/gestalt_output.json")
     return json.loads(data.read_text())
 
 
