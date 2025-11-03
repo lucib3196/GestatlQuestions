@@ -74,11 +74,7 @@ def all_question_payloads(
     ]
 
 
-@pytest_asyncio.fixture
-async def seed_questions(db_session, all_question_payloads):
-    """Create the mixed payloads in the DB for read/filter/delete tests."""
-    for payload in all_question_payloads:
-        await qcrud_service.create_question(payload, db_session)
+
 
 
 @pytest.fixture
@@ -109,13 +105,7 @@ def create_question(client, payload, metadata=None, files=None):
     return validated.question
 
 
-def retrieve_question(client, qid):
-    resp = client.get(f"/questions/{qid}")
-    assert resp.status_code == 200, resp.text
-    response_data = resp.json()
-    validated = QuestionReadResponse.model_validate(response_data)
-    assert validated
-    return validated.question
+
 
 
 def retrieve_single_file(client, qid, filename):

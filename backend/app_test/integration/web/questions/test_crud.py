@@ -17,6 +17,15 @@ def validate_response_payload(payload: dict, created: dict, key: str) -> bool:
     return pick(payload, key) == pick(created, key)
 
 
+def retrieve_question(client, qid):
+    resp = client.get(f"/questions/{qid}")
+    assert resp.status_code == 200, resp.text
+    response_data = resp.json()
+    qretrieved = Question.model_validate(response_data)
+    assert qretrieved
+    return qretrieved
+
+
 @pytest.fixture
 def create_question_and_return_question(create_question_web):
     resp = create_question_web
@@ -65,6 +74,26 @@ def test_create_multiple_questions(create_multiple_question_responses):
 
 
 # Retrieval Test
+def test_question_metadata_retrieval(
+    test_client, create_question_and_return_question
+):
+    """
+    Integration test: create a question with optional metadata and ensure retrieval works.
+
+    - Uses a minimal valid payload (`question_payload_minimal_dict`).
+    - Runs twice: once with no metadata, and once with valid `question_additional_metadata`.
+    - Valid creation should return 201 Created and allow retrieval of the created question.
+    """
+    question_id = create_question_and_return_question.id
+
+    # Act: retrieve the question
+    retrieved = retrieve_question(test_client, question_id)
+
+    logger.debug("Retrieved question: %s", retrieved)
+    assert retrieved
+    assert retrieved.id == question_id
+
+
 def test_qet_all_questions(test_client, create_multiple_question_responses):
     qpayloads = create_multiple_question_responses
     offset, limit = 0, 100

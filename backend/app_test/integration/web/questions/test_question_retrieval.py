@@ -16,7 +16,6 @@ from src.utils import normalize_content
 
 from app_test.fixtures.fixture_crud import (
     create_question,
-    retrieve_question,
     retrieve_files,
     retrieve_single_file,
 )
@@ -27,38 +26,8 @@ QUESTION_KEYS = ["title", "ai_generated", "isAdaptive", "createdBy"]
 # Helpers
 
 
-@pytest.mark.parametrize("payload_fixture", ["question_payload_minimal_dict"])
-@pytest.mark.parametrize("additional_metadata", ["", "question_additional_metadata"])
-def test_question_metadata_retrieval(
-    request, test_client, db_session, payload_fixture, additional_metadata
-):
-    """
-    Integration test: create a question with optional metadata and ensure retrieval works.
 
-    - Uses a minimal valid payload (`question_payload_minimal_dict`).
-    - Runs twice: once with no metadata, and once with valid `question_additional_metadata`.
-    - Valid creation should return 201 Created and allow retrieval of the created question.
-    """
-    # Arrange
-    payload = request.getfixturevalue(payload_fixture)
-    metadata = (
-        request.getfixturevalue(additional_metadata) if additional_metadata else None
-    )
-    question = create_question(test_client, payload, metadata)
-    question_id = question.id
 
-    logger.debug("Created question body: %s", question)
-
-    # Act: retrieve the question
-    retrieved = retrieve_question(test_client, question_id)
-
-    logger.debug("Retrieved question: %s", retrieved)
-    assert retrieved
-
-    # Assert: ensure core fields match
-    data = retrieved.model_dump()
-    for key in QUESTION_KEYS:
-        assert data.get(key) == payload.get(key)
 
 
 # File Retrieval

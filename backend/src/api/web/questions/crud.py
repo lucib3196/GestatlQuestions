@@ -93,7 +93,6 @@ async def delete_all(
     """
     try:
         qm.delete_all_questions()
-        path = Path(storage.get_base_path())
         if delete_storage:
             logger.info("Deleting storage")
             storage.hard_delete()
