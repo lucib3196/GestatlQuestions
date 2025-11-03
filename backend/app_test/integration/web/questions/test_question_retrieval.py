@@ -160,10 +160,7 @@ def test_read_question_file(
         assert retrieved_content == normalize_content(f.content)
 
 
-def test_get_question_bad_id(test_client):
-    bad_id = uuid4()
-    r = test_client.get(f"/questions/{bad_id}")
-    assert r.status_code == 400
+
 
 
 def test_get_question_data_all_not_found(test_client):

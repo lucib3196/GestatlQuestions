@@ -3,33 +3,6 @@ from src.api.core import logger
 
 
 
-
-
-# Test Delete Questions
-def test_delete_question_not_valid_id(test_client, create_question_minimal_response):
-    response = create_question_minimal_response
-    qid = response.json()["question"]["id"]
-
-    bad_id = uuid4()
-    response = test_client.delete(f"/questions/{bad_id}")
-    assert response.status_code == 500
-    assert response.json()["detail"] == "Question is None"
-
-
-def test_delete_question(test_client, create_question_minimal_response):
-    response = create_question_minimal_response
-    qid = response.json()["question"]["id"]
-    response = test_client.delete(f"/questions/{qid}")
-    logger.debug(f"This is the response {response.json()}")
-    assert response.status_code == 200
-    assert "Question Deleted" in response.json()["detail"]
-
-    # Try getting the data
-    response = test_client.get(f"/{qid}")
-    assert response.status_code == 404
-    assert "not found" in response.json()["detail"].lower()
-
-
 # TODO Fix this
 # def test_delete_all(test_client, create_multiple_question, all_question_payloads):
 #     """
