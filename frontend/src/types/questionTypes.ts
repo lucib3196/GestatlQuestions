@@ -1,22 +1,35 @@
+// For question types reference api/models
+
 export type QuestionType = "Numerical" | "MultipleChoice" | "Example" | "Other";
 import type { GeneralResponse } from "./responseTypes";
 
-export type Question = {
-  id: string; // UUID
-  title: string;
-  ai_generated: boolean;
-  isAdaptive: boolean;
-  createdBy: string | null;
-  user_id: number | null;
-  topics: string[];
-  languages: string[];
-  qtypes: string[];
+export type QuestionBase = {
+  id?: string; // UUID
+  title?: string;
+  ai_generated?: boolean;
+  isAdaptive?: boolean;
 };
-export type QuestionKeys = keyof Question;
-export type QuestionMeta = QuestionKeys[];
+
+export type QuestionData = QuestionBase & {
+  topics?: string[];
+  languages?: string[];
+  qtypes?: string[];
+};
+
+type questionRel = {
+  name: string;
+  id: number | string;
+};
+export type QuestionMeta = QuestionBase & {
+  topics?: questionRel[];
+  languages?: questionRel[];
+  qtypes?: questionRel[];
+};
+
+export type QuestionKeys = keyof QuestionData;
 
 export type QuestionFull = GeneralResponse & {
-  question: Question;
+  question: QuestionData;
   files: FileData[];
 };
 

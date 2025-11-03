@@ -42,14 +42,7 @@ type FileDataResponse = {
 };
 
 export const questionApi = {
-  async getbyId(id: string): Promise<Question> {
-    const res = await api.get(`/questions/${encodeURIComponent(id)}`);
-    return res.data.question;
-  },
-  async getbyIdFull(id: string): Promise<QuestionFull> {
-    const res = await api.get(`/questions/${encodeURIComponent(id)}/full`);
-    return res.data;
-  },
+  
 
   async getFileNames(id: string): Promise<FileName> {
     const res = await api.get(`/questions/${encodeURIComponent(id)}/files`);
@@ -84,26 +77,7 @@ export const questionApi = {
     return response.data;
   },
 
-  async getAllQuestions(offset: number, limit: number): Promise<Question[]> {
-    const response = await api.get<Question[]>(
-      `/questions/get_all/${offset}/${limit}/minimal`
-    );
-    return response.data;
-  },
-  async filterQuestions({
-    filter,
-    showAllQuestions,
-  }: searchQuestionProps): Promise<Question[]> {
-    if (showAllQuestions) {
-      return await questionApi.getAllQuestions(0, 100);
-    } else {
-      const response = await api.post(
-        "/questions/filter_questions",
-        !showAllQuestions ? filter : {}
-      );
-      return response.data;
-    }
-  },
+  
   async SyncQuestions(): Promise<SyncResponse> {
     const response = await api.post("/questions/sync_questions");
     return response.data;
@@ -138,26 +112,7 @@ export const questionApi = {
   },
 };
 
-export const searchQuestions = async ({
-  filter,
-  showAllQuestions = true,
-}: searchQuestionProps) => {
-  let retrievedQuestions: any[] = [];
-  try {
-    const data = await api.post(
-      "/questions/filter_questions",
-      !showAllQuestions ? filter : {}
-    );
-    retrievedQuestions = data.data || [];
-    return retrievedQuestions;
-  } catch (error) {
-    console.error(
-      "There was an error retrieving the questions returning an empty list",
-      error
-    );
-    return [];
-  }
-};
+
 
 import type {
   SuccessDataResponse,
@@ -213,10 +168,7 @@ export async function getSolutionHTML(questionId: string) {
   return await getQuestionFile(questionId, "solution.html");
 }
 
-export async function deleteQuestions(ids: string[]): Promise<void> {
-  if (!ids.length) return;
-  await Promise.all(ids.map((id) => api.delete(`/questions/${id}`)));
-}
+
 
 export async function getFiles(id: string) {
   try {
@@ -231,51 +183,3 @@ export async function getFiles(id: string) {
   }
 }
 
-
-
-type QuestionFormInput = QuestionFormData & { files?: File[] };
-export async function createQuestion({
-  title,
-  isAdaptive,
-  createdBy,
-  ai_generated,
-  topics,
-  languages,
-  qtypes,
-  files,
-}: QuestionFormInput) {
-  try {
-    const qData = {
-      title: title,
-      ai_generated: ai_generated
-        ? ai_generated.toLowerCase() === "true"
-        : false,
-      isAdaptive: isAdaptive ? isAdaptive.toLowerCase() === "true" : false,
-      createdBy: createdBy,
-    };
-    const additionalMeta = {
-      topics: topics,
-      languages: languages,
-      qtypes: qtypes,
-    };
-
-    const formData = new FormData();
-    formData.append("question", JSON.stringify(qData));
-    formData.append("additional_metadata", JSON.stringify(additionalMeta));
-
-    if (files) {
-      files.forEach((file) => {
-        formData.append("files", file, file.name);
-      });
-    }
-
-    const response = await api.post(
-      "/file_uploads/create_question/upload",
-      formData
-    );
-    console.log(response);
-    toast.success("Question created succesfully");
-  } catch (error) {
-    console.log(error);
-  }
-}

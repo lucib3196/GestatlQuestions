@@ -250,7 +250,7 @@ async def update_question(
     qm: QuestionManagerDependency,
     storage: StorageDependency,
     update_storage: bool = True,
-):
+)->QuestionMeta:
     """
     Update a question in the database and optionally rename its associated storage directory.
 
