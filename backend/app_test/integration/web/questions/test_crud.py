@@ -27,6 +27,14 @@ def create_question_and_return_question(create_question_web):
     return qcreated
 
 
+@pytest.fixture
+def create_multiple_question_responses(test_client, multi_payload_questions):
+    for p in multi_payload_questions:
+        response = test_client.post("/questions/", json=p)
+        assert response.status_code == 200
+    return multi_payload_questions
+
+
 def test_create_question_response(question_payload, create_question_web):
     """Ensure a valid question payload creates a question successfully."""
     resp = create_question_web
@@ -52,14 +60,25 @@ def test_create_question_bad_response(create_question_bad_payload_response):
     assert "Invalid or missing input when creating question" in body["detail"]
 
 
-def test_create_multiple_questions(test_client, multi_payload_questions):
-    """Ensure multiple question payloads can be created sequentially."""
-    for p in multi_payload_questions:
-        response = test_client.post("/questions/", json=p)
-        assert response.status_code == 200
+def test_create_multiple_questions(create_multiple_question_responses):
+    assert create_multiple_question_responses
 
 
 # Retrieval Test
+def test_qet_all_questions(test_client, create_multiple_question_responses):
+    qpayloads = create_multiple_question_responses
+    offset, limit = 0, 100
+    response = test_client.get(f"/questions/{offset}/{limit}")
+    assert response.status_code == 200, response.text
+    questions = response.json()
+    logger.info("This is the response of getting all the questions %s", questions)
+    assert isinstance(questions, list), "Expected response to be a list"
+    assert len(questions) == len(
+        qpayloads
+    ), f"Expected {len(qpayloads)} questions, got {len(questions)}"
+    logger.info("these are the questions %s", questions)
+
+
 def test_get_question_bad_id(test_client):
     bad_id = uuid4()
     r = test_client.get(f"/questions/{bad_id}")
@@ -86,3 +105,13 @@ def test_delete_question_not_valid_id(test_client):
     assert response.status_code == 404
     assert "not exist" in response.json()["detail"]
 
+
+def test_delete_all(test_client, create_multiple_question_responses):
+    qpayloads = create_multiple_question_responses
+    response = test_client.delete("/questions")
+    assert response.status_code == 200
+    offset, limit = 0, 100
+    response = test_client.get(f"/questions/{offset}/{limit}")
+    retrieved = response.json()
+    assert isinstance(retrieved, list), "Expected response to be a list"
+    assert len(retrieved) == 0
