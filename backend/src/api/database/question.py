@@ -63,7 +63,7 @@ async def create_question(
         raise ValueError(f"[DB] failed to create question an error occured {e}")
 
 
-def get_question(id: str | UUID, session: SessionDep) -> Question | None:
+def get_question(id: str | UUID | None, session: SessionDep) -> Question | None:
     """
     Fetch a single Question by its ID.
 
@@ -75,6 +75,7 @@ def get_question(id: str | UUID, session: SessionDep) -> Question | None:
         The matching Question instance, or None if not found.
     """
     try:
+        assert id
         question_id = convert_uuid(id)
         return session.exec(select(Question).where(Question.id == question_id)).first()
     except SQLAlchemyError as e:
@@ -119,7 +120,7 @@ def get_all_questions(
         raise ValueError(f"[DB] failed to retrieve all question {e}")
 
 
-def delete_question(id: str | UUID, session: SessionDep) -> bool:
+def delete_question(id: str | UUID | None, session: SessionDep) -> bool:
     try:
         question = get_question(id, session)
         if not question:
@@ -136,7 +137,7 @@ def delete_question(id: str | UUID, session: SessionDep) -> bool:
 
 
 async def get_question_data(
-    id: Union[str, UUID],
+    id: str | UUID | None,
     session: SessionDep,
 ) -> QuestionMeta:
     """
@@ -311,7 +312,7 @@ def get_question_path(
 
 
 def set_question_path(
-    id: str | UUID,
+    id: str | UUID | None,
     path: Path | str,
     storage_type: Literal["cloud", "local"],
     session: SessionDep,
