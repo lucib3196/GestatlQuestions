@@ -31,11 +31,11 @@ class FirebaseStorage(StorageService):
             Path(self.base_path).parent
         )
 
-    def create_storage_path(self, target: str | Path) -> Blob:
+    def create_storage_path(self, target: str | Path) -> str:
         target_blob = self.get_storage_path(target)
         blob: Blob = self.bucket.blob(target_blob)
         blob.upload_from_string("")
-        return blob
+        return str(blob.name)
 
     def does_storage_path_exist(self, target: str | Path) -> bool:
         target = self.get_storage_path(target)
@@ -160,13 +160,14 @@ class FirebaseStorage(StorageService):
         old_blob = self.get_blob(old)
 
         if not old_blob.exists():
-            raise FileNotFoundError(f"Blob not found: {old_path}")
+            logger.warning(f"Blob not found: {old_path}")
+            return str(new_path)
 
         # Copy the blob to the new location
-        self.bucket.copy_blob(old_blob, self.bucket, new_path)
+        new_blob = self.bucket.copy_blob(old_blob, self.bucket, new_path)
 
         # Delete the original blob
         old_blob.delete()
 
         print(f"[FirebaseStorage] Renamed {old_path} → {new_path}")
-        return new_path
+        return str(new_blob.name)

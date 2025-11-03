@@ -26,7 +26,7 @@ class StorageService:
         """Return the absolute path to the directory for a given storage target."""
         raise NotImplementedError("get_storage_path must be implemented by subclass")
 
-    def create_storage_path(self, target: str | Path) -> Path | Blob:
+    def create_storage_path(self, target: str | Path) -> Path | str:
         """Create a new directory or container for the given storage target."""
         raise NotImplementedError("create_storage_path must be implemented by subclass")
 

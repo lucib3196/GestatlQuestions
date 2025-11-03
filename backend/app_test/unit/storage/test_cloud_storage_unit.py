@@ -84,15 +84,15 @@ def test_create_storage_path(cloud_storage_service, save_test_question, file_dat
 
 def test_get_relative_storage_path(save_test_question, file_data):
     blob = save_test_question
-    expected = (Path(file_data["base"]) / file_data["identifier"] / file_data["filename"]).as_posix()
+    expected = (
+        Path(file_data["base"]) / file_data["identifier"] / file_data["filename"]
+    ).as_posix()
     assert blob == expected
 
 
 def test_does_storage_path_exist(cloud_storage_service, save_test_question, file_data):
     _ = save_test_question
-    assert cloud_storage_service.does_storage_path_exist(
-        target=file_data["identifier"]
-    )
+    assert cloud_storage_service.does_storage_path_exist(target=file_data["identifier"])
 
 
 # ============================================================================ #
@@ -162,5 +162,6 @@ def test_get_nonexistent_file(cloud_storage_service):
     assert content is None
 
 
+# TODO: Create a test for this
 def test_rename_blob(cloud_storage_service):
     pass

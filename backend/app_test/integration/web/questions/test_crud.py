@@ -242,6 +242,8 @@ async def test_question_filter_by_title(
 async def test_update_question(test_client, create_question_and_return_question):
     question = create_question_and_return_question
     updates = QuestionData(title="Updated Title", isAdaptive=True)
+    
+    logger.info("This is the question %s", question)
 
     patch_resp = test_client.put(
         f"/questions/{question.id}",
