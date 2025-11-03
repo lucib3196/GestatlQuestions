@@ -1,209 +1,193 @@
 {
-    "text": "A ball is traveling along a straight road at a constant speed of 10 m/s for 20 seconds. What is the total distance traveled? The correct answer is 200 m\n\nA car moves at a constant speed of 60 km/h for 2 hours. What is the total distance traveled? The correct answer is 120 km",
-    "questions": [
+  "text": "A ball is traveling along a straight road at a constant speed of 10 m/s for 20 seconds. What is the total distance traveled? The correct answer is 200 m\n\nA car moves at a constant speed of 60 km/h for 2 hours. What is the total distance traveled? The correct answer is 120 km",
+  "questions": [
+    {
+      "question": "A ball is traveling along a straight road at a constant speed of $10\\ \\text{m/s}$ for $20\\ \\text{seconds}$. What is the total distance traveled? The correct answer is $200\\ \\text{m}$",
+      "params": [
         {
-            "question": "A ball is traveling along a straight road at a constant speed of $10\\ \\text{m/s}$ for $20\\ \\text{seconds}$. What is the total distance traveled? The correct answer is $200\\ \\text{m}$",
-            "params": [
-                {
-                    "name": "speed",
-                    "value": "10",
-                    "units": "m/s"
-                },
-                {
-                    "name": "time",
-                    "value": "20",
-                    "units": "seconds"
-                }
-            ],
-            "correct_answers": [
-                {
-                    "name": "distance",
-                    "value": "200",
-                    "units": "m"
-                }
-            ],
-            "source": null,
-            "requires_external_data": false,
-            "requires_image": false,
-            "completeness": true,
-            "additional_information": null,
-            "solution": null
+          "name": "speed",
+          "value": "10",
+          "units": "m/s"
         },
         {
-            "question": "A car moves at a constant speed of $60\\ \\text{km/h}$ for $2\\ \\text{hours}$. What is the total distance traveled? The correct answer is $120\\ \\text{km}$",
-            "params": [
-                {
-                    "name": "speed",
-                    "value": "60",
-                    "units": "km/h"
-                },
-                {
-                    "name": "time",
-                    "value": "2",
-                    "units": "hours"
-                }
-            ],
-            "correct_answers": [
-                {
-                    "name": "distance",
-                    "value": "120",
-                    "units": "km"
-                }
-            ],
-            "source": null,
-            "requires_external_data": false,
-            "requires_image": false,
-            "completeness": true,
-            "additional_information": null,
-            "solution": null
+          "name": "time",
+          "value": "20",
+          "units": "seconds"
         }
-    ],
-    "gestalt_code": [
+      ],
+      "correct_answers": [
         {
-            "question_payload": {
-                "question": "A ball is traveling along a straight road at a constant speed of $10\\ \\text{m/s}$ for $20\\ \\text{seconds}$. What is the total distance traveled? The correct answer is $200\\ \\text{m}$",
-                "params": [
-                    {
-                        "name": "speed",
-                        "value": "10",
-                        "units": "m/s"
-                    },
-                    {
-                        "name": "time",
-                        "value": "20",
-                        "units": "seconds"
-                    }
-                ],
-                "correct_answers": [
-                    {
-                        "name": "distance",
-                        "value": "200",
-                        "units": "m"
-                    }
-                ],
-                "source": null,
-                "requires_external_data": false,
-                "requires_image": false,
-                "completeness": true,
-                "additional_information": null,
-                "solution": null
-            },
-            "files_data": {
-                "question.html": "<pl-question-panel>\n  <p> A ball is traveling along a straight road at a constant speed of {{params.speed}} {{params.unitsSpeed}} for {{params.time}} {{params.unitsTime}}.</p>\n  <p> What is the total distance traveled (in {{params.unitsDist}})?</p>\n</pl-question-panel>\n\n<pl-number-input answers-name=\"distance\" comparison=\"sigfig\" digits=\"3\" label=\"Total distance (in {{params.unitsDist}})\"></pl-number-input>",
-                "server.js": "const math = require('mathjs');\n\nconst generate = (case_ = 0) => {\n    // ---- Unit Systems ----\n    const unitSystems = {\n        si: {\n            speed: 'm/s',\n            distance: 'm',\n            time: 's'\n        },\n        uscs: {\n            speed: 'ft/s',\n            distance: 'ft',\n            time: 's'\n        }\n    };  \n\n    // ---- Hardcoded Values ----\n    const PREDEFINED_VALUES = { speed: 10, time: 20, selectedSystem: 'si' }; // matches chosen system\n    const TEST_VALUES = { speed: 10, time: 20 }; // hardcoded test values\n    const CORRECT_ANSWER = 200; // hardcoded correct answer\n\n    const ABS_TOL = 1e-6;\n    const REL_TOL = 1e-6;\n\n    let selectedSystem;\n    let speed, time;\n    let test_results = { pass: null, message: '' };\n\n    if (case_ === 0) {\n        // Random system selection\n        selectedSystem = math.randomInt(0, 2) === 0 ? 'si' : 'uscs';\n        units = unitSystems[selectedSystem];\n        // Generate random values: speed between 5 to 30 (m/s or ft/s) and time between 1 to 10 seconds\n        speed = math.randomInt(5, 31);\n        time = math.randomInt(1, 11);\n    } else if (case_ === 1) {\n        // Use predefined values\n        speed = PREDEFINED_VALUES.speed;\n        time = PREDEFINED_VALUES.time;\n        selectedSystem = PREDEFINED_VALUES.selectedSystem;\n    } else if (case_ === 2) {\n        if (typeof CORRECT_ANSWER === 'undefined') {\n            throw new Error('Test case unavailable: CORRECT_ANSWER not provided');\n        }\n        // Use test values\n        speed = TEST_VALUES.speed;\n        time = TEST_VALUES.time;\n        selectedSystem = 'si'; // Lock to SI for testing\n    } else {\n        throw new Error(`Unknown case_: ${case_}`);\n    }\n\n    const units = unitSystems[selectedSystem];\n\n    // Calculate the total distance: distance = speed * time\n    const distance = speed * time;\n\n    // ---- Verification Logic for Case 2 ----\n    if (case_ === 2) {\n        const expected = CORRECT_ANSWER;\n        const diff = Math.abs(distance - expected);\n        const tol = Math.max(ABS_TOL, REL_TOL * Math.abs(expected));\n        const passed = diff <= tol;\n\n        test_results.pass = passed ? 1 : 0;\n        test_results.message = passed\n            ? `PASS — computed=${distance} ${units.distance}, expected=${expected} ${units.distance}`\n            : `FAIL — computed=${distance} ${units.distance}, expected=${expected} ${units.distance}`;\n    }\n\n    // Return the structured data\n    return {\n        params: {\n            speed: speed,\n            time: time,\n            unitsSpeed: units.speed,\n            unitsDist: units.distance,\n            unitsTime: units.time\n        },\n        correct_answers: {\n            distance: math.round(distance, 3) // Round to 3 decimal places\n        },\n        test_results\n    };\n};\n\nmodule.exports = {\n    generate\n};",
-                "server.py": "from typing import Any, Dict, Optional\nimport random\n\n\ndef generate(case_: int = 0) -> Dict[str, Any]:\n    # Context setup\n    ORIGINAL_QUESTION = \"A ball is traveling along a straight road at a constant speed of $10\\ \\text{m/s}$ for $20\\ \\text{seconds}$. What is the total distance traveled?\"\n    ORIGINAL_UNITS = \"m\"\n\n    PREDEFINED_VALUES = {\"speed\": 10, \"time\": 20, \"unitsSpeed\": \"m/s\", \"unitsTime\": \"s\", \"unitsDist\": \"m\"}\n    TEST_VALUES = {\"speed\": 10, \"time\": 20, \"unitsSpeed\": \"m/s\", \"unitsTime\": \"s\"}\n    CORRECT_ANSWER: Optional[int] = 200  # meters\n\n    ABS_TOL = 1e-6\n    REL_TOL = 1e-6\n    test_results: Dict[str, Any] = {\"pass\": None, \"message\": \"\"}\n\n    # Handle different cases\na = None\nb = None\n    if case_ == 0:\n        speed = round(random.uniform(1, 100), 2)\n        time = round(random.uniform(1, 60), 2)\n        unitsSpeed = random.choice([\"m/s\", \"km/h\"])\n        unitsDist = \"m\" if unitsSpeed == \"m/s\" else \"km\"\n    elif case_ == 1:\n        speed = PREDEFINED_VALUES[\"speed\"]\n        time = PREDEFINED_VALUES[\"time\"]\n        unitsSpeed = PREDEFINED_VALUES[\"unitsSpeed\"]\n        unitsDist = PREDEFINED_VALUES[\"unitsDist\"]\n    elif case_ == 2:\n        if CORRECT_ANSWER is None:\n            raise ValueError(\"Test case unavailable: CORRECT_ANSWER not provided\")\n        speed = TEST_VALUES[\"speed\"]\n        time = TEST_VALUES[\"time\"]\n        unitsSpeed = TEST_VALUES[\"unitsSpeed\"]\n        unitsDist = \"m\"  # lock to original units for verification\n    else:\n        raise ValueError(f\"Unknown case_: {case_}\")\n\n    # Convert speed if necessary\n    if unitsSpeed == \"km/h\" and unitsDist == \"m\":\n        speed = speed * (1000 / 3600)  # convert km/h to m/s\n\n    distance = speed * time  # Calculate distance based on d=vt\n\n    # Verify CORRECT_ANSWER (only for case 2)\n    if case_ == 2:\n        expected = float(CORRECT_ANSWER)\n        diff = abs(distance - expected)\n        tol = max(ABS_TOL, REL_TOL * abs(expected))\n        passed = diff <= tol\n        test_results[\"pass\"] = 1 if passed else 0\n        test_results[\"message\"] = (\n            f\"PASS — computed={distance} {unitsDist}, expected={expected} {unitsDist}\"\n            if passed else\n            f\"FAIL — computed={distance} {unitsDist}, expected={expected} {unitsDist}\"\n        )\n\n    params = {\n        \"speed_value\": speed, \"speed_units\": unitsSpeed,\n        \"time_value\": time, \"time_units\": unitsDist,\n    }\n    correct_answers = {\n        \"distance_value\": round(distance, 3), \"distance_units\": unitsDist,\n    }\n\n    return {\"params\": params, \"correct_answers\": correct_answers, \"test_results\": test_results}",
-                "solution.html": "<pl-solution-panel>\n    <pl-hint level=\"1\" data-type=\"text\">\n        To calculate the total distance traveled by the ball, we use the formula: \n        $$ d = v \times t $$ \n        where $d$ is the distance, $v$ is the speed, and $t$ is the time.\n    </pl-hint>\n    <pl-hint level=\"2\" data-type=\"text\">\n        Here, the speed of the ball is given as {{params.speed}} {{params.unitsSpeed}} and the time it travels is {{params.time}} {{params.unitsTime}}.\n    </pl-hint>\n    <pl-hint level=\"3\" data-type=\"text\">\n        Substituting the known values into the formula gives:\n        $$ d = {{params.speed}} \times {{params.time}} $$\n    </pl-hint>\n    <pl-hint level=\"4\" data-type=\"text\">\n        The calculated distance will be:\n        $$ d = {{params.speed}} \\times {{params.time}} = {correct_answers.distance} {{params.unitsDist}} $$\n    </pl-hint>\n</pl-solution-panel>",
-                "qrender.json": [
-                    {
-                        "question_template": "A ball is traveling along a straight road at a constant speed of {{params.speed}} {{params.unitsSpeed}} for {{params.time}} {{params.unitsTime}}. What is the total distance traveled (in {{params.unitsDist}})?",
-                        "questionInputs": [
-                            {
-                                "name": "distance",
-                                "label": "Total distance (in {{params.unitsDist}})",
-                                "qtype": "number",
-                                "comparison": "sigfig",
-                                "digits": 3,
-                                "units": "{{params.unitsDist}}"
-                            }
-                        ],
-                        "image": null,
-                        "solution_render": [
-                            "> To calculate the total distance traveled by the ball, we use the formula: \n> $$ d = v \times t $$ \n> where $d$ is the distance, $v$ is the speed, and $t$ is the time. \n> \n> Here, the speed of the ball is given as {{params.speed}} {{params.unitsSpeed}} and the time it travels is {{params.time}} {{params.unitsTime}}. \n> \n> Substituting the known values into the formula gives: \n> $$ d = {{params.speed}} \times {{params.time}} $$ \n> \n> The calculated distance will be: \n> $$ d = {{params.speed}} \\times {{params.time}} = {correct_answers.distance} {{params.unitsDist}} $$ "
-                        ]
-                    }
-                ]
-            },
-            "metadata": {
-                "question": "A ball is traveling along a straight road at a constant speed of $10\\ \\text{m/s}$ for $20\\ \\text{seconds}$. What is the total distance traveled? The correct answer is $200\\ \\text{m}$",
-                "title": "ConstantSpeedDistanceCalculation",
-                "topics": [
-                    "Kinematics",
-                    "Time and Motion Analysis"
-                ],
-                "isAdaptive": "True",
-                "language": [
-                    "python",
-                    "javascript"
-                ],
-                "qtype": [
-                    "numerical"
-                ]
-            }
+          "name": "distance",
+          "value": "200",
+          "units": "m"
+        }
+      ],
+      "source": null,
+      "requires_external_data": false,
+      "requires_image": false,
+      "completeness": true,
+      "additional_information": null,
+      "solution": null
+    },
+    {
+      "question": "A car moves at a constant speed of $60\\ \\text{km/h}$ for $2\\ \\text{hours}$. What is the total distance traveled? The correct answer is $120\\ \\text{km}$",
+      "params": [
+        {
+          "name": "speed",
+          "value": "60",
+          "units": "km/h"
         },
         {
-            "question_payload": {
-                "question": "A car moves at a constant speed of $60\\ \\text{km/h}$ for $2\\ \\text{hours}$. What is the total distance traveled? The correct answer is $120\\ \\text{km}$",
-                "params": [
-                    {
-                        "name": "speed",
-                        "value": "60",
-                        "units": "km/h"
-                    },
-                    {
-                        "name": "time",
-                        "value": "2",
-                        "units": "hours"
-                    }
-                ],
-                "correct_answers": [
-                    {
-                        "name": "distance",
-                        "value": "120",
-                        "units": "km"
-                    }
-                ],
-                "source": null,
-                "requires_external_data": false,
-                "requires_image": false,
-                "completeness": true,
-                "additional_information": null,
-                "solution": null
-            },
-            "files_data": {
-                "question.html": "<pl-question-panel>\n  <p> A car moves at a constant speed of {{params.speed}} {{params.unitsSpeed}} for {{params.time}} {{params.unitsTime}}. </p>\n  <p> What is the total distance traveled (in {{params.unitsDist}})? </p>\n</pl-question-panel>\n\n<pl-number-input answers-name=\"distance\" comparison=\"sigfig\" digits=\"3\" label=\"Distance (in {{params.unitsDist}})\"></pl-number-input>",
-                "server.js": "const math = require('mathjs');\n\nconst generate = (case_ = 0) => {\n    const unitSystems = {\n        si: {\n            speed: 'km/h',\n            distance: 'km',\n            time: 'h'\n        },\n        uscs: {\n            speed: 'mph',\n            distance: 'ft',\n            time: 's'\n        }\n    };\n\n    // Hardcoded Values\n    const PREDEFINED_VALUES = { speed: 60, time: 2 }; // Speed in km/h and time in hours\n    const TEST_VALUES = { speed: 60, time: 2 }; // Same as PREDEFINED_VALUES for testing\n    const CORRECT_ANSWER = 120; // Correct answer for distance in km\n\n    const ABS_TOL = 1e-6;\n    const REL_TOL = 1e-6;\n\n    const selectedSystem = (case_ === 2) ? 'si' : (math.randomInt(0, 2) === 0 ? 'si' : 'uscs');\n    const units = unitSystems[selectedSystem];\n\n    let speed, time;\n    const test_results = { pass: null, message: \"\" };\n\n    if (case_ === 0) {\n        speed = math.randomInt(30, 121);\n        time = math.randomInt(1, 10);\n    } else if (case_ === 1) {\n        speed = PREDEFINED_VALUES.speed;\n        time = PREDEFINED_VALUES.time;\n    } else if (case_ === 2) {\n        if (typeof CORRECT_ANSWER === \"undefined\") {\n            throw new Error(\"Test case unavailable: CORRECT_ANSWER not provided\");\n        }\n        speed = TEST_VALUES.speed;\n        time = TEST_VALUES.time;\n    } else {\n        throw new Error(`Unknown case_: ${case_}`);\n    }\n\n    // Calculate distance: \n    let distance;\n    if (units.speed === 'km/h') {\n        distance = speed * time; // in km\n    } else { // units.speed === 'mph'\n        distance = speed * time * 0.000189394; // convert mph to km\n    }\n\n    // Handling Case 2 for verification with the correct answer\n    if (case_ === 2) {\n        const expected = CORRECT_ANSWER;\n        const diff = Math.abs(distance - expected);\n        const tol = Math.max(ABS_TOL, REL_TOL * Math.abs(expected));\n        const passed = diff <= tol;\n\n        test_results.pass = passed ? 1 : 0;\n        test_results.message = passed\n            ? `PASS — computed=${distance} ${units.distance}, expected=${expected} ${units.distance}`\n            : `FAIL — computed=${distance} ${units.distance}, expected=${expected} ${units.distance}`;\n    }\n\n    return {\n        params: {\n            speed,\n            time,\n            unitsSpeed: units.speed,\n            unitsTime: units.time,\n            unitsDist: units.distance,\n        },\n        correct_answers: {\n            distance: Number(math.round(distance, 3)),\n        },\n        test_results,\n    };\n};\n\nmodule.exports = { generate };",
-                "server.py": "import math\nimport random\n\ndef generate(case_: int = 0):\n    # 1. Define the parameter sets for the problem context\n    ORIGINAL_QUESTION = \"A car moves at a constant speed of $60\\ \\text{km/h}$ for $2\\ \\text{hours}$. What is the total distance traveled?\"\n    ORIGINAL_UNITS = \"km\"\n\n    speed_units = ['km/h', 'm/s', 'mi/h', 'ft/s']\n    time_units = ['s', 'min', 'h']\n    distance_units = ['km', 'm', 'mi', 'ft']\n\n    # 2. Predefined values\n    PREDEFINED_VALUES = {'speed': 60, 'unitsSpeed': 'km/h', 'time': 2, 'unitsTime': 'h'}\n    TEST_VALUES = {'speed': 60, 'time': 2}  # speed and time for case 2\n    CORRECT_ANSWER = 120  # expected distance\n\n    ABS_TOL = 1e-6\n    REL_TOL = 1e-6\n\n    # Initialize test results\n    test_results = {'pass': None, 'message': ''}\n    speed = 0\n    time = 0\n    distance = 0\n\n    # 3. Value Generation: random or predefined values\n    if case_ == 0:\n        # Generate random values\n        speed = random.uniform(10, 120)  # speed in km/h\n        time = random.uniform(1, 2)  # time in hours\n    elif case_ == 1:\n        # Use predefined values\n        speed = PREDEFINED_VALUES['speed']\n        time = PREDEFINED_VALUES['time']\n    elif case_ == 2:\n        if CORRECT_ANSWER is None:\n            raise ValueError(\"Test case unavailable: CORRECT_ANSWER not provided\")\n        speed = TEST_VALUES['speed']\n        time = TEST_VALUES['time']\n    else:\n        raise ValueError(f\"Unknown case_: {case_}\")\n\n    # Calculate distance based on speed and time\n    distance = (speed * time) if case_ != 2 else (TEST_VALUES['speed'] * TEST_VALUES['time'])\n\n    # 4. Create the parameters and answers structure\n    params = {\n        'speed_value': round(speed, 3), 'speed_units': PREDEFINED_VALUES['unitsSpeed'], 'speed_symbol': 'v',\n        'time_value': round(time, 3), 'time_units': PREDEFINED_VALUES['unitsTime'], 'time_symbol': 't'\n    }\n    correct_answers = {\n        'distance_value': round(distance, 3), 'distance_units': ORIGINAL_UNITS, 'distance_symbol': 'd'\n    }\n\n    # 5. Verification for case 2\n    if case_ == 2:\n        expected = float(CORRECT_ANSWER)\n        diff = abs(distance - expected)\n        tol = max(ABS_TOL, REL_TOL * abs(expected))\n        passed = diff <= tol\n        test_results['pass'] = 1 if passed else 0\n        test_results['message'] = (\n            f\"PASS — computed={distance} {ORIGINAL_UNITS}, expected={CORRECT_ANSWER} {ORIGINAL_UNITS}\"\n            if passed else\n            f\"FAIL — computed={distance} {ORIGINAL_UNITS}, expected={CORRECT_ANSWER} {ORIGINAL_UNITS}\"\n        )\n\n    return {'params': params, 'correct_answers': correct_answers, 'test_results': test_results}",
-                "solution.html": "<pl-solution-panel>\n    <pl-hint level=\"1\" data-type=\"text\">\n        To find the total distance traveled, we can use the formula: $$d = v \\cdot t$$.\n    </pl-hint>\n    <pl-hint level=\"2\" data-type=\"text\">\n        Here, $d$ is the distance, $v$ is the constant speed of the car, and $t$ is the time traveled.\n    </pl-hint>\n    <pl-hint level=\"3\" data-type=\"text\">\n        Substituting the known values, we have: $$d = {{params.speed}} \\cdot {{params.time}}$$.\n    </pl-hint>\n    <pl-hint level=\"4\" data-type=\"text\">\n        Therefore, the total distance traveled is computed as: $$d = {{params.speed}} \\cdot {{params.time}}$$ in {{params.unitsDist}}.\n    </pl-hint>\n    <pl-hint level=\"5\" data-type=\"text\">\n        This will give us the final answer: $$d = {{correct_answers.distance}}\\, {{params.unitsDist}}$$.\n    </pl-hint>\n</pl-solution-panel>",
-                "qrender.json": [
-                    {
-                        "question_template": "A car moves at a constant speed of {{params.speed}} {{params.unitsSpeed}} for {{params.time}} {{params.unitsTime}}. What is the total distance traveled (in {{params.unitsDist}})?",
-                        "questionInputs": [
-                            {
-                                "name": "distance",
-                                "label": "Distance (in {{params.unitsDist}})",
-                                "qtype": "number",
-                                "comparison": "sigfig",
-                                "digits": 3,
-                                "units": "{{params.unitsDist}}"
-                            }
-                        ],
-                        "image": null,
-                        "solution_render": [
-                            "To find the total distance traveled, we can use the formula: d = v · t.",
-                            "Here, d is the distance, v is the constant speed of the car, and t is the time traveled.",
-                            "Substituting the known values, we have: d = {{params.speed}} · {{params.time}}.",
-                            "Therefore, the total distance traveled is computed as: d = {{params.speed}} · {{params.time}} in {{params.unitsDist}}.",
-                            "This will give us the final answer: d = {{correct_answers.distance}} {{params.unitsDist}}."
-                        ]
-                    }
-                ]
-            },
-            "metadata": {
-                "question": "A car moves at a constant speed of $60\\ \\text{km/h}$ for $2\\ \\text{hours}$. What is the total distance traveled? The correct answer is $120\\ \\text{km}$",
-                "title": "DistanceTraveledByCar",
-                "topics": [
-                    "Kinematics",
-                    "Time and Motion Analysis"
-                ],
-                "isAdaptive": "True",
-                "language": [
-                    "python",
-                    "javascript"
-                ],
-                "qtype": [
-                    "numerical"
-                ]
-            }
+          "name": "time",
+          "value": "2",
+          "units": "hours"
         }
-    ]
+      ],
+      "correct_answers": [
+        {
+          "name": "distance",
+          "value": "120",
+          "units": "km"
+        }
+      ],
+      "source": null,
+      "requires_external_data": false,
+      "requires_image": false,
+      "completeness": true,
+      "additional_information": null,
+      "solution": null
+    }
+  ],
+  "gestalt_code": [
+    {
+      "question_payload": {
+        "question": "A ball is traveling along a straight road at a constant speed of $10\\ \\text{m/s}$ for $20\\ \\text{seconds}$. What is the total distance traveled? The correct answer is $200\\ \\text{m}$",
+        "params": [
+          {
+            "name": "speed",
+            "value": "10",
+            "units": "m/s"
+          },
+          {
+            "name": "time",
+            "value": "20",
+            "units": "seconds"
+          }
+        ],
+        "correct_answers": [
+          {
+            "name": "distance",
+            "value": "200",
+            "units": "m"
+          }
+        ],
+        "source": null,
+        "requires_external_data": false,
+        "requires_image": false,
+        "completeness": true,
+        "additional_information": null,
+        "solution": null
+      },
+      "files_data": {
+        "question.html": "<pl-question-panel>\n  <p> A ball is traveling along a straight road at a constant speed of {{params.speed}} {{params.unitsSpeed}} for {{params.time}} {{params.unitsTime}}.</p>\n  <p> What is the total distance traveled (in {{params.unitsDist}})?</p>\n</pl-question-panel>\n\n<pl-number-input answers-name=\"distance\" comparison=\"sigfig\" digits=\"3\" label=\"Total distance (in {{params.unitsDist}})\"></pl-number-input>",
+        "server.js": "const math = require('mathjs');\n\nconst generate = (case_ = 0) => {\n    // ---- Unit Systems ----\n    const unitSystems = {\n        si: {\n            speed: 'm/s',\n            distance: 'm',\n            time: 's'\n        },\n        uscs: {\n            speed: 'ft/s',\n            distance: 'ft',\n            time: 's'\n        }\n    };  \n\n    // ---- Hardcoded Values ----\n    const PREDEFINED_VALUES = { speed: 10, time: 20, selectedSystem: 'si' }; // matches chosen system\n    const TEST_VALUES = { speed: 10, time: 20 }; // hardcoded test values\n    const CORRECT_ANSWER = 200; // hardcoded correct answer\n\n    const ABS_TOL = 1e-6;\n    const REL_TOL = 1e-6;\n\n    let selectedSystem;\n    let speed, time;\n    let test_results = { pass: null, message: '' };\n\n    if (case_ === 0) {\n        // Random system selection\n        selectedSystem = math.randomInt(0, 2) === 0 ? 'si' : 'uscs';\n        units = unitSystems[selectedSystem];\n        // Generate random values: speed between 5 to 30 (m/s or ft/s) and time between 1 to 10 seconds\n        speed = math.randomInt(5, 31);\n        time = math.randomInt(1, 11);\n    } else if (case_ === 1) {\n        // Use predefined values\n        speed = PREDEFINED_VALUES.speed;\n        time = PREDEFINED_VALUES.time;\n        selectedSystem = PREDEFINED_VALUES.selectedSystem;\n    } else if (case_ === 2) {\n        if (typeof CORRECT_ANSWER === 'undefined') {\n            throw new Error('Test case unavailable: CORRECT_ANSWER not provided');\n        }\n        // Use test values\n        speed = TEST_VALUES.speed;\n        time = TEST_VALUES.time;\n        selectedSystem = 'si'; // Lock to SI for testing\n    } else {\n        throw new Error(`Unknown case_: ${case_}`);\n    }\n\n    const units = unitSystems[selectedSystem];\n\n    // Calculate the total distance: distance = speed * time\n    const distance = speed * time;\n\n    // ---- Verification Logic for Case 2 ----\n    if (case_ === 2) {\n        const expected = CORRECT_ANSWER;\n        const diff = Math.abs(distance - expected);\n        const tol = Math.max(ABS_TOL, REL_TOL * Math.abs(expected));\n        const passed = diff <= tol;\n\n        test_results.pass = passed ? 1 : 0;\n        test_results.message = passed\n            ? `PASS — computed=${distance} ${units.distance}, expected=${expected} ${units.distance}`\n            : `FAIL — computed=${distance} ${units.distance}, expected=${expected} ${units.distance}`;\n    }\n\n    // Return the structured data\n    return {\n        params: {\n            speed: speed,\n            time: time,\n            unitsSpeed: units.speed,\n            unitsDist: units.distance,\n            unitsTime: units.time\n        },\n        correct_answers: {\n            distance: math.round(distance, 3) // Round to 3 decimal places\n        },\n        test_results\n    };\n};\n\nmodule.exports = {\n    generate\n};",
+        "server.py": "from typing import Any, Dict, Optional\nimport random\n\n\ndef generate(case_: int = 0) -> Dict[str, Any]:\n    # Context setup\n    ORIGINAL_QUESTION = \"A ball is traveling along a straight road at a constant speed of $10\\ \\text{m/s}$ for $20\\ \\text{seconds}$. What is the total distance traveled?\"\n    ORIGINAL_UNITS = \"m\"\n\n    PREDEFINED_VALUES = {\"speed\": 10, \"time\": 20, \"unitsSpeed\": \"m/s\", \"unitsTime\": \"s\", \"unitsDist\": \"m\"}\n    TEST_VALUES = {\"speed\": 10, \"time\": 20, \"unitsSpeed\": \"m/s\", \"unitsTime\": \"s\"}\n    CORRECT_ANSWER: Optional[int] = 200  # meters\n\n    ABS_TOL = 1e-6\n    REL_TOL = 1e-6\n    test_results: Dict[str, Any] = {\"pass\": None, \"message\": \"\"}\n\n    # Handle different cases\na = None\nb = None\n    if case_ == 0:\n        speed = round(random.uniform(1, 100), 2)\n        time = round(random.uniform(1, 60), 2)\n        unitsSpeed = random.choice([\"m/s\", \"km/h\"])\n        unitsDist = \"m\" if unitsSpeed == \"m/s\" else \"km\"\n    elif case_ == 1:\n        speed = PREDEFINED_VALUES[\"speed\"]\n        time = PREDEFINED_VALUES[\"time\"]\n        unitsSpeed = PREDEFINED_VALUES[\"unitsSpeed\"]\n        unitsDist = PREDEFINED_VALUES[\"unitsDist\"]\n    elif case_ == 2:\n        if CORRECT_ANSWER is None:\n            raise ValueError(\"Test case unavailable: CORRECT_ANSWER not provided\")\n        speed = TEST_VALUES[\"speed\"]\n        time = TEST_VALUES[\"time\"]\n        unitsSpeed = TEST_VALUES[\"unitsSpeed\"]\n        unitsDist = \"m\"  # lock to original units for verification\n    else:\n        raise ValueError(f\"Unknown case_: {case_}\")\n\n    # Convert speed if necessary\n    if unitsSpeed == \"km/h\" and unitsDist == \"m\":\n        speed = speed * (1000 / 3600)  # convert km/h to m/s\n\n    distance = speed * time  # Calculate distance based on d=vt\n\n    # Verify CORRECT_ANSWER (only for case 2)\n    if case_ == 2:\n        expected = float(CORRECT_ANSWER)\n        diff = abs(distance - expected)\n        tol = max(ABS_TOL, REL_TOL * abs(expected))\n        passed = diff <= tol\n        test_results[\"pass\"] = 1 if passed else 0\n        test_results[\"message\"] = (\n            f\"PASS — computed={distance} {unitsDist}, expected={expected} {unitsDist}\"\n            if passed else\n            f\"FAIL — computed={distance} {unitsDist}, expected={expected} {unitsDist}\"\n        )\n\n    params = {\n        \"speed_value\": speed, \"speed_units\": unitsSpeed,\n        \"time_value\": time, \"time_units\": unitsDist,\n    }\n    correct_answers = {\n        \"distance_value\": round(distance, 3), \"distance_units\": unitsDist,\n    }\n\n    return {\"params\": params, \"correct_answers\": correct_answers, \"test_results\": test_results}",
+        "solution.html": "<pl-solution-panel>\n    <pl-hint level=\"1\" data-type=\"text\">\n        To calculate the total distance traveled by the ball, we use the formula: \n        $$ d = v \times t $$ \n        where $d$ is the distance, $v$ is the speed, and $t$ is the time.\n    </pl-hint>\n    <pl-hint level=\"2\" data-type=\"text\">\n        Here, the speed of the ball is given as {{params.speed}} {{params.unitsSpeed}} and the time it travels is {{params.time}} {{params.unitsTime}}.\n    </pl-hint>\n    <pl-hint level=\"3\" data-type=\"text\">\n        Substituting the known values into the formula gives:\n        $$ d = {{params.speed}} \times {{params.time}} $$\n    </pl-hint>\n    <pl-hint level=\"4\" data-type=\"text\">\n        The calculated distance will be:\n        $$ d = {{params.speed}} \\times {{params.time}} = {correct_answers.distance} {{params.unitsDist}} $$\n    </pl-hint>\n</pl-solution-panel>",
+        "qrender.json": [
+          {
+            "question_template": "A ball is traveling along a straight road at a constant speed of {{params.speed}} {{params.unitsSpeed}} for {{params.time}} {{params.unitsTime}}. What is the total distance traveled (in {{params.unitsDist}})?",
+            "questionInputs": [
+              {
+                "name": "distance",
+                "label": "Total distance (in {{params.unitsDist}})",
+                "qtype": "number",
+                "comparison": "sigfig",
+                "digits": 3,
+                "units": "{{params.unitsDist}}"
+              }
+            ],
+            "image": null,
+            "solution_render": [
+              "> To calculate the total distance traveled by the ball, we use the formula: \n> $$ d = v \times t $$ \n> where $d$ is the distance, $v$ is the speed, and $t$ is the time. \n> \n> Here, the speed of the ball is given as {{params.speed}} {{params.unitsSpeed}} and the time it travels is {{params.time}} {{params.unitsTime}}. \n> \n> Substituting the known values into the formula gives: \n> $$ d = {{params.speed}} \times {{params.time}} $$ \n> \n> The calculated distance will be: \n> $$ d = {{params.speed}} \\times {{params.time}} = {correct_answers.distance} {{params.unitsDist}} $$ "
+            ]
+          }
+        ]
+      },
+      "metadata": {
+        "question": "A ball is traveling along a straight road at a constant speed of $10\\ \\text{m/s}$ for $20\\ \\text{seconds}$. What is the total distance traveled? The correct answer is $200\\ \\text{m}$",
+        "title": "ConstantSpeedDistanceCalculation",
+        "topics": ["Kinematics", "Time and Motion Analysis"],
+        "isAdaptive": "True",
+        "language": ["python", "javascript"],
+        "qtype": ["numerical"]
+      }
+    },
+    {
+      "question_payload": {
+        "question": "A car moves at a constant speed of $60\\ \\text{km/h}$ for $2\\ \\text{hours}$. What is the total distance traveled? The correct answer is $120\\ \\text{km}$",
+        "params": [
+          {
+            "name": "speed",
+            "value": "60",
+            "units": "km/h"
+          },
+          {
+            "name": "time",
+            "value": "2",
+            "units": "hours"
+          }
+        ],
+        "correct_answers": [
+          {
+            "name": "distance",
+            "value": "120",
+            "units": "km"
+          }
+        ],
+        "source": null,
+        "requires_external_data": false,
+        "requires_image": false,
+        "completeness": true,
+        "additional_information": null,
+        "solution": null
+      },
+      "files_data": {
+        "question.html": "<pl-question-panel>\n  <p> A car moves at a constant speed of {{params.speed}} {{params.unitsSpeed}} for {{params.time}} {{params.unitsTime}}. </p>\n  <p> What is the total distance traveled (in {{params.unitsDist}})? </p>\n</pl-question-panel>\n\n<pl-number-input answers-name=\"distance\" comparison=\"sigfig\" digits=\"3\" label=\"Distance (in {{params.unitsDist}})\"></pl-number-input>",
+        "server.js": "const math = require('mathjs');\n\nconst generate = (case_ = 0) => {\n    const unitSystems = {\n        si: {\n            speed: 'km/h',\n            distance: 'km',\n            time: 'h'\n        },\n        uscs: {\n            speed: 'mph',\n            distance: 'ft',\n            time: 's'\n        }\n    };\n\n    // Hardcoded Values\n    const PREDEFINED_VALUES = { speed: 60, time: 2 }; // Speed in km/h and time in hours\n    const TEST_VALUES = { speed: 60, time: 2 }; // Same as PREDEFINED_VALUES for testing\n    const CORRECT_ANSWER = 120; // Correct answer for distance in km\n\n    const ABS_TOL = 1e-6;\n    const REL_TOL = 1e-6;\n\n    const selectedSystem = (case_ === 2) ? 'si' : (math.randomInt(0, 2) === 0 ? 'si' : 'uscs');\n    const units = unitSystems[selectedSystem];\n\n    let speed, time;\n    const test_results = { pass: null, message: \"\" };\n\n    if (case_ === 0) {\n        speed = math.randomInt(30, 121);\n        time = math.randomInt(1, 10);\n    } else if (case_ === 1) {\n        speed = PREDEFINED_VALUES.speed;\n        time = PREDEFINED_VALUES.time;\n    } else if (case_ === 2) {\n        if (typeof CORRECT_ANSWER === \"undefined\") {\n            throw new Error(\"Test case unavailable: CORRECT_ANSWER not provided\");\n        }\n        speed = TEST_VALUES.speed;\n        time = TEST_VALUES.time;\n    } else {\n        throw new Error(`Unknown case_: ${case_}`);\n    }\n\n    // Calculate distance: \n    let distance;\n    if (units.speed === 'km/h') {\n        distance = speed * time; // in km\n    } else { // units.speed === 'mph'\n        distance = speed * time * 0.000189394; // convert mph to km\n    }\n\n    // Handling Case 2 for verification with the correct answer\n    if (case_ === 2) {\n        const expected = CORRECT_ANSWER;\n        const diff = Math.abs(distance - expected);\n        const tol = Math.max(ABS_TOL, REL_TOL * Math.abs(expected));\n        const passed = diff <= tol;\n\n        test_results.pass = passed ? 1 : 0;\n        test_results.message = passed\n            ? `PASS — computed=${distance} ${units.distance}, expected=${expected} ${units.distance}`\n            : `FAIL — computed=${distance} ${units.distance}, expected=${expected} ${units.distance}`;\n    }\n\n    return {\n        params: {\n            speed,\n            time,\n            unitsSpeed: units.speed,\n            unitsTime: units.time,\n            unitsDist: units.distance,\n        },\n        correct_answers: {\n            distance: Number(math.round(distance, 3)),\n        },\n        test_results,\n    };\n};\n\nmodule.exports = { generate };",
+        "server.py": "import math\nimport random\n\ndef generate(case_: int = 0):\n    # 1. Define the parameter sets for the problem context\n    ORIGINAL_QUESTION = \"A car moves at a constant speed of $60\\ \\text{km/h}$ for $2\\ \\text{hours}$. What is the total distance traveled?\"\n    ORIGINAL_UNITS = \"km\"\n\n    speed_units = ['km/h', 'm/s', 'mi/h', 'ft/s']\n    time_units = ['s', 'min', 'h']\n    distance_units = ['km', 'm', 'mi', 'ft']\n\n    # 2. Predefined values\n    PREDEFINED_VALUES = {'speed': 60, 'unitsSpeed': 'km/h', 'time': 2, 'unitsTime': 'h'}\n    TEST_VALUES = {'speed': 60, 'time': 2}  # speed and time for case 2\n    CORRECT_ANSWER = 120  # expected distance\n\n    ABS_TOL = 1e-6\n    REL_TOL = 1e-6\n\n    # Initialize test results\n    test_results = {'pass': None, 'message': ''}\n    speed = 0\n    time = 0\n    distance = 0\n\n    # 3. Value Generation: random or predefined values\n    if case_ == 0:\n        # Generate random values\n        speed = random.uniform(10, 120)  # speed in km/h\n        time = random.uniform(1, 2)  # time in hours\n    elif case_ == 1:\n        # Use predefined values\n        speed = PREDEFINED_VALUES['speed']\n        time = PREDEFINED_VALUES['time']\n    elif case_ == 2:\n        if CORRECT_ANSWER is None:\n            raise ValueError(\"Test case unavailable: CORRECT_ANSWER not provided\")\n        speed = TEST_VALUES['speed']\n        time = TEST_VALUES['time']\n    else:\n        raise ValueError(f\"Unknown case_: {case_}\")\n\n    # Calculate distance based on speed and time\n    distance = (speed * time) if case_ != 2 else (TEST_VALUES['speed'] * TEST_VALUES['time'])\n\n    # 4. Create the parameters and answers structure\n    params = {\n        'speed_value': round(speed, 3), 'speed_units': PREDEFINED_VALUES['unitsSpeed'], 'speed_symbol': 'v',\n        'time_value': round(time, 3), 'time_units': PREDEFINED_VALUES['unitsTime'], 'time_symbol': 't'\n    }\n    correct_answers = {\n        'distance_value': round(distance, 3), 'distance_units': ORIGINAL_UNITS, 'distance_symbol': 'd'\n    }\n\n    # 5. Verification for case 2\n    if case_ == 2:\n        expected = float(CORRECT_ANSWER)\n        diff = abs(distance - expected)\n        tol = max(ABS_TOL, REL_TOL * abs(expected))\n        passed = diff <= tol\n        test_results['pass'] = 1 if passed else 0\n        test_results['message'] = (\n            f\"PASS — computed={distance} {ORIGINAL_UNITS}, expected={CORRECT_ANSWER} {ORIGINAL_UNITS}\"\n            if passed else\n            f\"FAIL — computed={distance} {ORIGINAL_UNITS}, expected={CORRECT_ANSWER} {ORIGINAL_UNITS}\"\n        )\n\n    return {'params': params, 'correct_answers': correct_answers, 'test_results': test_results}",
+        "solution.html": "<pl-solution-panel>\n    <pl-hint level=\"1\" data-type=\"text\">\n        To find the total distance traveled, we can use the formula: $$d = v \\cdot t$$.\n    </pl-hint>\n    <pl-hint level=\"2\" data-type=\"text\">\n        Here, $d$ is the distance, $v$ is the constant speed of the car, and $t$ is the time traveled.\n    </pl-hint>\n    <pl-hint level=\"3\" data-type=\"text\">\n        Substituting the known values, we have: $$d = {{params.speed}} \\cdot {{params.time}}$$.\n    </pl-hint>\n    <pl-hint level=\"4\" data-type=\"text\">\n        Therefore, the total distance traveled is computed as: $$d = {{params.speed}} \\cdot {{params.time}}$$ in {{params.unitsDist}}.\n    </pl-hint>\n    <pl-hint level=\"5\" data-type=\"text\">\n        This will give us the final answer: $$d = {{correct_answers.distance}}\\, {{params.unitsDist}}$$.\n    </pl-hint>\n</pl-solution-panel>",
+        "qrender.json": [
+          {
+            "question_template": "A car moves at a constant speed of {{params.speed}} {{params.unitsSpeed}} for {{params.time}} {{params.unitsTime}}. What is the total distance traveled (in {{params.unitsDist}})?",
+            "questionInputs": [
+              {
+                "name": "distance",
+                "label": "Distance (in {{params.unitsDist}})",
+                "qtype": "number",
+                "comparison": "sigfig",
+                "digits": 3,
+                "units": "{{params.unitsDist}}"
+              }
+            ],
+            "image": null,
+            "solution_render": [
+              "To find the total distance traveled, we can use the formula: d = v · t.",
+              "Here, d is the distance, v is the constant speed of the car, and t is the time traveled.",
+              "Substituting the known values, we have: d = {{params.speed}} · {{params.time}}.",
+              "Therefore, the total distance traveled is computed as: d = {{params.speed}} · {{params.time}} in {{params.unitsDist}}.",
+              "This will give us the final answer: d = {{correct_answers.distance}} {{params.unitsDist}}."
+            ]
+          }
+        ]
+      },
+      "metadata": {
+        "question": "A car moves at a constant speed of $60\\ \\text{km/h}$ for $2\\ \\text{hours}$. What is the total distance traveled? The correct answer is $120\\ \\text{km}$",
+        "title": "DistanceTraveledByCar",
+        "topics": ["Kinematics", "Time and Motion Analysis"],
+        "isAdaptive": "True",
+        "language": ["python", "javascript"],
+        "qtype": ["numerical"]
+      }
+    }
+  ]
 }

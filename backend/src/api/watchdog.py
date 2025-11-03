@@ -1,23 +1,16 @@
-import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from pathlib import Path
 from src.api.core import logger
-from src.api.dependencies import (
-    QuestionManagerDependency,
-    get_question_manager,
-    QuestionManager,
-)
-from src.api.models.question_model import QuestionMeta
-from pydantic import BaseModel, PositiveInt, ValidationError
+from src.api.models import QuestionMeta
+from pydantic import ValidationError
 import json
 from src.api.database import get_session, Session
 import asyncio
 from fastapi import HTTPException
 from typing import cast
-from src.api.core import settings
 
-from src.api.response_models import FileData
+from src.api.models import FileData
 import json
 from pathlib import Path
 from fastapi import HTTPException

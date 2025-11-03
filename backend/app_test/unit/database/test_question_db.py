@@ -1,0 +1,171 @@
+from src.api.database import question as qdb
+import pytest
+from src.api.models.models import Question
+from src.api.core.logging import logger
+from src.api.models.question import QuestionData, QuestionMeta
+
+
+# ----------------------
+# Minimal creation (no topics)
+# ----------------------
+@pytest.mark.asyncio
+async def test_create_question(db_session, question_payload):
+    qcreated = await qdb.create_question(question_payload, db_session)
+    assert qcreated
+    for key, _ in question_payload.items():
+        assert getattr(qcreated, key) == question_payload[key]
+
+
+@pytest.mark.asyncio
+async def test_create_question_with_relationship_data(
+    create_question_with_relationship, question_payload, relationship_payload
+):
+    qcreated = await create_question_with_relationship
+    for key, _ in question_payload.items():
+        assert getattr(qcreated, key) == question_payload[key]
+
+    for key, _ in relationship_payload.items():
+        logger.info("Relationship data %s", getattr(qcreated, key))
+        qrel = getattr(qcreated, key)
+        logger.info("This is the relationsip %s", qrel)
+        # Convert to a list with just the names and set for comparing
+        assert set([r.name for r in qrel]) == set(relationship_payload[key])
+
+
+@pytest.mark.asyncio
+async def test_get_question(db_session, question_payload):
+    qcreated = await qdb.create_question(question_payload, db_session)
+    assert qcreated == qdb.get_question(qcreated.id, db_session)
+
+
+@pytest.mark.asyncio
+async def test_get_all_questions(db_session, combined_payload):
+    # Create data
+    for q in combined_payload:
+        qcreated = await qdb.create_question(q, db_session)
+        assert qcreated
+    questions = qdb.get_all_questions(db_session)
+    assert isinstance(questions, list)
+    assert all(isinstance(q, Question) for q in questions)
+    assert len(combined_payload) == len(questions)
+
+
+# Test Deleting questions
+@pytest.mark.asyncio
+async def test_delete_all_questions(db_session, combined_payload):
+    for q in combined_payload:
+        qcreated = await qdb.create_question(q, db_session)
+        assert qcreated
+    qdb.delete_all_questions(db_session)
+    questions = qdb.get_all_questions(db_session)
+    assert isinstance(questions, list)
+    assert questions == []
+
+
+@pytest.mark.asyncio
+async def test_delete_single(db_session, combined_payload):
+    for q in combined_payload:
+        qcreated = await qdb.create_question(q, db_session)
+        assert qcreated
+
+        # Get the question
+        assert qdb.get_question(qcreated.id, db_session)
+        qdb.delete_question(qcreated.id, db_session)
+        assert qdb.get_question(qcreated.id, db_session) is None
+
+
+@pytest.mark.asyncio
+async def test_get_question_data(create_question_with_relationship, db_session):
+    qcreated = await create_question_with_relationship
+    data = await qdb.get_question_data(qcreated.id, db_session)
+    assert data
+
+
+@pytest.mark.asyncio
+async def test_question_update(db_session, question_payload):
+
+    qcreated = await qdb.create_question(question_payload, db_session)
+    assert qcreated is not None
+    assert isinstance(qcreated, Question)
+
+    update_data = QuestionData(title="new title", topics=["history", "math", "science"])
+
+    qupdate = await qdb.update_question(qcreated.id, update_data, db_session)
+    logger.info("This is the question %s ", qupdate)
+    assert qupdate is not None
+    assert isinstance(qupdate, QuestionMeta)
+
+    assert qupdate.title == "new title"
+    assert isinstance(qupdate.topics, list)
+    assert len(qupdate.topics) == 3
+
+    refetched = db_session.get(Question, qcreated.id)
+    assert refetched.title == "new title"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "update_data, expected_count, description",
+    [
+        (
+            QuestionData(title="Sample", ai_generated=True),
+            1,
+            "Should find question with partial title 'Sample' and ai_generated=True",
+        ),
+        (
+            QuestionData(topics=["math"]),
+            1,
+            "Should find question related to topic 'math'",
+        ),
+        (
+            QuestionData(title="Unknown", topics=["history"]),
+            0,
+            "No question should match a wrong title and nonexistent topic",
+        ),
+    ],
+)
+async def test_filter_questions(
+    create_question_with_relationship,
+    db_session,
+    update_data,
+    expected_count,
+    description,
+):
+    """Test dynamic question filtering across key combinations."""
+    qcreated = await create_question_with_relationship
+
+    results = await qdb.filter_questions(update_data, db_session)
+
+    print(f"\n{description}")
+    print(f"Input: {update_data}")
+    print(f"Results: {results}")
+
+    assert isinstance(results, list)
+    assert len(results) == expected_count
+    if expected_count:
+        assert all(isinstance(r, QuestionMeta) for r in results)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "storage_type, expected_attr",
+    [
+        ("cloud", "blob_path"),
+        ("local", "local_path"),
+    ],
+)
+async def test_setting_path(db_session, question_payload, storage_type, expected_attr):
+    # Create a test question
+    qcreated = await qdb.create_question(question_payload, db_session)
+    assert qcreated
+
+    # Run set_question_path for both storage types
+    q = qdb.set_question_path(
+        qcreated.id,
+        path="/test",
+        storage_type=storage_type,
+        session=db_session,
+    )
+
+    # Validate based on storage type
+    assert getattr(q, expected_attr) == "/test"
