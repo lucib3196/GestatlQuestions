@@ -2,6 +2,7 @@ from uuid import uuid4
 from src.api.core import logger
 from src.utils import pick
 from src.api.models.models import Question
+from src.api.models import QuestionMeta, QuestionData
 import pytest
 
 QUESTION_KEYS = [
@@ -73,10 +74,10 @@ def test_create_multiple_questions(create_multiple_question_responses):
     assert create_multiple_question_responses
 
 
+# ------------------------
 # Retrieval Test
-def test_question_metadata_retrieval(
-    test_client, create_question_and_return_question
-):
+# ------------------------
+def test_question_metadata_retrieval(test_client, create_question_and_return_question):
     """
     Integration test: create a question with optional metadata and ensure retrieval works.
 
@@ -108,10 +109,60 @@ def test_qet_all_questions(test_client, create_multiple_question_responses):
     logger.info("these are the questions %s", questions)
 
 
+def test_get_all_questions_metadata(test_client, create_question_and_return_question):
+    question_id = create_question_and_return_question.id
+    response = test_client.get(f"/questions/{question_id}/all_data")
+    assert response.status_code == 200
+    question_data = response.json()
+    assert QuestionMeta.model_validate(question_data)
+
+
+def test_get_get_all_question_data(create_multiple_question_responses, test_client):
+    # --- Arrange ---
+    qpayloads = create_multiple_question_responses
+    offset, limit = 0, 100
+
+    # --- Act ---
+    response = test_client.get(f"/questions/{offset}/{limit}/all_data")
+    data = response.json()
+    logger.info("Retrieved minimal questions response: %s", data)
+
+    # --- Assert: Basic response validation ---
+    assert (
+        response.status_code == 200
+    ), f"Unexpected status code: {response.status_code}"
+
+    assert isinstance(data, list), f"Expected list, got {type(data).__name__}"
+
+    # --- Assert: Schema validation ---
+    validated_questions = []
+    for idx, q in enumerate(data):
+        try:
+            validated = QuestionMeta.model_validate(q)
+            validated_questions.append(validated)
+        except Exception as e:
+            pytest.fail(f"Question at index {idx} failed schema validation: {e}")
+
+    # --- Assert: Count consistency ---
+    expected_count = len(qpayloads)
+    actual_count = len(validated_questions)
+    assert (
+        actual_count == expected_count
+    ), f"Expected {expected_count} questions, got {actual_count}"
+
+    logger.info(" Retrieved %d minimal questions successfully.", actual_count)
+
+
 def test_get_question_bad_id(test_client):
     bad_id = uuid4()
     r = test_client.get(f"/questions/{bad_id}")
     assert r.status_code == 404
+
+
+def test_get_question_data_all_not_found(test_client):
+    bad_id = uuid4()
+    r = test_client.get(f"/questions/{bad_id}/all_data")
+    assert r.status_code == 500
 
 
 # Deletion Test
@@ -144,3 +195,44 @@ def test_delete_all(test_client, create_multiple_question_responses):
     retrieved = response.json()
     assert isinstance(retrieved, list), "Expected response to be a list"
     assert len(retrieved) == 0
+
+
+# Updates
+@pytest.mark.asyncio
+async def test_filter_questions_no_match(
+    test_client, create_multiple_question_responses
+):
+    """
+    Filtering with values that should not match anything.
+    Expect an empty list.
+    """
+    payload = QuestionData(title="NonExistent", ai_generated=True)
+
+    response = test_client.post("/questions/filter", json=payload.model_dump())
+    assert response.status_code == 200
+
+    data = response.json()
+    logger.info("Filter with no match response: %s", data)
+
+    assert isinstance(data, list)
+    assert len(data) == 0
+
+
+@pytest.mark.asyncio
+async def test_question_filter_by_title(
+    test_client, create_multiple_question_responses
+):
+    """
+    Filter questions by a substring in the title.
+    Expects at least one match from create_multiple_questions fixture.
+    """
+    payload = QuestionData(title="Thermodynamics First Law")
+
+    response = test_client.post("/questions/filter", json=payload.model_dump())
+    assert response.status_code == 200
+
+    data = response.json()
+    logger.info("Filter by title response: %s", data)
+
+    assert isinstance(data, list)
+    assert len(data) > 0

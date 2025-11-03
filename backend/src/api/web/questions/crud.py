@@ -186,6 +186,16 @@ async def get_question_all_data(
         raise
 
 
+@router.get("/{offset:int}/{limit:int}/all_data")
+async def get_all_questions_data(
+    qm: QuestionManagerDependency, offset: int, limit: int
+) -> Sequence[QuestionMeta]:
+    try:
+        return await qm.get_all_question_data(offset, limit)
+    except Exception:
+        raise
+
+
 @router.delete("/{id}")
 async def delete_question(
     id: str | UUID, qm: QuestionManagerDependency, storage: StorageDependency
