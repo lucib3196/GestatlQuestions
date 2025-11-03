@@ -297,13 +297,17 @@ async def filter_questions(
 def get_question_path(
     id: str | UUID, storage_type: Literal["cloud", "local"], session: SessionDep
 ) -> str | None:
+    """Retrieve the storage path (cloud or local) for a question."""
     question = get_question(id, session)
     if not question:
-        raise ValueError("Question is none")
+        raise ValueError("Question not found")
+
     if storage_type == "cloud":
         return question.blob_path
     elif storage_type == "local":
         return question.local_path
+    else:
+        raise ValueError(f"Invalid storage type: {storage_type}")
 
 
 def set_question_path(
@@ -312,13 +316,27 @@ def set_question_path(
     storage_type: Literal["cloud", "local"],
     session: SessionDep,
 ) -> Question:
+    """
+    Update the question's storage path (local or cloud) and persist the change in the database.
+    """
     question = get_question(id, session)
     if not question:
-        raise ValueError("Question is none")
-    path = Path(path).as_posix()
-    if storage_type == "cloud":
-        question.blob_path = path
+        raise ValueError("Question not found")
+
+    path_str = Path(path).as_posix()
+    try:
+        if storage_type == "cloud":
+            question.blob_path = path_str
+        elif storage_type == "local":
+            question.local_path = path_str
+        else:
+            raise ValueError(f"Invalid storage type: {storage_type}")
+
+        session.add(question)
+        session.commit()
+        session.refresh(question)
         return question
-    elif storage_type == "local":
-        question.local_path = path
-        return question
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        raise RuntimeError(f"Failed to update question path: {e}")
