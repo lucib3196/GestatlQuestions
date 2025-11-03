@@ -100,17 +100,6 @@ def local_storage(tmp_path):
     return LocalStorageService(base)
 
 
-@pytest.fixture(scope="function", params=["local", "cloud"])
-def get_storage_service(request, cloud_storage_service, local_storage):
-    """Select either cloud or local storage for parameterized tests."""
-    storage_type = request.param
-    if storage_type == "cloud":
-        return cloud_storage_service
-    elif storage_type == "local":
-        return local_storage
-    raise ValueError(f"Invalid storage type: {storage_type}")
-
-
 # =========================================
 # API Fixtures
 # =========================================
@@ -123,7 +112,23 @@ def test_app():
 
 
 @pytest.fixture(scope="function", params=["local", "cloud"])
-def test_client(db_session, request, get_storage_service):
+def storage_mode(request):
+    """Single shared parameter controlling local/cloud mode."""
+    return request.param
+
+
+@pytest.fixture(scope="function")
+def get_storage_service(storage_mode, cloud_storage_service, local_storage):
+    """Select either cloud or local storage for parameterized tests."""
+    if storage_mode == "cloud":
+        return cloud_storage_service
+    elif storage_mode == "local":
+        return local_storage
+    raise ValueError(f"Invalid storage type: {storage_mode}")
+
+
+@pytest.fixture(scope="function")
+def test_client(db_session, get_storage_service, storage_mode):
     """
     Provide a configured FastAPI TestClient with overridden dependencies
     for both local and cloud storage modes.
@@ -131,15 +136,12 @@ def test_client(db_session, request, get_storage_service):
     app = get_application()
     app.router.lifespan_context = on_startup_test
 
-    # Override database session dependency
     def override_get_db():
         yield db_session
 
-    # Override QuestionManager dependency
     async def override_qm():
         yield QuestionManager(db_session)
 
-    # Override Storage dependency based on test parameter
     async def override_storage():
         yield get_storage_service
 
@@ -147,7 +149,7 @@ def test_client(db_session, request, get_storage_service):
     app.dependency_overrides[get_question_manager] = override_qm
     app.dependency_overrides[get_storage_manager] = override_storage
 
-    with TestClient(app) as client:
+    with TestClient(app, raise_server_exceptions=True) as client:
         yield client
 
 
@@ -234,9 +236,6 @@ def mark_logs_in_test():
 
 
 from app_test.fixtures.fixture_crud import *
-
-
-
 
 
 @pytest.fixture

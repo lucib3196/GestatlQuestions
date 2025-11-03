@@ -160,3 +160,7 @@ def test_get_nonexistent_file(cloud_storage_service):
     """Ensure retrieving a non-existent file returns None."""
     content = cloud_storage_service.get_file("no_folder", "missing.txt")
     assert content is None
+
+
+def test_rename_blob(cloud_storage_service):
+    pass

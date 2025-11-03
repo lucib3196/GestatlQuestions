@@ -252,7 +252,7 @@ async def update_question(
     update: QuestionData,
     qm: QuestionManagerDependency,
     storage: StorageDependency,
-    update_storage: bool,
+    update_storage: bool=True,
 ):
     """
     Update a question in the database and optionally rename its associated storage directory.
@@ -324,14 +324,26 @@ async def update_question(
         raise
     except Exception as e:
         logger.exception(f"Error while updating question {id}: {e}")
-        raise
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to update question {e}"
+        )
+
 
 
 @router.post("/filter")
 async def filter_questions(
     filter_data: QuestionData, qm: QuestionManagerDependency
 ) -> Sequence[QuestionMeta]:
-    return await qm.filter_questions(filter_data)
+    try:
+        return await qm.filter_questions(filter_data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to filter question {e}"
+        )
 
 
 # @router.get("/{qid}/files_data", status_code=status.HTTP_200_OK)

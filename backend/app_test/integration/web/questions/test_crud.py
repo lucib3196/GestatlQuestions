@@ -236,3 +236,20 @@ async def test_question_filter_by_title(
 
     assert isinstance(data, list)
     assert len(data) > 0
+
+
+@pytest.mark.asyncio
+async def test_update_question(test_client, create_question_and_return_question):
+    question = create_question_and_return_question
+    updates = QuestionData(title="Updated Title", isAdaptive=True)
+
+    patch_resp = test_client.put(
+        f"/questions/{question.id}",
+        json=updates.model_dump(),
+    )
+    logger.info(f"This is the path response {patch_resp}")
+    assert patch_resp.status_code == 200
+
+    updated = patch_resp.json()
+    assert updated["title"] == "Updated Title"
+    assert updated["isAdaptive"] is True

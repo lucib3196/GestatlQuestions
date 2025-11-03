@@ -193,6 +193,8 @@ async def update_question(
     if not question:
         raise ValueError("Question is not found")
     for key, value in update_data.model_dump(exclude_unset=True).items():
+        if value is None:
+            continue
         if key in relationships:
             target_class = relationships[key]
             if isinstance(value, list):

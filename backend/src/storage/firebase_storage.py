@@ -141,3 +141,32 @@ class FirebaseStorage(StorageService):
                 blob.delete()
         except NotFound:
             logger.warning("Base directory not found, nothing to delete.")
+
+    def rename_storage(self, old: str | Path, new: str | Path) -> str:
+        """
+        Rename a file (blob) in Firebase Storage by copying it to a new path
+        and deleting the old one.
+
+        Args:
+            old (str | Path): The current path of the blob in Firebase Storage.
+            new (str | Path): The desired new path of the blob.
+
+        Returns:
+            str: The new path after renaming.
+        """
+        old_path = str(old)
+        new_path = str(new)
+
+        old_blob = self.get_blob(old)
+
+        if not old_blob.exists():
+            raise FileNotFoundError(f"Blob not found: {old_path}")
+
+        # Copy the blob to the new location
+        self.bucket.copy_blob(old_blob, self.bucket, new_path)
+
+        # Delete the original blob
+        old_blob.delete()
+
+        print(f"[FirebaseStorage] Renamed {old_path} → {new_path}")
+        return new_path
