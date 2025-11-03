@@ -47,13 +47,10 @@ async def create_question(
     """
     try:
         qcreated = await qm.create_question(question)
-
         # Handles the directoru creation for the question
         path_name = safe_dir_name(f"{qcreated.title}_{str(qcreated.id)[:8]}")
-
         # Creates the actual path
         path = storage.create_storage_path(path_name)
-
         # Storing the relative path in db
         relative_path = storage.get_relative_storage_path(path)
         set_question_path(qcreated, relative_path)
@@ -252,7 +249,7 @@ async def update_question(
     update: QuestionData,
     qm: QuestionManagerDependency,
     storage: StorageDependency,
-    update_storage: bool=True,
+    update_storage: bool = True,
 ):
     """
     Update a question in the database and optionally rename its associated storage directory.
@@ -324,11 +321,7 @@ async def update_question(
         raise
     except Exception as e:
         logger.exception(f"Error while updating question {id}: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to update question {e}"
-        )
-
+        raise HTTPException(status_code=500, detail=f"Failed to update question {e}")
 
 
 @router.post("/filter")
@@ -340,10 +333,7 @@ async def filter_questions(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to filter question {e}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to filter question {e}")
 
 
 # @router.get("/{qid}/files_data", status_code=status.HTTP_200_OK)

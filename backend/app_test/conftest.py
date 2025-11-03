@@ -127,36 +127,36 @@ def get_storage_service(storage_mode, cloud_storage_service, local_storage):
     raise ValueError(f"Invalid storage type: {storage_mode}")
 
 
+# @pytest.fixture(scope="function")
+# def patch_app_settings(storage_mode, monkeypatch):
+#     """
+#     Patch STORAGE_SERVICE env var for this test's storage mode.
+#     Ensures get_settings() reflects the correct value.
+#     """
+#     monkeypatch.setenv("STORAGE_SERVICE", storage_mode)
+
+#     # Force settings reload (avoid cached instance if you use lru_cache)
+#     from src.api.core import config
+
+#     if hasattr(config.get_settings, "cache_clear"):
+#         config.get_settings.cache_clear()  # ensure settings re-read from env
+
+#     settings = config.get_settings()
+#     assert (
+#         settings.STORAGE_SERVICE == storage_mode
+#     ), f"Settings patch failed. Expected {storage_mode}, got {settings.STORAGE_SERVICE}"
+#     return settings
+
+
 @pytest.fixture(scope="function")
-def patch_app_settings(storage_mode, monkeypatch):
-    """
-    Patch STORAGE_SERVICE env var for this test's storage mode.
-    Ensures get_settings() reflects the correct value.
-    """
-    monkeypatch.setenv("STORAGE_SERVICE", storage_mode)
-
-    # Force settings reload (avoid cached instance if you use lru_cache)
-    from src.api.core import config
-
-    if hasattr(config.get_settings, "cache_clear"):
-        config.get_settings.cache_clear()  # ensure settings re-read from env
-
-    settings = config.get_settings()
-    assert (
-        settings.STORAGE_SERVICE == storage_mode
-    ), f"Settings patch failed. Expected {storage_mode}, got {settings.STORAGE_SERVICE}"
-    return settings
-
-
-@pytest.fixture(scope="function")
-def test_client(db_session, get_storage_service, storage_mode, patch_app_settings):
+def test_client(db_session, get_storage_service, storage_mode,):
     """
     Provide a configured FastAPI TestClient with overridden dependencies
     for both local and cloud storage modes.
     """
     app = get_application()
     app.router.lifespan_context = on_startup_test
-    patch_app_settings # type: ignore
+    # patch_app_settings # type: ignore
 
     def override_get_db():
         yield db_session

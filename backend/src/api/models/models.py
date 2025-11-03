@@ -51,7 +51,7 @@ class User(SQLModel, table=True):
 
 
 class Question(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
+    id: UUID | None = Field(default_factory=uuid4, primary_key=True, index=True)
     # Question metadata contains basic fields
     title: Optional[str] = Field(default=None, index=True)
     ai_generated: bool = False

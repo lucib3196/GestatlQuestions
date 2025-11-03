@@ -84,7 +84,7 @@ class QuestionManager:
                 detail="Could not delete all the question {e}",
             )
 
-    def delete_question(self, question_id: str | UUID):
+    def delete_question(self, question_id: str | UUID | None):
         try:
             return qdb.delete_question(question_id, self.session)
         except Exception as e:
@@ -111,7 +111,7 @@ class QuestionManager:
                 detail=f"Could not update question data {e}",
             )
 
-    async def get_question_data(self, id: str | UUID) -> QuestionMeta:
+    async def get_question_data(self, id: str | UUID | None) -> QuestionMeta:
         try:
             return await qdb.get_question_data(id, self.session)
         except Exception as e:
@@ -156,7 +156,7 @@ class QuestionManager:
 
     def set_question_path(
         self,
-        question_id: str | UUID,
+        question_id: str | UUID | None,
         path: str | Path,
         storage_type: Literal["cloud", "local"],
     ) -> Question:

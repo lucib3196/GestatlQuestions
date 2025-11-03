@@ -63,7 +63,7 @@ async def create_question(
         raise ValueError(f"[DB] failed to create question an error occured {e}")
 
 
-def get_question(id: str | UUID, session: SessionDep) -> Question | None:
+def get_question(id: str | UUID | None, session: SessionDep) -> Question | None:
     """
     Fetch a single Question by its ID.
 
@@ -75,6 +75,7 @@ def get_question(id: str | UUID, session: SessionDep) -> Question | None:
         The matching Question instance, or None if not found.
     """
     try:
+        assert id
         question_id = convert_uuid(id)
         return session.exec(select(Question).where(Question.id == question_id)).first()
     except SQLAlchemyError as e:
@@ -119,7 +120,7 @@ def get_all_questions(
         raise ValueError(f"[DB] failed to retrieve all question {e}")
 
 
-def delete_question(id: str | UUID, session: SessionDep) -> bool:
+def delete_question(id: str | UUID | None, session: SessionDep) -> bool:
     try:
         question = get_question(id, session)
         if not question:
@@ -136,7 +137,7 @@ def delete_question(id: str | UUID, session: SessionDep) -> bool:
 
 
 async def get_question_data(
-    id: Union[str, UUID],
+    id: str | UUID | None,
     session: SessionDep,
 ) -> QuestionMeta:
     """
@@ -297,28 +298,46 @@ async def filter_questions(
 def get_question_path(
     id: str | UUID, storage_type: Literal["cloud", "local"], session: SessionDep
 ) -> str | None:
+    """Retrieve the storage path (cloud or local) for a question."""
     question = get_question(id, session)
     if not question:
-        raise ValueError("Question is none")
+        raise ValueError("Question not found")
+
     if storage_type == "cloud":
         return question.blob_path
     elif storage_type == "local":
         return question.local_path
+    else:
+        raise ValueError(f"Invalid storage type: {storage_type}")
 
 
 def set_question_path(
-    id: str | UUID,
+    id: str | UUID | None,
     path: Path | str,
     storage_type: Literal["cloud", "local"],
     session: SessionDep,
 ) -> Question:
+    """
+    Update the question's storage path (local or cloud) and persist the change in the database.
+    """
     question = get_question(id, session)
     if not question:
-        raise ValueError("Question is none")
-    path = Path(path).as_posix()
-    if storage_type == "cloud":
-        question.blob_path = path
+        raise ValueError("Question not found")
+
+    path_str = Path(path).as_posix()
+    try:
+        if storage_type == "cloud":
+            question.blob_path = path_str
+        elif storage_type == "local":
+            question.local_path = path_str
+        else:
+            raise ValueError(f"Invalid storage type: {storage_type}")
+
+        session.add(question)
+        session.commit()
+        session.refresh(question)
         return question
-    elif storage_type == "local":
-        question.local_path = path
-        return question
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        raise RuntimeError(f"Failed to update question path: {e}")
