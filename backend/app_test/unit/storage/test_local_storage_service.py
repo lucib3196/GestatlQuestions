@@ -103,14 +103,14 @@ def test_get_filepath(save_multiple_files, local_storage, tmp_path):
 def test_empty_directory(create_test_dir, local_storage):
     """Check that a newly created directory is empty."""
     _, name = create_test_dir
-    f = local_storage.list_file_names(name)
+    f = local_storage.list_files(name)
     assert f == []
 
 
 def test_list_file_names(save_multiple_files, local_storage):
     """Ensure list_file_names returns all stored filenames."""
     files, name = save_multiple_files
-    retrieved_files = local_storage.list_file_names(name)
+    retrieved_files = local_storage.list_files(name)
 
     assert len(retrieved_files) == len(files)
     for fname, _ in files:
