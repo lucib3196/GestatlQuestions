@@ -1,8 +1,6 @@
-import json
 from pathlib import Path
 import pytest
 from src.api.models import FileData
-from src.api.models.models import Question
 
 
 @pytest.fixture
@@ -17,29 +15,6 @@ def question_data():
     }
 
 
-def create_question(client, payload, metadata=None, files=None):
-    data = {"question": json.dumps(payload)}
-    if metadata:
-        data["additional_metadata"] = json.dumps(metadata)
-
-    resp = client.post("/questions/", data=data, files=files)
-    assert resp.status_code == 201, resp.text
-
-    # Re-validate response data against the schema
-    response_data = resp.json()
-    validated = Question.model_validate(response_data)
-    assert validated
-
-    return validated
-
-
-def retrieve_question(client, qid):
-    resp = client.get(f"/questions/{qid}")
-    assert resp.status_code == 200, resp.text
-    response_data = resp.json()
-    validated = Question.model_validate(response_data)
-    assert validated
-    return validated
 
 
 @pytest.fixture
