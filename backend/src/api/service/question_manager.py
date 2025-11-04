@@ -144,10 +144,18 @@ class QuestionManager:
             )
 
     def get_question_path(
-        self, question_id: str | UUID, storage_type: Literal["cloud", "local"]
-    ) -> str | None:
+        self, question_id: str | UUID | None, storage_type: Literal["cloud", "local"]
+    ) -> str:
         try:
-            return qdb.get_question_path(question_id, storage_type, self.session)
+            question_path = qdb.get_question_path(
+                question_id, storage_type, self.session
+            )
+            if not question_path:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Question {id} does not contain a question path set to it for {storage_type}",
+                )
+            return question_path
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

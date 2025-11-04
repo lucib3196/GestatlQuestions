@@ -6,13 +6,9 @@ import pytest_asyncio
 from src.api.core import logger
 from src.utils import *
 from src.api.models import (
-    QuestionReadResponse,
     SuccessFileResponse,
     SuccessDataResponse,
 )
-
-
-
 
 
 @pytest.fixture
@@ -48,9 +44,6 @@ def question_payload_mechanics():
     }
 
 
-
-
-
 # --- Aggregate Fixture ---
 
 
@@ -74,9 +67,6 @@ def all_question_payloads(
     ]
 
 
-
-
-
 @pytest.fixture
 def invalid_question_payloads():
     # Values that should NOT work
@@ -89,23 +79,20 @@ def invalid_question_payloads():
 
 
 # Helpers
-def create_question(client, payload, metadata=None, files=None):
-    data = {"question": json.dumps(payload)}
-    if metadata:
-        data["additional_metadata"] = json.dumps(metadata)
+# def create_question(client, payload, metadata=None, files=None):
+#     data = {"question": json.dumps(payload)}
+#     if metadata:
+#         data["additional_metadata"] = json.dumps(metadata)
 
-    resp = client.post("/questions/", data=data, files=files)
-    assert resp.status_code == 201, resp.text
+#     resp = client.post("/questions/", data=data, files=files)
+#     assert resp.status_code == 201, resp.text
 
-    # Re-validate response data against the schema
-    response_data = resp.json()
-    validated = QuestionReadResponse.model_validate(response_data)
-    assert validated
+#     # Re-validate response data against the schema
+#     response_data = resp.json()
+#     validated = QuestionReadResponse.model_validate(response_data)
+#     assert validated
 
-    return validated.question
-
-
-
+#     return validated.question
 
 
 def retrieve_single_file(client, qid, filename):
@@ -131,11 +118,6 @@ def retrieve_files(
 # ----------------------------------------------------------------------
 # Fixtures
 # ----------------------------------------------------------------------
-
-
-
-
-
 
 
 @pytest.fixture

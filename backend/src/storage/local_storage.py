@@ -105,7 +105,9 @@ class LocalStorageService(StorageService):
     # File access and management
     # -------------------------------------------------------------------------
 
-    def get_filepath(self, target: str | Path, filename: str | None = None) -> str:
+    def get_file(
+        self, target: str | Path, filename: str | None = None, recursive: bool = False
+    ) -> str:
         """
         Build the absolute file path for a given identifier and filename.
 
@@ -117,11 +119,16 @@ class LocalStorageService(StorageService):
             Path: Full path to the file.
         """
         if filename:
-            return (Path(self.get_storage_path(target)) / filename).as_posix()
+
+            path = Path(self.get_storage_path(target)) / filename
+
+            return path.as_posix()
         else:
             return self.get_storage_path(target)
 
-    def get_file(self, target: str | Path, filename: str | None = None) -> bytes | None:
+    def read_file(
+        self, target: str | Path, filename: str | None = None
+    ) -> bytes | None:
         """
         Retrieve a file's contents by its identifier and filename.
 
@@ -132,7 +139,7 @@ class LocalStorageService(StorageService):
         Returns:
             bytes | None: File contents if found, otherwise None.
         """
-        target = Path(self.get_filepath(target, filename))
+        target = Path(self.get_file(target, filename))
 
         if target.exists() and target.is_file():
             return target.read_bytes()
@@ -176,7 +183,7 @@ class LocalStorageService(StorageService):
 
         return file_path
 
-    def list_file_paths(self, target: str | Path) -> List[Path]:
+    def list_filepaths(self, target: str | Path, recursive: bool = False) -> List[Path]:
         """
         List all file paths under a given identifier directory.
 
@@ -190,7 +197,10 @@ class LocalStorageService(StorageService):
         if not target.exists():
             logger.warning(f"Target path does not exist for {target}")
             return []
-        return [f for f in target.iterdir() if f.is_file]
+        if recursive:
+            return [f for f in target.rglob("*")]
+        else:
+            return [f for f in target.iterdir()]
 
     def list_files(self, target: str | Path) -> List[str]:
         """
@@ -202,7 +212,7 @@ class LocalStorageService(StorageService):
         Returns:
             List[str]: List of file names.
         """
-        return [f.name for f in self.list_file_paths(target)]
+        return [f.name for f in self.list_filepaths(target) if f.is_file()]
 
     def delete_storage(self, target: str | Path) -> None:
         """
@@ -227,7 +237,7 @@ class LocalStorageService(StorageService):
                     f.unlink()
             shutil.rmtree(target)
 
-    def delete_file(self, target: str | Path, filename: str) -> None:
+    def delete_file(self, target: str | Path, filename: str | None = None) -> None:
         """
         Delete a specific file within a resource directory.
 
@@ -235,7 +245,7 @@ class LocalStorageService(StorageService):
             identifier: Unique identifier for the stored resource.
             filename: Name of the file to delete.
         """
-        target = Path(self.get_filepath(target, filename))
+        target = Path(self.get_file(target, filename))
         if target and target.exists():
             target.unlink()
 

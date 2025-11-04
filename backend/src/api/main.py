@@ -8,9 +8,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.routing import APIRouter
-from starlette import status
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from src.api.core import logger
 
 # Local application imports
 from src.api.database.database import create_db_and_tables
@@ -18,6 +18,7 @@ from src.api.web import routes
 from src.api.core.config import get_settings
 
 settings = get_settings()
+
 
 ## Intializes the database
 @asynccontextmanager
@@ -48,7 +49,7 @@ def get_application(test_mode: bool = False):
         raise ValueError("Cannot Find Local Path")
 
     questions_dir = Path(settings.QUESTIONS_PATH).resolve()
-    
+
     if not questions_dir.exists():
         questions_dir.mkdir(parents=True, exist_ok=True)
 
@@ -57,7 +58,7 @@ def get_application(test_mode: bool = False):
         StaticFiles(directory=questions_dir, html=False),
         name="questions",
     )
-    print("Serving static files from:", questions_dir)
+    logger.info("Serving static files from:", questions_dir)
 
     # Define a custom OpenAPI schema that uses your token URL at /auth/login
     def custom_openapi():

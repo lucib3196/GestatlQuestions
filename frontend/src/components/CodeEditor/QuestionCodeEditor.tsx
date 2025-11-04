@@ -3,7 +3,7 @@ import { getLanguage } from "../../utils";
 import type { FileData } from "../../types/types";
 import CodeEditor from "./CodeEditorBase";
 import { LogOutput } from "./LogPrint";
-import { useQuestion } from "../../context/QuestionSelectionContext";
+import { useSelectedQuestion } from "../../context/SelectedQuestionContext";
 import { questionApi } from "../../api";
 import { toast } from "react-toastify";
 import FileDropDown from "../Generic/FileDropDown";
@@ -11,7 +11,7 @@ import { MyButton } from "../Base/Button";
 import { Loading } from "../Base/Loading";
 
 function QuestionCodeEditor() {
-  const { questionID: selectedQuestion } = useQuestion();
+  const { selectedQuestionID: selectedQuestion } = useSelectedQuestion();
   const [filesData, setFileData] = useState<FileData[]>([]);
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<string>("");

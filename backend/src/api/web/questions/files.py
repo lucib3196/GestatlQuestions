@@ -8,10 +8,11 @@ from src.api.core import logger
 from src.api.service.question_manager import QuestionManagerDependency
 from src.api.service.storage_manager import StorageDependency
 from src.api.models import *
-from src.api.web.questions.utils import get_question_path
 from fastapi import UploadFile
 from src.api.service.file_service import FileServiceDep
-
+from src.api.dependencies import StorageTypeDep
+from fastapi.responses import StreamingResponse
+from fastapi.responses import Response
 
 router = APIRouter(
     prefix="/questions",
@@ -29,13 +30,17 @@ client_file_extensions = {
 
 @router.get("/files/{qid}")
 async def get_question_files(
-    qid: str | UUID, qm: QuestionManagerDependency, storage: StorageDependency
+    qid: str | UUID,
+    qm: QuestionManagerDependency,
+    storage: StorageDependency,
+    storage_type: StorageTypeDep,
 ) -> SuccessFileResponse:
     """
-    Retrieve a list of all files associated with a given question.
+    Retrieve a list of filenames associated with a given question.
 
-    This endpoint locates the question using its unique identifier (UUID or string ID),
-    determines its storage path, and lists all available files in that directory.
+    This endpoint locates the question by its unique identifier (UUID or string ID),
+    determines the corresponding storage directory, and returns the filenames
+    of all available files within that question’s folder.
 
     Args:
         qid (str | UUID): The unique identifier of the question.
@@ -43,18 +48,19 @@ async def get_question_files(
         storage (StorageDependency): Dependency that handles file storage operations.
 
     Returns:
-        SuccessFileResponse: A response containing a list of file paths related to the question.
+        SuccessFileResponse: A response containing a list of filenames related to the question.
 
     Raises:
-        HTTPException(404): If the question is not found.
-        HTTPException(500): If the files cannot be retrieved due to a server error.
+        HTTPException(404): If the question cannot be found.
+        HTTPException(500): If the filenames cannot be retrieved due to a server error.
     """
     try:
         question = qm.get_question(qid)
-        question_path = get_question_path(question)
+        question_path = qm.get_question_path(question.id, storage_type)
+        assert question_path
         files = storage.list_files(question_path)
         return SuccessFileResponse(
-            status=200, detail="Retrieved files ok", filepaths=files
+            status=200, detail="Retrieved files ok", filenames=files
         )
     except HTTPException:
         raise
@@ -65,12 +71,30 @@ async def get_question_files(
         )
 
 
+@router.delete("/files/{qid}/{filename}")
+async def delete_file(
+    qid: str | UUID,
+    filename: str,
+    qm: QuestionManagerDependency,
+    storage: StorageDependency,
+    storage_type: StorageTypeDep,
+):
+    try:
+        question = qm.get_question(qid)
+        question_path = qm.get_question_path(question.id, storage_type)
+        storage.delete_file(question_path)
+        return SuccessDataResponse(status=200, detail="Deleted file ok")
+    except HTTPException:
+        raise
+
+
 @router.get("/files/{qid}/{filename}")
 async def read_question_file(
     qid: str | UUID,
     filename: str,
     qm: QuestionManagerDependency,
     storage: StorageDependency,
+    storage_type: StorageTypeDep,
 ) -> SuccessDataResponse:
     """
     Read the contents of a specific file associated with a given question.
@@ -93,10 +117,10 @@ async def read_question_file(
     """
     try:
         question = qm.get_question(qid)
-        question_path = get_question_path(question)
-        data = storage.get_file(question_path, filename)
-        assert data
-        data = data.decode("utf-8")
+        question_path = qm.get_question_path(question.id, storage_type)
+        data = storage.read_file(question_path, filename)
+        if data:
+            data = data.decode("utf-8")
         return SuccessDataResponse(
             status=status.HTTP_200_OK, detail=f"Read file {filename} success", data=data
         )
@@ -110,7 +134,6 @@ async def read_question_file(
 
 
 # Update
-# Update
 @router.put("/files/{qid}/{filename}")
 async def update_file(
     qid: str | UUID,
@@ -118,6 +141,7 @@ async def update_file(
     new_content: str | dict,
     qm: QuestionManagerDependency,
     storage: StorageDependency,
+    storage_type: StorageTypeDep,
 ) -> SuccessDataResponse:
     """
     Update or overwrite a file associated with a specific question.
@@ -144,7 +168,8 @@ async def update_file(
         if isinstance(new_content, dict):
             new_content = json.dumps(new_content)
         question = qm.get_question(qid)
-        question_path = get_question_path(question)
+        question_path = qm.get_question_path(question.id, storage_type)
+        assert question_path
         path = storage.save_file(question_path, filename, new_content, overwrite=True)
         return SuccessDataResponse(
             status=200, detail=f"Wrote file successfully to {path}", data=new_content
@@ -158,6 +183,71 @@ async def update_file(
         )
 
 
+@router.post("/files/{id}/{filename}/download")
+async def download_question_file(
+    qid: str | UUID,
+    filename: str,
+    qm: QuestionManagerDependency,
+    storage: StorageDependency,
+    fm: FileServiceDep,
+    storage_type: StorageTypeDep,
+):
+    try:
+        question = qm.get_question(qid)
+        question_path = qm.get_question_path(question.id, storage_type)
+        filepath = storage.get_file(question_path, filename)
+        folder_name = f"{question.title}_download"
+
+        zip_bytes = await fm.download_zip(files=[filepath], folder_name=folder_name)
+
+        return Response(
+            content=zip_bytes,
+            media_type="application/zip",
+            headers={"Content-Disposition": f"attachment; filename={folder_name}.zip"},
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not read file {filename}: {e}",
+        )
+
+
+@router.post("/files/{id}/download")
+async def download_question(
+    qid: str | UUID,
+    qm: QuestionManagerDependency,
+    storage: StorageDependency,
+    fm: FileServiceDep,
+    storage_type: StorageTypeDep,
+):
+    try:
+        question = qm.get_question(qid)
+        question_path = qm.get_question_path(question.id, storage_type)
+        files = storage.list_filepaths(question_path)
+        folder_name = f"{question.title}_download"
+
+        logger.info("These are the files %s", files)
+
+        zip_bytes = await fm.download_zip(files=files, folder_name=folder_name)
+
+        return Response(
+            content=zip_bytes,
+            media_type="application/zip",
+            headers={"Content-Disposition": f"attachment; filename={folder_name}.zip"},
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not get files {e}",
+        )
+
+
 @router.post("/{id}/upload_files")
 async def upload_files_to_question(
     id: str | UUID,
@@ -165,6 +255,7 @@ async def upload_files_to_question(
     qm: QuestionManagerDependency,
     storage: StorageDependency,
     fm: FileServiceDep,
+    storage_type: StorageTypeDep,
     auto_handle_images: bool = True,
 ):
     """
@@ -195,7 +286,7 @@ async def upload_files_to_question(
 
         # Get the question’s main storage directory
         question_storage_path = storage.get_storage_path(
-            str(get_question_path(question))
+            str(qm.get_question_path(question.id, storage_type))
         )
         logger.info("Resolved question storage path: %s", question_storage_path)
 

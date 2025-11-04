@@ -29,7 +29,7 @@ class SuccessfulResponse(BaseModel):
 class SuccessDataResponse(SuccessfulResponse):
     """Success response with a file system path included."""
 
-    data: Union[str, bytes, None]
+    data: Union[str, bytes, None] = None
 
 
 class SuccessFileResponse(SuccessfulResponse):
@@ -39,7 +39,7 @@ class SuccessFileResponse(SuccessfulResponse):
         default_factory=list,
         description="List of file objects or file strings",
     )
-    filepaths: List[str] | List[Path] = Field(
+    filenames: List[str] | List[Path] = Field(
         default_factory=list,
         description="List of relative file paths",
     )
@@ -53,20 +53,7 @@ class Response(BaseModel):
     detail: str
 
 
-class QuestionReadResponse(BaseModel):
-    status: int
-    question: QuestionMeta
-    files: List[FileData] | List[str] = []
-    detail: str
-
-
 class UpdateFile(BaseModel):
     question_id: str | UUID
     filename: str
     new_content: str | dict
-
-
-class AdditionalQMeta(BaseModel):
-    topics: Optional[List[str]] = None
-    languages: Optional[List[str]] = None
-    qtype: Optional[List[str]] = None

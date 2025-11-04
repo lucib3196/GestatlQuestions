@@ -4,8 +4,8 @@ import { QuestionFiltering } from "../components/QuestionFilterNew/QuestionFilte
 import { QuestionTable } from "../components/QuestionTable/QuestionTablesDB";
 import { SimpleToggle } from "../components/Generic/SimpleToggle";
 import { ResizableQuestionContainer } from "../components/Question/ResizableQuestion";
-import SyncQuestions from "../components/System/SyncQuestions";
-import { useQuestion } from "../context/QuestionSelectionContext";
+import SyncQuestions from "../components/QuestionSync/QuestionSync";
+import { useSelectedQuestion } from "../context/SelectedQuestionContext";
 
 function QuestionDashBoardHeader() {
   return (
@@ -18,9 +18,8 @@ function QuestionDashBoardHeader() {
 }
 
 export function QuestionViewPage() {
-  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const { questionID } = useQuestion()
+  const { selectedQuestionID } = useSelectedQuestion()
 
   return (
     <section className="w-full flex flex-col items-center py-12 space-y-16">
@@ -49,16 +48,16 @@ export function QuestionViewPage() {
 
         {/* Filters & Table */}
         <div className="w-full">
-          <QuestionFiltering setSearchResults={setSearchResults} />
+          <QuestionFiltering />
 
           <section className="mt-10 flex justify-center w-full">
-            <QuestionTable results={searchResults} />
+            <QuestionTable />
           </section>
         </div>
       </div>
 
       {/* Question Detail View */}
-      {questionID && <div className="w-full px-4 sm:px-8">
+      {selectedQuestionID && <div className="w-full px-4 sm:px-8">
         <ResizableQuestionContainer />
       </div>}
     </section>

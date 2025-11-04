@@ -99,7 +99,7 @@ class FirebaseStorage(StorageService):
     def does_file_exist(self, target_path: str | Path, filename: str | None):
         return self.get_blob(target_path, filename).exists()
 
-    def get_file(
+    def read_file(
         self, target: str | Path, filename: Optional[str] = None
     ) -> bytes | None:
         if self.does_file_exist(target, filename):

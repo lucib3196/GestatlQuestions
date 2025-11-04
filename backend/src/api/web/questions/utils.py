@@ -34,24 +34,3 @@ def parse_question_payload(
 #     return fd
 
 
-def get_question_path(question: Question) -> str | Path :
-    question_path = None
-    if app_settings.STORAGE_SERVICE == "cloud":
-        question_path = question.blob_path
-    elif app_settings.STORAGE_SERVICE == "local":
-        question_path = Path(str(question.local_path))
-
-    if not question_path:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Cannot get question path it is not set for {app_settings.STORAGE_SERVICE}",
-        )
-    return question_path
-
-
-def set_question_path(question: Question, path: str | Path) -> Question:
-    if app_settings.STORAGE_SERVICE == "local":
-        question.local_path = Path(str(path)).as_posix()
-    elif app_settings.STORAGE_SERVICE == "cloud":
-        question.blob_path = Path(str(path)).as_posix()
-    return question

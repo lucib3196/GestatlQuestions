@@ -111,8 +111,10 @@ class FileService:
     async def convert_to_uploadfile(
         self, path: Union[Path, str, UploadFile]
     ) -> UploadFile:
+
         if isinstance(path, UploadFile):
             return path
+
         path = Path(path)
         upload_file = UploadFile(
             filename=path.name,
@@ -139,37 +141,29 @@ class FileService:
 
     async def download_zip(
         self,
-        files: Sequence[Union[Path, str, UploadFile]],
-        dest: str | Path,
+        files: Sequence[Union[Path, str]],
         folder_name: Optional[str],
     ) -> bytes:
         """Bundle multiple files into a zip and return as StreamingResponse."""
-        upload_files: List[UploadFile] = await asyncio.gather(
-            *(self.convert_to_uploadfile(f) for f in files)
-        )
-
         buffer = io.BytesIO()
-        manifest: list[dict] = []
         folder_name = folder_name or "Untitled_Content"
-
-        zip_path = Path(dest).resolve() / f"{folder_name}.zip"
-
         with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as z:
-            for f in upload_files:
-                fname = f.filename or "UntitledFile.txt"
-                arcname = f"{folder_name}/{fname}"
-                data = await f.read()
-                z.writestr(arcname, data)
-                manifest.append({"file": arcname, "size": len(data)})
-
-            z.writestr(
-                "MANIFEST.json",
-                json.dumps(
-                    {"count": len(manifest), "files": manifest},
-                    ensure_ascii=False,
-                    indent=2,
-                ),
-            )
+            for path in files:
+                path = Path(path)
+                if path.is_dir():
+                    for subfile in path.rglob("*"):
+                        if subfile.is_file():
+                            arcname = (
+                                f"{folder_name}/{subfile.relative_to(path.parent)}"
+                            )
+                            with open(subfile, "rb") as f:
+                                z.writestr(str(arcname), f.read())
+                elif path.is_file():
+                    arcname = f"{folder_name}/{path.name}"
+                    with open(path, "rb") as f:
+                        z.writestr(arcname, f.read())
+                else:
+                    logger.warning(f"[WARN] Skipping invalid path: {path}")
         buffer.seek(0)
         return buffer.getvalue()  # type: bytes
 
