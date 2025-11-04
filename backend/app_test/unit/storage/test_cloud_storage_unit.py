@@ -100,10 +100,10 @@ def test_does_storage_path_exist(cloud_storage_service, save_test_question, file
 # ============================================================================ #
 
 
-def test_get_file(cloud_storage_service, save_test_question, file_data):
+def test_read_file(cloud_storage_service, save_test_question, file_data):
     """Ensure a saved file can be retrieved with its correct content."""
     _ = save_test_question
-    content = cloud_storage_service.get_file(
+    content = cloud_storage_service.read_file(
         file_data["identifier"], filename=file_data["filename"]
     )
     assert content is not None

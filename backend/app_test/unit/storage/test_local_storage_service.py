@@ -95,7 +95,7 @@ def test_get_filepath(save_multiple_files, local_storage, tmp_path):
     files, folder_name = save_multiple_files
     for f in files:
         assert (
-            local_storage.get_filepath(folder_name, f[0])
+            local_storage.get_file(folder_name, f[0])
             == (Path(tmp_path) / "questions" / folder_name / f[0]).as_posix()
         )
 
@@ -122,7 +122,7 @@ def test_delete_file(save_multiple_files, local_storage):
     files, name = save_multiple_files
     for filename, _ in files:
         local_storage.delete_file(name, filename)
-        assert local_storage.get_file(name, filename) is None
+        assert local_storage.read_file(name, filename) is None
 
 
 def test_get_file(save_multiple_files, local_storage):
