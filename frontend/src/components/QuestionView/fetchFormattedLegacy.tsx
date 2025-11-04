@@ -7,7 +7,7 @@ import { useSelectedQuestion } from "../../context/SelectedQuestionContext";
 
 type FormattedResult = { qStr: string | null; sStr: string[] | null };
 
-// --- Pure processing helper (no API calls) ---
+
 function formatWithParams(
     rawHtml: string | null,
     rawSolution: string | null,
@@ -29,7 +29,7 @@ function formatWithParams(
     const qStr = qRes?.htmlString ?? null;
 
     const sRes = replacedS
-        ? processPrairielearnTags(replacedS, params, "", questionTitle, CHOICE_PARAMS)
+        ? processPrairielearnTags(replacedS, params,  questionTitle, CHOICE_PARAMS)
         : undefined;
 
     const solutionsStrings = sRes?.solutionsStrings ?? null;
