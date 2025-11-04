@@ -1,24 +1,20 @@
 import {
-    useState,
     useCallback,
-    useContext,
     useMemo,
+    useState,
     type FormEvent,
 } from "react";
 
-import { Loading } from "../Base/Loading";
-import { Error } from "../Generic/Error";
-import { getQuestionMeta } from "../../api";
-import { useFormattedLegacy } from "../QuestionView/fetchFormattedLegacy";
+import { useAdaptiveParams } from "../../api";
 import { trueish } from "../../utils";
-import { QuestionSettingsContext } from "./../../context/GeneralSettingsContext";
-import { getAdaptiveParams } from "../../api";
-import { QuestionHtml } from "./QuestionHtml";
+import { useSelectedQuestion } from "../../context/SelectedQuestionContext";
+import { Loading } from "../Base/Loading";
 import { ButtonActions } from "./ActionButtons";
 import DisplayCorrectAnswer from "./DisplayCorrectAnswer";
+import { Error } from "../Generic/Error";
 import { QuestionHeader } from "./QuestionHeader";
-import { useQuestion } from "../../context/QuestionSelectionContext";
-
+import { QuestionHtml } from "./QuestionHtml";
+import { useFormattedLegacy } from "../QuestionView/fetchFormattedLegacy";
 
 type QuestionCardProps = {
     setShowSolution: React.Dispatch<React.SetStateAction<boolean>>;
@@ -29,80 +25,65 @@ export default function QuestionCard({
     setShowSolution,
     setSolution,
 }: QuestionCardProps) {
-    const { questionID: selectedQuestion } = useQuestion()
-    const { codeRunningSettings } = useContext(QuestionSettingsContext);
-    const [isSubmitted, setIsSubmitted] = useState(false);
+    const { questionMeta: qdata } = useSelectedQuestion();
 
-    const {
-        data: qdata,
-        loading: qLoading,
-        error: qError,
-    } = getQuestionMeta(selectedQuestion);
-    const isAdaptive = useMemo(
-        () => trueish(qdata?.isAdaptive),
-        [qdata?.isAdaptive]
-    );
-    // Get Question Parameters
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const isAdaptive = useMemo(() => trueish(qdata?.isAdaptive), [qdata?.isAdaptive]);
+
     const {
         params,
         loading: pLoading,
         error: pError,
-        reset: refetchParams,
-    } = getAdaptiveParams(
-        selectedQuestion ?? null,
-        codeRunningSettings,
-        isAdaptive
-    );
+        refetch
+    } = useAdaptiveParams(isAdaptive);
+
+    const questionTitle = qdata?.title ?? "Untitled Question";
+
+    const {
+        questionHtml,
+        solutionHTML,
+        loading: qLoading,
+    } = useFormattedLegacy(params, questionTitle);
+
+    useMemo(() => {
+        if (solutionHTML) setSolution(solutionHTML);
+    }, [solutionHTML, setSolution]);
 
     const handleSubmit = useCallback((e: FormEvent) => {
         e.preventDefault();
         setIsSubmitted(true);
     }, []);
 
-    const questionTitle = qdata?.title;
-
-    const { questionHtml, solutionHTML } = useFormattedLegacy(
-        selectedQuestion ?? null,
-        params,
-        questionTitle
-    );
-    setSolution(solutionHTML);
-
-    const generateVarient = useCallback(async () => {
-        await refetchParams();
+    const generateVariant = useCallback(async () => {
+        await refetch()
         setIsSubmitted(false);
         setShowSolution(false);
-    }, [refetchParams]);
+    }, [refetch, setShowSolution]);
 
-    if (qLoading || pLoading || !qdata) return <Loading />;
-    if (qError || pError) {
-        return <Error error={(qError ?? pError) as string} />;
-    }
+    // --- Loading / Error Handling ---
+    if (pLoading || qLoading) return <Loading />;
+    if (pError) return <Error error={pError} />;
     if (!questionHtml)
-        return (
-            <Error error={"Could not render question no question.html present"} />
-        );
+        return <Error error="Could not render question. No question.html present." />;
+
+    // --- Main Render ---
     return (
         <>
             <QuestionHeader question={qdata} />
-            <QuestionHtml html={questionHtml} />
+            {(!params && isAdaptive) ? <Loading /> : <QuestionHtml html={questionHtml} />}
             <div className="w-3/4 flex flex-col items-center">
                 <ButtonActions
                     isSubmitted={isSubmitted}
-                    showSolution={() => setShowSolution(prev => !prev)}
+                    showSolution={() => setShowSolution((prev) => !prev)}
                     handleSubmit={handleSubmit}
-                    generateVarient={generateVarient}
+                    generateVarient={generateVariant}
                 />
                 {isSubmitted && (
                     <div className="w-full flex justify-center flex-col items-center mb-10">
-                        <DisplayCorrectAnswer
-                            questionParams={params ?? null}
-                        ></DisplayCorrectAnswer>
+                        <DisplayCorrectAnswer questionParams={params ?? null} />
                     </div>
                 )}
             </div>
         </>
     );
 }
-
-

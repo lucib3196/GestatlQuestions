@@ -1,75 +1,101 @@
 import type { QuestionParams } from "../../types/types";
 import applyPlaceHolders from "../../utils/flattenParams";
 import { processPrairielearnTags } from "../../utils/readPrairielearn";
-import { getQuestionHTML, getSolutionHTML } from "../../api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { QuestionAPI } from "../../api/questions/crud";
+import { useSelectedQuestion } from "../../context/SelectedQuestionContext";
 
-export const fetchFormattedLegacyAdaptive = async (
-    selectedQuestion: string | null,
+type FormattedResult = { qStr: string | null; sStr: string[] | null };
+
+// --- Pure processing helper (no API calls) ---
+function formatWithParams(
+    rawHtml: string | null,
+    rawSolution: string | null,
     params: QuestionParams | null,
     questionTitle: string
-): Promise<{ qStr: string | null; sStr: string[] | null } | undefined> => {
+): FormattedResult {
     type ChoiceParams = { fracQuestions: [number, number] };
     const CHOICE_PARAMS: ChoiceParams = { fracQuestions: [1.0, 1.0] };
 
-    if (!selectedQuestion) return;
+    if (!rawHtml && !rawSolution) return { qStr: null, sStr: null };
 
-    try {
-        // The Question HTML is the main one 
-        // A solution file may not be present
-        const [rawHtml, rawSolution] = await Promise.all([
-            getQuestionHTML(selectedQuestion),
-            getSolutionHTML(selectedQuestion),
-        ]);
-        console.log("This is the raw html", rawHtml)
-        console.log("This is the data", params)
-        console.log("This si the question title inside", questionTitle)
-        const replacedQ = rawHtml ? applyPlaceHolders(rawHtml, params) : null
-        const replacedS = rawSolution ? applyPlaceHolders(rawSolution, params) : null
-        const qRes = replacedQ
-            ? processPrairielearnTags(replacedQ, params, "", questionTitle, CHOICE_PARAMS)
-            : undefined;
+    const replacedQ = rawHtml ? applyPlaceHolders(rawHtml, params) : null;
+    const replacedS = rawSolution ? applyPlaceHolders(rawSolution, params) : null;
 
-        const qStr = qRes?.htmlString ?? null;
+    const qRes = replacedQ
+        ? processPrairielearnTags(replacedQ, params, "", questionTitle, CHOICE_PARAMS)
+        : undefined;
 
-        const sRes = replacedS
-            ? processPrairielearnTags(replacedS, params, "", questionTitle, CHOICE_PARAMS)
-            : undefined;
+    const qStr = qRes?.htmlString ?? null;
 
-        const solutionsStrings = sRes?.solutionsStrings ?? null;
+    const sRes = replacedS
+        ? processPrairielearnTags(replacedS, params, "", questionTitle, CHOICE_PARAMS)
+        : undefined;
 
-        console.log(qStr)
-        const sStr: string[] = solutionsStrings ? Object.values(solutionsStrings) : []
-        return { qStr, sStr };
-    } catch (error) {
-        console.error("Failed to build question HTML/solution:", error);
-    }
-};
+    const solutionsStrings = sRes?.solutionsStrings ?? null;
+    const sStr = solutionsStrings ? Object.values(solutionsStrings) : [];
 
-export function useFormattedLegacy(selectedQuestion: string | null, params: any, questionTitle: string) {
-    const [questionHtml, setQuestionHtml] = useState<string | null>("");
-    const [solutionHTML, setSolutionHTML] = useState<string[] | null>([]);
-
-    useEffect(() => {
-        let mounted = true;
-        const run = async () => {
-            try {
-                const res = await fetchFormattedLegacyAdaptive(selectedQuestion, params, questionTitle);
-                if (mounted && res) {
-                    const { qStr, sStr } = res;
-                    setQuestionHtml(qStr);
-                    setSolutionHTML(sStr);
-                }
-            } catch (err) {
-                console.error("Failed:", err);
-            }
-        };
-        run();
-        return () => {
-            mounted = false;
-        };
-    }, [selectedQuestion, params, questionTitle]);
-
-    return { questionHtml, solutionHTML, setQuestionHtml, setSolutionHTML };
+    return { qStr, sStr };
 }
 
+// --- React hook ---
+export function useFormattedLegacy(params: QuestionParams | null, questionTitle: string) {
+    const { selectedQuestionID } = useSelectedQuestion();
+
+    const [questionHtml, setQuestionHtml] = useState<string | null>(null);
+    const [solutionHTML, setSolutionHTML] = useState<string[] | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // Keep raw HTML cached so we don’t re-download
+    const rawHtmlRef = useRef<string | null>(null);
+    const rawSolutionRef = useRef<string | null>(null);
+
+    const fetchBaseFiles = useCallback(async () => {
+        if (!selectedQuestionID) return;
+        setLoading(true);
+        try {
+            const [rawHtmlRes, rawSolutionRes] = await Promise.all([
+                QuestionAPI.getQuestionFile(selectedQuestionID, "question.html"),
+                QuestionAPI.getQuestionFile(selectedQuestionID, "solution.html"),
+            ]);
+
+            rawHtmlRef.current = rawHtmlRes?.data ?? null;
+            rawSolutionRef.current = rawSolutionRes?.data ?? null;
+        } catch (err: any) {
+            console.error("❌ Failed to fetch base HTML files:", err);
+            setError(err.message || "Failed to fetch base HTML files");
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedQuestionID]);
+
+    // Fetch HTML once when question changes
+    useEffect(() => {
+        fetchBaseFiles();
+    }, [fetchBaseFiles]);
+
+    // Re-render processed HTML when params arrive
+    useEffect(() => {
+        if (!params || !rawHtmlRef.current || !rawSolutionRef.current) return;
+
+        setLoading(true);
+        try {
+            const { qStr, sStr } = formatWithParams(
+                rawHtmlRef.current,
+                rawSolutionRef.current,
+                params,
+                questionTitle
+            );
+            setQuestionHtml(qStr);
+            setSolutionHTML(sStr);
+        } catch (err: any) {
+            console.error("❌ Failed to process HTML:", err);
+            setError(err.message || "Failed to process question HTML");
+        } finally {
+            setLoading(false);
+        }
+    }, [params, questionTitle]);
+
+    return { questionHtml, solutionHTML, loading, error };
+}

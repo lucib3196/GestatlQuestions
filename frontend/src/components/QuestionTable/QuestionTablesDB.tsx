@@ -9,7 +9,7 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
-import { useQuestion } from "../../context/QuestionSelectionContext";
+import { useSelectedQuestion } from "../../context/SelectedQuestionContext";
 import { useSelection } from "./utils/useSelection";
 import { QuestionRow } from "./QuestionRow";
 import type { MinimalTestResult } from "./utils/services";
@@ -21,7 +21,7 @@ import { useQuestionContext } from './../../context/QuestionContext';
 export function QuestionTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const { questionID, setQuestionID } = useQuestion()
+  const { selectedQuestionID, setSelectedQuestionID } = useSelectedQuestion()
   const { isSelected, toggle } = useSelection();
   const [testResults] = useState<MinimalTestResult[]>([]);
   const [theme] = useTheme();
@@ -40,7 +40,7 @@ export function QuestionTable() {
 
   const handleQuestionClick = (id: string) => {
     console.log("This is the id of clicked", id)
-    setQuestionID((prev: string | null) => (prev === id ? null : id));
+    setSelectedQuestionID((prev: string | null) => (prev === id ? null : id));
   };
 
   return (
@@ -72,7 +72,7 @@ export function QuestionTable() {
               <QuestionRow
                 key={q.id}
                 question={q}
-                isActive={questionID === q.id}
+                isActive={selectedQuestionID === q.id}
                 isChecked={isSelected(q.id ?? "")}
                 onToggleCheck={toggle}
                 onClickTitle={handleQuestionClick}

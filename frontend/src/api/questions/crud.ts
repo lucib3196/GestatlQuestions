@@ -86,4 +86,16 @@ export class QuestionAPI {
     );
     return response.data;
   }
+
+  static async runServer(
+    questionId: string,
+    language: "python" | "javascript"
+  ) {
+    const response = await api.post(
+      `run_server/${encodeURIComponent(questionId)}/${encodeURIComponent(
+        language
+      )}`
+    );
+    return response.data;
+  }
 }

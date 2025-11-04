@@ -12,7 +12,6 @@ export const processPrairielearnTags = (
 ) => {
   try {
     const $ = cheerio.load(html, { xmlMode: false });
-    console.log(qdir);
     let htmlString: string | undefined;
     let formattedSolution: string | undefined;
     const solutionsStrings: Record<string | number, string> = {};

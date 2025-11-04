@@ -1,118 +1,13 @@
 // questionHooks.ts
-import { useState, useCallback, useEffect, useRef, useContext } from "react";
-import type { QuestionMeta, QuestionParams } from "../types/types";
-import api from "./client";
+import { useState, useCallback, useEffect, useContext } from "react";
+import type { QuestionParams } from "../types/types";
 import { CodeLogsSettings } from "../context/CodeLogsContext";
 import { QuestionAPI } from "./questions/crud";
 import type { QuestionData } from "../types/questionTypes";
 import { useQuestionContext } from "../context/QuestionContext";
-// Kept name & logic the same (though this is a hook in practice)
-export function getQuestionMeta(selectedQuestion?: string | null): any {
-  const [data, setData] = useState<QuestionMeta | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+import { useSelectedQuestion } from "../context/SelectedQuestionContext";
 
-  const reset = useCallback(() => {
-    setData(null);
-    setError(null);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    if (!selectedQuestion) {
-      reset();
-      return;
-    }
-
-    const controller = new AbortController();
-    (async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await api.get(
-          `/questions/${encodeURIComponent(selectedQuestion)}`,
-          { signal: controller.signal }
-        );
-
-        const qData =
-          typeof res.data.question === "string"
-            ? JSON.parse(res.data.question)
-            : res.data.question;
-        setData(qData);
-      } catch (error: any) {
-        if (error?.name !== "CanceledError") {
-          setError("Could not get question data");
-        }
-      } finally {
-        setLoading(false);
-      }
-    })();
-
-    return () => controller.abort();
-  }, [selectedQuestion, reset]);
-
-  return { data, loading, error, reset };
-}
-
-// Kept name & logic the same (also a hook)
-export function getAdaptiveParams(
-  selectedQuestion: string | null | undefined,
-  codeLanguage: "python" | "javascript",
-  enabled: boolean
-) {
-  const [params, setParams] = useState<QuestionParams | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
-  const { setLogs } = useContext(CodeLogsSettings);
-
-  const reset = useCallback(() => {
-    if (!enabled || !selectedQuestion) {
-      setParams(null);
-      setError(null);
-      setLoading(false);
-      return;
-    }
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-    (async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await api.post(
-          `/question_running/run_server/${encodeURIComponent(
-            selectedQuestion
-          )}/${encodeURIComponent(codeLanguage)}`,
-          undefined,
-          { signal: controller.signal }
-        );
-
-        const quizData = res.data;
-        setParams(quizData);
-        setLogs(quizData.logs);
-      } catch (e: any) {
-        if (e?.name !== "CanceledError")
-          setError("Could not generate question data");
-        else {
-          setError(e as string);
-          console.log(error);
-        }
-      } finally {
-        setLoading(false);
-      }
-    })();
-    return () => controller.abort();
-  }, [enabled, selectedQuestion, codeLanguage]);
-
-  useEffect(() => {
-    void reset();
-    return () => abortRef.current?.abort();
-  }, [reset]);
-
-  return { params, loading, error, reset };
-}
-
+import { QuestionSettingsContext } from './../context/GeneralSettingsContext';
 export function useRetrievedQuestions({
   questionFilter,
   showAllQuestions,
@@ -123,10 +18,9 @@ export function useRetrievedQuestions({
   const { setQuestions } = useQuestionContext();
   const fetchQuestions = useCallback(async () => {
     try {
-      // const filter = showAllQuestions ? {} : questionFilter;
-      // console.log(filter)
+      const filter = showAllQuestions ? {} : questionFilter;
+      console.log(filter);
       const retrieved = await QuestionAPI.filterQuestions(questionFilter);
-      console.log("retrieved", retrieved)
       setQuestions(retrieved);
     } catch (error) {
       console.error("❌ Failed to fetch questions:", error);
@@ -136,4 +30,45 @@ export function useRetrievedQuestions({
   useEffect(() => {
     fetchQuestions();
   }, [fetchQuestions]);
+}
+
+
+
+export function useAdaptiveParams(isAdaptive: boolean) {
+  const [params, setParams] = useState<QuestionParams | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { codeRunningSettings } = useContext(QuestionSettingsContext);
+  const { setLogs } = useContext(CodeLogsSettings);
+  const { selectedQuestionID } = useSelectedQuestion();
+
+  const fetchParams = useCallback(async () => {
+    if (!isAdaptive) return;
+    if (!selectedQuestionID) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await QuestionAPI.runServer(
+        selectedQuestionID,
+        codeRunningSettings
+      );
+
+      setParams(res);
+      if (res?.logs) setLogs(res.logs);
+    } catch (err: any) {
+      console.error("Error fetching adaptive params:", err);
+      setError(err?.message ?? "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  }, [isAdaptive, selectedQuestionID, codeRunningSettings, setLogs]);
+
+  useEffect(() => {
+    fetchParams();
+  }, [fetchParams]);
+
+  return { params, loading, error, refetch: fetchParams };
 }
