@@ -6,7 +6,7 @@ import * as mathhelper from "./mathHelpers";
 export const processPrairielearnTags = (
   html: string,
   qdata: any,
-  qdir: string,
+  // qdir: string,
   questionName: string,
   choiceParams: { fracQuestions?: [number, number] } = { fracQuestions: [1, 1] }
 ) => {
