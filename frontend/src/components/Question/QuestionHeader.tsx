@@ -1,4 +1,4 @@
-import type { Question } from "../../types/questionTypes";
+import type { QuestionData } from "../../types/questionTypes";
 import { Pill, type PillTheme } from "../Base/Pill";
 import { SimpleToggle } from "../Generic/SimpleToggle";
 import { useState } from "react";
@@ -64,7 +64,7 @@ const GenericInfo = ({
   </div>
 );
 
-export default function QuestionInfo({ qmetadata }: { qmetadata: Question }) {
+export default function QuestionInfo({ qmetadata }: { qmetadata: QuestionData }) {
   const { topics = [], isAdaptive } = qmetadata;
 
   return (
@@ -84,7 +84,7 @@ export default function QuestionInfo({ qmetadata }: { qmetadata: Question }) {
 }
 
 // --- Header with Toggle ---
-export function QuestionHeader({ question }: { question: Question }) {
+export function QuestionHeader({ question }: { question: QuestionData }) {
   const [showMeta, setShowMeta] = useState(true);
   const { codeRunningSettings } = useContext(QuestionSettingsContext);
 

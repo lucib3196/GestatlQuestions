@@ -15,8 +15,6 @@ def question_data():
     }
 
 
-
-
 @pytest.fixture
 def server_files():
     """Static assets used by question endpoints."""
