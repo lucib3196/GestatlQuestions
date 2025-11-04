@@ -63,6 +63,7 @@ export default function QuestionCard({
     // --- Loading / Error Handling ---
     if (pLoading || qLoading) return <Loading />;
     if (pError) return <Error error={pError} />;
+    if (!qdata) return <Error error={"Failed to get question data"} />
     if (!questionHtml)
         return <Error error="Could not render question. No question.html present." />;
 

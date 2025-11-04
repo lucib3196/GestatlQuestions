@@ -3,6 +3,11 @@
 export type QuestionType = "Numerical" | "MultipleChoice" | "Example" | "Other";
 import type { GeneralResponse } from "./responseTypes";
 
+type questionRel = {
+  name: string;
+  id: number | string;
+};
+
 export type QuestionBase = {
   id?: string; // UUID
   title?: string;
@@ -16,10 +21,6 @@ export type QuestionData = QuestionBase & {
   qtypes?: string[];
 };
 
-type questionRel = {
-  name: string;
-  id: number | string;
-};
 export type QuestionMeta = QuestionBase & {
   topics?: questionRel[];
   languages?: questionRel[];
