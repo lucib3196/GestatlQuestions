@@ -4,7 +4,7 @@ import { QuestionFiltering } from "../components/QuestionFilterNew/QuestionFilte
 import { QuestionTable } from "../components/QuestionTable/QuestionTablesDB";
 import { SimpleToggle } from "../components/Generic/SimpleToggle";
 import { ResizableQuestionContainer } from "../components/Question/ResizableQuestion";
-import SyncQuestions from "../components/System/SyncQuestions";
+import SyncQuestions from "../components/QuestionSync/QuestionSync";
 import { useSelectedQuestion } from "../context/SelectedQuestionContext";
 
 function QuestionDashBoardHeader() {

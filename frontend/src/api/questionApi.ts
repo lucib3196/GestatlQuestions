@@ -4,30 +4,7 @@ import { toast } from "react-toastify";
 import type { FileName } from "../types/questionTypes";
 import type { FileData } from "../types/types";
 
-type SyncMetrics = {
-  total_found: number;
-  synced: number;
-  skipped: number;
-  failed: number;
-};
 
-type SyncResponse = {
-  metrics: SyncMetrics;
-  syncedQuestions: Question[];
-  skippedQuestions: any[]; // There is a different type but forget for now
-  failedQuestions: string[];
-};
-
-type FolderCheckMetrics = {
-  total_checked: number;
-  deleted_from_db: number;
-  still_valid: number;
-};
-
-type PruneResponse = {
-  metrics: FolderCheckMetrics;
-  remaining_questions: Question[];
-};
 
 type FileDataResponse = {
   status: number;
@@ -70,14 +47,7 @@ export const questionApi = {
     return response.data;
   },
 
-  async SyncQuestions(): Promise<SyncResponse> {
-    const response = await api.post("/questions/sync_questions");
-    return response.data;
-  },
-  async PruneQuestions(): Promise<PruneResponse> {
-    const response = await api.post("/questions/prune_missing_questions");
-    return response.data;
-  },
+
 
   async getQuestionFiles({
     questionID,
