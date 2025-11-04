@@ -130,7 +130,7 @@ def test_get_file(save_multiple_files, local_storage):
     files, name = save_multiple_files
 
     for filename, expected in files:
-        content = local_storage.get_file(name, filename)
+        content = local_storage.read_file(name, filename)
         assert content is not None, f"File {filename} should exist"
 
         if isinstance(expected, str):

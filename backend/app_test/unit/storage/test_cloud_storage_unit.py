@@ -140,7 +140,7 @@ def test_delete_file(cloud_storage_service, save_test_question, file_data):
         file_data["identifier"], file_data["filename"]
     )
     assert (
-        cloud_storage_service.get_file(
+        cloud_storage_service.read_file(
             file_data["identifier"], filename=file_data["filename"]
         )
         is None
@@ -158,7 +158,7 @@ def test_does_file_exist(cloud_storage_service, save_test_question, file_data):
 
 def test_get_nonexistent_file(cloud_storage_service):
     """Ensure retrieving a non-existent file returns None."""
-    content = cloud_storage_service.get_file("no_folder", "missing.txt")
+    content = cloud_storage_service.read_file("no_folder", "missing.txt")
     assert content is None
 
 
