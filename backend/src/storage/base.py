@@ -30,7 +30,7 @@ class StorageService:
         """Create a new directory or container for the given storage target."""
         raise NotImplementedError("create_storage_path must be implemented by subclass")
 
-    def get_relative_storage_path(self, target: str | Path|Blob) -> str | Path:
+    def get_relative_storage_path(self, target: str | Path | Blob) -> str | Path:
         """Return the relative path (from the base directory) for the given storage target."""
         raise NotImplementedError(
             "get_relative_storage_path must be implemented by subclass"
@@ -45,13 +45,14 @@ class StorageService:
     # -------------------------------------------------------------------------
     # File operations
     # -------------------------------------------------------------------------
-    def get_file(
+
+    def read_file(
         self, target: str | Path, filename: Optional[str] = None
     ) -> Optional[bytes]:
         """Retrieve the raw contents of a file for a given target."""
         raise NotImplementedError("get_file must be implemented by subclass")
 
-    def get_filepath(
+    def get_file(
         self, target: str | Path, filename: Optional[str] = None
     ) -> str | Path:
         """Return the absolute path to a specific file inside a given target directory."""
@@ -80,12 +81,14 @@ class StorageService:
     def list_files(self, target: str | Path) -> List[str]:
         """List all file names under a given target directory."""
         raise NotImplementedError("list_files must be implemented by subclass")
+    def list_filepaths(self, target:str|Path, recursive:bool = False)->List[Path]:
+         raise NotImplementedError("list_filepaths must be implemented by subclass")
 
     def delete_storage(self, target: str | Path) -> None:
         """Delete an entire storage directory or container for the given target."""
         raise NotImplementedError("delete_storage must be implemented by subclass")
 
-    def delete_file(self, target: str | Path, filename: str) -> None:
+    def delete_file(self, target: str | Path, filename: str | None = None) -> None:
         """Delete a specific file under a given target directory."""
         raise NotImplementedError("delete_file must be implemented by subclass")
 
@@ -93,7 +96,5 @@ class StorageService:
         """Completely remove all storage contents (destructive operation)."""
         raise NotImplementedError("hard_delete must be implemented by subclass")
 
-    def rename_storage(self, old:str|Path, new: str|Path)->str:
+    def rename_storage(self, old: str | Path, new: str | Path) -> str:
         raise NotImplementedError("rename must be implemented by subclass")
-
-        

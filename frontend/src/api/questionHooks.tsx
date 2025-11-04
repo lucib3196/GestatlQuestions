@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect, useContext } from "react";
 import type { QuestionParams } from "../types/types";
 import { CodeLogsSettings } from "../context/CodeLogsContext";
-import { QuestionAPI } from "./questions/crud";
+import { QuestionAPI } from "./questionCrud";
 import type { QuestionData } from "../types/questionTypes";
 import { useQuestionContext } from "../context/QuestionContext";
 import { useSelectedQuestion } from "../context/SelectedQuestionContext";

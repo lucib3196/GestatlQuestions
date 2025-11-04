@@ -1,15 +1,30 @@
 from typing import Annotated, Literal
+
 from fastapi import Depends
-from src.api.core.config import get_settings
+
+from src.api.core.config import get_settings, AppSettings
+
+StorageType = Literal["local", "cloud"]
 
 
-app_settings = get_settings()
-
-storage_type = Literal["local", "cloud"]
-
-
-async def get_storage_service_type() -> storage_type:
-    return app_settings.STORAGE_SERVICE
+def get_app_settings() -> AppSettings:
+    """
+    Dependency that provides application settings from environment or config file.
+    """
+    return get_settings()
 
 
-StorageType = Annotated[storage_type, Depends(get_storage_service_type)]
+SettingDependency = Annotated[AppSettings, Depends(get_app_settings)]
+
+
+def get_storage_type(
+    settings: SettingDependency,
+) -> StorageType:
+    """
+    Dependency that extracts the storage type from the global app settings.
+    """
+    return settings.STORAGE_SERVICE
+
+
+# Type alias for injecting storage type directly
+StorageTypeDep = Annotated[StorageType, Depends(get_storage_type)]

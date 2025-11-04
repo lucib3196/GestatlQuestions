@@ -2,7 +2,7 @@ import type { QuestionParams } from "../../types/types";
 import applyPlaceHolders from "../../utils/flattenParams";
 import { processPrairielearnTags } from "../../utils/readPrairielearn";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { QuestionAPI } from "../../api/questions/crud";
+import { QuestionAPI } from "../../api/questionCrud";
 import { useSelectedQuestion } from "../../context/SelectedQuestionContext";
 
 type FormattedResult = { qStr: string | null; sStr: string[] | null };

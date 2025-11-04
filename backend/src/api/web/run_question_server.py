@@ -15,7 +15,7 @@ from src.api.service.question_manager import QuestionManagerDependency
 from src.code_runner.models import CodeRunException, CodeRunResponse, QuizData
 from src.code_runner.runtime_switcher import run_generate
 from src.api.service.storage_manager import StorageDependency
-from src.api.dependencies import StorageType
+from src.api.dependencies import StorageTypeDep
 
 router = APIRouter(prefix="/run_server", tags=["code_running", "questions"])
 
@@ -29,7 +29,7 @@ async def run_server(
     server_language: Literal["python", "javascript"],
     qm: QuestionManagerDependency,
     storage: StorageDependency,
-    storage_type: StorageType,
+    storage_type: StorageTypeDep,
 ) -> QuizData:
     if server_language not in MAPPPING_FILENAME:
         raise HTTPException(

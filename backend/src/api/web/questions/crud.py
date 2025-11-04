@@ -9,7 +9,7 @@ from src.api.service.storage_manager import StorageDependency
 from src.api.models.models import Question
 from src.api.models import *
 from src.utils import safe_dir_name
-from src.api.dependencies import StorageType
+from src.api.dependencies import StorageTypeDep
 
 router = APIRouter(
     prefix="/questions",
@@ -24,7 +24,7 @@ async def create_question(
     qm: QuestionManagerDependency,
     storage: StorageDependency,
     question: QuestionData,
-    storage_type: StorageType,
+    storage_type: StorageTypeDep,
 ) -> Question:
     """
     Create a new question, store it in the database, and initialize its corresponding storage path.
@@ -199,7 +199,7 @@ async def delete_question(
     id: str | UUID,
     qm: QuestionManagerDependency,
     storage: StorageDependency,
-    storage_type: StorageType,
+    storage_type: StorageTypeDep,
 ):
     """
     Delete a question from the database and remove any associated stored files.
@@ -256,7 +256,7 @@ async def update_question(
     update: QuestionData,
     qm: QuestionManagerDependency,
     storage: StorageDependency,
-    storage_type: StorageType,
+    storage_type: StorageTypeDep,
     update_storage: bool = True,
 ) -> QuestionMeta:
     """

@@ -2,10 +2,10 @@ import type {
   QuestionBase,
   QuestionData,
   QuestionMeta,
-} from "../../types/questionTypes";
-import type { SuccessDataResponse } from "../../types/responseModels";
+} from "../types/questionTypes";
+import type { SuccessDataResponse } from "../types/responseModels";
 
-import api from "../client";
+import api from "./client";
 
 export class QuestionAPI {
   private static readonly base = "/questions";
