@@ -23,7 +23,7 @@ function formatWithParams(
     const replacedS = rawSolution ? applyPlaceHolders(rawSolution, params) : null;
 
     const qRes = replacedQ
-        ? processPrairielearnTags(replacedQ, params, "", questionTitle, CHOICE_PARAMS)
+        ? processPrairielearnTags(replacedQ, params, questionTitle, CHOICE_PARAMS)
         : undefined;
 
     const qStr = qRes?.htmlString ?? null;
