@@ -1,7 +1,8 @@
 import json
 from pathlib import Path
 import pytest
-from src.api.models import FileData, QuestionReadResponse
+from src.api.models import FileData
+from src.api.models.models import Question
 
 
 @pytest.fixture
@@ -26,19 +27,19 @@ def create_question(client, payload, metadata=None, files=None):
 
     # Re-validate response data against the schema
     response_data = resp.json()
-    validated = QuestionReadResponse.model_validate(response_data)
+    validated = Question.model_validate(response_data)
     assert validated
 
-    return validated.question
+    return validated
 
 
 def retrieve_question(client, qid):
     resp = client.get(f"/questions/{qid}")
     assert resp.status_code == 200, resp.text
     response_data = resp.json()
-    validated = QuestionReadResponse.model_validate(response_data)
+    validated = Question.model_validate(response_data)
     assert validated
-    return validated.question
+    return validated
 
 
 @pytest.fixture
