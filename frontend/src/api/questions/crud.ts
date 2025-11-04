@@ -3,6 +3,7 @@ import type {
   QuestionData,
   QuestionMeta,
 } from "../../types/questionTypes";
+import type { SuccessDataResponse } from "../../types/responseModels";
 
 import api from "../client";
 
@@ -71,6 +72,18 @@ export class QuestionAPI {
   /** Filter questions by given criteria */
   static async filterQuestions(filter: QuestionData): Promise<QuestionMeta[]> {
     const response = await api.post(`${this.base}/filter`, filter);
+    return response.data;
+  }
+
+  static async getQuestionFile(
+    questionId: string,
+    filename: string
+  ): Promise<SuccessDataResponse> {
+    const response = await api.get(
+      `${this.base}/files/${encodeURI(questionId)}/${encodeURIComponent(
+        filename
+      )}`
+    );
     return response.data;
   }
 }

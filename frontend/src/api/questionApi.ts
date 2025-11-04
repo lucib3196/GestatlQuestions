@@ -143,29 +143,9 @@ export const downloadStart = async () => {
     toast.error("Could not download Starter Template");
   }
 };
-export async function getQuestionFile(questionId: string, filename: string) {
-  if (!questionId) return;
-  try {
-    const response = await api.get<SuccessDataResponse>(
-      `/questions/${encodeURIComponent(questionId)}/files/${encodeURIComponent(
-        filename
-      )}`
-    );
-    console.log("This is the response of getting the files", response);
-    return response.data.data;
-  } catch (error) {
-    console.log("Could not get question file ", error);
-  }
-}
 
-export async function getQuestionHTML(questionId: string) {
-  const data = await getQuestionFile(questionId, "question.html");
-  console.log("This is the question html", data);
-  return data;
-}
-export async function getSolutionHTML(questionId: string) {
-  return await getQuestionFile(questionId, "solution.html");
-}
+
+
 
 export async function getFiles(id: string) {
   try {
