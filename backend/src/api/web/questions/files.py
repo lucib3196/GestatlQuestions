@@ -8,10 +8,9 @@ from src.api.core import logger
 from src.api.service.question_manager import QuestionManagerDependency
 from src.api.service.storage_manager import StorageDependency
 from src.api.models import *
-from src.api.web.questions.utils import get_question_path
 from fastapi import UploadFile
 from src.api.service.file_service import FileServiceDep
-
+from src.api.dependencies import StorageType
 
 router = APIRouter(
     prefix="/questions",
@@ -29,7 +28,10 @@ client_file_extensions = {
 
 @router.get("/files/{qid}")
 async def get_question_files(
-    qid: str | UUID, qm: QuestionManagerDependency, storage: StorageDependency
+    qid: str | UUID,
+    qm: QuestionManagerDependency,
+    storage: StorageDependency,
+    storage_type: StorageType,
 ) -> SuccessFileResponse:
     """
     Retrieve a list of all files associated with a given question.
@@ -51,7 +53,8 @@ async def get_question_files(
     """
     try:
         question = qm.get_question(qid)
-        question_path = get_question_path(question)
+        question_path = qm.get_question_path(question.id, storage_type)
+        assert question_path
         files = storage.list_files(question_path)
         return SuccessFileResponse(
             status=200, detail="Retrieved files ok", filepaths=files
@@ -71,6 +74,7 @@ async def read_question_file(
     filename: str,
     qm: QuestionManagerDependency,
     storage: StorageDependency,
+    storage_type: StorageType,
 ) -> SuccessDataResponse:
     """
     Read the contents of a specific file associated with a given question.
@@ -93,7 +97,8 @@ async def read_question_file(
     """
     try:
         question = qm.get_question(qid)
-        question_path = get_question_path(question)
+        question_path = qm.get_question_path(question.id, storage_type)
+        assert question_path
         data = storage.get_file(question_path, filename)
         assert data
         data = data.decode("utf-8")
@@ -110,7 +115,6 @@ async def read_question_file(
 
 
 # Update
-# Update
 @router.put("/files/{qid}/{filename}")
 async def update_file(
     qid: str | UUID,
@@ -118,6 +122,7 @@ async def update_file(
     new_content: str | dict,
     qm: QuestionManagerDependency,
     storage: StorageDependency,
+    storage_type: StorageType,
 ) -> SuccessDataResponse:
     """
     Update or overwrite a file associated with a specific question.
@@ -144,7 +149,8 @@ async def update_file(
         if isinstance(new_content, dict):
             new_content = json.dumps(new_content)
         question = qm.get_question(qid)
-        question_path = get_question_path(question)
+        question_path = qm.get_question_path(question.id, storage_type)
+        assert question_path
         path = storage.save_file(question_path, filename, new_content, overwrite=True)
         return SuccessDataResponse(
             status=200, detail=f"Wrote file successfully to {path}", data=new_content
@@ -165,6 +171,7 @@ async def upload_files_to_question(
     qm: QuestionManagerDependency,
     storage: StorageDependency,
     fm: FileServiceDep,
+    storage_type: StorageType,
     auto_handle_images: bool = True,
 ):
     """
@@ -195,7 +202,7 @@ async def upload_files_to_question(
 
         # Get the question’s main storage directory
         question_storage_path = storage.get_storage_path(
-            str(get_question_path(question))
+            str(qm.get_question_path(question.id, storage_type))
         )
         logger.info("Resolved question storage path: %s", question_storage_path)
 

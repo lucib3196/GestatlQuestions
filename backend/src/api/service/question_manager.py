@@ -144,7 +144,7 @@ class QuestionManager:
             )
 
     def get_question_path(
-        self, question_id: str | UUID, storage_type: Literal["cloud", "local"]
+        self, question_id: str | UUID|None, storage_type: Literal["cloud", "local"]
     ) -> str | None:
         try:
             return qdb.get_question_path(question_id, storage_type, self.session)

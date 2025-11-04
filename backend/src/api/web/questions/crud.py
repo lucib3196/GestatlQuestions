@@ -9,7 +9,7 @@ from src.api.service.storage_manager import StorageDependency
 from src.api.models.models import Question
 from src.api.models import *
 from src.utils import safe_dir_name
-from src.api.web.questions.utils import get_question_path, set_question_path
+from src.api.dependencies import StorageType
 
 router = APIRouter(
     prefix="/questions",
@@ -24,6 +24,7 @@ async def create_question(
     qm: QuestionManagerDependency,
     storage: StorageDependency,
     question: QuestionData,
+    storage_type: StorageType,
 ) -> Question:
     """
     Create a new question, store it in the database, and initialize its corresponding storage path.
@@ -53,7 +54,7 @@ async def create_question(
         path = storage.create_storage_path(path_name)
         # Storing the relative path in db
         relative_path = storage.get_relative_storage_path(path)
-        set_question_path(qcreated, relative_path)
+        qm.set_question_path(qcreated.id, relative_path, storage_type)
         # Commit the changes
         qm.session.commit()
 
@@ -195,7 +196,10 @@ async def get_all_questions_data(
 
 @router.delete("/{id}")
 async def delete_question(
-    id: str | UUID, qm: QuestionManagerDependency, storage: StorageDependency
+    id: str | UUID,
+    qm: QuestionManagerDependency,
+    storage: StorageDependency,
+    storage_type: StorageType,
 ):
     """
     Delete a question from the database and remove any associated stored files.
@@ -227,7 +231,10 @@ async def delete_question(
             raise HTTPException(
                 status_code=404, detail="Question not found nothing to delete"
             )
-        question_path = get_question_path(question)
+        question_path = qm.get_question_path(
+            question.id,
+            storage_type,
+        )
 
         assert qm.delete_question(id)
         if not question_path:
@@ -249,8 +256,9 @@ async def update_question(
     update: QuestionData,
     qm: QuestionManagerDependency,
     storage: StorageDependency,
+    storage_type: StorageType,
     update_storage: bool = True,
-)->QuestionMeta:
+) -> QuestionMeta:
     """
     Update a question in the database and optionally rename its associated storage directory.
 
@@ -288,7 +296,7 @@ async def update_question(
                 f"Updating storage directory for question '{existing_question.title}' → '{update.title}'"
             )
 
-            old_storage_path = get_question_path(existing_question)
+            old_storage_path = qm.get_question_path(id, storage_type)
             if not old_storage_path:
                 logger.error(f"No valid storage path found for question ID {id}")
                 raise HTTPException(
@@ -304,7 +312,9 @@ async def update_question(
 
             # Update the question's stored path reference
             updated_relative_path = storage.get_relative_storage_path(new_storage_path)
-            set_question_path(existing_question, updated_relative_path)
+            qm.set_question_path(
+                existing_question.id, updated_relative_path, storage_type
+            )
             qm.session.commit()
 
             logger.info(

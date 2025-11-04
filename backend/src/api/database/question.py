@@ -272,7 +272,7 @@ async def filter_questions(
                     or_(*[filter_conditional(Question, key, v) for v in value])
                 )
             else:
-               
+
                 conds.append(filter_conditional(Question, key, value))
 
         if conds:
@@ -297,7 +297,7 @@ async def filter_questions(
 
 
 def get_question_path(
-    id: str | UUID, storage_type: Literal["cloud", "local"], session: SessionDep
+    id: str | UUID | None, storage_type: Literal["cloud", "local"], session: SessionDep
 ) -> str | None:
     """Retrieve the storage path (cloud or local) for a question."""
     question = get_question(id, session)

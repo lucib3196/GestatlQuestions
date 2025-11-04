@@ -2,7 +2,11 @@ import api from "./client";
 import type { QuestionMeta } from "../types/types";
 import { toast } from "react-toastify";
 
-import type { QuestionBase, QuestionFull, FileName } from "../types/questionTypes";
+import type {
+  QuestionBase,
+  QuestionFull,
+  FileName,
+} from "../types/questionTypes";
 import type { FileData } from "../types/types";
 type searchQuestionProps = {
   filter?: QuestionMeta;
@@ -42,8 +46,6 @@ type FileDataResponse = {
 };
 
 export const questionApi = {
-  
-
   async getFileNames(id: string): Promise<FileName> {
     const res = await api.get(`/questions/${encodeURIComponent(id)}/files`);
     return res.data;
@@ -77,7 +79,6 @@ export const questionApi = {
     return response.data;
   },
 
-  
   async SyncQuestions(): Promise<SyncResponse> {
     const response = await api.post("/questions/sync_questions");
     return response.data;
@@ -111,8 +112,6 @@ export const questionApi = {
     return true;
   },
 };
-
-
 
 import type {
   SuccessDataResponse,
@@ -168,8 +167,6 @@ export async function getSolutionHTML(questionId: string) {
   return await getQuestionFile(questionId, "solution.html");
 }
 
-
-
 export async function getFiles(id: string) {
   try {
     const res = await api.get<SuccessFileResponse>(
@@ -182,4 +179,3 @@ export async function getFiles(id: string) {
     return [];
   }
 }
-
