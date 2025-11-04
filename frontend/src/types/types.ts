@@ -112,12 +112,4 @@ export type FileData = {
 
 export type Qtypes = "numerical" | "multiple-choice" | "other";
 
-export type QuestionFormData = {
-  title: string;
-  isAdaptive: string; // "true" | "false"
-  createdBy: string;
-  ai_generated: string;
-  topics: string[] |string; // user will type comma-separated
-  languages: string[];
-  qtypes: Qtypes[] | "";
-};
+
