@@ -7,7 +7,7 @@ import type { QuestionData } from "../types/questionTypes";
 import { useQuestionContext } from "../context/QuestionContext";
 import { useSelectedQuestion } from "../context/SelectedQuestionContext";
 
-import { QuestionSettingsContext } from './../context/GeneralSettingsContext';
+import { QuestionSettingsContext } from "./../context/GeneralSettingsContext";
 export function useRetrievedQuestions({
   questionFilter,
   showAllQuestions,
@@ -31,8 +31,6 @@ export function useRetrievedQuestions({
     fetchQuestions();
   }, [fetchQuestions]);
 }
-
-
 
 export function useAdaptiveParams(isAdaptive: boolean) {
   const [params, setParams] = useState<QuestionParams | null>(null);
