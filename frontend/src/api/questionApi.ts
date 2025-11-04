@@ -1,8 +1,8 @@
 import api from "./client";
 import type { QuestionMeta } from "../types/types";
 import { toast } from "react-toastify";
-import type { QuestionFormData } from "../types/types";
-import type { Question, QuestionFull, FileName } from "../types/questionTypes";
+
+import type { QuestionBase, QuestionFull, FileName } from "../types/questionTypes";
 import type { FileData } from "../types/types";
 type searchQuestionProps = {
   filter?: QuestionMeta;

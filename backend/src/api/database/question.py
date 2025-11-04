@@ -272,6 +272,7 @@ async def filter_questions(
                     or_(*[filter_conditional(Question, key, v) for v in value])
                 )
             else:
+               
                 conds.append(filter_conditional(Question, key, value))
 
         if conds:

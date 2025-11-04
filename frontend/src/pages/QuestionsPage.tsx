@@ -18,7 +18,6 @@ function QuestionDashBoardHeader() {
 }
 
 export function QuestionViewPage() {
-  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const { questionID } = useQuestion()
 
@@ -49,10 +48,10 @@ export function QuestionViewPage() {
 
         {/* Filters & Table */}
         <div className="w-full">
-          <QuestionFiltering setSearchResults={setSearchResults} />
+          <QuestionFiltering />
 
           <section className="mt-10 flex justify-center w-full">
-            <QuestionTable results={searchResults} />
+            <QuestionTable  />
           </section>
         </div>
       </div>

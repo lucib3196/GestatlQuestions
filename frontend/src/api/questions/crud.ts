@@ -1,58 +1,76 @@
-import type { QuestionBase, QuestionData } from "../../types/questionTypes";
-import type { QuestionMeta } from "../../types/types";
+import type {
+  QuestionBase,
+  QuestionData,
+  QuestionMeta,
+} from "../../types/questionTypes";
 
 import api from "../client";
 
 export class QuestionAPI {
-  private static base = "/questions";
+  private static readonly base = "/questions";
 
+  /** Create a new question */
   static async create(payload: QuestionData): Promise<QuestionBase> {
-    const response = await api.post(`${this.base}`, {
-      question: payload,
-    });
+    const response = await api.post(this.base, payload);
     return response.data;
   }
-  static async delete() {
+
+  /** Delete all questions (use carefully) */
+  static async deleteAll(): Promise<any> {
     const response = await api.delete(this.base);
     return response.data;
   }
-  static async get_all(offset: number, limit: number): Promise<QuestionBase[]> {
+
+  /** Get paginated questions */
+  static async getAll(offset: number, limit: number): Promise<QuestionBase[]> {
     const response = await api.get(`${this.base}/${offset}/${limit}`);
     return response.data;
   }
-  static async get_question(id: string | number): Promise<QuestionBase> {
+
+  /** Get a question (full data) by ID */
+  static async getQuestion(id: string | number): Promise<QuestionBase> {
     const response = await api.get(`${this.base}/${encodeURIComponent(id)}`);
     return response.data;
   }
-  static async get_question_meta(id: string | number): Promise<QuestionMeta> {
-    const response = await api.get(`${this.base}/${encodeURIComponent(id)}`);
+
+  /** Get question metadata only by ID */
+  static async getQuestionMeta(id: string | number): Promise<QuestionMeta> {
+    const response = await api.get(
+      `${this.base}/${encodeURIComponent(id)}/meta`
+    );
     return response.data;
   }
-  static async get_all_questions_meta(
+
+  /** Get all question metadata (paginated) */
+  static async getAllQuestionsMeta(
     offset: number,
     limit: number
   ): Promise<QuestionMeta[]> {
     const response = await api.get(`${this.base}/${offset}/${limit}/all_data`);
     return response.data;
   }
-  static async delete_question(id: string | number) {
+
+  /** Delete a specific question by ID */
+  static async deleteQuestion(id: string | number): Promise<any> {
     const response = await api.delete(`${this.base}/${encodeURIComponent(id)}`);
     return response.data;
   }
-  static async update_question(
+
+  /** Update an existing question by ID */
+  static async updateQuestion(
     id: string | number,
-    update_payload: QuestionData
+    updatePayload: QuestionData
   ): Promise<QuestionMeta> {
-    const response = await api.put(`${this.base}/${encodeURIComponent(id)}`, {
-      update: update_payload,
-    });
+    const response = await api.put(
+      `${this.base}/${encodeURIComponent(id)}`,
+      updatePayload
+    );
     return response.data;
   }
 
-  static async filter_questions(filter: QuestionData): Promise<QuestionMeta[]> {
-    const response = await api.post(`${this.base}/filter`, {
-      filter: filter,
-    });
+  /** Filter questions by given criteria */
+  static async filterQuestions(filter: QuestionData): Promise<QuestionMeta[]> {
+    const response = await api.post(`${this.base}/filter`, filter);
     return response.data;
   }
 }

@@ -3,8 +3,9 @@ import { useState, useCallback, useEffect, useRef, useContext } from "react";
 import type { QuestionMeta, QuestionParams } from "../types/types";
 import api from "./client";
 import { CodeLogsSettings } from "../context/CodeLogsContext";
-import { questionApi } from './questionApi';
-
+import { QuestionAPI } from "./questions/crud";
+import type { QuestionData } from "../types/questionTypes";
+import { useQuestionContext } from "../context/QuestionContext";
 // Kept name & logic the same (though this is a hook in practice)
 export function getQuestionMeta(selectedQuestion?: string | null): any {
   const [data, setData] = useState<QuestionMeta | null>(null);
@@ -29,9 +30,7 @@ export function getQuestionMeta(selectedQuestion?: string | null): any {
         setLoading(true);
         setError(null);
         const res = await api.get(
-          `/questions/${encodeURIComponent(
-            selectedQuestion
-          )}`,
+          `/questions/${encodeURIComponent(selectedQuestion)}`,
           { signal: controller.signal }
         );
 
@@ -65,7 +64,7 @@ export function getAdaptiveParams(
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const { setLogs } = useContext(CodeLogsSettings)
+  const { setLogs } = useContext(CodeLogsSettings);
 
   const reset = useCallback(() => {
     if (!enabled || !selectedQuestion) {
@@ -89,16 +88,15 @@ export function getAdaptiveParams(
           { signal: controller.signal }
         );
 
-        const quizData = res.data
+        const quizData = res.data;
         setParams(quizData);
-        setLogs(quizData.logs)
-
+        setLogs(quizData.logs);
       } catch (e: any) {
         if (e?.name !== "CanceledError")
           setError("Could not generate question data");
         else {
-          setError(e as string)
-          console.log(error)
+          setError(e as string);
+          console.log(error);
         }
       } finally {
         setLoading(false);
@@ -115,43 +113,27 @@ export function getAdaptiveParams(
   return { params, loading, error, reset };
 }
 
-
-type UseRetrievedFilteredQuestionsProps = {
-  searchTitle: string;
-  showAllQuestions: boolean;
-  setSearchResults: (val: any[]) => void;
-  setIsSearching: (val: boolean) => void;
-};
-
-export function useRetrievedFilteredQuestions({
-  searchTitle,
+export function useRetrievedQuestions({
+  questionFilter,
   showAllQuestions,
-  setSearchResults,
-  setIsSearching,
-}: UseRetrievedFilteredQuestionsProps) {
+}: {
+  questionFilter: QuestionData;
+  showAllQuestions: boolean;
+}) {
+  const { setQuestions } = useQuestionContext();
+  const fetchQuestions = useCallback(async () => {
+    try {
+      // const filter = showAllQuestions ? {} : questionFilter;
+      // console.log(filter)
+      const retrieved = await QuestionAPI.filterQuestions(questionFilter);
+      console.log("retrieved", retrieved)
+      setQuestions(retrieved);
+    } catch (error) {
+      console.error("❌ Failed to fetch questions:", error);
+    }
+  }, [showAllQuestions, questionFilter, setQuestions]);
 
   useEffect(() => {
-    const fetchQuestions = async () => {
-      if (!showAllQuestions && !searchTitle) {
-        setSearchResults([]);
-        return;
-      }
-
-      setIsSearching(true);
-      try {
-        const retrievedQuestions = await questionApi.filterQuestions({
-          filter: { title: searchTitle ?? "" },
-          showAllQuestions,
-        });
-        setSearchResults(retrievedQuestions);
-      } catch (error) {
-        console.error("Error fetching questions:", error);
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    };
-
     fetchQuestions();
-  }, [searchTitle, showAllQuestions, setSearchResults, setIsSearching]);
+  }, [fetchQuestions]);
 }

@@ -329,6 +329,7 @@ async def filter_questions(
     filter_data: QuestionData, qm: QuestionManagerDependency
 ) -> Sequence[QuestionMeta]:
     try:
+        logger.info("Retrieved filter %s", filter_data)
         return await qm.filter_questions(filter_data)
     except HTTPException:
         raise
