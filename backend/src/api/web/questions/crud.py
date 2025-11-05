@@ -160,7 +160,7 @@ async def get_question(id: str | UUID, qm: QuestionManagerDependency) -> Questio
 
 @router.get("/{id}/all_data")
 async def get_question_all_data(
-    id: str | UUID, qm: QuestionManagerDependency
+    id: str | UUID, qm: QuestionManagerDependency, storage_type: StorageTypeDep
 ) -> QuestionMeta:
     """
     Retrieve a question and all associated metadata by its ID.
@@ -179,7 +179,9 @@ async def get_question_all_data(
         Exception: Propagates any database or data access errors encountered during retrieval.
     """
     try:
-        return await qm.get_question_data(id)
+        question_data = await qm.get_question_data(id)
+        question_data.question_path = qm.get_question_path(id, storage_type)
+        return question_data
     except Exception:
         raise
 

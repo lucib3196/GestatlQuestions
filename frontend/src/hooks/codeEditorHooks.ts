@@ -1,14 +1,14 @@
-import { useCodeEditorContext } from "./../../context/CodeEditorContext";
+import { useCodeEditorContext } from "../context/CodeEditorContext";
 import { useState, useCallback, useEffect } from "react";
-import { useSelectedQuestion } from "../../context/SelectedQuestionContext";
-import { QuestionAPI } from "./../../api/questionCrud";
+import { QuestionAPI } from "../api/questionCrud";
 import { toast } from "react-toastify";
-import type { FileData } from "../../types/questionTypes";
+import type { FileData } from "../types/questionTypes";
+import { useQuestionContext } from "../context/QuestionContext";
 
 export function useQuestionFiles() {
   const { setFileNames, selectedFile, setFileContent, refreshKey } =
     useCodeEditorContext();
-  const { selectedQuestionID } = useSelectedQuestion();
+  const { selectedQuestionID } = useQuestionContext();
 
   const [filesData, setFileData] = useState<FileData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -102,8 +102,12 @@ export function useDeleteQuestionFile(onRefresh?: () => void) {
   const [loading, setLoading] = useState(false);
 
   const deleteFile = useCallback(
-    async (questionID: string, filename: string) => {
+    async (questionID: string, filename: string | null) => {
       try {
+        if (!filename) {
+          console.log("Filename is empty");
+          return;
+        }
         setLoading(true);
         await QuestionAPI.deleteFile(questionID, filename);
         toast.success("File deleted successfully!");

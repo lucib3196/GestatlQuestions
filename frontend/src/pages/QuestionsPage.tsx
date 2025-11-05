@@ -1,10 +1,7 @@
-
-import { useState } from "react";
 import { QuestionFiltering } from "../components/QuestionFilterNew/QuestionFiltering";
 import { QuestionTable } from "../components/QuestionTable/QuestionTablesDB";
 import { ResizableQuestionContainer } from "../components/Question/ResizableQuestion";
-import { useSelectedQuestion } from "../context/SelectedQuestionContext";
-
+import { useQuestionContext } from "../context/QuestionContext";
 function QuestionDashBoardHeader() {
   return (
     <div className="flex justify-center items-center mb-6">
@@ -16,8 +13,7 @@ function QuestionDashBoardHeader() {
 }
 
 export function QuestionViewPage() {
-  const [showSettings, setShowSettings] = useState<boolean>(false);
-  const { selectedQuestionID } = useSelectedQuestion()
+  const { selectedQuestionID } = useQuestionContext();
 
   return (
     <section className="w-full flex flex-col items-center py-12 space-y-16">
@@ -36,9 +32,11 @@ export function QuestionViewPage() {
       </div>
 
       {/* Question Detail View */}
-      {selectedQuestionID && <div className="w-full px-4 sm:px-8">
-        <ResizableQuestionContainer />
-      </div>}
+      {selectedQuestionID && (
+        <div className="w-full px-4 sm:px-8">
+          <ResizableQuestionContainer />
+        </div>
+      )}
     </section>
   );
 }

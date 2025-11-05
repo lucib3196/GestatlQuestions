@@ -1,13 +1,12 @@
 import { MathJaxContext } from "better-react-mathjax";
 import QuestionSettingsProvider from "./context/GeneralSettingsContext";
-import RunningQuestionProvider from "./context/SelectedQuestionContext";
 import { AuthProvider } from "./context/AuthContext";
 import NavBar from "./components/NavBar/NavBar";
 import { ToastContainer } from "react-toastify";
 import CodeEditorProvider from "./context/CodeEditorContext";
-import QuestionSelectionProvider from "./context/SelectedQuestionContext";
 import { LecturePage } from "./pages/LecturePage";
 import { QuestionProvider } from "./context/QuestionContext";
+
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {
@@ -19,24 +18,20 @@ const config = {
 function App() {
   return (
     <AuthProvider>
-      <QuestionProvider>
-        <QuestionSelectionProvider>
-          <MathJaxContext version={3} config={config}>
-            <QuestionSettingsProvider>
-              <RunningQuestionProvider>
-                <CodeEditorProvider>
-                  {/* Main Content */}
-                  <NavBar />
-                  <ToastContainer />
-                  <LecturePage />
-                  {/* <LegacyQuestion /> */}
-                  {/* End of Main Content */}
-                </CodeEditorProvider>
-              </RunningQuestionProvider>
-            </QuestionSettingsProvider>
-          </MathJaxContext>
-        </QuestionSelectionProvider>
-      </QuestionProvider>
+      <MathJaxContext version={3} config={config}>
+        <QuestionSettingsProvider>
+          <QuestionProvider>
+            <CodeEditorProvider>
+              {/* Main Content */}
+              <NavBar />
+              <ToastContainer />
+              <LecturePage />
+              {/* <LegacyQuestion /> */}
+              {/* End of Main Content */}
+            </CodeEditorProvider>
+          </QuestionProvider>
+        </QuestionSettingsProvider>
+      </MathJaxContext>
     </AuthProvider>
   );
 }

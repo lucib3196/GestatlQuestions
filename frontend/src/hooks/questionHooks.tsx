@@ -2,12 +2,9 @@
 import { useState, useCallback, useEffect, } from "react";
 import type { QuestionParams } from "../types/types";
 import { useCodeEditorContext } from "../context/CodeEditorContext";
-import { QuestionAPI } from "./questionCrud";
+import { QuestionAPI } from "../api/questionCrud";
 import type { QuestionData } from "../types/questionTypes";
 import { useQuestionContext } from "../context/QuestionContext";
-import { useSelectedQuestion } from "../context/SelectedQuestionContext";
-
-
 
 export function useRetrievedQuestions({
   questionFilter,
@@ -20,11 +17,10 @@ export function useRetrievedQuestions({
   const fetchQuestions = useCallback(async () => {
     try {
       const filter = showAllQuestions ? {} : questionFilter;
-      console.log(filter);
-      const retrieved = await QuestionAPI.filterQuestions(questionFilter);
+      const retrieved = await QuestionAPI.filterQuestions(filter);
       setQuestions(retrieved);
     } catch (error) {
-      console.error("❌ Failed to fetch questions:", error);
+      console.error("Failed to fetch questions:", error);
     }
   }, [showAllQuestions, questionFilter, setQuestions]);
 
@@ -40,7 +36,7 @@ export function useAdaptiveParams(isAdaptive: boolean) {
 
   const { codeRunningSettings, setLogs } = useCodeEditorContext();
 
-  const { selectedQuestionID } = useSelectedQuestion();
+  const { selectedQuestionID } = useQuestionContext();
 
   const fetchParams = useCallback(async () => {
     if (!isAdaptive) return;

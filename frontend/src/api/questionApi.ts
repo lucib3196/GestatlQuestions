@@ -3,11 +3,6 @@ import { toast } from "react-toastify";
 
 import type { FileName } from "../types/questionTypes";
 
-
-
-
-
-
 export const questionApi = {
   async getFileNames(id: string): Promise<FileName> {
     const res = await api.get(`/questions/${encodeURIComponent(id)}/files`);
@@ -42,9 +37,6 @@ export const questionApi = {
     return response.data;
   },
 
-
-
-  
   async saveFileContent(
     filename: string,
     content: string,

@@ -3,11 +3,16 @@ import FileDropDown from "../Generic/FileDropDown";
 import { useCodeEditorContext } from "./../../context/CodeEditorContext";
 import { CodeSettings } from "../QuestionFilter/CodeSettings";
 import { MyModal } from "../Base/MyModal";
-import { useSelectedQuestion } from "../../context/SelectedQuestionContext";
-import { useDeleteQuestionFile, useSaveQuestionFile, useUploadQuestionFiles } from "./codeEditorHooks";
+import { useQuestionContext } from "../../context/QuestionContext";
+import {
+    useDeleteQuestionFile,
+    useSaveQuestionFile,
+    useUploadQuestionFiles,
+} from "../../hooks/codeEditorHooks";
 import { useState } from "react";
 import { UploadCodeFile } from "./UploadCodeFiles";
 import { DeleteCodeFile } from "./DeletedCodeFiles";
+import QuestionUpdateForm from "../Forms/UpdateQuestionMeta";
 
 export function CodeEditorToolBar() {
     const {
@@ -20,20 +25,20 @@ export function CodeEditorToolBar() {
         setRefreshKey,
         setShowLogs,
     } = useCodeEditorContext();
-    const { selectedQuestionID } = useSelectedQuestion();
-    const { saveFile, } = useSaveQuestionFile(() =>
+    const { selectedQuestionID } = useQuestionContext();
+    const { saveFile } = useSaveQuestionFile(() =>
         setRefreshKey((prev) => prev + 1)
     );
     const { deleteFile } = useDeleteQuestionFile(() =>
-        setRefreshKey((prev) => prev + 1))
-
-
+        setRefreshKey((prev) => prev + 1)
+    );
 
     const [showUpload, setShowUpload] = useState(false);
     const [showEditMeta, setShowEditMeta] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
     const { uploadFile } = useUploadQuestionFiles(() =>
-        setRefreshKey((prev) => prev + 1));
+        setRefreshKey((prev) => prev + 1)
+    );
 
     return (
         <div className="flex flex-col w-full gap-y-4 my-2">
@@ -96,7 +101,7 @@ export function CodeEditorToolBar() {
                 )}
                 {showEditMeta && (
                     <MyModal setShowModal={() => setShowEditMeta((prev) => !prev)}>
-                        <div>Meta</div>
+                        <QuestionUpdateForm />
                     </MyModal>
                 )}
                 {showDelete && (
@@ -104,7 +109,9 @@ export function CodeEditorToolBar() {
                         <DeleteCodeFile
                             questionId={selectedQuestionID ?? ""}
                             filename={selectedFile}
-                            onSubmit={() => deleteFile(selectedQuestionID ?? "", selectedFile)}
+                            onSubmit={() =>
+                                deleteFile(selectedQuestionID ?? "", selectedFile)
+                            }
                         />
                     </MyModal>
                 )}

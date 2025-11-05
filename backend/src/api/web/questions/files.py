@@ -22,7 +22,7 @@ router = APIRouter(
     tags=["questions", "files"],
 )
 
-
+CLIENT_FILE_DIR = "clientFiles"
 client_file_extensions = {
     ".png",
     ".jpg",
@@ -81,11 +81,20 @@ async def delete_file(
     qm: QuestionManagerDependency,
     storage: StorageDependency,
     storage_type: StorageTypeDep,
+    fm: FileServiceDep,
 ):
     try:
         question = qm.get_question(qid)
-        question_path = qm.get_question_path(question.id, storage_type)
-        storage.delete_file(question_path)
+        question_path = Path(qm.get_question_path(question.id, storage_type))
+        logger.debug(f"The question path is {question_path}")
+        if await fm.is_image(filename):
+            filepath = question_path / CLIENT_FILE_DIR / filename
+        else:
+            filepath = question_path / filename
+
+        resolved_filepath = filepath
+        logger.info("Deleting the resolved file %s", resolved_filepath)
+        storage.delete_file(resolved_filepath)
         return SuccessDataResponse(status=200, detail="Deleted file ok")
     except HTTPException:
         raise
@@ -358,7 +367,7 @@ async def upload_files_to_question(
                 other_files.append(uploaded_file)
 
         # Define destination paths
-        client_files_dir = Path(question_storage_path) / "clientFiles"
+        client_files_dir = Path(question_storage_path) / CLIENT_FILE_DIR
 
         # Upload files based on handling strategy
         if auto_handle_images:

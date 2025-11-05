@@ -31,7 +31,7 @@ class LocalStorageService(StorageService):
         Args:
             root: Path or string specifying the root storage directory.
         """
-        self.root = Path(root).resolve()
+        self.root = Path(root).resolve().parent  # => C:\Github\GestatlQuestions
         self.root.mkdir(parents=True, exist_ok=True)
 
         logger.debug(
@@ -61,7 +61,7 @@ class LocalStorageService(StorageService):
         Returns:
             Path: Path to the resource directory.
         """
-        return (self.root / safe_dir_name(str(target))).as_posix()
+        return (Path(self.root) / str(target)).as_posix()
 
     def create_storage_path(self, target: str | Path) -> Path:
         """
@@ -77,7 +77,7 @@ class LocalStorageService(StorageService):
         storage.mkdir(parents=True, exist_ok=True)
         return storage
 
-    def get_relative_storage_path(self, target):
+    def get_relative_storage_path(self, target: str | Path | Blob):
         """
         Return the relative path of a storage directory from the base root.
 
@@ -87,7 +87,8 @@ class LocalStorageService(StorageService):
         Returns:
             Path: Relative path to the storage directory.
         """
-        return Path(self.get_storage_path(target)).relative_to(self.root.parent)
+        # Assuming you are running it from backend folder
+        return Path(self.root) / str(target)
 
     def does_storage_path_exist(self, target: str | Path) -> bool:
         """
@@ -119,9 +120,7 @@ class LocalStorageService(StorageService):
             Path: Full path to the file.
         """
         if filename:
-
             path = Path(self.get_storage_path(target)) / filename
-
             return path.as_posix()
         else:
             return self.get_storage_path(target)
@@ -246,7 +245,9 @@ class LocalStorageService(StorageService):
             filename: Name of the file to delete.
         """
         target = Path(self.get_file(target, filename))
+        logger.debug(f"[LOCAL STORAGE] Attempting to delete [target]: {target}")
         if target and target.exists():
+            logger.debug(f"[LOCAL STORAGE] Deleting file {target}")
             target.unlink()
 
     def rename_storage(self, old: str | Path, new: str | Path) -> str:

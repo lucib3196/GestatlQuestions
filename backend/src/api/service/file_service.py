@@ -8,7 +8,7 @@ from typing import Annotated, List, Optional, Sequence, Union
 
 from fastapi import Depends, HTTPException, UploadFile
 from starlette import status
-
+import mimetypes
 
 from src.api.core import logger
 from src.api.core.config import get_settings
@@ -48,6 +48,11 @@ ALLOWED_MIME_TYPES = {
     "text/javascript",
 }
 ALLOWED_ZIP_EXTENSIONS = {"application/zip", "application/x-zip-compressed"}
+ALLOWED_IMAGE_EXTENSIONS = {
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+}
 
 
 class SuccessFileServiceResponse(SuccessfulResponse):
@@ -166,6 +171,12 @@ class FileService:
                     logger.warning(f"[WARN] Skipping invalid path: {path}")
         buffer.seek(0)
         return buffer.getvalue()  # type: bytes
+
+    async def is_image(self, filename: str) -> bool:
+        mime_type, _ = mimetypes.guess_type(filename)
+        if mime_type and (mime_type in ALLOWED_IMAGE_EXTENSIONS):
+            return True
+        return False
 
     # Helpers
     async def validate_file_size(self, file: UploadFile) -> UploadFile:

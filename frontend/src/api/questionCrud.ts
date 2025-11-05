@@ -37,7 +37,7 @@ export class QuestionAPI {
   /** Get question metadata only by ID */
   static async getQuestionMeta(id: string | number): Promise<QuestionMeta> {
     const response = await api.get(
-      `${this.base}/${encodeURIComponent(id)}/meta`
+      `${this.base}/${encodeURIComponent(id)}/all_data`
     );
     return response.data;
   }

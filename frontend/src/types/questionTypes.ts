@@ -13,6 +13,7 @@ export type QuestionBase = {
   title?: string;
   ai_generated?: boolean;
   isAdaptive?: boolean;
+  question_path?: string;
 };
 
 export type QuestionData = QuestionBase & {
@@ -37,7 +38,7 @@ export type QuestionFull = GeneralResponse & {
 export type FileData = {
   filename: string;
   content: string;
-  mime_type:string
+  mime_type: string;
 };
 
 export type FileName = GeneralResponse & {

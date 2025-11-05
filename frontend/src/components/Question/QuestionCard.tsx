@@ -4,17 +4,16 @@ import {
     useState,
     type FormEvent,
 } from "react";
-
+import { QuestionHTMLToReact } from "../QuestionComponents/ParseQuestionHTML";
 import { useAdaptiveParams } from "../../api";
 import { trueish } from "../../utils";
-import { useSelectedQuestion } from "../../context/SelectedQuestionContext";
 import { Loading } from "../Base/Loading";
 import { ButtonActions } from "./ActionButtons";
 import DisplayCorrectAnswer from "./DisplayCorrectAnswer";
 import { Error } from "../Generic/Error";
 import { QuestionHeader } from "./QuestionHeader";
-import { QuestionHtml } from "./QuestionHtml";
 import { useFormattedLegacy } from "../QuestionView/fetchFormattedLegacy";
+import { useQuestionContext } from "../../context/QuestionContext";
 
 type QuestionCardProps = {
     setShowSolution: React.Dispatch<React.SetStateAction<boolean>>;
@@ -25,7 +24,7 @@ export default function QuestionCard({
     setShowSolution,
     setSolution,
 }: QuestionCardProps) {
-    const { questionMeta: qdata } = useSelectedQuestion();
+    const { questionMeta: qdata } = useQuestionContext();
 
     const [isSubmitted, setIsSubmitted] = useState(false);
     const isAdaptive = useMemo(() => trueish(qdata?.isAdaptive), [qdata?.isAdaptive]);
@@ -37,13 +36,15 @@ export default function QuestionCard({
         refetch
     } = useAdaptiveParams(isAdaptive);
 
-    const questionTitle = qdata?.title ?? "Untitled Question";
+    // Usef for images
+    let questionPath = qdata?.question_path ?? qdata?.title ?? "";
+    questionPath += "/clientFiles"
 
     const {
         questionHtml,
         solutionHTML,
         loading: qLoading,
-    } = useFormattedLegacy(params, questionTitle);
+    } = useFormattedLegacy(params, questionPath);
 
     useMemo(() => {
         if (solutionHTML) setSolution(solutionHTML);
@@ -66,12 +67,12 @@ export default function QuestionCard({
     if (!qdata) return <Error error={"Failed to get question data"} />
     if (!questionHtml)
         return <Error error="Could not render question. No question.html present." />;
-
+    console.log(questionHtml)
     // --- Main Render ---
     return (
         <>
             <QuestionHeader question={qdata} />
-            {(!params && isAdaptive) ? <Loading /> : <QuestionHtml html={questionHtml} />}
+            {(!params && isAdaptive) ? <Loading /> : <QuestionHTMLToReact html={questionHtml} />}
             <div className="w-3/4 flex flex-col items-center">
                 <ButtonActions
                     isSubmitted={isSubmitted}

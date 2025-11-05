@@ -3,7 +3,7 @@ import { LogOutput } from "./LogPrint";
 import { Loading } from "../Base/Loading";
 import { useCodeEditorContext } from "../../context/CodeEditorContext";
 import { CodeEditorToolBar } from "./CodeEditorToolBar";
-import { useQuestionFiles } from "./codeEditorHooks";
+import { useQuestionFiles } from "../../hooks/codeEditorHooks";
 import { useState, useEffect } from "react";
 
 

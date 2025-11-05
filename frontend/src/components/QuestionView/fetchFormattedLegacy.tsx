@@ -1,16 +1,15 @@
 import type { QuestionParams } from "../../types/types";
 import applyPlaceHolders from "../../utils/flattenParams";
-import { processPrairielearnTags } from "../../utils/readPrairielearn";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback} from "react";
 import { QuestionAPI } from "../../api/questionCrud";
-import { useSelectedQuestion } from "../../context/SelectedQuestionContext";
+import { useQuestionContext } from "../../context/QuestionContext";
 
 type FormattedResult = { qStr: string | null; sStr: string[] | null };
 
 
 function formatWithParams(
     rawHtml: string | null,
-    rawSolution: string | null,
+    rawSolution: string | null| string[],
     params: QuestionParams | null,
     questionTitle: string
 ): FormattedResult {
@@ -20,17 +19,17 @@ function formatWithParams(
     if (!rawHtml && !rawSolution) return { qStr: null, sStr: null };
 
     const replacedQ = rawHtml ? applyPlaceHolders(rawHtml, params) : null;
-    const replacedS = rawSolution ? applyPlaceHolders(rawSolution, params) : null;
+    const replacedS = rawSolution ? applyPlaceHolders(rawSolution??"", params) : null;
 
-    const qRes = replacedQ
-        ? processPrairielearnTags(replacedQ, params, questionTitle, CHOICE_PARAMS)
-        : undefined;
+    // const qRes = replacedQ
+    //     ? processPrairielearnTags(replacedQ, params, questionTitle, CHOICE_PARAMS)
+    //     : undefined;
 
     const qStr = qRes?.htmlString ?? null;
 
-    const sRes = replacedS
-        ? processPrairielearnTags(replacedS, params,  questionTitle, CHOICE_PARAMS)
-        : undefined;
+    // const sRes = replacedS
+    //     ? processPrairielearnTags(replacedS, params, questionTitle, CHOICE_PARAMS)
+    //     : undefined;
 
     const solutionsStrings = sRes?.solutionsStrings ?? null;
     const sStr = solutionsStrings ? Object.values(solutionsStrings) : [];
@@ -40,16 +39,14 @@ function formatWithParams(
 
 // --- React hook ---
 export function useFormattedLegacy(params: QuestionParams | null, questionTitle: string) {
-    const { selectedQuestionID } = useSelectedQuestion();
+    const { selectedQuestionID } = useQuestionContext();
 
     const [questionHtml, setQuestionHtml] = useState<string | null>(null);
-    const [solutionHTML, setSolutionHTML] = useState<string[] | null>(null);
+    const [solutionHTML, setSolutionHTML] = useState<string[] | null | string>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Keep raw HTML cached so we don’t re-download
-    const rawHtmlRef = useRef<string | null>(null);
-    const rawSolutionRef = useRef<string | null>(null);
+
 
     const fetchBaseFiles = useCallback(async () => {
         if (!selectedQuestionID) return;
@@ -60,8 +57,8 @@ export function useFormattedLegacy(params: QuestionParams | null, questionTitle:
                 QuestionAPI.getQuestionFile(selectedQuestionID, "solution.html"),
             ]);
 
-            rawHtmlRef.current = rawHtmlRes?.data ?? null;
-            rawSolutionRef.current = rawSolutionRes?.data ?? null;
+            setQuestionHtml(rawHtmlRes?.data ?? null);
+            setSolutionHTML(rawSolutionRes?.data ?? null);
         } catch (err: any) {
             console.error("❌ Failed to fetch base HTML files:", err);
             setError(err.message || "Failed to fetch base HTML files");
@@ -77,13 +74,13 @@ export function useFormattedLegacy(params: QuestionParams | null, questionTitle:
 
     // Re-render processed HTML when params arrive
     useEffect(() => {
-        if (!params || !rawHtmlRef.current || !rawSolutionRef.current) return;
+        if (!params) return;
 
         setLoading(true);
         try {
             const { qStr, sStr } = formatWithParams(
-                rawHtmlRef.current,
-                rawSolutionRef.current,
+                questionHtml,
+                solutionHTML ?? "",
                 params,
                 questionTitle
             );

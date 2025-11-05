@@ -81,8 +81,9 @@ class StorageService:
     def list_files(self, target: str | Path) -> List[str]:
         """List all file names under a given target directory."""
         raise NotImplementedError("list_files must be implemented by subclass")
-    def list_filepaths(self, target:str|Path, recursive:bool = False)->List[Path]:
-         raise NotImplementedError("list_filepaths must be implemented by subclass")
+
+    def list_filepaths(self, target: str | Path, recursive: bool = False) -> List[Path]:
+        raise NotImplementedError("list_filepaths must be implemented by subclass")
 
     def delete_storage(self, target: str | Path) -> None:
         """Delete an entire storage directory or container for the given target."""

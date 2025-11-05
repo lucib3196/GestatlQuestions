@@ -1,0 +1,41 @@
+import PLQuestionPanel from "./PLQuestionPanel";
+import PLNumberInput from "./PLNumberInput";
+import type { PLQuestionPanelProps } from "./PLQuestionPanel";
+import type { PLNumberInputProps } from "./PLNumberInput";
+
+// The currently available tags that are processed, this is the mapping
+// These in html look like EX: <pl-question-panel>Hello world</pl-question-panel
+export type ValidComponents = "pl-question-panel" | "pl-number-input";
+
+export type TagRegistry = {
+    "pl-question-panel": PLQuestionPanelProps;
+    "pl-number-input": PLNumberInputProps;
+};
+
+export const ComponentMap: Record<
+    ValidComponents | string,
+    React.FC<any> | undefined
+> = {
+    "pl-question-panel": PLQuestionPanel,
+    "pl-number-input": PLNumberInput,
+};
+// These are the raw attributes for instance <pl-number-input answer-name='c' />
+type RawAttributes = Record<string, string>;
+
+// This essentially maps the raw attributes and changes them and process them
+// Into more react viable components, the raw attributes are a mapping to the react
+// props that the input element expects,
+export const TagAttributeMapping: {
+    [K in keyof TagRegistry]: (attrs: RawAttributes) => TagRegistry[K];
+} = {
+    "pl-question-panel": (_attrs) => ({}),
+
+    "pl-number-input": (attrs) => ({
+        answerName: attrs["answers-name"],
+        comparison: attrs.comparison ?? "exact",
+        digits: Number(attrs.digits ?? 3),
+        label: attrs.label ?? "",
+        className: attrs["classname"],
+        variant: attrs["variant"],
+    }),
+};
