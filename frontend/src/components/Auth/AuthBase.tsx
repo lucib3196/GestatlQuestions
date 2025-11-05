@@ -1,7 +1,8 @@
-import FormInputTextBase from "../Forms/InputComponent";
+
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { MyButton } from "../Base/Button";
+import { InputTextForm } from './../Forms/InputComponents';
 
 
 type State = "login" | "signup" | "resetPassword"
@@ -33,7 +34,7 @@ export default function AuthBase({ state, onSubmit, children }: AuthProps) {
             id={state}
         >
             {state === "signup" && (
-                <FormInputTextBase
+                <InputTextForm
                     id="name"
                     type="text"
                     name="name"
@@ -43,7 +44,7 @@ export default function AuthBase({ state, onSubmit, children }: AuthProps) {
                 />
             )}
             {state === "signup" && (
-                <FormInputTextBase
+                <InputTextForm
                     id="username"
                     type="text"
                     name="username"
@@ -52,7 +53,7 @@ export default function AuthBase({ state, onSubmit, children }: AuthProps) {
                     onChange={(e) => setUserName(e.target.value)}
                 />
             )}
-            <FormInputTextBase
+            <InputTextForm
                 id="email"
                 type="email"
                 name="email"
@@ -60,7 +61,7 @@ export default function AuthBase({ state, onSubmit, children }: AuthProps) {
                 placeholder="FBody@email.com"
                 onChange={(e) => setEmail(e.target.value)}
             />
-            <FormInputTextBase
+            <InputTextForm
                 id="password"
                 type="password"
                 name="password"

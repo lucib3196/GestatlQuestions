@@ -3,7 +3,7 @@
 export type QuestionType = "Numerical" | "MultipleChoice" | "Example" | "Other";
 import type { GeneralResponse } from "./responseTypes";
 
-type questionRel = {
+export type questionRel = {
   name: string;
   id: number | string;
 };

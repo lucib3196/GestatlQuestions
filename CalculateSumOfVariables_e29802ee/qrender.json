@@ -1,0 +1,22 @@
+[
+  {
+    "question_template": "If $a = {{params.a}}$ and $b = {{params.b}}$, what is $c = a + b$?",
+    "questionInputs": [
+      {
+        "name": "c",
+        "label": "$c=$",
+        "qtype": "number",
+        "comparison": "sigfig",
+        "digits": 3,
+        "units": null
+      }
+    ],
+    "image": null,
+    "solution_render": [
+      "> We begin by noting that the problem states: if $a = {{params.a}}$ and $b = {{params.b}}$, we need to calculate $c = a + b$.",
+      " > The symbolic equation for the sum of $a$ and $b$ is: $c = a + b$.",
+      " > Now we will substitute the known values into the equation, yielding: $c = {{params.a}} + {{params.b}}$.",
+      " > To find the final result, we simply need to add the two numbers: $c = {{params.a}} + {{params.b}} = {correct_answers.c}$."
+    ]
+  }
+]

@@ -7,6 +7,7 @@ import {
     type Dispatch,
     type ReactNode,
 } from "react";
+
 import { QuestionAPI } from "../api/questionCrud";
 import type { QuestionMeta } from "../types/questionTypes";
 
@@ -29,7 +30,7 @@ export function QuestionProvider({ children }: { children: ReactNode }) {
     const fetchQuestionMeta = useCallback(async () => {
         if (!selectedQuestionID) return;
         try {
-            const retrieved = await QuestionAPI.getQuestion(selectedQuestionID);
+            const retrieved = await QuestionAPI.getQuestionMeta(selectedQuestionID);
             setQuestionMeta(retrieved);
         } catch (error) {
             console.error("❌ Failed to fetch question:", error);
