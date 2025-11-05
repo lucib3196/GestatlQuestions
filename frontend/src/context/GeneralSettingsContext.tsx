@@ -1,28 +1,18 @@
 import React, { createContext, useState, useEffect } from "react";
 import { getSettings } from "../api";
-import type { CodeLanguage, QuestionStorage, RenderingType } from "../types/settingsType";
+import type { QuestionStorage } from "../types/settingsType";
 
 type GeneralSettingsContextType = {
-    renderingType: RenderingType;
-    setRenderingType: React.Dispatch<React.SetStateAction<RenderingType>>;
-    codeRunningSettings: CodeLanguage;
-    setCodeRunningSettings: React.Dispatch<React.SetStateAction<CodeLanguage>>;
     questionStorage: QuestionStorage,
 };
 
 // Create context with default values
 export const QuestionSettingsContext = createContext<GeneralSettingsContextType>({
-    renderingType: "legacy",
-    setRenderingType: () => { },
-    codeRunningSettings: "javascript",
-    setCodeRunningSettings: () => { },
     questionStorage: "local"
 
 });
 
 const QuestionSettingsProvider = ({ children }: { children: React.ReactNode }) => {
-    const [renderingType, setRenderingType] = useState<RenderingType>("legacy");
-    const [codeRunningSettings, setCodeRunningSettings] = useState<CodeLanguage>("javascript");
     const [questionStorage, setQuestionStorage] = useState<QuestionStorage>("local")
 
     useEffect(() => {
@@ -43,10 +33,6 @@ const QuestionSettingsProvider = ({ children }: { children: React.ReactNode }) =
     return (
         <QuestionSettingsContext.Provider
             value={{
-                renderingType,
-                setRenderingType,
-                codeRunningSettings,
-                setCodeRunningSettings,
                 questionStorage
             }}
         >

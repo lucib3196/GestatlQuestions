@@ -1,13 +1,14 @@
 // questionHooks.ts
-import { useState, useCallback, useEffect, useContext } from "react";
+import { useState, useCallback, useEffect, } from "react";
 import type { QuestionParams } from "../types/types";
-import { CodeLogsSettings } from "../context/CodeLogsContext";
+import { useCodeEditorContext } from "../context/CodeEditorContext";
 import { QuestionAPI } from "./questionCrud";
 import type { QuestionData } from "../types/questionTypes";
 import { useQuestionContext } from "../context/QuestionContext";
 import { useSelectedQuestion } from "../context/SelectedQuestionContext";
 
-import { QuestionSettingsContext } from "./../context/GeneralSettingsContext";
+
+
 export function useRetrievedQuestions({
   questionFilter,
   showAllQuestions,
@@ -37,8 +38,8 @@ export function useAdaptiveParams(isAdaptive: boolean) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { codeRunningSettings } = useContext(QuestionSettingsContext);
-  const { setLogs } = useContext(CodeLogsSettings);
+  const { codeRunningSettings, setLogs } = useCodeEditorContext();
+
   const { selectedQuestionID } = useSelectedQuestion();
 
   const fetchParams = useCallback(async () => {

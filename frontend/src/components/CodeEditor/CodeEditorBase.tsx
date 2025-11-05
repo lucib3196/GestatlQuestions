@@ -2,12 +2,8 @@ import React, { memo, useMemo, useCallback, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import type { OnChange } from "@monaco-editor/react";
 import type { editor as MonacoEditor } from "monaco-editor";
-interface CodeEditorProps {
-  content: string;
-  language: string /** Language key: 'js', 'py', etc. */;
-  onChange?: (value: string) => void;
-  height?: string;
-}
+import { useCodeEditorContext } from "../../context/CodeEditorContext";
+
 const languageMap: Record<string, string> = {
   js: "javascript",
   py: "python",
@@ -16,42 +12,41 @@ const languageMap: Record<string, string> = {
 };
 
 interface CodeEditorProps {
-  content: string;
-  language: string;
-  onChange?: (value: string) => void;
-  theme?: string
+  theme?: string;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ content, language, onChange,theme="vs-light" }) => {
-  const resolvedLanguage = useMemo(() => languageMap[language] ?? "plaintext", [language]);
+const CodeEditor: React.FC<CodeEditorProps> = ({ theme = "vs-light" }) => {
+  const { selectedFile, fileContent, setFileContent } = useCodeEditorContext();
+  const resolvedLanguage = useMemo(
+    () => languageMap[selectedFile?.split(".").at(-1) ?? ""] ?? "plaintext",
+    [selectedFile]
+  );
 
   const handleEditorChange: OnChange = useCallback(
-    (value) => onChange?.(value ?? ""),
-    [onChange]
+    (value) => setFileContent(value ?? ""),
+    [setFileContent]
   );
 
   const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
 
   return (
-    <div className="w-full  overflow-auto">
-      <Editor
+    <Editor
       height={"80vh"}
-        language={resolvedLanguage}
-        value={content}
-        onChange={handleEditorChange}
-        onMount={(editor) => (editorRef.current = editor)}
-        options={{
-          automaticLayout: true,
-          minimap: { enabled: false },
-          fontSize: 14,
-          lineNumbers: "on",
-          scrollBeyondLastLine: false,
-          padding: { top: 12 },
-          smoothScrolling: true,
-        }}
-        theme={theme}
-      />
-    </div>
+      language={resolvedLanguage}
+      value={fileContent}
+      onChange={handleEditorChange}
+      onMount={(editor) => (editorRef.current = editor)}
+      options={{
+        automaticLayout: true,
+        minimap: { enabled: false },
+        fontSize: 14,
+        lineNumbers: "on",
+        scrollBeyondLastLine: false,
+        padding: { top: 12 },
+        smoothScrolling: true,
+      }}
+      theme={theme}
+    />
   );
 };
 

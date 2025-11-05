@@ -4,7 +4,7 @@ import type {
   QuestionMeta,
 } from "../types/questionTypes";
 import type { SuccessDataResponse } from "../types/responseModels";
-
+import type { FileData } from "../types/questionTypes";
 import api from "./client";
 
 export class QuestionAPI {
@@ -75,16 +75,60 @@ export class QuestionAPI {
     return response.data;
   }
 
+  // Files
   static async getQuestionFile(
     questionId: string,
     filename: string
   ): Promise<SuccessDataResponse> {
     const response = await api.get(
-      `${this.base}/files/${encodeURI(questionId)}/${encodeURIComponent(
-        filename
-      )}`
+      `${this.base}/files/${encodeURIComponent(
+        questionId
+      )}/${encodeURIComponent(filename)}`
     );
     return response.data;
+  }
+
+  static async getQuestionFiles(questionID: string): Promise<FileData[]> {
+    const response = await api.get(
+      `/questions/filedata/${encodeURIComponent(questionID)}`
+    );
+    return response.data;
+  }
+
+  static async updateFileContent(
+    questionId: string,
+    filename: string,
+    new_content: string
+  ) {
+    console.log("This is the new content", new_content);
+    const response = await api.put(
+      `${this.base}/files/${encodeURIComponent(
+        questionId
+      )}/${encodeURIComponent(filename)}`,
+      new_content
+    );
+    return response.data;
+  }
+
+  static async uploadFiles(questionId: string, files: File[]) {
+    try {
+      const formData = new FormData();
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+      const response = await api.post(
+        `${this.base}/${encodeURIComponent(questionId)}/upload_files`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 
   static async runServer(

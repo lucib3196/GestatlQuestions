@@ -37,6 +37,7 @@ export type QuestionFull = GeneralResponse & {
 export type FileData = {
   filename: string;
   content: string;
+  mime_type:string
 };
 
 export type FileName = GeneralResponse & {

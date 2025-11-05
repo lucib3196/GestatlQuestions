@@ -2,6 +2,9 @@
 from fastapi import APIRouter, HTTPException
 from starlette import status
 import json
+import mimetypes
+import base64
+from src.utils import encode_image
 
 # --- Internal ---
 from src.api.core import logger
@@ -10,8 +13,8 @@ from src.api.service.storage_manager import StorageDependency
 from src.api.models import *
 from fastapi import UploadFile
 from src.api.service.file_service import FileServiceDep
+from src.api.models.response_models import FileData
 from src.api.dependencies import StorageTypeDep
-from fastapi.responses import StreamingResponse
 from fastapi.responses import Response
 
 router = APIRouter(
@@ -181,6 +184,54 @@ async def update_file(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Could not write file content: {e}",
         )
+
+
+@router.get("/filedata/{qid}")
+async def get_filedata(
+    qid: str | UUID,
+    qm: QuestionManagerDependency,
+    storage: StorageDependency,
+    storage_type: StorageTypeDep,
+) -> List[FileData]:
+    try:
+        question = qm.get_question(qid)
+        question_path = qm.get_question_path(question.id, storage_type)
+        file_paths = storage.list_filepaths(question_path, recursive=True)
+        logger.info("These are the file paths", file_paths)
+        file_data = []
+        for f in file_paths:
+            if not f.is_file():
+                continue
+            try:
+                mime_type, _ = mimetypes.guess_type(f.name)
+                logger.info(f"File is {f} and mime type {mime_type}")
+                if mime_type and (
+                    mime_type.startswith("text")
+                    or mime_type.startswith("application/json")
+                ):
+                    content = f.read_text(encoding="utf-8")
+                else:
+                    content = encode_image(f)
+                    logger.info("Encoded image just fine")
+
+                file_data.append(
+                    FileData(
+                        filename=f.name,
+                        content=content,
+                        mime_type=mime_type or "application/octet-stream",
+                    )
+                )
+            except Exception as e:
+                logger.warning(f"Could not read file {f}: {e}")
+                file_data.append(
+                    FileData(filename=f.name, content="Could not read file")
+                )
+
+        return file_data
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Could not get file data {e}")
 
 
 @router.post("/files/{id}/{filename}/download")

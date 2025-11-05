@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import ModGenerators from "./BaseTemplate";
 import api from "../../api/client";
 import { toast } from "react-toastify";
-import UploadFilesButton from "../Generic/UploadFiles";
+import UploadFilesButton from "../Forms/UploadFileComponent";
 const ImageGeneratorConst = {
     name: "Visual Extract",
 };

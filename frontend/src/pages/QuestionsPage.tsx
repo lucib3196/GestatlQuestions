@@ -1,10 +1,8 @@
-import { QuestionSettings } from "../components/QuestionFilter/QuestionSettings";
+
 import { useState } from "react";
 import { QuestionFiltering } from "../components/QuestionFilterNew/QuestionFiltering";
 import { QuestionTable } from "../components/QuestionTable/QuestionTablesDB";
-import { SimpleToggle } from "../components/Generic/SimpleToggle";
 import { ResizableQuestionContainer } from "../components/Question/ResizableQuestion";
-import SyncQuestions from "../components/QuestionSync/QuestionSync";
 import { useSelectedQuestion } from "../context/SelectedQuestionContext";
 
 function QuestionDashBoardHeader() {
@@ -26,25 +24,6 @@ export function QuestionViewPage() {
       {/* Dashboard Section */}
       <div className="w-full max-w-5xl flex flex-col items-center px-4 sm:px-6 lg:px-8">
         <QuestionDashBoardHeader />
-
-        {/* Settings Toggle */}
-        <div className="flex flex-col items-center w-full mb-6">
-          <div className="flex flex-row items-center gap-x-10">
-            <SimpleToggle
-              setToggle={() => setShowSettings((prev) => !prev)}
-              label="Show Settings"
-              id="settings"
-              checked={showSettings}
-            />
-            <SyncQuestions />
-          </div>
-
-          {showSettings && (
-            <div className="mt-4 w-full">
-              <QuestionSettings />
-            </div>
-          )}
-        </div>
 
         {/* Filters & Table */}
         <div className="w-full">
