@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import type { CodeLanguage } from "../types/settingsType";
 
 type CodeEditorContext = {
@@ -51,6 +51,8 @@ const CodeEditorProvider = ({ children }: { children: React.ReactNode }) => {
         useState<CodeLanguage>("javascript");
     const [showLogs, setShowLogs] = useState<boolean>(false)
     const [refreshKey, setRefreshKey] = useState(0);
+    
+    
     return (
         <CodeEditorContex.Provider
             value={{

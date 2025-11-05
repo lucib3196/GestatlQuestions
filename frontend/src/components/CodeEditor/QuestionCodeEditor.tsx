@@ -5,11 +5,10 @@ import { useCodeEditorContext } from "../../context/CodeEditorContext";
 import { CodeEditorToolBar } from "./CodeEditorToolBar";
 import { useQuestionFiles } from "../../hooks/codeEditorHooks";
 import { useState, useEffect } from "react";
-
-
+import { getImageBase64FileData, isImageExt } from "../../utils/parsers";
 
 export default function QuestionCodeEditor() {
-  const { showLogs, selectedFile, } = useCodeEditorContext();
+  const { showLogs, selectedFile } = useCodeEditorContext();
   const { loading, filesData } = useQuestionFiles();
   const [image, setImage] = useState<string | null>(null);
 
@@ -18,17 +17,14 @@ export default function QuestionCodeEditor() {
       setImage(null);
       return;
     }
-
-    const ext = selectedFile.split(".").at(-1)?.toLowerCase();
-    if (ext === "png" || ext === "jpg" || ext === "jpeg") {
+    if (isImageExt(selectedFile)) {
       const file = filesData.find((v) => v.filename === selectedFile);
-      if (file && file.content && file.mime_type?.startsWith("image")) {
-        setImage(`data:${file.mime_type};base64,${file.content}`);
+      if (file) {
+        const imageUrl = getImageBase64FileData(file);
+        setImage(imageUrl);
       } else {
         setImage(null);
       }
-    } else {
-      setImage(null);
     }
   }, [selectedFile, filesData]);
 
@@ -36,12 +32,7 @@ export default function QuestionCodeEditor() {
 
   return (
     <>
-      {/* Toolbar */}
-      <div className="flex w-full items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3">
-        <CodeEditorToolBar />
-      </div>
-
-      {/* Editor or Image */}
+      <CodeEditorToolBar />
       <div
         id="EditorContainer"
         className="w-full rounded-lg border border-gray-300 dark:border-gray-600 overflow-auto p-4 flex justify-center"
@@ -56,13 +47,7 @@ export default function QuestionCodeEditor() {
           <CodeEditor />
         )}
       </div>
-
-      {/* Logs */}
-      {showLogs && (
-        <div className="w-full mt-4">
-          <LogOutput />
-        </div>
-      )}
+      {showLogs && <LogOutput />}
     </>
   );
 }
