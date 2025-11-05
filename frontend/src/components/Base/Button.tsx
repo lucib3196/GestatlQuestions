@@ -32,7 +32,6 @@ const colorClasses: Record<ButtonColor, string> = {
   generateVariant:
     "bg-purple-500 text-white hover:bg-purple-600 dark:bg-purple-700 dark:hover:bg-purple-800",
 
-
   showSolution:
     "bg-cyan-500 text-white hover:bg-cyan-600 dark:bg-cyan-700 dark:hover:bg-cyan-800",
 };

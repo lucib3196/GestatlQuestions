@@ -1,17 +1,12 @@
 import { useState } from "react";
 import { CloseButton } from "../CloseButton";
-
-
-
-
 type CreateFileProps = {
     showModal: (visible: boolean) => void;
 };
 
-
 function CreateFileModal({ showModal }: CreateFileProps) {
     const [fileName, setFileName] = useState("");
-    
+
     const handleSubmit = async () => {
         try {
             console.log("Submitted File")
