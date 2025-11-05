@@ -8,8 +8,8 @@ import { useState, useEffect } from "react";
 
 
 
-export function QuestionCodeEditor() {
-  const { showLogs, selectedFile } = useCodeEditorContext();
+export default function QuestionCodeEditor() {
+  const { showLogs, selectedFile, } = useCodeEditorContext();
   const { loading, filesData } = useQuestionFiles();
   const [image, setImage] = useState<string | null>(null);
 

@@ -4,11 +4,10 @@ import { useCodeEditorContext } from "./../../context/CodeEditorContext";
 import { CodeSettings } from "../QuestionFilter/CodeSettings";
 import { MyModal } from "../Base/MyModal";
 import { useSelectedQuestion } from "../../context/SelectedQuestionContext";
-import { useSaveQuestionFile, useUploadQuestionFiles } from "./codeEditorHooks";
+import { useDeleteQuestionFile, useSaveQuestionFile, useUploadQuestionFiles } from "./codeEditorHooks";
 import { useState } from "react";
 import { UploadCodeFile } from "./UploadCodeFiles";
-
-
+import { DeleteCodeFile } from "./DeletedCodeFiles";
 
 export function CodeEditorToolBar() {
     const {
@@ -22,12 +21,19 @@ export function CodeEditorToolBar() {
         setShowLogs,
     } = useCodeEditorContext();
     const { selectedQuestionID } = useSelectedQuestion();
-    const { saveFile } = useSaveQuestionFile(() =>
+    const { saveFile, } = useSaveQuestionFile(() =>
         setRefreshKey((prev) => prev + 1)
     );
+    const { deleteFile } = useDeleteQuestionFile(() =>
+        setRefreshKey((prev) => prev + 1))
+
+
+
     const [showUpload, setShowUpload] = useState(false);
     const [showEditMeta, setShowEditMeta] = useState(false);
-    const { uploadFile } = useUploadQuestionFiles()
+    const [showDelete, setShowDelete] = useState(false);
+    const { uploadFile } = useUploadQuestionFiles(() =>
+        setRefreshKey((prev) => prev + 1));
 
     return (
         <div className="flex flex-col w-full gap-y-4 my-2">
@@ -55,7 +61,11 @@ export function CodeEditorToolBar() {
                             saveFile(selectedQuestionID ?? "", selectedFile, fileContent)
                         }
                     />
-                    <MyButton name="Delete" className="flex-1 min-w-20" />
+                    <MyButton
+                        name="Delete"
+                        className="flex-1 min-w-20"
+                        onClick={() => setShowDelete((prev) => !prev)}
+                    />
                     <MyButton
                         name="Show Logs"
                         onClick={() => setShowLogs((prev) => !prev)}
@@ -78,12 +88,24 @@ export function CodeEditorToolBar() {
 
                 {showUpload && (
                     <MyModal setShowModal={() => setShowUpload((prev) => !prev)}>
-                        <UploadCodeFile questionId={selectedQuestionID ?? ""} onSubmit={uploadFile} />
+                        <UploadCodeFile
+                            questionId={selectedQuestionID ?? ""}
+                            onSubmit={uploadFile}
+                        />
                     </MyModal>
                 )}
                 {showEditMeta && (
                     <MyModal setShowModal={() => setShowEditMeta((prev) => !prev)}>
                         <div>Meta</div>
+                    </MyModal>
+                )}
+                {showDelete && (
+                    <MyModal setShowModal={() => setShowDelete((prev) => !prev)}>
+                        <DeleteCodeFile
+                            questionId={selectedQuestionID ?? ""}
+                            filename={selectedFile}
+                            onSubmit={() => deleteFile(selectedQuestionID ?? "", selectedFile)}
+                        />
                     </MyModal>
                 )}
             </div>

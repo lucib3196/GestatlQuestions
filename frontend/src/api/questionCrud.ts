@@ -100,7 +100,6 @@ export class QuestionAPI {
     filename: string,
     new_content: string
   ) {
-    console.log("This is the new content", new_content);
     const response = await api.put(
       `${this.base}/files/${encodeURIComponent(
         questionId
@@ -129,6 +128,18 @@ export class QuestionAPI {
     } catch (error) {
       throw error;
     }
+  }
+
+  static async deleteFile(
+    questionId: string,
+    filename: string
+  ): Promise<SuccessDataResponse> {
+    const response = await api.delete(
+      `${this.base}/files/${encodeURIComponent(
+        questionId
+      )}/${encodeURIComponent(filename)}`
+    );
+    return response.data;
   }
 
   static async runServer(

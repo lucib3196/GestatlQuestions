@@ -35,18 +35,19 @@ export function useQuestionFiles() {
     } finally {
       setLoading(false);
     }
-  }, [selectedQuestionID, setFileNames, setFileContent]);
+  }, [selectedQuestionID, setFileNames, setFileContent, refreshKey]);
   useEffect(() => {
     fetchFiles();
   }, [fetchFiles, refreshKey]);
+
   useEffect(() => {
     const fd = filesData.find((v) => v.filename === selectedFile);
     setFileContent(fd?.content ?? "");
-  }, [selectedFile, filesData, setFileContent]);
+  }, [selectedFile, filesData, setFileContent, refreshKey]);
 
   useEffect(() => {
     setFileNames(filesData.map((v) => v.filename));
-  }, [filesData, setFileNames]);
+  }, [filesData, setFileNames, refreshKey]);
 
   return { filesData, loading };
 }
@@ -97,25 +98,25 @@ export function useUploadQuestionFiles(onRefresh?: () => void) {
   return { uploadFile, loading };
 }
 
-// export function useDeleteQuestionFile(onRefresh?: () => void) {
-//   const [loading, setLoading] = useState(false);
+export function useDeleteQuestionFile(onRefresh?: () => void) {
+  const [loading, setLoading] = useState(false);
 
-//   const deleteFile = useCallback(
-//     async (questionID: string, filename: string) => {
-//       try {
-//         setLoading(true);
-//         await QuestionAPI.deleteFile(questionID, filename);
-//         toast.success("File deleted successfully!");
-//         onRefresh?.();
-//       } catch (error) {
-//         console.error(error);
-//         toast.error("Could not delete file.");
-//       } finally {
-//         setLoading(false);
-//       }
-//     },
-//     [onRefresh]
-//   );
+  const deleteFile = useCallback(
+    async (questionID: string, filename: string) => {
+      try {
+        setLoading(true);
+        await QuestionAPI.deleteFile(questionID, filename);
+        toast.success("File deleted successfully!");
+        onRefresh?.();
+      } catch (error) {
+        console.error(error);
+        toast.error("Could not delete file.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [onRefresh]
+  );
 
-//   return { deleteFile, loading };
-// }
+  return { deleteFile, loading };
+}
