@@ -53,7 +53,7 @@ async def create_question(
         # Creates the actual path
         path = storage.create_storage_path(path_name)
         # Storing the relative path in db
-        relative_path = storage.get_relative_storage_path(path)
+        relative_path = storage.get_storage_path(path, relative=True)
         qm.set_question_path(qcreated.id, relative_path, storage_type)
         # Commit the changes
         qm.session.commit()
@@ -313,7 +313,9 @@ async def update_question(
             )
 
             # Update the question's stored path reference
-            updated_relative_path = storage.get_relative_storage_path(new_storage_path)
+            updated_relative_path = storage.get_storage_path(
+                new_storage_path, relative=True
+            )
             qm.set_question_path(
                 existing_question.id, updated_relative_path, storage_type
             )
@@ -349,56 +351,8 @@ async def filter_questions(
         raise HTTPException(status_code=500, detail=f"Failed to filter question {e}")
 
 
-# @router.get("/{qid}/files_data", status_code=status.HTTP_200_OK)
-# async def get_question_files_data(
-#     qid: str | UUID, session: SessionDep, qm: QuestionManagerDependency
-# ) -> SuccessFileResponse:
-#     try:
-#         logger.debug("Attempting to retrieve filedata")
-
-#         filedata = await qm.read_all_files(qid, session)
-#         return SuccessFileResponse(
-#             status=200,
-#             detail="Retrieved files succesfully",
-#             filedata=filedata,
-#             filepaths=[],
-#         )
-#     except HTTPException:
-#         raise
-#     except Exception as e:
-
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail=f"Could not retrieve files data: {e}",
-#         )
 
 
-# @router.post("/{qid}/download")
-# async def download_question(
-#     qid: str | UUID, session: SessionDep, qm: QuestionManagerDependency
-# ):
-#     try:
-#         data = await qm.download_question(session, qid)
-#         if not isinstance(data, io.BytesIO):
-#             buffer = io.BytesIO(data)
-#         else:
-#             buffer = data
-
-#         zip_name = await qm.get_question_identifier(qid, session)
-
-#         return StreamingResponse(
-#             buffer,
-#             media_type="application/zip",
-#             headers={"Content-Disposition": f'attachment; filename="{zip_name}.zip"'},
-#         )
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail="Could not download question",
-#         )
-
-
-# import zipfile
 
 
 # # TODO: Add test

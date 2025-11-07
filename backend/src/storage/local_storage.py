@@ -70,7 +70,7 @@ class LocalStorageService(StorageService):
 
     # Getting
 
-    def get_storage_path(self, target: str | Path | Blob) -> str:
+    def get_storage_path(self, target: str | Path | Blob, relative: bool = True) -> str:
         """
         Build the absolute path for a resource based on its identifier.
 
@@ -83,22 +83,12 @@ class LocalStorageService(StorageService):
         if isinstance(target, Blob):
             target = str(target.name)
         target = self.normalize_path(target)
-        return (Path(self.root) / str(target)).as_posix()
-    
-    def get_relative_storage_path(self, target: str | Path | Blob):
-        """
-        Return the relative path of a storage directory from the base root.
-
-        Args:
-            identifier: Unique identifier for the stored resource.
-
-        Returns:
-            Path: Relative path to the storage directory.
-        """
-        # Assuming you are running it from backend folder
-        absolute_path = Path(self.get_storage_path(target)).resolve()
-        relative = absolute_path.relative_to(self.root)
-        return relative
+        
+        absolute_path = (Path(self.root) / str(target))
+        if relative:
+            return absolute_path.relative_to(self.root).as_posix()
+        
+        return absolute_path.as_posix()
 
     def create_storage_path(self, target: str | Path) -> Path:
         """
