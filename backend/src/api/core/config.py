@@ -57,7 +57,6 @@ class AppSettings(BaseSettings):
 
     # Static Directory
     QUESTIONS_DIRNAME: Union[str, Path]
-    QUESTIONS_PATH: Union[str, Path]
     ROOT_PATH: Union[str, Path]
 
     SQLITE_DB_PATH: Optional[str] = None
@@ -83,7 +82,6 @@ def get_settings() -> AppSettings:
         ],
         SECRET_KEY=os.getenv("SECRET_KEY", ""),
         QUESTIONS_DIRNAME="questions",
-        QUESTIONS_PATH=ROOT_PATH / "questions",
         ROOT_PATH=ROOT_PATH,
         FIREBASE_CRED=os.getenv("FIREBASE_CRED", "default_firebase_cred"),
         STORAGE_BUCKET=os.getenv("STORAGE_BUCKET"),
