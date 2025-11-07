@@ -1,37 +1,22 @@
-<pl-question-panel>
-
-
-
-
-
-
-
-    <p> If $a = {{params.a}}$ and $b = {{params.b}}$, what is $c = a + b$?</p>
-
-
-
-
-
-
-
-    <pl-figure file-name="test_image.png"></pl-figure>
-
-
-
-
-
-
-
-</pl-question-panel>
-
-
-
-
-
-
-
-
-
-
-
-<pl-number-input variant="accent" answers-name="c" comparison="sigfig" digits="3" label="$c=$"></pl-number-input>
+<pl-question-panel>
+  <p>If $a = {{params.a}}$ and $b = {{params.b}}$, what is $c = a + b$?</p>
+
+  <pl-figure file-name="test_image.png"></pl-figure>
+</pl-question-panel>
+
+<div classname="flex flex-row ">
+  <pl-number-input
+    variant="accent"
+    answers-name="c"
+    comparison="sigfig"
+    digits="3"
+    label="$c=$"
+  ></pl-number-input
+  ><pl-number-input
+    variant="accent"
+    answers-name="c"
+    comparison="sigfig"
+    digits="3"
+    label="$c=$"
+  ></pl-number-input>
+</div>

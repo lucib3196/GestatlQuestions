@@ -7,6 +7,7 @@ import {
 import parse, { domToReact } from "html-react-parser";
 import type { DOMNode } from "html-react-parser";
 import { MathJax } from "better-react-mathjax";
+import { useState } from "react";
 
 const isValidTagName = (val: string): val is keyof TagRegistry => {
     return val in TagAttributeMapping;
@@ -41,44 +42,67 @@ function TransformTag<K extends ValidComponents>(
     }
 }
 
-const HandleTags = (node: DOMNode) => {
-    if (node.type === "tag") {
+export const HandleTags = (node: DOMNode) => {
+    try {
+        if (node.type !== "tag") return null;
+
         const result = TransformTag(node);
+        if (!result) return null;
 
-        if (result) {
-            const { Tag, transformedProps } = result;
+        const { Tag, transformedProps } = result;
+        if (!Tag) return null;
 
-            if (!Tag) return null;
+        let children: React.ReactNode = null;
 
-            const children = node.childNodes?.length
-                ? domToReact(node.children as DOMNode[], {
+        if (node.childNodes?.length) {
+            try {
+                children = domToReact(node.children as DOMNode[], {
                     replace: (child: any) => {
-                        if (child.type === "tag") {
-                            const childResult = TransformTag(child);
+                        try {
+                            if (child.type === "tag") {
+                                const childResult = TransformTag(child);
+                                if (!childResult) return null;
 
-                            if (childResult) {
-                                const { Tag: ChildTag, transformedProps: ChildAttrs } =
-                                    childResult;
+                                const { Tag: ChildTag, transformedProps: ChildAttrs } = childResult;
                                 if (!ChildTag) return null;
+
                                 return (
                                     <ChildTag {...ChildAttrs}>
                                         {domToReact(child.children)}
                                     </ChildTag>
                                 );
                             }
+                        } catch (err) {
+                            console.error("Error transforming child tag:", err, child);
+                            return null;
                         }
                     },
-                })
-                : null;
-
-            return <Tag {...transformedProps}>{children}</Tag>;
+                });
+            } catch (err) {
+                console.error("Error parsing child nodes:", err, node);
+            }
         }
+
+        return <Tag {...transformedProps}>{children}</Tag>;
+    } catch (err) {
+        console.error("Error handling tag:", err, node);
+        return (
+            <span style={{ color: "red", fontStyle: "italic" }}>
+                [Render error: invalid tag]
+            </span>
+        );
     }
 };
 
 
 export function QuestionHTMLToReact({ html }: { html: string }) {
-    const parsedFile = parse(html, { replace: (node) => HandleTags(node) })
+    let parsed;
+    try {
+        parsed = parse(html, { replace: (node) => HandleTags(node) })
+    } catch (error) {
+        console.log(error)
+        parsed = html
+    }
 
-    return <> <MathJax>{parsedFile}</MathJax></>
+    return <> <MathJax>{parsed}</MathJax></>
 }

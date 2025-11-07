@@ -1,6 +1,6 @@
 // questionHooks.ts
 import { useState, useCallback, useEffect, } from "react";
-import type { QuestionParams } from "../types/types";
+import type { QuestionParams } from "../types/questionTypes";
 import { useCodeEditorContext } from "../context/CodeEditorContext";
 import { QuestionAPI } from "../api/questionCrud";
 import type { QuestionData } from "../types/questionTypes";
@@ -30,27 +30,19 @@ export function useRetrievedQuestions({
 }
 
 export function useAdaptiveParams(isAdaptive: boolean) {
+  const { codeRunningSettings, setLogs } = useCodeEditorContext();
+  const { selectedQuestionID } = useQuestionContext();
+
   const [params, setParams] = useState<QuestionParams | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { codeRunningSettings, setLogs } = useCodeEditorContext();
-
-  const { selectedQuestionID } = useQuestionContext();
-
   const fetchParams = useCallback(async () => {
-    if (!isAdaptive) return;
-    if (!selectedQuestionID) return;
-
+    if (!isAdaptive || !selectedQuestionID) return;
     try {
       setLoading(true);
       setError(null);
-
-      const res = await QuestionAPI.runServer(
-        selectedQuestionID,
-        codeRunningSettings
-      );
-
+      const res = await QuestionAPI.runServer(selectedQuestionID, codeRunningSettings);
       setParams(res);
       if (res?.logs) setLogs(res.logs);
     } catch (err: any) {
@@ -59,11 +51,11 @@ export function useAdaptiveParams(isAdaptive: boolean) {
     } finally {
       setLoading(false);
     }
-  }, [isAdaptive, selectedQuestionID, codeRunningSettings, setLogs]);
+  }, [isAdaptive, selectedQuestionID, codeRunningSettings]);
 
   useEffect(() => {
-    fetchParams();
-  }, [fetchParams]);
+    if (isAdaptive) fetchParams();
+  }, [fetchParams, isAdaptive]);
 
   return { params, loading, error, refetch: fetchParams };
 }

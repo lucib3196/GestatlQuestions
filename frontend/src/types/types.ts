@@ -1,9 +1,4 @@
-export type QuestionParams = {
-  params: Record<string, string | number | any>;
-  correct_answers: Record<string, string | number>;
-  nDigits: number;
-  sigfigs: number;
-};
+
 
 export type QuestionData = {
   question_template: string;
@@ -111,5 +106,3 @@ export type FileData = {
 };
 
 export type Qtypes = "numerical" | "multiple-choice" | "other";
-
-

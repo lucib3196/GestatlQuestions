@@ -10,13 +10,6 @@ import QuestionCard from "./QuestionCard";
 import { MyButton } from "./../Base/Button";
 import QuestionCodeEditor from "../CodeEditor/QuestionCodeEditor";
 
-
-
-
-
-
-
-
 export function ResizableQuestionContainer() {
   const [showSolution, setShowSolution] = useState(false);
   const [solution, setSolution] = useState<string[] | null>(null);
@@ -91,8 +84,6 @@ export function ResizableQuestionContainer() {
                      bg-white dark:bg-gray-800 p-6 overflow-auto"
         >
           <QuestionCard
-            setShowSolution={setShowSolution}
-            setSolution={setSolution}
           />
         </RPanel>
       </PanelGroup>

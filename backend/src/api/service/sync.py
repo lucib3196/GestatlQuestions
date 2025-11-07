@@ -50,6 +50,7 @@ async def check_question_sync_status(
         - `UnsyncedQuestion`: with detailed reasoning if not synced.
     """
     relative_path = Path(question).as_posix()
+    logger.info("Checking the relative path for the sync", relative_path)
     metadata = await resolve_metadata_path(question)
     if metadata is None:
         detail = (
@@ -96,8 +97,10 @@ async def check_question_sync_status(
     logger.info(f"🗂 Found Question ID: {question_id}")
 
     # --- Step 3: Confirm question exists in DB ---
-    qdb = qm.get_question(question_id)
-    if qdb is None:
+    try:
+        qdb = qm.get_question(question_id)
+    except Exception:
+        logger.info("Question is not in database")
         detail = (
             f"Metadata contains Question ID {question_id}, but no corresponding record was found in the database. "
             "Run the synchronization process to register this question."
@@ -120,23 +123,31 @@ async def check_question_sync_status(
 async def get_all_unsynced(
     path: Path, qm: QuestionManagerDependency
 ) -> Sequence[UnsyncedQuestion]:
-    tasks = [
-        check_question_sync_status(question, qm)
-        for question in path.iterdir()
-        if question.name not in excluded_path_names
-    ]
-    results = await asyncio.gather(*tasks)
-    return [r for r in results if isinstance(r, UnsyncedQuestion)]
-
+    try:
+        tasks = [
+            check_question_sync_status(question, qm)
+            for question in path.iterdir()
+            if question.name not in excluded_path_names
+        ]
+        results = await asyncio.gather(*tasks)
+        return [r for r in results if isinstance(r, UnsyncedQuestion)]
+    except Exception as e:
+        raise ValueError(f"Could not check the unsynced questions {e}")
 
 async def check_local_unsync(
     storage: StorageDependency, qm: QuestionManagerDependency
 ) -> Sequence[UnsyncedQuestion]:
-    path = Path(storage.get_base_path()).resolve()
-    if not path.exists():
-        logger.debug("Creating base path. It does not exist")
-        path.mkdir(parents=True, exist_ok=True)
-    return await get_all_unsynced(path, qm)
+    try:
+        
+        path = (Path(storage.get_base_path())/"questions").resolve()
+        logger.info(f"Checking the path {path}")
+        if not path.exists():
+            logger.debug("Creating base path. It does not exist")
+            path.mkdir(parents=True, exist_ok=True)
+        return await get_all_unsynced(path, qm)
+    except Exception as e:
+        logger.info(f"Could not check unsync {e}")
+        raise e
 
 
 async def sync_question(
@@ -200,7 +211,8 @@ async def sync_question(
 async def sync_questions(
     qm: QuestionManagerDependency, storage: StorageDependency
 ) -> SyncMetrics:
-    path = Path(storage.get_base_path()).resolve()
+    path = (Path(storage.get_base_path())/"questions").resolve()
+    logger.info("Checking the path %s", path)
     if not path.exists():
         logger.warning(f"⚠️ Base directory {path} not found — creating it.")
         path.mkdir(parents=True, exist_ok=True)

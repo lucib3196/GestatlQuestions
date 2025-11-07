@@ -2,6 +2,7 @@ import { QuestionFiltering } from "../components/QuestionFilterNew/QuestionFilte
 import { QuestionTable } from "../components/QuestionTable/QuestionTablesDB";
 import { ResizableQuestionContainer } from "../components/Question/ResizableQuestion";
 import { useQuestionContext } from "../context/QuestionContext";
+import SyncQuestions from "../components/QuestionSync/QuestionSync";
 function QuestionDashBoardHeader() {
   return (
     <div className="flex justify-center items-center mb-6">
@@ -20,6 +21,7 @@ export function QuestionViewPage() {
       {/* Dashboard Section */}
       <div className="w-full max-w-5xl flex flex-col items-center px-4 sm:px-6 lg:px-8">
         <QuestionDashBoardHeader />
+        <SyncQuestions />
 
         {/* Filters & Table */}
         <div className="w-full">
