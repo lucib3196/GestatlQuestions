@@ -23,13 +23,8 @@ class FirebaseStorage(StorageService):
     def get_base_path(self) -> str | Path:
         return Path(self.base_path).as_posix()
 
-    def get_storage_path(self, target: str | Path | Blob) -> str:
+    def get_storage_path(self, target: str | Path | Blob, relative: bool = True) -> str:
         return (Path(self.base_path) / str(target)).as_posix()
-
-    def get_relative_storage_path(self, target: str | Path | Blob) -> str | Path:
-        return Path(self.get_storage_path(target)).relative_to(
-            Path(self.base_path).parent
-        )
 
     def create_storage_path(self, target: str | Path) -> str:
         target_blob = self.get_storage_path(target)
