@@ -35,9 +35,18 @@ def save_multiple_files(local_storage, create_test_dir):
 # =============================================================================
 def test_initialization(local_storage, tmp_path):
     """Ensure storage initializes with correct root and base properties."""
-    assert local_storage.root == (tmp_path / "questions")
+    assert local_storage.get_root_path() == (tmp_path).as_posix()
     assert local_storage.get_base_path() == (tmp_path / "questions").as_posix()
 
+
+def test_normalize_path(local_storage):
+    question_expected = "questions/ValidQuestion"
+    assert local_storage.normalize_path(question_expected) == question_expected
+    
+    question_wrong = "ValidQuestion"
+    assert local_storage.normalize_path(question_wrong) == question_expected
+    
+    
 
 # =============================================================================
 # Directory Management Tests
@@ -145,4 +154,3 @@ def test_get_file(save_multiple_files, local_storage):
 
         else:
             raise TypeError(f"Unsupported type: {type(expected)}")
-

@@ -24,19 +24,32 @@ class LocalStorageService(StorageService):
     # Initialization / Lifecycle
     # -------------------------------------------------------------------------
 
-    def __init__(self, root: str | Path):
+    def __init__(self, root: str | Path, base: str):
         """
         Initialize the local storage service with a base directory.
 
         Args:
             root: Path or string specifying the root storage directory.
         """
-        self.root = Path(root).resolve().parent  # => C:\Github\GestatlQuestions
+        # Where the storage is at
+        self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
 
+        # Base name the folder where we store
+        self.base_name = base
+        self.base_path = self.root / base
         logger.debug(
             "Initialized the storage, questions will be stored at %s", self.root
         )
+
+    # Helper
+    def normalize_path(self, target: str | Path) -> str:
+        "Essentially make sure that whatever target path we pass in is stored in the basepath"
+        if isinstance(target, Path):
+            target = target.as_posix()
+        if not target.startswith(f"{self.base_name}/"):
+            return f"{self.base_name}/{target}"
+        return target
 
     # -------------------------------------------------------------------------
     # Base path operations
@@ -49,7 +62,13 @@ class LocalStorageService(StorageService):
         Returns:
             Path: The resolved base directory path.
         """
-        return (self.root).as_posix()
+        return Path(self.base_path).as_posix()
+
+    def get_root_path(self) -> str:
+        """Returns the root path"""
+        return self.root.as_posix()
+
+    # Getting
 
     def get_storage_path(self, target: str | Path | Blob) -> str:
         """
@@ -61,7 +80,25 @@ class LocalStorageService(StorageService):
         Returns:
             Path: Path to the resource directory.
         """
+        if isinstance(target, Blob):
+            target = str(target.name)
+        target = self.normalize_path(target)
         return (Path(self.root) / str(target)).as_posix()
+    
+    def get_relative_storage_path(self, target: str | Path | Blob):
+        """
+        Return the relative path of a storage directory from the base root.
+
+        Args:
+            identifier: Unique identifier for the stored resource.
+
+        Returns:
+            Path: Relative path to the storage directory.
+        """
+        # Assuming you are running it from backend folder
+        absolute_path = Path(self.get_storage_path(target)).resolve()
+        relative = absolute_path.relative_to(self.root)
+        return relative
 
     def create_storage_path(self, target: str | Path) -> Path:
         """
@@ -76,19 +113,6 @@ class LocalStorageService(StorageService):
         storage = Path(self.get_storage_path(target))
         storage.mkdir(parents=True, exist_ok=True)
         return storage
-
-    def get_relative_storage_path(self, target: str | Path | Blob):
-        """
-        Return the relative path of a storage directory from the base root.
-
-        Args:
-            identifier: Unique identifier for the stored resource.
-
-        Returns:
-            Path: Relative path to the storage directory.
-        """
-        # Assuming you are running it from backend folder
-        return Path(self.root) / str(target)
 
     def does_storage_path_exist(self, target: str | Path) -> bool:
         """

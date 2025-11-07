@@ -19,6 +19,10 @@ class StorageService:
         """Return the absolute path (or URI) to the base storage directory or bucket."""
         raise NotImplementedError("get_base_path must be implemented by subclass")
 
+    def get_root_path(self) -> str | Path:
+        """Return the absolute path (or URI) to the base storage directory or bucket."""
+        raise NotImplementedError("get_base_path must be implemented by subclass")
+
     # -------------------------------------------------------------------------
     # Storage path operations
     # -------------------------------------------------------------------------
