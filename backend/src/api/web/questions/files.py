@@ -92,7 +92,7 @@ async def delete_file(
         else:
             filepath = question_path / filename
 
-        resolved_filepath = filepath
+        resolved_filepath = storage.get_storage_path(filepath, relative=False)
         logger.info("Deleting the resolved file %s", resolved_filepath)
         storage.delete_file(resolved_filepath)
         return SuccessDataResponse(status=200, detail="Deleted file ok")
@@ -346,7 +346,7 @@ async def upload_files_to_question(
 
         # Get the question’s main storage directory
         question_storage_path = storage.get_storage_path(
-            str(qm.get_question_path(question.id, storage_type))
+            str(qm.get_question_path(question.id, storage_type)), relative=False
         )
         logger.info("Resolved question storage path: %s", question_storage_path)
 

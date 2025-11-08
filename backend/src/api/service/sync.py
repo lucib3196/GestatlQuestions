@@ -50,7 +50,7 @@ async def check_question_sync_status(
         - `UnsyncedQuestion`: with detailed reasoning if not synced.
     """
     relative_path = Path(question).as_posix()
-    logger.info("Checking the relative path for the sync", relative_path)
+    logger.info("Checking the relative path for the sync %s", relative_path)
     metadata = await resolve_metadata_path(question)
     if metadata is None:
         detail = (
@@ -134,12 +134,13 @@ async def get_all_unsynced(
     except Exception as e:
         raise ValueError(f"Could not check the unsynced questions {e}")
 
+
 async def check_local_unsync(
     storage: StorageDependency, qm: QuestionManagerDependency
 ) -> Sequence[UnsyncedQuestion]:
     try:
-        
-        path = (Path(storage.get_base_path())/"questions").resolve()
+
+        path = Path(storage.get_base_path()).resolve()
         logger.info(f"Checking the path {path}")
         if not path.exists():
             logger.debug("Creating base path. It does not exist")
@@ -177,7 +178,7 @@ async def sync_question(
         # Handle path
         old_path = Path(unsynced.question_path).resolve()
         new_path = safe_dir_name(f"{qcreated.title}_{str(qcreated.id)[:8]}")
-
+        new_path = Path(storage.get_base_path()) / new_path
         logger.info("This is the db_path")
 
         if old_path.exists():
@@ -186,7 +187,7 @@ async def sync_question(
         else:
             new_path = storage.create_storage_path(new_path)
 
-        db_path = storage.get_relative_storage_path(new_path)
+        db_path = storage.get_storage_path(new_path, relative=True)
         logger.info("This is the db_path %s ", db_path)
 
         qm.set_question_path(qcreated.id, db_path, storage_type="local")
@@ -211,7 +212,7 @@ async def sync_question(
 async def sync_questions(
     qm: QuestionManagerDependency, storage: StorageDependency
 ) -> SyncMetrics:
-    path = (Path(storage.get_base_path())/"questions").resolve()
+    path = Path(storage.get_base_path()).resolve()
     logger.info("Checking the path %s", path)
     if not path.exists():
         logger.warning(f"⚠️ Base directory {path} not found — creating it.")
@@ -243,7 +244,7 @@ async def prune_question(
     if not q.local_path:
         qm.delete_question(q.id)
         return "deleted"
-    question_path = Path(storage.get_storage_path(q.local_path))
+    question_path = Path(storage.get_storage_path(q.local_path, relative=False))
     if question_path.exists():
         logger.debug(f"✅ Folder exists for '{q.title}' → {question_path}")
         return "ok"

@@ -53,6 +53,13 @@ export default function QuestionCard() {
             <Error error="Could not render question. No question.html present." />
         );
 
+    // const generateVariant = useCallback(async () => {
+    //     await refetch()
+    //     setIsSubmitted(false);
+    //     setShowSolution(false);
+    // }, [refetch, setShowSolution]);
+
+
     return (
         <>
             <QuestionHeader question={qdata} />
@@ -60,11 +67,6 @@ export default function QuestionCard() {
             <QuestionHTMLToReact html={formattedQuestion} />
         </>
     );
-    // const generateVariant = useCallback(async () => {
-    //     await refetch()
-    //     setIsSubmitted(false);
-    //     setShowSolution(false);
-    // }, [refetch, setShowSolution]);
 
     // // --- Loading / Error Handling ---
 

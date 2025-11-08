@@ -22,9 +22,9 @@ export default function QuestionCodeEditor() {
       if (file) {
         const imageUrl = getImageBase64FileData(file);
         setImage(imageUrl);
-      } else {
-        setImage(null);
       }
+    } else {
+      setImage(null)
     }
   }, [selectedFile, filesData]);
 

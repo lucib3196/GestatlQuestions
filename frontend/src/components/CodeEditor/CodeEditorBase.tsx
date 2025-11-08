@@ -19,47 +19,52 @@ interface CodeEditorProps {
 const CodeEditor: React.FC<CodeEditorProps> = ({ theme = "vs-light" }) => {
   const { selectedFile, fileContent, setFileContent } = useCodeEditorContext();
   const [cleanedContent, setCleanedContent] = useState(fileContent);
-  const resolvedLanguage = useMemo(
-    () => languageMap[selectedFile?.split(".").at(-1) ?? ""] ?? "plaintext",
-    [selectedFile]
-  );
+  const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
+
+  const resolvedLanguage = useMemo(() => {
+    const ext = selectedFile?.split(".").pop() ?? "";
+    return languageMap[ext] ?? "plaintext";
+  }, [selectedFile]);
 
   const handleEditorChange: OnChange = useCallback(
     (value) => setFileContent(value ?? ""),
     [setFileContent]
   );
-  const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
 
-  useEffect(() => {
-    async function clean() {
-      let c = fileContent;
+  // // ✅ Clean only when a *new file* is selected
+  // useEffect(() => {
+  //   if (!fileContent || !selectedFile) return;
 
-      if (resolvedLanguage === "html") {
-        try {
-          // only load dynamically in browser-safe way
-          c = fileContent
-            .split("\n")
-            .map((line) => line.trim())
-            .filter(Boolean)
-            .join("");
-        } catch (err) {
-          console.error("Minify failed (browser env):", err);
-          c = fileContent;
-        }
-      }
+  //   let c = fileContent;
 
-      setCleanedContent(c);
-    }
+  //   console.log("Cleaning new file:", selectedFile);
 
-    clean();
-  }, [selectedFile]);
+  //   if (resolvedLanguage === "html" && typeof fileContent === "string") {
+  //     try {
+  //       c = fileContent
+  //         .split("\n")
+  //         .map(line => line.trimEnd())
+  //         .filter(line => line.length > 0)
+  //         .join("");
+  //     } catch (err) {
+  //       console.error("HTML minify failed:", err);
+  //     }
+  //   }
 
+  //   setCleanedContent(c);
+  // }, [selectedFile]); // ← only runs when file changes
+
+  // // Keep editor content in sync when switching files
+  // useEffect(() => {
+  //   // When selectedFile changes, reset file content to cleanedContent
+  //   setFileContent(cleanedContent);
+  // }, [cleanedContent]);
 
   return (
     <Editor
-      height={"80vh"}
+      height="80vh"
       language={resolvedLanguage}
-      value={cleanedContent}
+      value={fileContent}
       onChange={handleEditorChange}
       onMount={(editor) => (editorRef.current = editor)}
       options={{
@@ -72,6 +77,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ theme = "vs-light" }) => {
         smoothScrolling: true,
         formatOnType: true,
         formatOnPaste: true,
+        wordWrap: "on",
       }}
       theme={theme}
     />

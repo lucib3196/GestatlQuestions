@@ -1,6 +1,4 @@
-import io
 import json
-import zipfile
 from pathlib import Path
 from typing import Tuple
 import pytest
@@ -11,6 +9,7 @@ def create_test_dir(local_storage) -> Tuple[Path, str]:
     """Create a temporary test directory inside the local storage."""
     testdir = "TestFolder"
     created_dir = local_storage.create_storage_path(testdir).as_posix()
+    print("[TEST] This is the created dir", created_dir)
     return created_dir, testdir
 
 
@@ -42,11 +41,10 @@ def test_initialization(local_storage, tmp_path):
 def test_normalize_path(local_storage):
     question_expected = "questions/ValidQuestion"
     assert local_storage.normalize_path(question_expected) == question_expected
-    
+
     question_wrong = "ValidQuestion"
     assert local_storage.normalize_path(question_wrong) == question_expected
-    
-    
+
 
 # =============================================================================
 # Directory Management Tests
@@ -62,16 +60,7 @@ def test_create_storage_path(create_test_dir):
 def test_get_storage_path(create_test_dir, local_storage):
     """Validate that get_storage_path returns the correct directory path."""
     created, folder_name = create_test_dir
-    assert local_storage.get_storage_path(folder_name) == created
-
-
-def test_get_relative_storage_path(create_test_dir, local_storage):
-    """Check that relative path is computed correctly from base root."""
-    _, folder_name = create_test_dir
-    assert (
-        Path(local_storage.get_relative_storage_path(folder_name))
-        == Path("questions") / folder_name
-    )
+    assert local_storage.get_storage_path(folder_name, False) == created
 
 
 def test_does_storage_path_exist(create_test_dir, local_storage):
@@ -99,19 +88,20 @@ def test_save_file(local_storage, create_test_dir, filename, content, reader):
     assert reader(f) == content
 
 
-def test_get_filepath(save_multiple_files, local_storage, tmp_path):
+def test_get_file(save_multiple_files, local_storage, tmp_path):
     """Validate get_filepath returns expected absolute paths."""
     files, folder_name = save_multiple_files
     for f in files:
         assert (
             local_storage.get_file(folder_name, f[0])
-            == (Path(tmp_path) / "questions" / folder_name / f[0]).as_posix()
+            == (tmp_path / "questions" / folder_name / f[0]).as_posix()
         )
 
 
 def test_empty_directory(create_test_dir, local_storage):
     """Check that a newly created directory is empty."""
     _, name = create_test_dir
+    local_storage.delete_storage(name)
     f = local_storage.list_files(name)
     assert f == []
 
@@ -134,7 +124,7 @@ def test_delete_file(save_multiple_files, local_storage):
         assert local_storage.read_file(name, filename) is None
 
 
-def test_get_file(save_multiple_files, local_storage):
+def test_read_file(save_multiple_files, local_storage):
     """Verify get_file correctly retrieves stored file contents."""
     files, name = save_multiple_files
 

@@ -7,7 +7,7 @@ import {
 import parse, { domToReact } from "html-react-parser";
 import type { DOMNode } from "html-react-parser";
 import { MathJax } from "better-react-mathjax";
-import { useState } from "react";
+import React from "react";
 
 const isValidTagName = (val: string): val is keyof TagRegistry => {
     return val in TagAttributeMapping;
@@ -20,25 +20,99 @@ type TransformTagType<K extends ValidComponents> = {
     transformedProps: TagRegistry[K];
 };
 
+class SafeRenderer extends React.Component<
+    { children: React.ReactNode },
+    { hasError: boolean; errorMessage?: string }
+> {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, errorMessage: "" }
+    }
+
+    static getDerivedStateFromError(error: unknown) {
+        const message =
+            error instanceof Error ? error.message : String(error);
+        return { hasError: true, errorMessage: message };
+    }
+
+    componentDidCatch(error: any, info: any) {
+        console.error("Render failed:", error, info);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return <div>⚠️ Failed to render content {this.state.errorMessage} </div>;
+        }
+        return this.props.children;
+    }
+}
+
+function getChildrenSafe(node: unknown): React.ReactNode | null {
+    if (!React.isValidElement(node)) return null;
+
+    const props = (node as Record<string, any>).props;
+
+    if (!Object.prototype.hasOwnProperty.call(props, "children")) {
+        return null;
+    }
+    return props.children ?? null;
+}
+
+export function CleanNode(node: unknown) {
+    if (typeof node === "string") {
+        const trimmed = node.replace(/\r?\n|\r/g, "").trim();
+        return trimmed.length > 0 ? (
+            <React.Fragment>{trimmed}</React.Fragment>
+        ) : null;
+    }
+    if (React.isValidElement(node)) {
+        const children = getChildrenSafe(node);
+
+        if (children) {
+            // Recursivley clean
+            const cleanedChildren = Array.isArray(children)
+                ? children.map((child, i) => {
+                    console.log("Cleaning Child", child);
+                    return <React.Fragment key={i}>{CleanNode(child)}</React.Fragment>;
+                })
+                : null;
+            return React.cloneElement(node, {
+                ...node.props,
+                children: cleanedChildren,
+            });
+        }
+
+        console.log("Node passed cleaning this is the node", node);
+
+        // no Children
+        return node;
+    }
+
+    console.warn("Skipped invalid React child:", node);
+    return null;
+}
+
 function TransformTag<K extends ValidComponents>(
     node: DOMNode
 ): TransformTagType<K> | undefined {
-    if (node.type === "tag") {
-        const tagName = node.name.toLowerCase();
+    try {
+        if (node.type === "tag") {
+            const tagName = node.name.toLowerCase();
 
-        if (isValidTagName(tagName)) {
-            const Tag = ComponentMap[tagName];
+            if (isValidTagName(tagName)) {
+                const Tag = ComponentMap[tagName];
+                const transform = TagAttributeMapping[tagName];
+                const transformedProps = transform(node.attribs);
 
-            console.log("Got node as tag", node)
-            const transform = TagAttributeMapping[tagName];
-            const transformedProps = transform(node.attribs);
-
-            return {
-                tagName,
-                Tag,
-                transformedProps,
-            } as TransformTagType<K>;
+                return {
+                    tagName,
+                    Tag,
+                    transformedProps,
+                } as TransformTagType<K>;
+            }
         }
+    } catch (error) {
+        console.log("Error transforming tag", error);
     }
 }
 
@@ -63,7 +137,8 @@ export const HandleTags = (node: DOMNode) => {
                                 const childResult = TransformTag(child);
                                 if (!childResult) return null;
 
-                                const { Tag: ChildTag, transformedProps: ChildAttrs } = childResult;
+                                const { Tag: ChildTag, transformedProps: ChildAttrs } =
+                                    childResult;
                                 if (!ChildTag) return null;
 
                                 return (
@@ -94,15 +169,19 @@ export const HandleTags = (node: DOMNode) => {
     }
 };
 
-
 export function QuestionHTMLToReact({ html }: { html: string }) {
     let parsed;
     try {
-        parsed = parse(html, { replace: (node) => HandleTags(node) })
+        parsed = parse(html, { replace: (node) => HandleTags(node) });
     } catch (error) {
-        console.log(error)
-        parsed = html
+        console.log(error);
+        parsed = html;
     }
+    
 
-    return <> <MathJax>{parsed}</MathJax></>
+    return (
+        <SafeRenderer>
+            <MathJax>{parsed}</MathJax>
+        </SafeRenderer>
+    );
 }
