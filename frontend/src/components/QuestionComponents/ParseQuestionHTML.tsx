@@ -1,13 +1,14 @@
+import React from "react";
+import { MathJax } from "better-react-mathjax";
+import parse, { domToReact, type DOMNode } from "html-react-parser";
+
 import {
     TagAttributeMapping,
     type TagRegistry,
     type ValidComponents,
     ComponentMap,
 } from "./questionComponentMapping";
-import parse, { domToReact } from "html-react-parser";
-import type { DOMNode } from "html-react-parser";
-import { MathJax } from "better-react-mathjax";
-import React from "react";
+
 
 const isValidTagName = (val: string): val is keyof TagRegistry => {
     return val in TagAttributeMapping;
@@ -26,12 +27,11 @@ class SafeRenderer extends React.Component<
 > {
     constructor(props: { children: React.ReactNode }) {
         super(props);
-        this.state = { hasError: false, errorMessage: "" }
+        this.state = { hasError: false, errorMessage: "" };
     }
 
     static getDerivedStateFromError(error: unknown) {
-        const message =
-            error instanceof Error ? error.message : String(error);
+        const message = error instanceof Error ? error.message : String(error);
         return { hasError: true, errorMessage: message };
     }
 
@@ -46,18 +46,6 @@ class SafeRenderer extends React.Component<
         return this.props.children;
     }
 }
-
-function getChildrenSafe(node: unknown): React.ReactNode | null {
-    if (!React.isValidElement(node)) return null;
-
-    const props = (node as Record<string, any>).props;
-
-    if (!Object.prototype.hasOwnProperty.call(props, "children")) {
-        return null;
-    }
-    return props.children ?? null;
-}
-
 
 function TransformTag<K extends ValidComponents>(
     node: DOMNode
@@ -136,7 +124,7 @@ export const HandleTags = (node: DOMNode) => {
     }
 };
 
-export function QuestionHTMLToReact({ html }: { html: string }) {
+export default function QuestionHTMLToReact({ html }: { html: string }) {
     let parsed;
     try {
         parsed = parse(html, { replace: (node) => HandleTags(node) });
@@ -144,7 +132,6 @@ export function QuestionHTMLToReact({ html }: { html: string }) {
         console.log(error);
         parsed = html;
     }
-
 
     return (
         <SafeRenderer>

@@ -5,7 +5,7 @@ import {
     useState,
     type FormEvent,
 } from "react";
-import { QuestionHTMLToReact } from "../QuestionComponents/ParseQuestionHTML";
+import QuestionHTMLToReact from "../QuestionComponents/ParseQuestionHTML";
 import { useAdaptiveParams } from "../../api";
 import { trueish } from "../../utils";
 import { Loading } from "../Base/Loading";
