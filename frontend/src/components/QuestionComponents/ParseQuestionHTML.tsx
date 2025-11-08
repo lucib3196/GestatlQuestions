@@ -24,7 +24,7 @@ class SafeRenderer extends React.Component<
     { children: React.ReactNode },
     { hasError: boolean; errorMessage?: string }
 > {
-    constructor(props) {
+    constructor(props: { children: React.ReactNode }) {
         super(props);
         this.state = { hasError: false, errorMessage: "" }
     }
@@ -58,39 +58,6 @@ function getChildrenSafe(node: unknown): React.ReactNode | null {
     return props.children ?? null;
 }
 
-export function CleanNode(node: unknown) {
-    if (typeof node === "string") {
-        const trimmed = node.replace(/\r?\n|\r/g, "").trim();
-        return trimmed.length > 0 ? (
-            <React.Fragment>{trimmed}</React.Fragment>
-        ) : null;
-    }
-    if (React.isValidElement(node)) {
-        const children = getChildrenSafe(node);
-
-        if (children) {
-            // Recursivley clean
-            const cleanedChildren = Array.isArray(children)
-                ? children.map((child, i) => {
-                    console.log("Cleaning Child", child);
-                    return <React.Fragment key={i}>{CleanNode(child)}</React.Fragment>;
-                })
-                : null;
-            return React.cloneElement(node, {
-                ...node.props,
-                children: cleanedChildren,
-            });
-        }
-
-        console.log("Node passed cleaning this is the node", node);
-
-        // no Children
-        return node;
-    }
-
-    console.warn("Skipped invalid React child:", node);
-    return null;
-}
 
 function TransformTag<K extends ValidComponents>(
     node: DOMNode
@@ -177,7 +144,7 @@ export function QuestionHTMLToReact({ html }: { html: string }) {
         console.log(error);
         parsed = html;
     }
-    
+
 
     return (
         <SafeRenderer>
