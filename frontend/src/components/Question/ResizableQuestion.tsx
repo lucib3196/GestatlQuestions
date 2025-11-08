@@ -9,6 +9,7 @@ import { SolutionPanel } from "./SolutionPanel";
 import QuestionCard from "./QuestionCard";
 import { MyButton } from "./../Base/Button";
 import QuestionCodeEditor from "../CodeEditor/QuestionCodeEditor";
+import QuestionEngine from "../QuestionEngine/QuestionEngine";
 
 export function ResizableQuestionContainer() {
   const [showSolution, setShowSolution] = useState(false);
@@ -83,8 +84,7 @@ export function ResizableQuestionContainer() {
           className="flex flex-col items-center justify-center 
                      bg-white dark:bg-gray-800 p-6 overflow-auto"
         >
-          <QuestionCard
-          />
+         <QuestionEngine />
         </RPanel>
       </PanelGroup>
     </SectionContainer>

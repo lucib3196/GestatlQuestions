@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import { useQuestionAnswers } from "../../context/QuestionAnswerContext";
 import { MathJax } from "better-react-mathjax";
 
 export type PLNumberInputProps = {
@@ -6,12 +7,9 @@ export type PLNumberInputProps = {
     comparison: string;
     digits: number | string;
     label: string | number;
-    value: number | string;
     className?: string;
     variant?: keyof typeof variantStyles;
-    onChange: (name: string, value: string) => void;
 };
-
 
 const variantStyles: Record<string, string> = {
     default: "border-gray-300 shadow-sm",
@@ -23,11 +21,13 @@ const PLNumberInput: React.FC<PLNumberInputProps> = ({
     className = "",
     digits,
     label,
-    value,
+
     variant = "default", // 👈 default variant
-    onChange,
 }) => {
     const step = 1 / Math.pow(10, Number(digits) || 0);
+
+    const { answers, setAnswer } = useQuestionAnswers();
+
 
     return (
         <MathJax>
@@ -47,8 +47,8 @@ const PLNumberInput: React.FC<PLNumberInputProps> = ({
                         type="number"
                         step={step}
                         placeholder={String(answerName)}
-                        value={value}
-                        onChange={(e) => onChange(answerName, e.target.value)}
+                        value={answers[answerName] ?? ""}
+                        onChange={(e) => setAnswer(answerName, e.target.value)}
                         className="w-full max-w-md rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </fieldset>
@@ -57,4 +57,4 @@ const PLNumberInput: React.FC<PLNumberInputProps> = ({
     );
 };
 
-export default PLNumberInput
+export default PLNumberInput;

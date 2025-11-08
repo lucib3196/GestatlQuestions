@@ -1,5 +1,7 @@
 import PLQuestionPanel from "./PLQuestionPanel";
 import PLNumberInput from "./PLNumberInput";
+import PLFigure from "./PLFigure";
+import type { PLFigureProps } from "./PLFigure";
 import type { PLQuestionPanelProps } from "./PLQuestionPanel";
 import type { PLNumberInputProps } from "./PLNumberInput";
 
@@ -8,16 +10,18 @@ import type { PLNumberInputProps } from "./PLNumberInput";
 export type ValidComponents = "pl-question-panel" | "pl-number-input";
 
 export type TagRegistry = {
-    "pl-question-panel": PLQuestionPanelProps;
-    "pl-number-input": PLNumberInputProps;
+  "pl-question-panel": PLQuestionPanelProps;
+  "pl-number-input": PLNumberInputProps;
+  "pl-figure": PLFigureProps;
 };
 
 export const ComponentMap: Record<
-    ValidComponents | string,
-    React.FC<any> | undefined
+  ValidComponents | string,
+  React.FC<any> | undefined
 > = {
-    "pl-question-panel": PLQuestionPanel,
-    "pl-number-input": PLNumberInput,
+  "pl-question-panel": PLQuestionPanel,
+  "pl-number-input": PLNumberInput,
+  "pl-figure": PLFigure,
 };
 // These are the raw attributes for instance <pl-number-input answer-name='c' />
 type RawAttributes = Record<string, string>;
@@ -26,16 +30,26 @@ type RawAttributes = Record<string, string>;
 // Into more react viable components, the raw attributes are a mapping to the react
 // props that the input element expects,
 export const TagAttributeMapping: {
-    [K in keyof TagRegistry]: (attrs: RawAttributes) => TagRegistry[K];
+  [K in keyof TagRegistry]: (attrs: RawAttributes) => TagRegistry[K];
 } = {
-    "pl-question-panel": (_attrs) => ({}),
+  "pl-question-panel": (attrs) => ({
+    className: attrs["classname"] || attrs["class"],
+    size: attrs["size"],
+    variant: attrs["variant"],
+  }),
 
-    "pl-number-input": (attrs) => ({
-        answerName: attrs["answers-name"],
-        comparison: attrs.comparison ?? "exact",
-        digits: Number(attrs.digits ?? 3),
-        label: attrs.label ?? "",
-        className: attrs["classname"],
-        variant: attrs["variant"],
-    }),
+  "pl-number-input": (attrs) => ({
+    answerName: attrs["answers-name"],
+    comparison: attrs.comparison ?? "exact",
+    digits: Number(attrs.digits ?? 3),
+    label: attrs.label ?? "",
+    className: attrs["classname"] || attrs["class"],
+    variant: attrs["variant"],
+  }),
+  "pl-figure": (attrs) => ({
+    src: attrs["file-name"],
+    className: attrs["classname"] || attrs["class"],
+    size: attrs["size"],
+    variant: attrs["variant"],
+  }),
 };
