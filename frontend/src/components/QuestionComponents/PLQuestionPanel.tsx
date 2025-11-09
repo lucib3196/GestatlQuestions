@@ -30,7 +30,7 @@ const PLQuestionPanel: React.FC<PLQuestionPanelProps> = ({
 }) => (
     <div
         className={clsx(
-            "flex flex-col items-center text-center rounded-md transition-all duration-200",
+            "flex flex-col items-center justify-center text-center rounded-md transition-all duration-200",
             variantStyles[variant as PLQuestionPanelVariant],
             sizeStyles[size as PLQuestionPanelSize],
             className
