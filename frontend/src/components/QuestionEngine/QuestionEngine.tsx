@@ -36,9 +36,6 @@ export default function QuestionEngine() {
         solutionHTML ?? ""
     );
 
-    console.log("Current answers", answers)
-
-
     useEffect(() => {
         if (parsed) {
             const { qHTML, sHTML } = parsed;
@@ -54,7 +51,6 @@ export default function QuestionEngine() {
     return (
         <>
             <QuestionHeader question={qdata} />
-
             <QuestionHTMLToReact html={formattedQuestion} />
 
         </>
