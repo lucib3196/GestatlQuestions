@@ -33,7 +33,7 @@ const sizeStyles: Record<PLSolutionPanelSize, string> = {
 const PLSolutionPanel: React.FC<PLSolutionPanelProps> = ({
     children,
     className = "",
-    title,
+    title="Solution",
     subtitle,
     size = "md",
     variant = "default",
