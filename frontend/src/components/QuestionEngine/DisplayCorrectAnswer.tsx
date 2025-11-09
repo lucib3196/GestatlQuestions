@@ -1,4 +1,4 @@
-import type { QuestionParams } from "../../types/types";
+import type { QuestionParams } from "../../types/questionTypes";
 
 type showAnswerProps = {
   questionParams: QuestionParams | null;
