@@ -1,9 +1,9 @@
-import React, { memo, useMemo, useCallback, useRef, useEffect } from "react";
+import React, { memo, useMemo, useCallback, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import type { OnChange } from "@monaco-editor/react";
 import type { editor as MonacoEditor } from "monaco-editor";
 import { useCodeEditorContext } from "../../context/CodeEditorContext";
-import { useState } from "react";
+import { useEffect } from "react";
 
 const languageMap: Record<string, string> = {
   js: "javascript",
@@ -34,22 +34,27 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ theme = "vs-light" }) => {
   );
 
 
+
+  useEffect(() => {
+    if (!fileContent || !selectedFile) return;
+    let c = fileContent;
+    c.trim()
+      // normalize line endings
+      .replace(/\r\n/g, "\n")
+      // remove extra blank lines (keep one)
+      .replace(/\n{2,}/g, "\n")
+      // remove trailing spaces on each line
+      .split("\n")
+      .map((line) => line.replace(/\s+$/g, ""))
+      .join("\n");
+    setFileContent(c);
+  }, [selectedFile]);
+
   return (
     <Editor
       height="80vh"
       language={resolvedLanguage}
-      value={fileContent
-        ?.trim()
-        // normalize line endings
-        .replace(/\r\n/g, "\n")
-        // remove extra blank lines (keep one)
-        .replace(/\n{2,}/g, "\n")
-        // remove trailing spaces on each line
-        .split("\n")
-        .map(line => line.replace(/\s+$/g, ""))
-        .join("\n")}
-
-
+      value={fileContent}
       onChange={handleEditorChange}
       onMount={(editor) => (editorRef.current = editor)}
       options={{

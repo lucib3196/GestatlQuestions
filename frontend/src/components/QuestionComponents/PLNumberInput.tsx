@@ -1,5 +1,5 @@
 import React from "react";
-import { useQuestionAnswers } from "../../context/QuestionAnswerContext";
+import { useQuestionRuntime } from "../../context/QuestionAnswerContext";
 import { MathJax } from "better-react-mathjax";
 
 export type PLNumberInputProps = {
@@ -26,7 +26,7 @@ const PLNumberInput: React.FC<PLNumberInputProps> = ({
 }) => {
     const step = 1 / Math.pow(10, Number(digits) || 0);
 
-    const { answers, setAnswer } = useQuestionAnswers();
+    const { answers, setAnswer } = useQuestionRuntime();
 
 
     return (

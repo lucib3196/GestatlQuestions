@@ -2,18 +2,18 @@
 import type { FormEvent } from "react";
 import { MyButton } from "../Base/Button";
 
-type ButtonActionsProps = {
+type QuestionButtonProps = {
   isSubmitted: boolean;
   showSolution: () => void;
   handleSubmit: (e: FormEvent) => void;
   generateVarient: () => void;
 };
-export function ButtonActions({
+export function QuestionButtons({
   isSubmitted,
   showSolution,
   handleSubmit,
   generateVarient,
-}: ButtonActionsProps) {
+}: QuestionButtonProps) {
   return (
     <div className="grid sm:grid-cols-3 gap-10 mb-10">
       <MyButton

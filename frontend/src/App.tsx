@@ -7,7 +7,7 @@ import CodeEditorProvider from "./context/CodeEditorContext";
 import { LecturePage } from "./pages/LecturePage";
 import { QuestionProvider } from "./context/QuestionContext";
 
-import { QuestionAnswersProvider } from './context/QuestionAnswerContext';
+import { QuestionRuntimeProvider } from './context/QuestionAnswerContext';
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {
@@ -20,7 +20,7 @@ function App() {
   return (
     <AuthProvider>
       <MathJaxContext version={3} config={config}>
-        <QuestionAnswersProvider>
+        <QuestionRuntimeProvider>
           <QuestionSettingsProvider>
             <QuestionProvider>
               <CodeEditorProvider>
@@ -33,7 +33,7 @@ function App() {
               </CodeEditorProvider>
             </QuestionProvider>
           </QuestionSettingsProvider>
-        </QuestionAnswersProvider>
+        </QuestionRuntimeProvider>
       </MathJaxContext>
     </AuthProvider>
   );

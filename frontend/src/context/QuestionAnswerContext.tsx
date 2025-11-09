@@ -1,31 +1,51 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 
+// --- Types ---
+type AnswerValue = string | number;
+type AnswersMap = Record<string, AnswerValue>;
 
-type Answers = Record<string, string | number>;
+interface QuestionRuntimeContextType {
+  /** All current answers keyed by input name */
+  answers: AnswersMap;
+  /** Update or add a new answer */
+  setAnswer: (name: string, value: AnswerValue) => void;
 
-type QuestionAnswersContextType = {
-    answers: Answers
-    setAnswer: (name: string, value: string) => void
+  /** Full solution text or HTML */
+  solution: string;
+  setSolution: React.Dispatch<React.SetStateAction<string>>;
+
+  /** Whether to show the solution panel */
+  showSolution: boolean;
+  setShowSolution: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const QuestionAnswersContext = createContext<QuestionAnswersContextType | null>(null)
+// --- Context ---
+const QuestionRuntimeContext = createContext<QuestionRuntimeContextType | null>(null);
 
-export const QuestionAnswersProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [answers, setAnswers] = useState<Answers>({});
+// --- Provider ---
+export const QuestionRuntimeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [answers, setAnswers] = useState<AnswersMap>({});
+  const [solution, setSolution] = useState<string>("");
+  const [showSolution, setShowSolution] = useState<boolean>(false);
 
-    const setAnswer = (name: string, value: string) => {
-        setAnswers((prev) => ({ ...prev, [name]: value }));
-    };
+  const setAnswer = useCallback((name: string, value: AnswerValue) => {
+    setAnswers((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
-    return (
-        <QuestionAnswersContext.Provider value={{ answers, setAnswer }}>
-            {children}
-        </QuestionAnswersContext.Provider>
-    );
+  return (
+    <QuestionRuntimeContext.Provider
+      value={{ answers, setAnswer, solution, setSolution, showSolution, setShowSolution }}
+    >
+      {children}
+    </QuestionRuntimeContext.Provider>
+  );
 };
 
-export const useQuestionAnswers = () => {
-    const ctx = useContext(QuestionAnswersContext);
-    if (!ctx) throw new Error("useQuestionAnswers must be used within a QuestionAnswersProvider");
-    return ctx;
+// --- Hook ---
+export const useQuestionRuntime = (): QuestionRuntimeContextType => {
+  const ctx = useContext(QuestionRuntimeContext);
+  if (!ctx) {
+    throw new Error("useQuestionRuntime must be used within a QuestionRuntimeProvider");
+  }
+  return ctx;
 };
