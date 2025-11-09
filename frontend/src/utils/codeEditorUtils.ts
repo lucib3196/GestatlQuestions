@@ -1,4 +1,4 @@
-import type { FileData } from "../types/types";
+import type { FileData } from "../types/questionTypes";
 import { toStringSafe } from "./generalUtils";
 
 export const getLanguage = (selectedFile: string) =>
