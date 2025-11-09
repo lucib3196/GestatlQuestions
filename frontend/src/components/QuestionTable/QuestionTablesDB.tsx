@@ -9,7 +9,6 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
-import { useSelectedQuestion } from "../../context/SelectedQuestionContext";
 import { useSelection } from "./utils/useSelection";
 import { QuestionRow } from "./QuestionRow";
 import type { MinimalTestResult } from "./utils/services";
@@ -17,11 +16,10 @@ import { tableHeaderSx } from "../../styles/tableHeaderSx";
 import { useTheme } from "../Generic/DarkModeToggle";
 import { useQuestionContext } from './../../context/QuestionContext';
 
-
 export function QuestionTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const { selectedQuestionID, setSelectedQuestionID } = useSelectedQuestion()
+  const { selectedQuestionID, setSelectedQuestionID } = useQuestionContext()
   const { isSelected, toggle } = useSelection();
   const [testResults] = useState<MinimalTestResult[]>([]);
   const [theme] = useTheme();
@@ -39,8 +37,7 @@ export function QuestionTable() {
   };
 
   const handleQuestionClick = (id: string) => {
-    console.log("This is the id of clicked", id)
-    setSelectedQuestionID((prev: string | null) => (prev === id ? null : id));
+    setSelectedQuestionID(id);
   };
 
   return (

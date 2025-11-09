@@ -24,19 +24,51 @@ class LocalStorageService(StorageService):
     # Initialization / Lifecycle
     # -------------------------------------------------------------------------
 
-    def __init__(self, root: str | Path):
+    def __init__(self, root: str | Path, base: str, create: bool = False):
         """
         Initialize the local storage service with a base directory.
 
         Args:
             root: Path or string specifying the root storage directory.
         """
+        # Where the storage is at
         self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
 
+        # Base name the folder where we store
+        self.base_name = base
+        self.base_path = self.root / base
         logger.debug(
             "Initialized the storage, questions will be stored at %s", self.root
         )
+
+    # Helper
+    def normalize_path(self, target: str | Path) -> str:
+        """
+        Ensure the given path is normalized under the base path.
+
+        - If an absolute path is passed, it strips self.root and returns a relative path.
+        - If a relative path is passed, it ensures it is prefixed by self.base_name.
+        - Always returns a POSIX-style string (forward slashes).
+        """
+        # Convert to Path
+        target_path = Path(target)
+
+        # Case 1: Absolute path inside the storage root
+        try:
+            relative_path = target_path.relative_to(self.root)
+        except ValueError:
+            # Case 2: Not inside root (likely already relative or external)
+            relative_path = target_path
+
+        # Convert to posix string
+        rel_str = relative_path.as_posix()
+
+        # Case 3: Ensure prefix
+        if not rel_str.startswith(f"{self.base_name}/"):
+            rel_str = f"{self.base_name}/{rel_str}"
+
+        return rel_str
 
     # -------------------------------------------------------------------------
     # Base path operations
@@ -49,9 +81,15 @@ class LocalStorageService(StorageService):
         Returns:
             Path: The resolved base directory path.
         """
-        return (self.root).as_posix()
+        return Path(self.base_path).as_posix()
 
-    def get_storage_path(self, target: str | Path | Blob) -> str:
+    def get_root_path(self) -> str:
+        """Returns the root path"""
+        return self.root.as_posix()
+
+    # Getting
+
+    def get_storage_path(self, target: str | Path | Blob, relative: bool = True) -> str:
         """
         Build the absolute path for a resource based on its identifier.
 
@@ -61,7 +99,15 @@ class LocalStorageService(StorageService):
         Returns:
             Path: Path to the resource directory.
         """
-        return (self.root / safe_dir_name(str(target))).as_posix()
+        if isinstance(target, Blob):
+            target = str(target.name)
+        target = self.normalize_path(target)
+
+        absolute_path = Path(self.root) / str(target)
+        if relative:
+            return absolute_path.relative_to(self.root).as_posix()
+
+        return absolute_path.as_posix()
 
     def create_storage_path(self, target: str | Path) -> Path:
         """
@@ -73,21 +119,9 @@ class LocalStorageService(StorageService):
         Returns:
             Path: Path to the created directory.
         """
-        storage = Path(self.get_storage_path(target))
+        storage = Path(self.get_storage_path(target, relative=False))
         storage.mkdir(parents=True, exist_ok=True)
         return storage
-
-    def get_relative_storage_path(self, target):
-        """
-        Return the relative path of a storage directory from the base root.
-
-        Args:
-            identifier: Unique identifier for the stored resource.
-
-        Returns:
-            Path: Relative path to the storage directory.
-        """
-        return Path(self.get_storage_path(target)).relative_to(self.root.parent)
 
     def does_storage_path_exist(self, target: str | Path) -> bool:
         """
@@ -99,7 +133,7 @@ class LocalStorageService(StorageService):
         Returns:
             bool: True if the directory exists, False otherwise.
         """
-        return Path(self.get_storage_path(target)).exists()
+        return Path(self.get_storage_path(target, relative=False)).exists()
 
     # -------------------------------------------------------------------------
     # File access and management
@@ -119,12 +153,19 @@ class LocalStorageService(StorageService):
             Path: Full path to the file.
         """
         if filename:
-
-            path = Path(self.get_storage_path(target)) / filename
-
+            path = Path(self.get_storage_path(target, relative=False)) / filename
             return path.as_posix()
         else:
             return self.get_storage_path(target)
+
+    def get_filepath(
+        self, target: str | Path, filename: str | None = None, recursive: bool = False
+    ):
+        if filename:
+            path = Path(self.get_storage_path(target, relative=False)) / filename
+            return path.as_posix()
+        else:
+            return self.get_storage_path(target, relative=False)
 
     def read_file(
         self, target: str | Path, filename: str | None = None
@@ -167,7 +208,7 @@ class LocalStorageService(StorageService):
         Raises:
             ValueError: If overwrite is False and the file already exists.
         """
-        file_path = Path(self.get_storage_path(target)) / filename
+        file_path = Path(self.get_storage_path(target, relative=False)) / filename
 
         if not overwrite and file_path.exists():
             raise ValueError(f"Cannot overwrite file {file_path}")
@@ -193,7 +234,7 @@ class LocalStorageService(StorageService):
         Returns:
             List[Path]: List of file paths under the directory.
         """
-        target = Path(self.get_storage_path(target))
+        target = Path(self.get_storage_path(target, relative=False))
         if not target.exists():
             logger.warning(f"Target path does not exist for {target}")
             return []
@@ -230,7 +271,7 @@ class LocalStorageService(StorageService):
             shutil.rmtree(target)
 
     def hard_delete(self) -> None:
-        target = self.root
+        target = Path(self.get_base_path())
         if target.exists():
             for f in target.iterdir():
                 if f.is_file():
@@ -245,11 +286,22 @@ class LocalStorageService(StorageService):
             identifier: Unique identifier for the stored resource.
             filename: Name of the file to delete.
         """
-        target = Path(self.get_file(target, filename))
+        target = Path(self.get_filepath(target, filename))
+        logger.debug(f"[LOCAL STORAGE] Attempting to delete [target]: {target}")
         if target and target.exists():
+            logger.debug(f"[LOCAL STORAGE] Deleting file {target}")
             target.unlink()
+        else:
+            logger.warning("File does not exist")
 
     def rename_storage(self, old: str | Path, new: str | Path) -> str:
-        old = self.get_storage_path(old)
-        new = self.get_storage_path(new)
-        return Path(old).rename(new).as_posix()
+        old = Path(old)
+        new = Path(new)
+
+        if not old.is_absolute():
+            old = self.get_storage_path(old, relative=False)
+        if not new.is_absolute():
+            new = self.get_storage_path(new, relative=False)
+
+        Path(old).rename(new)
+        return Path(new).as_posix()

@@ -4,15 +4,17 @@ type InputComponentProps = {
   id: string;
   type: React.HTMLInputTypeAttribute;
   name: string;
+  value:string
   label: string;
   placeholder?: string;
   required?: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
-export default function FormInputTextBase({
+export function InputTextForm({
   id,
   type,
   name,
+  value,
   label,
   placeholder,
   required,
@@ -28,6 +30,7 @@ export default function FormInputTextBase({
           type={type}
           id={id}
           name={name}
+          value={value}
           placeholder={placeholder}
           required={required}
           onChange={onChange}
@@ -37,3 +40,4 @@ export default function FormInputTextBase({
     </>
   );
 }
+

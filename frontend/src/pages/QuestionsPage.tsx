@@ -1,12 +1,8 @@
-import { QuestionSettings } from "../components/QuestionFilter/QuestionSettings";
-import { useState } from "react";
 import { QuestionFiltering } from "../components/QuestionFilterNew/QuestionFiltering";
 import { QuestionTable } from "../components/QuestionTable/QuestionTablesDB";
-import { SimpleToggle } from "../components/Generic/SimpleToggle";
 import { ResizableQuestionContainer } from "../components/Question/ResizableQuestion";
+import { useQuestionContext } from "../context/QuestionContext";
 import SyncQuestions from "../components/QuestionSync/QuestionSync";
-import { useSelectedQuestion } from "../context/SelectedQuestionContext";
-
 function QuestionDashBoardHeader() {
   return (
     <div className="flex justify-center items-center mb-6">
@@ -18,33 +14,14 @@ function QuestionDashBoardHeader() {
 }
 
 export function QuestionViewPage() {
-  const [showSettings, setShowSettings] = useState<boolean>(false);
-  const { selectedQuestionID } = useSelectedQuestion()
+  const { selectedQuestionID } = useQuestionContext();
 
   return (
     <section className="w-full flex flex-col items-center py-12 space-y-16">
       {/* Dashboard Section */}
       <div className="w-full max-w-5xl flex flex-col items-center px-4 sm:px-6 lg:px-8">
         <QuestionDashBoardHeader />
-
-        {/* Settings Toggle */}
-        <div className="flex flex-col items-center w-full mb-6">
-          <div className="flex flex-row items-center gap-x-10">
-            <SimpleToggle
-              setToggle={() => setShowSettings((prev) => !prev)}
-              label="Show Settings"
-              id="settings"
-              checked={showSettings}
-            />
-            <SyncQuestions />
-          </div>
-
-          {showSettings && (
-            <div className="mt-4 w-full">
-              <QuestionSettings />
-            </div>
-          )}
-        </div>
+        <SyncQuestions />
 
         {/* Filters & Table */}
         <div className="w-full">
@@ -57,9 +34,11 @@ export function QuestionViewPage() {
       </div>
 
       {/* Question Detail View */}
-      {selectedQuestionID && <div className="w-full px-4 sm:px-8">
-        <ResizableQuestionContainer />
-      </div>}
+      {selectedQuestionID && (
+        <div className="w-full px-4 sm:px-8">
+          <ResizableQuestionContainer />
+        </div>
+      )}
     </section>
   );
 }

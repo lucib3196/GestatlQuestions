@@ -5,22 +5,16 @@ import {
   PanelGroup,
   PanelResizeHandle,
 } from "react-resizable-panels";
-import { SolutionPanel } from "./SolutionPanel";
-import QuestionCard from "./QuestionCard";
 import { MyButton } from "./../Base/Button";
 import QuestionCodeEditor from "../CodeEditor/QuestionCodeEditor";
-
-
-
-
-
-
+import QuestionEngine from "../QuestionEngine/QuestionEngine";
+import { useQuestionRuntime } from "../../context/QuestionAnswerContext";
+import QuestionHTMLToReact from "../QuestionComponents/ParseQuestionHTML";
 
 
 export function ResizableQuestionContainer() {
-  const [showSolution, setShowSolution] = useState(false);
-  const [solution, setSolution] = useState<string[] | null>(null);
   const [showDevMode, setDevMode] = useState(false);
+  const { showSolution, solution } = useQuestionRuntime()
 
   return (
     <SectionContainer
@@ -70,7 +64,7 @@ export function ResizableQuestionContainer() {
             className="bg-white dark:bg-gray-800 border-r 
                        border-gray-300 dark:border-gray-700 p-4 overflow-auto"
           >
-            <SolutionPanel solution={solution ?? []} />
+            <QuestionHTMLToReact html={solution} />
           </RPanel>
         )}
 
@@ -90,10 +84,7 @@ export function ResizableQuestionContainer() {
           className="flex flex-col items-center justify-center 
                      bg-white dark:bg-gray-800 p-6 overflow-auto"
         >
-          <QuestionCard
-            setShowSolution={setShowSolution}
-            setSolution={setSolution}
-          />
+          <QuestionEngine />
         </RPanel>
       </PanelGroup>
     </SectionContainer>

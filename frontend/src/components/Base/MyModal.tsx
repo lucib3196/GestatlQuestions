@@ -54,11 +54,11 @@ export function MyModal({
     };
   }, [setShowModal]);
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 ">
+    <div className="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-50 border-2 ">
       <div
         ref={modalRef}
         className={clsx(
-          "flex flex-col bg-white rounded-lg shadow-lg p-8 overflow-auto dark:bg-background",
+          "flex flex-col bg-white  border-gray-300 rounded-lg shadow-xl/30 p-8 overflow-auto dark:bg-background",
           modalSizeVariants[variant],
           className
         )}

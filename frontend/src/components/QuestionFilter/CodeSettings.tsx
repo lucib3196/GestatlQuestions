@@ -21,6 +21,7 @@ export const CodeSettings = ({ language, setLanguage }: CodeSettingsProps) => {
     _: React.MouseEvent<HTMLElement>,
     newLanguage: CodeLanguage | null
   ) => {
+    console.log("newLanguage selected", newLanguage)
     if (newLanguage) {
       setLanguage(newLanguage);
     }

@@ -15,7 +15,9 @@ def get_storage_manager() -> StorageService:
             base_path="/UCR_Questions", bucket=settings.STORAGE_BUCKET
         )
     else:
-        storage_service = LocalStorageService(settings.QUESTIONS_PATH)
+        storage_service = LocalStorageService(
+            settings.ROOT_PATH, str(settings.QUESTIONS_DIRNAME)
+        )
     logger.info(f"Question manager set to {settings.STORAGE_SERVICE}")
     logger.info("Initialized Question Manager Success ")
     return storage_service

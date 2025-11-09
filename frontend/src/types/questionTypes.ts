@@ -3,7 +3,7 @@
 export type QuestionType = "Numerical" | "MultipleChoice" | "Example" | "Other";
 import type { GeneralResponse } from "./responseTypes";
 
-type questionRel = {
+export type questionRel = {
   name: string;
   id: number | string;
 };
@@ -13,6 +13,7 @@ export type QuestionBase = {
   title?: string;
   ai_generated?: boolean;
   isAdaptive?: boolean;
+  question_path?: string;
 };
 
 export type QuestionData = QuestionBase & {
@@ -37,9 +38,18 @@ export type QuestionFull = GeneralResponse & {
 export type FileData = {
   filename: string;
   content: string;
+  mime_type: string;
 };
 
 export type FileName = GeneralResponse & {
   files: FileData[];
   file_paths: string[];
+};
+
+export type QuestionParams = {
+  params: Record<string, string | number | any>;
+  correct_answers: Record<string, string | number>;
+  nDigits: number;
+  sigfigs: number;
+  logs?: string[];
 };

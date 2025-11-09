@@ -2,16 +2,6 @@ import api from "./client";
 import { toast } from "react-toastify";
 
 import type { FileName } from "../types/questionTypes";
-import type { FileData } from "../types/types";
-
-
-
-type FileDataResponse = {
-  status: number;
-  detail: string;
-  filedata: FileData[];
-  filepaths: string[];
-};
 
 export const questionApi = {
   async getFileNames(id: string): Promise<FileName> {
@@ -47,18 +37,6 @@ export const questionApi = {
     return response.data;
   },
 
-
-
-  async getQuestionFiles({
-    questionID,
-  }: {
-    questionID: string;
-  }): Promise<FileData[]> {
-    const response = await api.get<FileDataResponse>(
-      `/questions/${questionID}/files_data`
-    );
-    return response.data.filedata;
-  },
   async saveFileContent(
     filename: string,
     content: string,

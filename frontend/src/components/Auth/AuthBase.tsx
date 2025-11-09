@@ -1,7 +1,8 @@
-import FormInputTextBase from "../Forms/InputComponent";
+
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { MyButton } from "../Base/Button";
+import { InputTextForm } from './../Forms/InputComponents';
 
 
 type State = "login" | "signup" | "resetPassword"
@@ -13,7 +14,7 @@ type AuthProps = {
     children?: React.ReactNode
 };
 export default function AuthBase({ state, onSubmit, children }: AuthProps) {
-    const [_, setName] = useState<string>("");
+    const [name, setName] = useState<string>("");
     const [username, setUserName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
@@ -24,7 +25,7 @@ export default function AuthBase({ state, onSubmit, children }: AuthProps) {
         onSubmit(email, password, username);
     };
 
-    
+
 
     return (
         <form
@@ -33,7 +34,8 @@ export default function AuthBase({ state, onSubmit, children }: AuthProps) {
             id={state}
         >
             {state === "signup" && (
-                <FormInputTextBase
+                <InputTextForm
+                    value={name}
                     id="name"
                     type="text"
                     name="name"
@@ -43,7 +45,8 @@ export default function AuthBase({ state, onSubmit, children }: AuthProps) {
                 />
             )}
             {state === "signup" && (
-                <FormInputTextBase
+                <InputTextForm
+                    value={username}
                     id="username"
                     type="text"
                     name="username"
@@ -52,7 +55,8 @@ export default function AuthBase({ state, onSubmit, children }: AuthProps) {
                     onChange={(e) => setUserName(e.target.value)}
                 />
             )}
-            <FormInputTextBase
+            <InputTextForm
+                value={email}
                 id="email"
                 type="email"
                 name="email"
@@ -60,7 +64,8 @@ export default function AuthBase({ state, onSubmit, children }: AuthProps) {
                 placeholder="FBody@email.com"
                 onChange={(e) => setEmail(e.target.value)}
             />
-            <FormInputTextBase
+            <InputTextForm
+                value={password}
                 id="password"
                 type="password"
                 name="password"

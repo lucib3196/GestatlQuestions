@@ -42,7 +42,7 @@ async def run_server(
     try:
         question = qm.get_question(qid)
         question_path = qm.get_question_path(question.id, storage_type)
-        resolved_path = storage.get_storage_path(str(question_path))
+        resolved_path = storage.get_storage_path(str(question_path), relative=False)
         files = storage.list_files(resolved_path)
     except HTTPException:
         raise

@@ -2,12 +2,9 @@ import React, { memo, useMemo, useCallback, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import type { OnChange } from "@monaco-editor/react";
 import type { editor as MonacoEditor } from "monaco-editor";
-interface CodeEditorProps {
-  content: string;
-  language: string /** Language key: 'js', 'py', etc. */;
-  onChange?: (value: string) => void;
-  height?: string;
-}
+import { useCodeEditorContext } from "../../context/CodeEditorContext";
+import { useEffect } from "react";
+
 const languageMap: Record<string, string> = {
   js: "javascript",
   py: "python",
@@ -16,42 +13,64 @@ const languageMap: Record<string, string> = {
 };
 
 interface CodeEditorProps {
-  content: string;
-  language: string;
-  onChange?: (value: string) => void;
-  theme?: string
+  theme?: string;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ content, language, onChange,theme="vs-light" }) => {
-  const resolvedLanguage = useMemo(() => languageMap[language] ?? "plaintext", [language]);
-
-  const handleEditorChange: OnChange = useCallback(
-    (value) => onChange?.(value ?? ""),
-    [onChange]
-  );
-
+const CodeEditor: React.FC<CodeEditorProps> = ({ theme = "vs-light" }) => {
+  const { selectedFile, fileContent, setFileContent } = useCodeEditorContext();
   const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
 
+  const resolvedLanguage = useMemo(() => {
+    const ext = selectedFile?.split(".").pop() ?? "";
+    return languageMap[ext] ?? "plaintext";
+  }, [selectedFile]);
+
+  const handleEditorChange: OnChange = useCallback(
+    (value) => {
+      // Only update context if user is typing
+      setFileContent(value ?? "");
+    },
+    [setFileContent]
+  );
+
+
+
+  useEffect(() => {
+    if (!fileContent || !selectedFile) return;
+    let c = fileContent;
+    c.trim()
+      // normalize line endings
+      .replace(/\r\n/g, "\n")
+      // remove extra blank lines (keep one)
+      .replace(/\n{2,}/g, "\n")
+      // remove trailing spaces on each line
+      .split("\n")
+      .map((line) => line.replace(/\s+$/g, ""))
+      .join("\n");
+    setFileContent(c);
+  }, [selectedFile]);
+
   return (
-    <div className="w-full  overflow-auto">
-      <Editor
-      height={"80vh"}
-        language={resolvedLanguage}
-        value={content}
-        onChange={handleEditorChange}
-        onMount={(editor) => (editorRef.current = editor)}
-        options={{
-          automaticLayout: true,
-          minimap: { enabled: false },
-          fontSize: 14,
-          lineNumbers: "on",
-          scrollBeyondLastLine: false,
-          padding: { top: 12 },
-          smoothScrolling: true,
-        }}
-        theme={theme}
-      />
-    </div>
+    <Editor
+      height="80vh"
+      language={resolvedLanguage}
+      value={fileContent}
+      onChange={handleEditorChange}
+      onMount={(editor) => (editorRef.current = editor)}
+      options={{
+        automaticLayout: true,
+        minimap: { enabled: false },
+        fontSize: 14,
+        lineNumbers: "on",
+        scrollBeyondLastLine: false,
+        padding: { top: 12 },
+        smoothScrolling: true,
+        formatOnType: true,
+        formatOnPaste: true,
+        wordWrap: "on",
+      }}
+      theme={theme}
+    />
   );
 };
 

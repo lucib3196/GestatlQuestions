@@ -19,22 +19,20 @@ class StorageService:
         """Return the absolute path (or URI) to the base storage directory or bucket."""
         raise NotImplementedError("get_base_path must be implemented by subclass")
 
+    def get_root_path(self) -> str | Path:
+        """Return the absolute path (or URI) to the base storage directory or bucket."""
+        raise NotImplementedError("get_base_path must be implemented by subclass")
+
     # -------------------------------------------------------------------------
     # Storage path operations
     # -------------------------------------------------------------------------
-    def get_storage_path(self, target: str | Path) -> str | Path:
+    def get_storage_path(self, target: str | Path, relative:bool) -> str:
         """Return the absolute path to the directory for a given storage target."""
         raise NotImplementedError("get_storage_path must be implemented by subclass")
-
     def create_storage_path(self, target: str | Path) -> Path | str:
         """Create a new directory or container for the given storage target."""
         raise NotImplementedError("create_storage_path must be implemented by subclass")
 
-    def get_relative_storage_path(self, target: str | Path | Blob) -> str | Path:
-        """Return the relative path (from the base directory) for the given storage target."""
-        raise NotImplementedError(
-            "get_relative_storage_path must be implemented by subclass"
-        )
 
     def does_storage_path_exist(self, target: str | Path) -> bool:
         """Check whether a storage directory or container exists for the given target."""
@@ -81,8 +79,9 @@ class StorageService:
     def list_files(self, target: str | Path) -> List[str]:
         """List all file names under a given target directory."""
         raise NotImplementedError("list_files must be implemented by subclass")
-    def list_filepaths(self, target:str|Path, recursive:bool = False)->List[Path]:
-         raise NotImplementedError("list_filepaths must be implemented by subclass")
+
+    def list_filepaths(self, target: str | Path, recursive: bool = False) -> List[Path]:
+        raise NotImplementedError("list_filepaths must be implemented by subclass")
 
     def delete_storage(self, target: str | Path) -> None:
         """Delete an entire storage directory or container for the given target."""

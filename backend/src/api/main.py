@@ -45,20 +45,22 @@ def get_application(test_mode: bool = False):
         allow_methods=["*"],  # allow all HTTP methods (GET, POST, etc.)
         allow_headers=["*"],  # allow all headers (including Authorization)
     )
-    if not settings.QUESTIONS_PATH:
+    
+    question_dir = Path(settings.ROOT_PATH)/settings.QUESTIONS_DIRNAME
+    if not question_dir:
         raise ValueError("Cannot Find Local Path")
 
-    questions_dir = Path(settings.QUESTIONS_PATH).resolve()
+    logger.info(f"Setting Question Dir to {question_dir}")
 
-    if not questions_dir.exists():
-        questions_dir.mkdir(parents=True, exist_ok=True)
+    if not question_dir.exists():
+        question_dir.mkdir(parents=True, exist_ok=True)
 
     app.mount(
-        f"/{questions_dir.name}",  # -> "/questions"
-        StaticFiles(directory=questions_dir, html=False),
+        f"/{question_dir.name}",  # -> "/questions"
+        StaticFiles(directory=question_dir, html=False),
         name="questions",
     )
-    logger.info("Serving static files from:", questions_dir)
+    logger.info("Serving static files from:", question_dir)
 
     # Define a custom OpenAPI schema that uses your token URL at /auth/login
     def custom_openapi():

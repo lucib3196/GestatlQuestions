@@ -12,7 +12,8 @@ from src.api.models.question import QuestionMeta
 
 class FileData(BaseModel):
     filename: str
-    content: dict | str | Any
+    content: dict | str | Any| bytes
+    mime_type: str = "application/octet-stream"
 
 
 class FilesData(BaseModel):

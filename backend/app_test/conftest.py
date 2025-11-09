@@ -96,8 +96,8 @@ def clean_up_cloud(cloud_storage_service):
 @pytest.fixture(scope="function")
 def local_storage(tmp_path):
     """Provide a LocalStorageService rooted in a temporary directory."""
-    base = tmp_path / "questions"
-    return LocalStorageService(base)
+    root = tmp_path 
+    return LocalStorageService(root, base="questions")
 
 
 # =========================================
