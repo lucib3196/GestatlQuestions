@@ -14,7 +14,6 @@ export function getFileNames(data: FileData[]) {
 export function fetchFileContent(filename: string, data: FileData[]) {
   try {
     const match = (data ?? []).find((f) => f.filename === filename);
-    console.log(data, "this is filesa data");
     return match ? toStringSafe(match.content ?? "") : "";
   } catch (error) {
     console.log(error);

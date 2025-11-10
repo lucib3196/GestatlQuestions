@@ -26,9 +26,11 @@ export default function QuestionCodeEditor() {
     } else {
       setImage(null)
     }
-  }, [selectedFile, filesData]);
+  }, [filesData]);
 
   if (loading) return <Loading />;
+
+  
 
   return (
     <>
