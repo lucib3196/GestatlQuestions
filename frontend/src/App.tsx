@@ -27,7 +27,7 @@ function App() {
                 {/* Main Content */}
                 <NavBar />
                 <ToastContainer />
-                <LecturePage />
+                {/* <LecturePage /> */}
                 {/* <LegacyQuestion /> */}
                 {/* End of Main Content */}
               </CodeEditorProvider>
