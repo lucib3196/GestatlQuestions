@@ -37,19 +37,20 @@ export function useQuestionFiles() {
     } finally {
       setLoading(false);
     }
-  }, [selectedQuestionID, setFileNames, setFileContent, refreshKey]);
+  }, [selectedQuestionID, refreshKey]);
+
   useEffect(() => {
     fetchFiles();
-  }, [fetchFiles, refreshKey]);
+  }, [fetchFiles]);
 
   useEffect(() => {
     const fd = filesData.find((v) => v.filename === selectedFile);
     setFileContent(fd?.content ?? "");
-  }, [selectedFile, filesData, setFileContent, refreshKey]);
+  }, [selectedFile, refreshKey]);
 
   useEffect(() => {
     setFileNames(filesData.map((v) => v.filename));
-  }, [filesData, setFileNames, refreshKey]);
+  }, [refreshKey, filesData]);
 
   return { filesData, loading };
 }
