@@ -4,7 +4,7 @@ import type { OnChange } from "@monaco-editor/react";
 import type { editor as MonacoEditor } from "monaco-editor";
 import { useCodeEditorContext } from "../../context/CodeEditorContext";
 import { useEffect } from "react";
-
+import { debounce } from "lodash";
 const languageMap: Record<string, string> = {
   js: "javascript",
   py: "python",
@@ -17,7 +17,7 @@ interface CodeEditorProps {
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = ({ theme = "vs-light" }) => {
-  const { selectedFile, fileContent, setFileContent } = useCodeEditorContext();
+  const { selectedFile, fileContent, setFileContent, } = useCodeEditorContext();
   const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
 
   const resolvedLanguage = useMemo(() => {
@@ -26,28 +26,25 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ theme = "vs-light" }) => {
   }, [selectedFile]);
 
   const handleEditorChange: OnChange = useCallback(
-    (value) => {
-      // Only update context if user is typing
-      setFileContent(value ?? "");
-    },
-    [setFileContent]
-  );
-
-
+  debounce((value?: string) => setFileContent(value ?? ""), 600),
+  [selectedFile]
+);
 
   useEffect(() => {
-    if (!fileContent || !selectedFile) return;
-    let c = fileContent;
-    c.trim()
-      // normalize line endings
+    if (!selectedFile || !fileContent) return;
+
+    const cleaned = fileContent
+      .trim()
       .replace(/\r\n/g, "\n")
-      // remove extra blank lines (keep one)
       .replace(/\n{2,}/g, "\n")
-      // remove trailing spaces on each line
       .split("\n")
       .map((line) => line.replace(/\s+$/g, ""))
       .join("\n");
-    setFileContent(c);
+
+    // Only update if cleaned version differs (prevents cursor jump)
+    if (cleaned !== fileContent) {
+      setFileContent(cleaned);
+    }
   }, [selectedFile]);
 
   return (
@@ -56,18 +53,21 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ theme = "vs-light" }) => {
       language={resolvedLanguage}
       value={fileContent}
       onChange={handleEditorChange}
-      onMount={(editor) => (editorRef.current = editor)}
+      onMount={(editor) => {
+        console.log("Monaco mounted");
+        editorRef.current = editor;
+      }}
       options={{
-        automaticLayout: true,
+        // automaticLayout: true,
         minimap: { enabled: false },
         fontSize: 14,
         lineNumbers: "on",
-        scrollBeyondLastLine: false,
+        // scrollBeyondLastLine: false,
         padding: { top: 12 },
         smoothScrolling: true,
-        formatOnType: true,
-        formatOnPaste: true,
-        wordWrap: "on",
+        // formatOnType: true,
+        // formatOnPaste: true,
+        // wordWrap: "on",
       }}
       theme={theme}
     />
