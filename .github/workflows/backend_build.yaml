@@ -1,9 +1,17 @@
 name: FastAPI CI
 
+# Only triggers if there is a backend change
 on:
   push:
+    paths: 
+      - 'backend/**'
+      - '.github/workflows/backend_build.yml'
     branches: ["main", "dev"]
+    
   pull_request:
+    paths: 
+      - 'backend/**'
+      - '.github/workflows/backend_build.yml'
     branches: ["dev", "main"]
 
 jobs:
