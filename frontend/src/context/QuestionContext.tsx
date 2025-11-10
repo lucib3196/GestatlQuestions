@@ -1,73 +1,70 @@
-import React, { createContext, useState } from "react"
+import {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    useCallback,
+    type Dispatch,
+    type ReactNode,
+} from "react";
 
+import { QuestionAPI } from "../api/questionCrud";
+import type { QuestionMeta } from "../types/questionTypes";
 
-type RenderingType = "legacy" | "new";
-type CodeRunningType = "javascript" | "python";
-
-type QuestionContextValue = {
-    // Filters
-    title: string;
-    setTitle: React.Dispatch<React.SetStateAction<string>>;
-    qtype: string[];
-    setQType: React.Dispatch<React.SetStateAction<string[]>>;
-    topic: string[];
-    setTopic: React.Dispatch<React.SetStateAction<string[]>>;
-    isAdaptive: boolean; // ← boolean only
-    setIsAdaptive: React.Dispatch<React.SetStateAction<boolean>>;
-    createdBy: string;
-    setCreatedBy: React.Dispatch<React.SetStateAction<string>>;
-
-    // Settings
-    showAllQuestions: boolean;
-    setShowAllQuestions: React.Dispatch<React.SetStateAction<boolean>>;
-    renderingSettings: RenderingType;
-    setRenderingSettings: React.Dispatch<React.SetStateAction<RenderingType>>;
-    codeRunningSettings: CodeRunningType;
-    setCodeRunningSettings: React.Dispatch<React.SetStateAction<CodeRunningType>>;
+type QuestionContextType = {
+    selectedQuestionID: string | null;
+    setSelectedQuestionID: React.Dispatch<React.SetStateAction<string>>;
+    questionMeta: QuestionMeta | null;
+    setQuestionMeta: React.Dispatch<React.SetStateAction<QuestionMeta | null>>;
+    questions: QuestionMeta[];
+    setQuestions: Dispatch<React.SetStateAction<QuestionMeta[]>>;
 };
 
-// Safer: undefined until provider sets it
-export const QuestionContext = createContext<QuestionContextValue | undefined>(undefined);
+export const QuestionContext = createContext<QuestionContextType | null>(null);
 
-type ProviderProps = { children: React.ReactNode };
+export function QuestionProvider({ children }: { children: ReactNode }) {
+    const [questions, setQuestions] = useState<QuestionMeta[]>([]);
+    const [questionMeta, setQuestionMeta] = useState<QuestionMeta | null>(null);
+    const [selectedQuestionID, setSelectedQuestionID] = useState<string>("");
 
-export const QuestionDBProvider = ({ children }: ProviderProps) => {
-    // Filters
-    const [title, setTitle] = useState("");
-    const [qtype, setQType] = useState<string[]>([]);
-    const [topic, setTopic] = useState<string[]>([]);
-    const [isAdaptive, setIsAdaptive] = useState<boolean>(false);
-    const [createdBy, setCreatedBy] = useState("");
-    const [showAllQuestions, setShowAllQuestions] = useState(false);
+    const fetchQuestionMeta = useCallback(async () => {
+        if (!selectedQuestionID) return;
+        try {
+            const retrieved = await QuestionAPI.getQuestionMeta(selectedQuestionID);
+            setQuestionMeta(retrieved);
+        } catch (error) {
+            console.error("❌ Failed to fetch question:", error);
+        }
+    }, [selectedQuestionID]);
 
-    // Settings
-    const [renderingSettings, setRenderingSettings] = useState<RenderingType>("new");
-    const [codeRunningSettings, setCodeRunningSettings] = useState<CodeRunningType>("javascript");
+    useEffect(() => {
+        fetchQuestionMeta();
+    }, [fetchQuestionMeta]);
 
-    const value = React.useMemo(
-        () => ({
-            title, setTitle,
-            qtype, setQType,
-            topic, setTopic,
-            isAdaptive, setIsAdaptive,
-            createdBy, setCreatedBy,
-            showAllQuestions, setShowAllQuestions,
-            renderingSettings, setRenderingSettings,
-            codeRunningSettings, setCodeRunningSettings,
-        }),
-        [
-            title, qtype, topic,
-            isAdaptive, createdBy,
-            showAllQuestions,            // ← add this!
-            renderingSettings, codeRunningSettings,
-        ]
+    return (
+        <QuestionContext.Provider
+            value={{
+                questions,
+                setQuestions,
+                selectedQuestionID,
+                setSelectedQuestionID,
+                questionMeta,
+                setQuestionMeta,
+            }}
+        >
+            {children}
+        </QuestionContext.Provider>
     );
+}
 
-    return <QuestionContext.Provider value={value}>{children}</QuestionContext.Provider>;
-};
+export function useQuestionContext() {
+    const context = useContext(QuestionContext);
 
-export const useQuestionContext = () => {
-    const ctx = React.useContext(QuestionContext);
-    if (!ctx) throw new Error("useQuestionContext must be used within <QuestionDBProvider>");
-    return ctx;
-};
+    if (!context) {
+        throw new Error(
+            "useQuestionContext must be used within a <QuestionProvider>"
+        );
+    }
+
+    return context;
+}

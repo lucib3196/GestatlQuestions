@@ -1,13 +1,13 @@
 import { MathJaxContext } from "better-react-mathjax";
-import QuestionProvider from "./context/QuestionFilterContext";
 import QuestionSettingsProvider from "./context/GeneralSettingsContext";
-import RunningQuestionProvider from "./context/QuestionSelectionContext";
 import { AuthProvider } from "./context/AuthContext";
-import { QuestionDBProvider } from "./context/QuestionContext";
 import NavBar from "./components/NavBar/NavBar";
 import { ToastContainer } from "react-toastify";
-import LogsProvider from "./context/CodeLogsContext";
-import QuestionSelectionProvider from "./context/QuestionSelectionContext";
+import CodeEditorProvider from "./context/CodeEditorContext";
+import { LecturePage } from "./pages/LecturePage";
+import { QuestionProvider } from "./context/QuestionContext";
+
+import { QuestionRuntimeProvider } from './context/QuestionAnswerContext';
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {
@@ -19,25 +19,22 @@ const config = {
 function App() {
   return (
     <AuthProvider>
-      <QuestionSelectionProvider>
-        <QuestionDBProvider>
-          <MathJaxContext version={3} config={config}>
+      <MathJaxContext version={3} config={config}>
+        <QuestionRuntimeProvider>
+          <QuestionSettingsProvider>
             <QuestionProvider>
-              <QuestionSettingsProvider>
-                <RunningQuestionProvider>
-                  <LogsProvider>
-                    {/* Main Content */}
-                    <NavBar />
-                    <ToastContainer />
-                    {/* <LegacyQuestion /> */}
-                    {/* End of Main Content */}
-                  </LogsProvider>
-                </RunningQuestionProvider>
-              </QuestionSettingsProvider>
+              <CodeEditorProvider>
+                {/* Main Content */}
+                <NavBar />
+                <ToastContainer />
+                <LecturePage />
+                {/* <LegacyQuestion /> */}
+                {/* End of Main Content */}
+              </CodeEditorProvider>
             </QuestionProvider>
-          </MathJaxContext>
-        </QuestionDBProvider>
-      </QuestionSelectionProvider>
+          </QuestionSettingsProvider>
+        </QuestionRuntimeProvider>
+      </MathJaxContext>
     </AuthProvider>
   );
 }

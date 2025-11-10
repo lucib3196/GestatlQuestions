@@ -1,12 +1,8 @@
-import { QuestionSettings } from "../components/QuestionFilter/QuestionSettings";
-import { useState } from "react";
 import { QuestionFiltering } from "../components/QuestionFilterNew/QuestionFiltering";
 import { QuestionTable } from "../components/QuestionTable/QuestionTablesDB";
-import { SimpleToggle } from "../components/Generic/SimpleToggle";
 import { ResizableQuestionContainer } from "../components/Question/ResizableQuestion";
-import SyncQuestions from "../components/System/SyncQuestions";
-import { useQuestion } from "../context/QuestionSelectionContext";
-
+import { useQuestionContext } from "../context/QuestionContext";
+import SyncQuestions from "../components/QuestionSync/QuestionSync";
 function QuestionDashBoardHeader() {
   return (
     <div className="flex justify-center items-center mb-6">
@@ -18,49 +14,31 @@ function QuestionDashBoardHeader() {
 }
 
 export function QuestionViewPage() {
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [showSettings, setShowSettings] = useState<boolean>(false);
-  const { questionID } = useQuestion()
+  const { selectedQuestionID } = useQuestionContext();
 
   return (
     <section className="w-full flex flex-col items-center py-12 space-y-16">
       {/* Dashboard Section */}
       <div className="w-full max-w-5xl flex flex-col items-center px-4 sm:px-6 lg:px-8">
         <QuestionDashBoardHeader />
-
-        {/* Settings Toggle */}
-        <div className="flex flex-col items-center w-full mb-6">
-          <div className="flex flex-row items-center gap-x-10">
-            <SimpleToggle
-              setToggle={() => setShowSettings((prev) => !prev)}
-              label="Show Settings"
-              id="settings"
-              checked={showSettings}
-            />
-            <SyncQuestions />
-          </div>
-
-          {showSettings && (
-            <div className="mt-4 w-full">
-              <QuestionSettings />
-            </div>
-          )}
-        </div>
+        <SyncQuestions />
 
         {/* Filters & Table */}
         <div className="w-full">
-          <QuestionFiltering setSearchResults={setSearchResults} />
+          <QuestionFiltering />
 
           <section className="mt-10 flex justify-center w-full">
-            <QuestionTable results={searchResults} />
+            <QuestionTable />
           </section>
         </div>
       </div>
 
       {/* Question Detail View */}
-      {questionID && <div className="w-full px-4 sm:px-8">
-        <ResizableQuestionContainer />
-      </div>}
+      {selectedQuestionID && (
+        <div className="w-full px-4 sm:px-8">
+          <ResizableQuestionContainer />
+        </div>
+      )}
     </section>
   );
 }

@@ -1,11 +1,10 @@
-import type { Question } from "../../types/questionTypes";
+import type { QuestionData, QuestionMeta } from "../../types/questionTypes";
 import { Pill, type PillTheme } from "../Base/Pill";
 import { SimpleToggle } from "../Generic/SimpleToggle";
 import { useState } from "react";
 import { FaPython } from "react-icons/fa";
 import { IoLogoJavascript } from "react-icons/io5";
-import { QuestionSettingsContext } from "../../context/GeneralSettingsContext";
-import { useContext } from "react";
+import { useCodeEditorContext } from "../../context/CodeEditorContext";
 interface FormatMetaDataProps {
   val: string[] | string;
   label: string;
@@ -64,12 +63,12 @@ const GenericInfo = ({
   </div>
 );
 
-export default function QuestionInfo({ qmetadata }: { qmetadata: Question }) {
+export default function QuestionInfo({ qmetadata }: { qmetadata: QuestionData | QuestionMeta }) {
   const { topics = [], isAdaptive } = qmetadata;
 
   return (
     <div className="flex flex-col gap-5 p-2 sm:p-4">
-      <GenericInfo title="Topics" data={topics.map((t) => t)} theme="info" />
+      <GenericInfo title="Topics" data={topics.map((t) => (typeof t === "object" ? t.name : t))} theme="info" />
 
       <div className="flex items-center gap-4">
         <p className="text-base font-semibold text-gray-800 dark:text-gray-200">
@@ -84,9 +83,9 @@ export default function QuestionInfo({ qmetadata }: { qmetadata: Question }) {
 }
 
 // --- Header with Toggle ---
-export function QuestionHeader({ question }: { question: Question }) {
+export function QuestionHeader({ question }: { question: QuestionData | QuestionMeta }) {
   const [showMeta, setShowMeta] = useState(true);
-  const { codeRunningSettings } = useContext(QuestionSettingsContext);
+  const { codeRunningSettings } = useCodeEditorContext();
 
   return (
     <div className="flex flex-col items-center w-full max-w-5xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8 mt-8">

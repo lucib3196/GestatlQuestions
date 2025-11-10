@@ -1,5 +1,3 @@
-
-
 // Headless UI
 import {
   Disclosure,
@@ -13,15 +11,18 @@ import {
 
 // React Router
 import { BrowserRouter as Router, Routes, Link } from "react-router-dom";
-
+import { useState } from "react";
 // Heroicons
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
-
-import { handleRoutes, navigation } from './navigationSettings';
+import { handleRoutes, navigation } from "./navigationSettings";
+import UserLoginPage from "../Auth/UserLoginPage";
+import { useAuth } from "../../context/AuthContext";
 
 function NavBar() {
+  const [showLogin, setShowLogin] = useState(false);
+  const { user, logout } = useAuth();
   return (
     <Router>
       <Disclosure as="nav" className="bg-gray-800">
@@ -79,7 +80,8 @@ function NavBar() {
                         }`}
                         >
                           {item.name}
-                        </Link>)
+                        </Link>
+                      )
                     )
                   )}
                 </div>
@@ -93,7 +95,49 @@ function NavBar() {
                   <p className="hover:text-bold hover:text-xl transition delay-150 duration-300 ease-in-out " onClick={() => setShowLogin(true)}>Log In</p>
                 )}
                 <LogInPage showModal={showLogin} setShowModal={setShowLogin} />
+
+
               </div> */}
+
+              <div className="flex ml-auto text-white items-center justify-center">
+                {user ? (
+                  <>
+                    <button
+                      onClick={logout}
+                      className="px-4 py-2 font-semibold text-white hover:text-gray-200 transition-all duration-200 ease-in-out transform hover:scale-105 active:scale-95"
+                    >
+                      Logout
+                    </button>
+                    <Link
+                      key={
+                        navigation.find((v) => v.name === "My Account")?.name
+                      }
+                      to={
+                        navigation.find((v) => v.name === "My Account")?.href ??
+                        "My Account"
+                      }
+                      className={`px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white'
+                        }`}
+                    >
+                      {navigation.find((v) => v.name === "My Account")?.name}
+                    </Link>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setShowLogin((prev) => !prev)}
+                    className="px-4 py-2 font-semibold text-white hover:text-gray-200 transition-all duration-200 ease-in-out transform hover:scale-105 active:scale-95"
+                  >
+                    Sign Up / Log In
+                  </button>
+                )}
+
+                {showLogin && (
+                  <UserLoginPage
+                    show={showLogin}
+                    setShow={() => setShowLogin((prev) => !prev)}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>

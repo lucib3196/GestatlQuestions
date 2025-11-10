@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DisplayFiles } from "../components/Generic/DisplayFiles";
-import UploadFiles from "../components/Generic/UploadFiles";
+import UploadFiles from "../components/Forms/UploadFileComponent";
 import SectionContainer from "../components/Base/SectionContainer";
 import { downloadStart } from "../api";
 

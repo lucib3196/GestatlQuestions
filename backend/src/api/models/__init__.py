@@ -1,2 +1,2 @@
-from .users_model import User
-from .question_model import Question, Topic, Language, QType
+from src.api.models.response_models import *
+from src.api.models.question import *

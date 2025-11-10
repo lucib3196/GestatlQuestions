@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
-import UploadFilesButton from "../Generic/UploadFiles";
+import UploadFilesButton from "../Forms/UploadFileComponent";
 import { MyButton } from "../Base/Button";
-import type { QuestionFormData } from "../../types/types";
-import { createQuestion } from "../../api";
+import type { QuestionData } from "../../types/questionTypes";
+import { QuestionAPI } from "../../api/questionCrud";
 
 function handleLanguages(languages: string[]) {
     return [
@@ -43,14 +43,13 @@ type FormProps = {
 function QuestionCreationForm({ onFinish }: FormProps) {
     const [files, setFiles] = useState<File[]>([]);
     const [alignment, setAlignment] = useState("files");
-    const [formData, setFormData] = useState<QuestionFormData>({
+    const [formData, setFormData] = useState<QuestionData>({
         title: "",
-        isAdaptive: "false",
-        createdBy: "",
-        ai_generated: "false",
-        topics: "",
+        isAdaptive: false,
+        ai_generated: false,
+        topics: [],
         languages: [],
-        qtypes: "",
+        qtypes: [],
     });
 
     const handleFormChange = (
@@ -81,9 +80,9 @@ function QuestionCreationForm({ onFinish }: FormProps) {
         e.preventDefault();
 
         // convert topics string into array (split by comma)
-        const languageArray = handleLanguages(formData.languages);
-        const topicArray = handleTopics(formData.topics);
-        const qTypeArray = handleQtypes(formData.qtypes);
+        const languageArray = handleLanguages(formData.languages ?? []);
+        const topicArray = handleTopics(formData.topics ?? []);
+        const qTypeArray = handleQtypes(formData.qtypes ?? []);
 
         const submission = {
             ...formData,
@@ -94,7 +93,7 @@ function QuestionCreationForm({ onFinish }: FormProps) {
         };
         console.log("Submitting form:", submission);
         try {
-            const result = await createQuestion(submission);
+            const result = await QuestionAPI.create(submission);
             onFinish()
             console.log(result)
 
@@ -128,15 +127,7 @@ function QuestionCreationForm({ onFinish }: FormProps) {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Created By
                     </label>
-                    <input
-                        type="text"
-                        name="createdBy"
-                        value={formData.createdBy}
-                        onChange={handleFormChange}
-                        placeholder="Your identifier"
-                        required
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring focus:ring-blue-200"
-                    />
+
                 </div>
 
                 {/* Flags */}
@@ -147,7 +138,7 @@ function QuestionCreationForm({ onFinish }: FormProps) {
                         </label>
                         <select
                             name="isAdaptive"
-                            value={formData.isAdaptive}
+                            value={formData.isAdaptive ? "true" : "false"}
                             onChange={handleFormChange}
                             className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring focus:ring-blue-200"
                         >
@@ -162,7 +153,7 @@ function QuestionCreationForm({ onFinish }: FormProps) {
                         </label>
                         <select
                             name="ai_generated"
-                            value={formData.ai_generated}
+                            value={formData.ai_generated ? "true" : "false"}
                             onChange={handleFormChange}
                             className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring focus:ring-blue-200"
                         >
@@ -188,7 +179,7 @@ function QuestionCreationForm({ onFinish }: FormProps) {
                 </div>
 
                 {/* Languages (only if Adaptive) */}
-                {formData.isAdaptive === "true" && (
+                {formData.isAdaptive && (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Languages

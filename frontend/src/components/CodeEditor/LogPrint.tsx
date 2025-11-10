@@ -1,17 +1,17 @@
-import { CodeLogsSettings } from "../../context/CodeLogsContext";
-
-import { useContext } from "react";
+import { useCodeEditorContext } from "../../context/CodeEditorContext";
 
 interface LogOutputProps {
     filename?: string;
 }
 
 export function LogOutput({ filename }: LogOutputProps) {
-    const { logs } = useContext(CodeLogsSettings) ?? { logs: [] };
+    const { logs } = useCodeEditorContext();
 
     return (
         <div className="w-full border-gray-500 border-2 bg-white p-4">
-            <h1>Output Logs <hr className="my-3" /></h1>
+            <h1>
+                Output Logs <hr className="my-3" />
+            </h1>
             {filename && (
                 <div className="mb-2 text-sm text-gray-700">
                     Showing logs for: <strong>{filename}</strong>

@@ -1,25 +1,30 @@
+from typing import Annotated, Literal
+
 from fastapi import Depends
-from src.api.service.question_manager import QuestionManager
-from src.api.core import settings, logger
-from src.api.service.storage import FireCloudStorageService, LocalStorageService
-from typing import Annotated
+
+from src.api.core.config import get_settings, AppSettings
+
+StorageType = Literal["local", "cloud"]
 
 
-def get_question_manager() -> QuestionManager:
-    if settings.STORAGE_SERVICE == "cloud":
-        if not (settings.FIREBASE_PATH and settings.STORAGE_BUCKET):
-            raise ValueError("Settings for Cloud Storage not Set")
-        storage_service = FireCloudStorageService(
-            cred_path=settings.FIREBASE_PATH,
-            bucket_name=settings.STORAGE_BUCKET,
-            base_name="UCR_Questions",
-        )
-
-    else:
-        storage_service = LocalStorageService(settings.QUESTIONS_PATH)
-    logger.info(f"Question manager set to {settings.STORAGE_SERVICE}")
-    logger.info("Initialized Question Manager Success ")
-    return QuestionManager(storage_service, storage_type=settings.STORAGE_SERVICE)
+def get_app_settings() -> AppSettings:
+    """
+    Dependency that provides application settings from environment or config file.
+    """
+    return get_settings()
 
 
-QuestionManagerDependency = Annotated[QuestionManager, Depends(get_question_manager)]
+SettingDependency = Annotated[AppSettings, Depends(get_app_settings)]
+
+
+def get_storage_type(
+    settings: SettingDependency,
+) -> StorageType:
+    """
+    Dependency that extracts the storage type from the global app settings.
+    """
+    return settings.STORAGE_SERVICE
+
+
+# Type alias for injecting storage type directly
+StorageTypeDep = Annotated[StorageType, Depends(get_storage_type)]

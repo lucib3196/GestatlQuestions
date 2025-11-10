@@ -1,21 +1,19 @@
 from __future__ import annotations
 
 # --- Standard Library ---
-from typing import Optional, List
+from typing import Optional, List, Sequence
+import asyncio
 
 # --- Third-Party ---
-from fastapi import APIRouter, Body, Depends, HTTPException
-from starlette import status
+from fastapi import APIRouter, Body, HTTPException, UploadFile
 from pydantic import BaseModel
 
-# --- Internal ---
-from src.api.database.database import get_session, SessionDep
-from src.api.service.auth import user
-from src.api.service.ai_generation.code_generation import run_text, run_image
-from fastapi import UploadFile
-from src.api.dependencies import QuestionManagerDependency
+# --- Internal Imports ---
+from src.api.models.models import Question
+from src.api.service.code_generation import run_text, run_image
+from src.api.service.question_resource import QuestionResourceDepencency
 
-router = APIRouter(prefix="/codegenerator", tags=["code_generator"])
+router = APIRouter(prefix="/code_generator", tags=["code_generator"])
 
 
 # Loads up directory and get all the questions
@@ -26,62 +24,36 @@ class TextGenInput(BaseModel):
 
 @router.post("/v5/text_gen")
 async def generate_question_v5(
-    qm: QuestionManagerDependency,
+    qresource: QuestionResourceDepencency,
     data: TextGenInput = Body(..., embed=True),
-    # current_user=Depends(user.get_current_user),
-    session=Depends(get_session),
-):
-    # user_id = await user.get_user_by_name(
-    #     username=current_user.username,
-    #     email=current_user.email,
-    #     session=session,
-    # )
-    # if not user_id:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail="Must be logged in to use generation",
-    #     )
-    additional_meta = {
-        # "createdBy": current_user.email,
-        # "user_id": user_id,
-        "title": data.question_title
-        or None,
-    }
+) -> Sequence[Question]:
+
     try:
-        return await run_text(
-            text=data.question, session=session, additional_meta=additional_meta, qm=qm
-        )
+        result = await run_text(text=data.question)
+        tasks = []
+        for r in result:
+            filedata, qdata = r
+            tasks.append(qresource.create_question(qdata, filedata))
+        created_questions = await asyncio.gather(*tasks)
+        return created_questions
     except HTTPException as e:
         raise e
 
 
 @router.post("/v5/image_gen")
 async def generate_question_image_v5(
-    qm: QuestionManagerDependency,
+    qresource: QuestionResourceDepencency,
     files: List[UploadFile],
-    # current_user=Depends(user.get_current_user),
-    session=Depends(get_session),
-):
-    # user_id = await user.get_user_by_name(
-    #     username=current_user.username,
-    #     email=current_user.email,
-    #     session=session,
-    # )
-    # if not user_id:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail="Must be logged in to use generation",
-    #     )
-    # additional_meta = {
-    #     "createdBy": current_user.email,
-    #     "user_id": user_id,
-    # }
+) -> Sequence[Question]:
     try:
-        return await run_image(
+        result = await run_image(
             files,
-            session,
-            qm=qm,
-            # meta=additional_meta,
         )
+        tasks = []
+        for r in result:
+            filedata, qdata = r
+            tasks.append(qresource.create_question(qdata, filedata))
+        created_questions = await asyncio.gather(*tasks)
+        return created_questions
     except HTTPException as e:
         raise e

@@ -1,14 +1,13 @@
 import { useState } from "react";
 import ModularFilter from "./ModularFilter";
 import type { Flag } from "./ModularFilter";
-import { useRetrievedFilteredQuestions } from "../../api";
+
 import { useDebounce } from "@uidotdev/usehooks";
 import SearchBar from "../Base/SearchBar";
 import { SimpleToggle } from "../Generic/SimpleToggle";
+import { useRetrievedQuestions } from "../../api";
+import { useMemo } from "react";
 
-type QuestionFilterProps = {
-  setSearchResults: (val: any[]) => void; // ideally use: setSearchResults: (val: Question[]) => void
-};
 
 const flags: Flag[] = [
   { key: "adaptive", label: "Adaptive", type: "checkbox" },
@@ -21,10 +20,9 @@ const flags: Flag[] = [
   },
 ];
 
-export function QuestionFiltering({ setSearchResults }: QuestionFilterProps) {
+export function QuestionFiltering() {
   const [toggle, setToggle] = useState(false);
   const [searchTitle, setSearchTitle] = useState<string>("");
-  const [isSearching, setIsSearching] = useState<boolean>(false);
   const [showAllQuestions, setShowAllQuestions] = useState<boolean>(false);
 
   const debouncedSearchTerm = useDebounce(searchTitle, 300);
@@ -34,11 +32,14 @@ export function QuestionFiltering({ setSearchResults }: QuestionFilterProps) {
     console.log(activeFilters);
   };
 
-  useRetrievedFilteredQuestions({
-    searchTitle: debouncedSearchTerm,
+  const questionFilter = useMemo(
+    () => ({ title: debouncedSearchTerm }),
+    [debouncedSearchTerm]
+  );
+
+  useRetrievedQuestions({
+    questionFilter,
     showAllQuestions,
-    setSearchResults,
-    setIsSearching,
   });
 
   return (
@@ -82,12 +83,6 @@ export function QuestionFiltering({ setSearchResults }: QuestionFilterProps) {
         </div>
       )}
 
-      {/* Searching Indicator */}
-      {isSearching && (
-        <span className="text-sm font-medium text-gray-500 dark:text-gray-400 animate-pulse">
-          Searching...
-        </span>
-      )}
     </div>
   );
 }

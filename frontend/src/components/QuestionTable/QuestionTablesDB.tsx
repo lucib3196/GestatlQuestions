@@ -9,27 +9,25 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
-import { useQuestion } from "../../context/QuestionSelectionContext";
 import { useSelection } from "./utils/useSelection";
 import { QuestionRow } from "./QuestionRow";
-import type { QuestionMeta } from "../../types/types";
 import type { MinimalTestResult } from "./utils/services";
 import { tableHeaderSx } from "../../styles/tableHeaderSx";
 import { useTheme } from "../Generic/DarkModeToggle";
+import { useQuestionContext } from './../../context/QuestionContext';
 
-type Props = { results: QuestionMeta[] };
-
-export function QuestionTable({ results }: Props) {
+export function QuestionTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const { questionID, setQuestionID } = useQuestion()
+  const { selectedQuestionID, setSelectedQuestionID } = useQuestionContext()
   const { isSelected, toggle } = useSelection();
   const [testResults] = useState<MinimalTestResult[]>([]);
   const [theme] = useTheme();
+  const { questions } = useQuestionContext()
 
   const paged = useMemo(
-    () => results.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [results, page, rowsPerPage]
+    () => questions.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    [questions, page, rowsPerPage]
   );
 
   const handleChangePage = (_: unknown, newPage: number) => setPage(newPage);
@@ -39,8 +37,7 @@ export function QuestionTable({ results }: Props) {
   };
 
   const handleQuestionClick = (id: string) => {
-    console.log("This is the id of clicked", id)
-    setQuestionID((prev: string | null) => (prev === id ? null : id));
+    setSelectedQuestionID(id);
   };
 
   return (
@@ -72,7 +69,7 @@ export function QuestionTable({ results }: Props) {
               <QuestionRow
                 key={q.id}
                 question={q}
-                isActive={questionID === q.id}
+                isActive={selectedQuestionID === q.id}
                 isChecked={isSelected(q.id ?? "")}
                 onToggleCheck={toggle}
                 onClickTitle={handleQuestionClick}
@@ -86,7 +83,7 @@ export function QuestionTable({ results }: Props) {
       <div className="flex justify-end mt-4">
         <TablePagination
           rowsPerPageOptions={[5, 10, 20]}
-          count={results.length}
+          count={questions.length}
           component="div"
           page={page}
           rowsPerPage={rowsPerPage}

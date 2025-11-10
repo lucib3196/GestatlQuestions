@@ -1,459 +1,184 @@
-# Stdlib
-import asyncio
+# --- Standard Library ---
 from pathlib import Path
-from typing import List, Literal, Sequence
+from typing import Literal, Sequence, Annotated
 from uuid import UUID
 
-# Internal
+# --- Third-Party ---
+from fastapi import HTTPException, Depends
+from starlette import status
+
+# --- Internal ---
 from src.api.core import logger
 from src.api.database import SessionDep
-from src.api.models import Question
-from src.api.response_models import FileData
-from src.api.service.crud import question_crud as qc
-from src.api.service.storage import StorageService
-from src.utils import safe_dir_name
-from sqlmodel import select
-from fastapi import HTTPException
-from starlette import status
-import io
-from typing import Dict, Any
-from pydantic import ValidationError
-from src.api.database import question_db as qdb
-from src.api.service.file_handler import FileService
+from src.api.database import question as qdb
+from src.api.models.models import Question
+from src.api.models.question import QuestionData, QuestionMeta
+from src.api.core.config import get_settings
 
-
-from src.api.core import settings
+settings = get_settings()
 
 
 class QuestionManager:
     """Manage creation, retrieval, and file operations for questions."""
 
-    def __init__(
-        self, storage_service: StorageService, storage_type: Literal["local", "cloud"]
-    ):
-        """Initialize with a storage backend and storage type."""
-        self.storage = storage_service
-        self.storage_type: Literal["local", "cloud"] = storage_type
-        self.base_path = self.storage.get_base_path()
-        self.base_name = self.storage.get_base_name()
+    def __init__(self, session: SessionDep):
+        self.session = session
 
-        # TODO: Need to make this a bit better
-        ## General file service mostly just used for the starter template download
-        self.file_service = FileService(settings.BASE_PATH)
-
-    # ---------------------------
-    # Question Lifecycle
-    # ---------------------------
-    async def create_question(
-        self, question: Question | dict, session: SessionDep, exists: bool = False
-    ) -> Question:
+    async def create_question(self, question: QuestionData | dict) -> Question:
         """Create a new question in DB and storage."""
-        try:
-            q = await qc.create_question(question, session)
-            logger.info("Created question successfully %s", q.title)
-        except Exception as e:
-            logger.error("Failed to create question in DB: %s", e)
-            raise
-
-        try:
-            logger.info("Setting up Question")
-            qname = safe_dir_name((q.title or "").strip())
-
-            if not qname:
-                logger.error("Question title is None")
-                raise ValueError("Question title cannot be None")
-
-            # Always append the ID to guarantee uniqueness
-            qname = f"{qname}_{q.id}"
-
-            # Create directory if it doesn’t exist already
-            if not exists and not self.storage.does_storage_path_exist(qname):
-                self.storage.create_storage_path(qname)
-
-            # Point DB record to the correct directory
-            q = self.set_question_path(q, qname)
-
-            # Refresh DB object
-            q = await qc.safe_refresh_question(q, session)
-            return q
-
-        except Exception as e:
-            logger.error(
-                "Failed to set up storage for question %s: %s",
-                getattr(q, "title", None),
-                e,
+        if not question or (
+            not isinstance(question, dict) and not isinstance(question, QuestionData)
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Question must either be object of type Question or dict or not Empty got type {type(question)}",
             )
-            raise
+        try:
+            qcreated = await qdb.create_question(question, self.session)
+            return qcreated
+        except ValueError as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid or missing input when creating question: {e}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error Processing Question Content {e}",
+            )
+
+    def get_question(
+        self,
+        question_id: str | UUID,
+    ) -> Question:
+        try:
+            question = qdb.get_question(question_id, self.session)
+            if not question:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Question does not exist",
+                )
+            return question
+        except ValueError as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad Request {str(e)}"
+            )
+
+    def get_all_questions(
+        self, offset: int = 0, limit: int = 100
+    ) -> Sequence[Question]:
+        try:
+            return qdb.get_all_questions(self.session, offset, limit)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Could not get questions {e}",
+            )
+
+    def delete_all_questions(self) -> bool:
+        try:
+            return qdb.delete_all_questions(self.session)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Could not delete all the question {e}",
+            )
+
+    def delete_question(self, question_id: str | UUID | None):
+        try:
+            return qdb.delete_question(question_id, self.session)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Could not delete  the question {e}",
+            )
 
     async def update_question(
-        self, question_id: str | UUID, session: SessionDep, **kwargs
-    ):
+        self, question_id: str | UUID, data: QuestionData | dict
+    ) -> QuestionMeta:
         """Update question metadata in the DB."""
         try:
-            return await qc.edit_question_meta(question_id, session, **kwargs)
+            if isinstance(data, dict):
+                data = QuestionData.model_validate(data)
+            try:
+                return await qdb.update_question(question_id, data, self.session)
+            except Exception as e:
+                logger.error(f"Failed to update question {str(e)}")
+                raise
         except Exception as e:
-            logger.error(f"Failed to update question {str(e)}")
-            raise
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Could not update question data {e}",
+            )
 
-    async def get_question(self, question_id: str | UUID, session: SessionDep):
-        """Retrieve a question by ID."""
+    async def get_question_data(self, id: str | UUID | None) -> QuestionMeta:
         try:
-            return await qc.get_question_by_id(question_id, session)
+            return await qdb.get_question_data(id, self.session)
         except Exception as e:
-            logger.error("Failed to retrieve question %s: %s", question_id, e)
-            raise
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Could not retrieve question data",
+            )
 
-    # Retrieving all Questions
-    # TODO: Add a test for this
-    async def get_question_data(
-        self, question_id: UUID | str, session: SessionDep
+    async def get_all_question_data(
+        self, offset: int = 0, limit: int = 100
+    ) -> Sequence[QuestionMeta]:
+        try:
+            return await qdb.get_all_question_data(self.session, offset, limit)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Could not get question data {e}",
+            )
+
+    async def filter_questions(
+        self,
+        filter_data: QuestionData,
+    ):
+        try:
+            return await qdb.filter_questions(filter_data, self.session)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Could not filter question {e}",
+            )
+
+    def get_question_path(
+        self, question_id: str | UUID | None, storage_type: Literal["cloud", "local"]
+    ) -> str:
+        try:
+            question_path = qdb.get_question_path(
+                question_id, storage_type, self.session
+            )
+            if not question_path:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Question {id} does not contain a question path set to it for {storage_type}",
+                )
+            return question_path
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Could not retreive question {e}",
+            )
+
+    def set_question_path(
+        self,
+        question_id: str | UUID | None,
+        path: str | Path,
+        storage_type: Literal["cloud", "local"],
     ) -> Question:
         try:
-            retrieved_question = await qdb.get_question_data(question_id, session)
-            return Question.model_validate(retrieved_question)
-        except ValidationError as e:
-            # Log the validation issue for debugging
-            logger.error("Validation failed for Question %s: %s", question_id, e)
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Invalid question data: {e.errors()}",
-            )
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Question not Found"
-            )
-        except Exception as e:
-            logger.error("Failed to retrieve question data %s: %s", question_id, e)
-            raise
-
-    async def get_question_identifier(
-        self, question_id: str | UUID, session: SessionDep
-    ):
-        """Get the storage identifier (folder/blob name) for a question."""
-        q = await self.get_question(question_id, session)
-        if q is None:
-            logger.error("Failed to get a question")
-            raise ValueError("Question is None")
-
-        try:
-            qpath = self.get_question_path(q)
-            return Path(qpath).name if qpath else None
-        except Exception as e:
-            logger.error(
-                "Error while extracting identifier for question %s: %s", question_id, e
-            )
-            raise
-
-    # Retrieving all Questions
-    # TODO: Add a test for this
-    async def get_all_questions(
-        self, offset: int, limit: int, session: SessionDep
-    ) -> Sequence[Question] | None:
-        try:
-            if self.storage_type == "cloud":
-                filter = Question.blob_name != None
-            else:
-                filter = Question.local_path != None
-
-            results = session.exec(
-                select(Question).where(filter).offset(offset).limit(limit)
-            ).all()
-            return results
-        except Exception as e:
-            logger.error("Error while getting questions %s: %s", e)
-            raise
-
-    # TODO: Add a test for this service
-    async def get_all_questions_full(
-        self, offset: int, limit: int, session: SessionDep
-    ):
-        try:
-            all_questions = await self.get_all_questions(offset, limit, session)
-            results = await asyncio.gather(
-                *[self.get_question_data(q.id, session) for q in all_questions or []]
-            )
-            return results
-        except Exception as e:
-            raise
-
-    # TODO Add a test for this service
-    async def filter_questions(self, session: SessionDep, **kwargs):
-        try:
-            if self.storage_type == "cloud":
-                filter = Question.blob_name != None
-            else:
-                filter = Question.local_path != None
-
-            return await qc.filter_questions_meta(
-                session,
-                [filter],
-                **kwargs,
-            )
-        except Exception as e:
-            raise
-
-    # ---------------------------
-    # File Operations
-    # ---------------------------
-    async def save_file_to_question(
-        self,
-        question_id: str | UUID,
-        session: SessionDep,
-        file: FileData,
-        overwrite: bool = False,
-    ) -> bool:
-        """Save a single file to a question directory."""
-        try:
-            await self.get_question(question_id, session)
-            identifier = await self.get_question_identifier(question_id, session)
-            if not identifier:
-                raise ValueError("Could not resolve question identifier")
-
-            self.storage.save_file(identifier, file.filename, file.content, overwrite)
-            logger.info(f"Wrote file {file.filename} for question {question_id}")
-            return True
-        except Exception as e:
-            logger.error(
-                "Failed saving file %s for question %s: %s",
-                file.filename,
-                question_id,
-                e,
-            )
-            raise
-
-    async def save_files_to_question(
-        self,
-        question_id: str | UUID,
-        session: SessionDep,
-        files: List[FileData],
-        overwrite: bool = False,
-    ) -> bool:
-        """Save multiple files to a question directory."""
-        try:
-            await asyncio.gather(
-                *[
-                    self.save_file_to_question(question_id, session, f, overwrite)
-                    for f in files
-                ]
-            )
-            return True
-        except Exception as e:
-            logger.error("Failed to save files to question %s: %s", question_id, e)
-            raise
-
-    async def read_file(
-        self, question_id: str | UUID, session: SessionDep, filename: str
-    ) -> bytes | None:
-        """Retrieve a file from a question directory."""
-        try:
-            qidentifier = await self.get_question_identifier(question_id, session)
-            if not qidentifier:
-                raise ValueError("Could not resolve question identifier")
-            return self.storage.get_file(qidentifier, filename)
-        except Exception as e:
-            logger.error("Failed to get file %s for question %s", filename, question_id)
-            raise
-
-    async def get_all_files(
-        self, question_id: str | UUID, session: SessionDep
-    ) -> List[str]:
-        """Retrieve all file names for a given question."""
-        try:
-            qidentifier = await self.get_question_identifier(question_id, session)
-            if not qidentifier:
-                raise ValueError("Could not resolve question identifier")
-            return self.storage.list_file_names(qidentifier)
-        except Exception as e:
-            logger.error("Failed to get files for question %s", question_id)
-            raise
-
-    async def read_all_files(
-        self, question_id: str | UUID, session: SessionDep
-    ) -> List[FileData]:
-        try:
-            files = await self.get_all_files(question_id, session)
-
-            # Await to actually run and collect results
-            contents = await asyncio.gather(
-                *[self.read_file(question_id, session, f) for f in files]
-            )
-
-            # Pair each filename with its content
-            file_data = [
-                FileData(filename=f, content=c) for f, c in zip(files, contents)
-            ]
-            return file_data
-
-        except Exception as e:
-            logger.error(
-                "Failed to read all files for question %s Error: %s",
-                question_id,
-                str(e),
-            )
-            raise
-
-    # ---------------------------
-    # Deletion
-    # ---------------------------
-    async def delete_question(self, question_id: str | UUID, session: SessionDep):
-        """Delete a question and all its files."""
-        try:
-            qidentifier = await self.get_question_identifier(question_id, session)
-            if not qidentifier:
-                raise ValueError("Could not resolve question identifier")
-            await qc.delete_question_by_id(question_id, session)
-            self.storage.delete_storage(qidentifier)
-            return True
-        except Exception as e:
-            logger.error("Failed to delete question %s: %s", question_id, e)
-            raise
-
-    async def delete_question_file(
-        self, question_id: str | UUID, session: SessionDep, filename: str
-    ):
-        """Delete a single file from a question."""
-        try:
-            qidentifier = await self.get_question_identifier(question_id, session)
-            if not qidentifier:
-                raise ValueError("Could not resolve question identifier")
-            self.storage.delete_file(qidentifier, filename)
-        except Exception as e:
-            logger.error("Failed to delete file %s %s: %s", question_id, filename, e)
-            raise
-
-    # TODO: Test
-    async def delete_all_questions(self, session: SessionDep):
-        try:
-            all_questions = await self.get_all_questions(
-                offset=0, limit=100, session=session
-            )
-            logger.debug(f"These are all the questions, %s", all_questions)
-            if not all_questions:
-                logger.info("No questions found to delete.")
-                return {"deleted_count": 0, "detail": "No questions to delete"}
-
-            logger.debug("Deleting %d questions: %s", len(all_questions), all_questions)
-            question_ids = [
-                q["id"] if isinstance(q, dict) else q.id for q in all_questions
-            ]
-            results = await asyncio.gather(
-                *[
-                    self.delete_question(UUID(str(qid)), session)
-                    for qid in question_ids
-                ],
-                return_exceptions=True,
-            )
-            deleted_count = sum(1 for r in results if r is True)
-            errors = [str(r) for r in results if isinstance(r, Exception)]
-
-            if errors:
-                logger.error("Errors occurred while deleting questions: %s", errors)
-                return {
-                    "deleted_count": deleted_count,
-                    "errors": errors,
-                    "detail": "Some deletions failed",
-                }
-
-            return {
-                "deleted_count": deleted_count,
-                "detail": "All questions deleted successfully",
-            }
-        except Exception as e:
-            raise e
-
-    # Download
-    # TODO: Test
-    async def download_question(
-        self, session: SessionDep, question_id: UUID | str
-    ) -> bytes | io.BytesIO:
-        qidentifier = await self.get_question_identifier(question_id, session)
-        if not qidentifier:
-            raise ValueError("Could not resolve question identifier")
-        return await self.storage.download_question(qidentifier)
-
-    # TODO Fix this and add a test for this
-    async def download_starter_templates(self) -> Dict[str, bytes]:
-        try:
-            adaptive_template = (
-                Path(settings.BASE_PATH) / "starter_templates" / "AdaptiveStarter"
-            )
-            nonadaptive_template = (
-                Path(settings.BASE_PATH) / "starter_templates" / "NonAdaptive"
-            )
-            adaptive_bytes = await self.file_service.download_zip(
-                [p for p in adaptive_template.iterdir()],
-                folder_name="Adaptive Template",
-            )
-            nonadaptive_bytes = await self.file_service.download_zip(
-                [p for p in nonadaptive_template.iterdir()],
-                folder_name="NonAdaptiveStarter",
-            )
-            return {
-                "adaptiveTemplate": adaptive_bytes,
-                "NonAdaptiveTemplate": nonadaptive_bytes,
-            }
+            return qdb.set_question_path(question_id, path, storage_type, self.session)
         except Exception as e:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Could not download starter template {str(e)}",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Could not set path question {e}",
             )
 
-    # ---------------------------
-    # Helpers
-    # ---------------------------
-    # TODO: Test
-    def get_question_path(self, q: Question):
-        """Return the stored path (local or cloud) for a question."""
-        try:
-            if self.storage_type == "local":
-                return q.local_path
-            elif self.storage_type == "cloud":
-                return q.blob_name
-        except Exception as e:
-            logger.error(
-                "Failed to get question path for %s: %s", getattr(q, "title", None), e
-            )
-            raise
 
-    # TODO: Test
-    def set_question_path(self, q: Question, qname: str) -> Question:
-        """Assign storage path (local or cloud) to a question object."""
-        logger.info("Setting question path for %s", q.title)
+def get_question_manager(session: SessionDep) -> QuestionManager:
+    return QuestionManager(session)
 
-        relative_path = self.storage.get_relative_storage_path(qname)
 
-        if isinstance(relative_path, Path):
-            relative_path = relative_path.as_posix()
-
-        try:
-            # Assign based on storage type
-            if self.storage_type == "local":
-                q.local_path = relative_path
-                logger.info("Local question path set → %s", q.local_path)
-
-            elif self.storage_type == "cloud":
-                q.blob_name = relative_path
-                logger.info("Cloud question path set → %s", q.blob_name)
-
-            else:
-                raise ValueError(f"Unknown storage type: {self.storage_type}")
-
-            return q
-
-        except Exception as e:
-            title = getattr(q, "title", "<unknown>")
-            msg = f"Failed to set question path for '{title}': {str(e)}"
-            logger.error(msg)
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=msg,
-            ) from e
-
-    # TODO: Test
-    def get_basename(self) -> str | Path:
-        """Return the base directory/bucket name from storage."""
-        try:
-            return self.storage.get_base_path()
-        except Exception as e:
-            logger.error("Failed to get basename from storage: %s", e)
-            raise
+QuestionManagerDependency = Annotated[QuestionManager, Depends(get_question_manager)]

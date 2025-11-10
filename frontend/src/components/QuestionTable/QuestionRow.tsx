@@ -1,4 +1,4 @@
-import type { QuestionMeta } from "../../types/types";
+import type { QuestionMeta } from "../../types/questionTypes";
 import { Checkbox, TableCell, TableRow } from "@mui/material";
 import type { MinimalTestResult } from "./utils/services";
 
@@ -88,11 +88,11 @@ export function QuestionRow({
             </TableCell>
 
             {/* Created By */}
-            <TableCell>
+            {/* <TableCell>
                 <span className="text-sm text-gray-700 dark:text-gray-300">
                     {String(question.createdBy)}
                 </span>
-            </TableCell>
+            </TableCell> */}
 
             {/* Test Results */}
             <TableCell>

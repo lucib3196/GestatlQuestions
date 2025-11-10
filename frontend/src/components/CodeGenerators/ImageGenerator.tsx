@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import ModGenerators from "./BaseTemplate";
 import api from "../../api/client";
 import { toast } from "react-toastify";
-import UploadFilesButton from "../Generic/UploadFiles";
+import UploadFilesButton from "../Forms/UploadFileComponent";
 const ImageGeneratorConst = {
     name: "Visual Extract",
 };
@@ -27,9 +27,6 @@ const FileUploadForm: React.FC = () => {
     const [fileList, setFileList] = useState<File[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
-
-
-
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!fileList) return;
@@ -43,22 +40,11 @@ const FileUploadForm: React.FC = () => {
         setLoading(true);
 
         try {
-            const token = localStorage.getItem("access_token");
-            if (!token) {
-                toast.error("Error: Must Be Logged In")
-                return;
-            }
-            const response = await api.post(
+
+            await api.post(
                 "/codegenerator/v5/image_gen",
                 formData,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
             );
-            console.log(response)
 
             toast.success("Generation Successful")
         } catch (error) {
