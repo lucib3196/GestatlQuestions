@@ -42,7 +42,7 @@ const FileUploadForm: React.FC = () => {
         try {
 
             await api.post(
-                "/codegenerator/v5/image_gen",
+                "/code_generator/v5/image_gen",
                 formData,
             );
 

@@ -154,7 +154,7 @@ const InputForm: React.FC = () => {
 
             const requests = payload.map((dataItem) =>
                 api.post(
-                    "/codegenerator/v5/text_gen",
+                    "/code_generator/v5/text_gen",
                     { data: dataItem },
                 )
             );

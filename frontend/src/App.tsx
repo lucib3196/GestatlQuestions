@@ -4,7 +4,6 @@ import { AuthProvider } from "./context/AuthContext";
 import NavBar from "./components/NavBar/NavBar";
 import { ToastContainer } from "react-toastify";
 import CodeEditorProvider from "./context/CodeEditorContext";
-import { LecturePage } from "./pages/LecturePage";
 import { QuestionProvider } from "./context/QuestionContext";
 
 import { QuestionRuntimeProvider } from './context/QuestionAnswerContext';
@@ -27,7 +26,7 @@ function App() {
                 {/* Main Content */}
                 <NavBar />
                 <ToastContainer />
-                <LecturePage />
+                {/* <LecturePage /> */}
                 {/* <LegacyQuestion /> */}
                 {/* End of Main Content */}
               </CodeEditorProvider>
