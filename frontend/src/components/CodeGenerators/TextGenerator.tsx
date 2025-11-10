@@ -142,11 +142,7 @@ const InputForm: React.FC = () => {
         setLoading(true);
 
         try {
-            const token = localStorage.getItem("access_token");
-            if (!token) {
-                toast.error("Error: Must be logged in");
-                return;
-            }
+            
 
 
             const payload = formData.map(({ question, question_title }) => ({
@@ -160,12 +156,6 @@ const InputForm: React.FC = () => {
                 api.post(
                     "/codegenerator/v5/text_gen",
                     { data: dataItem },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                        },
-                    }
                 )
             );
             const responses = await Promise.all(requests);
