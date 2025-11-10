@@ -164,7 +164,7 @@ async def sync_question(
     # Validate the metadata
     try:
         metadata_dict = json.loads(str(unsynced.metadata))
-        qvalidated = Question.model_validate(metadata_dict, context={"extra": "ignore"})
+        qvalidated = QuestionData.model_validate(metadata_dict, context={"extra": "ignore"})
     except json.JSONDecodeError as e:
         logger.error(f"Invalid JSON for {unsynced.question_name}: {e}")
         return "invalid_metadata_json"
@@ -194,7 +194,7 @@ async def sync_question(
 
         # Write the question data to the folder
         question_data = await qm.get_question_data(qcreated.id)
-        meta_path = (Path(new_path) / "info.json").resolve()
+        meta_path = (Path(new_path) / "info2.json").resolve()
         meta_path.write_text(
             json.dumps(
                 to_serializable(question_data.model_dump()),

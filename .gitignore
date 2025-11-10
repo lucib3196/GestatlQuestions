@@ -6,6 +6,8 @@
 /.env
 ai.env
 FIREBASE_CRED.json
+backend\node_modules
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
