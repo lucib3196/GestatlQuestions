@@ -7,11 +7,25 @@ import CodeEditorProvider from "./context/CodeEditorContext";
 import { QuestionProvider } from "./context/QuestionContext";
 
 import { QuestionRuntimeProvider } from './context/QuestionAnswerContext';
+
+
+
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {
-    inlineMath: [["$", "$"]],
-    displayMath: [["$$", "$$"]],
+    inlineMath: [
+      ["$", "$"],
+      ["\(", "\)"]
+    ],
+    displayMath: [
+      ["$$", "$$"],
+      ["\\[", "\\]"]
+    ],
+    processEscapes: true,
+  },
+  options: {
+    ignoreHtmlClass: "no-mathjax",
+    processHtmlClass: "mathjax-process",
   },
 };
 
