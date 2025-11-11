@@ -1,3 +1,5 @@
+const math = require('mathjs');
+
 function generate() {
   const a = 1;
   const b = 2;
