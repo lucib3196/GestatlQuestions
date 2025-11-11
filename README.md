@@ -48,9 +48,45 @@ Go into backend directory and install dependencies
 cd backend
 poetry install
 ```
+## 3.1 Install Backend Dependencies (Alternative Method)
 
+You can also install backend dependencies manually using a virtual environment and pip.
+
+### Step 1: Create and Activate a Virtual Environment
+
+**On macOS/Linux:**
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+```
 
 ---
+
+**On Windows**
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate
+```
+```bash
+pip install -r requirements.txt
+```
+
+----
+
+## 3.6 Node.js Setup for ExecJS
+
+The `execjs` library requires **Node.js** to be installed and accessible in your environment.  
+If you don’t have Node.js installed, follow these steps **inside the backend directory**.
+
+### Step 1: Initialize a Node.js Project
+
+```bash
+cd backend
+npm init -y
+```
+
 
 ## 4️⃣ Install Frontend Dependencies
 
