@@ -5,6 +5,8 @@ import type { editor as MonacoEditor } from "monaco-editor";
 import { useCodeEditorContext } from "../../context/CodeEditorContext";
 import { useEffect } from "react";
 import { debounce } from "lodash";
+
+
 const languageMap: Record<string, string> = {
   js: "javascript",
   py: "python",
@@ -26,9 +28,9 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ theme = "vs-light" }) => {
   }, [selectedFile]);
 
   const handleEditorChange: OnChange = useCallback(
-  debounce((value?: string) => setFileContent(value ?? ""), 600),
-  [selectedFile]
-);
+    debounce((value?: string) => setFileContent(value ?? ""), 600),
+    [selectedFile]
+  );
 
   useEffect(() => {
     if (!selectedFile || !fileContent) return;

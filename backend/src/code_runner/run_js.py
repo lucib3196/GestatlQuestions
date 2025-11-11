@@ -107,7 +107,7 @@ def execute_javascript(
 
 
 def test():
-    path = Path(r"code_runner\test2.js")
+    path = Path(r"app_test\test_assets\code\generate.js").resolve()
 
     print(execute_javascript(path, True))
 
