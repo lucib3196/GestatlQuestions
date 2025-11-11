@@ -36,7 +36,7 @@ export default function QuestionUpdateForm() {
         questionMeta?.ai_generated ?? false
     );
 
-    console.log("This is the question data", questionMeta)
+
 
     if (!questionMeta) return null;
 
