@@ -5,7 +5,7 @@ import NavBar from "./components/NavBar/NavBar";
 import { ToastContainer } from "react-toastify";
 import CodeEditorProvider from "./context/CodeEditorContext";
 import { QuestionProvider } from "./context/QuestionContext";
-
+import ChatUI from "./components/ChatUI/ChatUI";
 import { QuestionRuntimeProvider } from './context/QuestionAnswerContext';
 
 
@@ -40,6 +40,7 @@ function App() {
                 {/* Main Content */}
                 <NavBar />
                 <ToastContainer />
+                <ChatUI />
                 {/* <LecturePage /> */}
                 {/* <LegacyQuestion /> */}
                 {/* End of Main Content */}
