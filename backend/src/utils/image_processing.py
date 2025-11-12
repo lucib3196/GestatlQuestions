@@ -20,39 +20,33 @@ def handle_image_data(data) -> bytes:
         raise e
 
 
-def write_image_data(
-    image_bytes: bytes, folder_path: str | Path, filename: Optional[str] = None
-) -> bool:
+def write_image_data(image_bytes: bytes, folder_path: str | Path, filename: str) -> str:
     try:
         path = Path(folder_path).resolve()
-        if filename:
-            path = path / filename
-        if not path.exists():
-            path.mkdir(parents=True, exist_ok=True)
+        path.mkdir(exist_ok=True)
+        save_path = path / filename
 
-        if path.suffix != ".png":
+        if save_path.suffix != ".png":
             raise ValueError(
                 "Suffix allowed is only PNG either missing or nnot allowed"
             )
-        with open(path, "wb") as f:
-            f.write(image_bytes)
-        return True
+        save_path.write_bytes(image_bytes)
+        return save_path.as_posix()
     except Exception as e:
-        raise Exception(f"Could not save image {str(e)}")
+        raise ValueError(f"Could not save image {str(e)}")
 
 
 def save_graph_visualization(
     graph: CompiledStateGraph | Any,
     folder_path: str | Path,
-    filename: Optional[str] = None,
+    filename: str,
 ):
     try:
-        path = Path(folder_path).resolve()
-        if filename:
-            path = path / filename
-
         image_bytes = graph.get_graph().draw_mermaid_png()
-        write_image_data(image_bytes, path)
-        print(f"✅ Saved graph visualization at: {path}")
+        save_path = write_image_data(image_bytes, folder_path, filename)
+
+        print(f"✅ Saved graph visualization at: {save_path}")
+    except ValueError:
+        raise
     except Exception as error:
         print(f"❌ Graph visualization failed: {error}")

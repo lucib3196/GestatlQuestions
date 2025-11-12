@@ -1,14 +1,15 @@
 from pathlib import Path
-from src.ai_base.settings import get_settings
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_community.vectorstores import FAISS
-from langchain.tools import tool
-from langchain_core.messages import AIMessageChunk
-from langchain.chat_models import init_chat_model
-from langchain.agents import create_agent
-from typing import Any
 from typing import Any, cast
-from src.utils import write_image_data
+
+from langchain.agents import create_agent
+from langchain.chat_models import init_chat_model
+from langchain_core.messages import AIMessageChunk
+from langchain.tools import tool
+from langchain_community.vectorstores import FAISS
+from langchain_openai import OpenAIEmbeddings
+
+from src.ai_base.settings import get_settings
+from src.utils import save_graph_visualization
 
 # Get settings
 settings = get_settings()
@@ -50,11 +51,15 @@ prompt_text = (
 
 agent = create_agent(model, tools, system_prompt=prompt_text)  # Pass string directly
 
+
 if __name__ == "__main__":
     query = "What course is offered by UCR for mechanical engineering that is focused on thermodynamics and heat transfer\n\n"
 
     token: AIMessageChunk
     metadata: dict[str, Any]
+
+    folder_path = Path("src/ai_processing/course_classification/graphs")
+    save_graph_visualization(agent, folder_path, filename="agent_graph.png")
 
     for token_raw, metadata_raw in agent.stream(
         {"messages": [{"role": "user", "content": query}]},

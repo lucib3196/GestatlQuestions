@@ -59,10 +59,7 @@
     {
       "name": "Machine Design",
       "description": "Covers the principles and methods for designing mechanical components and systems like gears, shafts, and bearings.",
-      "discipline": [
-        "Mechanical Engineering",
-        "Manufacturing Engineering"
-      ]
+      "discipline": ["Mechanical Engineering", "Manufacturing Engineering"]
     },
     {
       "name": "Control Systems",
@@ -168,11 +165,7 @@
     {
       "name": "Historical Impacts of Treaties",
       "description": "Explores how treaties, particularly the Treaty of Versailles, shaped political, economic, and social dynamics in Europe during the interwar period, influencing subsequent events leading to World War II.",
-      "discipline": [
-        "History",
-        "Political Science",
-        "International Relations"
-      ]
+      "discipline": ["History", "Political Science", "International Relations"]
     },
     {
       "name": "Biological Energy Processes",
