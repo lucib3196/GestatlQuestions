@@ -44,17 +44,17 @@ def retrieve_context(query: str):
     return serialized, retrieved_docs
 
 
-@wrap_tool_call
-def handle_tool_errors(request, handler):
-    """Handle tool execution errors with custom messages."""
-    try:
-        return handler(request)
-    except Exception as e:
-        # Return a custom error message to the model
-        return ToolMessage(
-            content=f"Tool error: Please check your input and try again. ({str(e)})",
-            tool_call_id=request.tool_call["id"],
-        )
+# @wrap_tool_call
+# def handle_tool_errors(request, handler):
+#     """Handle tool execution errors with custom messages."""
+#     try:
+#         return handler(request)
+#     except Exception as e:
+#         # Return a custom error message to the model
+#         return ToolMessage(
+#             content=f"Tool error: Please check your input and try again. ({str(e)})",
+#             tool_call_id=request.tool_call["id"],
+#         )
 
 
 tools = [retrieve_context]
@@ -65,8 +65,10 @@ prompt_text = (
 )
 
 agent = create_agent(
-    model, tools, system_prompt=prompt_text, middleware=[handle_tool_errors]
-)  # Pass string directly
+    model,
+    tools,
+    system_prompt=prompt_text,
+)
 
 
 if __name__ == "__main__":

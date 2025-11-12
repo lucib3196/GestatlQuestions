@@ -3,7 +3,8 @@
   "dependencies": ["."],
   "graphs": {
     "math_helper": "src/test_langgraph/src/agent/graph.py:graph",
-    "topic_classification": "src/ai_processing/question_topic_classification/agent.py:agent"
+    "topic_classification": "src/ai_processing/question_topic_classification/agent.py:agent",
+    "ucr_mechanical_courses": "src/ai_processing/course_classification/agent.py:agent"
   },
 
   "env": "../.env",
