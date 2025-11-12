@@ -8,7 +8,7 @@ from langchain.chat_models import init_chat_model
 from langchain.agents import create_agent
 from typing import Any
 from typing import Any, cast
-
+from src.utils import write_image_data
 
 # Get settings
 settings = get_settings()
