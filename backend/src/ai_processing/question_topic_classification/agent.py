@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Any, cast
-
+from functools import lru_cache
 from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import AIMessageChunk
@@ -16,19 +16,44 @@ settings = get_settings()
 embedding_model = settings.embedding_model
 base_model = settings.base_model
 
-# Define the model we are usiong
-model = init_chat_model(base_model.model, model_provider=base_model.provider)
-# Load in vector store
-vector_store_path = (
-    Path(r"src\ai_processing\question_topic_classification\topic_vectorstore")
-    .resolve()
-    .as_posix()
-)
-embeddings = OpenAIEmbeddings(model=settings.embedding_model)
-vectorstore = FAISS.load_local(
-    vector_store_path, embeddings, allow_dangerous_deserialization=True
-)
 
+# Define the model we are usiong
+@lru_cache()
+def load_topic_classification_resources():
+    """
+    Lazy-load chat model + FAISS vectorstore only when needed.
+    Cached so it never reloads on every invocation.
+    """
+    # 1. Initialize model
+    model = init_chat_model(
+        settings.base_model.model,
+        model_provider=settings.base_model.provider,
+    )
+
+    # 2. Resolve vectorstore path
+    vector_store_path = (
+        Path("src/ai_processing/question_topic_classification/topic_vectorstore")
+        .resolve()
+        .as_posix()
+    )
+
+    # 3. Initialize embeddings
+    embeddings = OpenAIEmbeddings(model=settings.embedding_model)
+
+    # 4. Load FAISS safely
+    try:
+        vectorstore = FAISS.load_local(
+            vector_store_path, embeddings, allow_dangerous_deserialization=True
+        )
+    except Exception as e:
+        raise RuntimeError(
+            f"Failed to load topic classification FAISS vectorstore at "
+            f"{vector_store_path}. Error: {e}"
+        )
+
+    return model, vectorstore
+
+model, vectorstore = load_topic_classification_resources()
 
 # Create a tool for answering based on vectorstore
 @tool(response_format="content_and_artifact")

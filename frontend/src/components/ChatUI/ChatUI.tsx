@@ -1,4 +1,3 @@
-
 import { useStream } from "@langchain/langgraph-sdk/react";
 import type { Message } from "@langchain/langgraph-sdk";
 import { useRef, useEffect } from "react";
@@ -6,11 +5,14 @@ import ChatContainer from "./ChatContainer";
 import ChatMessageContainer from "./ChatMessage";
 import { useState } from "react";
 
+type ChatUIProps = {
+    assistantID: string;
+};
 
-export default function ChatUI() {
+export default function ChatUI({ assistantID }: ChatUIProps) {
     const thread = useStream<{ messages: Message[] }>({
         apiUrl: "http://localhost:2024",
-        assistantId: "agent",
+        assistantId: assistantID,
         messagesKey: "messages",
     });
 
