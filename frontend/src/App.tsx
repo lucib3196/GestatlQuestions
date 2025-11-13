@@ -5,21 +5,18 @@ import NavBar from "./components/NavBar/NavBar";
 import { ToastContainer } from "react-toastify";
 import CodeEditorProvider from "./context/CodeEditorContext";
 import { QuestionProvider } from "./context/QuestionContext";
-
-import { QuestionRuntimeProvider } from './context/QuestionAnswerContext';
-
-
+import { QuestionRuntimeProvider } from "./context/QuestionAnswerContext";
 
 const config = {
   loader: { load: ["[tex]/ams"] },
   tex: {
     inlineMath: [
       ["$", "$"],
-      ["\(", "\)"]
+      ["(", ")"],
     ],
     displayMath: [
       ["$$", "$$"],
-      ["\\[", "\\]"]
+      ["\\[", "\\]"],
     ],
     processEscapes: true,
   },
@@ -40,6 +37,7 @@ function App() {
                 {/* Main Content */}
                 <NavBar />
                 <ToastContainer />
+
                 {/* <LecturePage /> */}
                 {/* <LegacyQuestion /> */}
                 {/* End of Main Content */}

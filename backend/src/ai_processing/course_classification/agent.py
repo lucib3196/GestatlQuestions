@@ -7,6 +7,8 @@ from langchain_core.messages import AIMessageChunk
 from langchain.tools import tool
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
+from langchain.agents.middleware import wrap_tool_call
+from langchain_core.messages import ToolMessage
 
 from src.ai_base.settings import get_settings
 from src.utils import save_graph_visualization
@@ -42,6 +44,19 @@ def retrieve_context(query: str):
     return serialized, retrieved_docs
 
 
+# @wrap_tool_call
+# def handle_tool_errors(request, handler):
+#     """Handle tool execution errors with custom messages."""
+#     try:
+#         return handler(request)
+#     except Exception as e:
+#         # Return a custom error message to the model
+#         return ToolMessage(
+#             content=f"Tool error: Please check your input and try again. ({str(e)})",
+#             tool_call_id=request.tool_call["id"],
+#         )
+
+
 tools = [retrieve_context]
 
 prompt_text = (
@@ -49,7 +64,11 @@ prompt_text = (
     "Use the tool to help answer user queries."
 )
 
-agent = create_agent(model, tools, system_prompt=prompt_text)  # Pass string directly
+agent = create_agent(
+    model,
+    tools,
+    system_prompt=prompt_text,
+)
 
 
 if __name__ == "__main__":
@@ -68,4 +87,6 @@ if __name__ == "__main__":
         token = cast(AIMessageChunk, token_raw)
         metadata = cast(dict[str, Any], metadata_raw)
 
-        print(token.content)
+        node = metadata["langgraph_node"]
+        print(f"node: {node}")
+        print(f"content: {token.content}")
