@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ChatUI from "../components/ChatUI/ChatUI";
 
+
 export const availableChats = [
   "math_helper",
   "topic_classification",
@@ -24,12 +25,12 @@ function ChatDropDown({
   setSelectedChat,
 }: {
   selectedChat: AvailableChats;
-  setSelectedChat: (val: string) => void;
+  setSelectedChat: (val: AvailableChats) => void;
 }) {
   const handleSelectionChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setSelectedChat(event.target.value);
+    setSelectedChat(event.target.value as AvailableChats);
   };
 
   const cleaned = selectedChat.trim();
