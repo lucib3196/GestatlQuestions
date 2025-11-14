@@ -19,7 +19,7 @@ export function AuthModeProvider({ children }: { children: React.ReactNode }) {
     )
 }
 
-export function useUserMode() {
+export function UseAuthMode() {
     const context = useContext(AuthModeContext);
     if (context === undefined) {
         throw new Error("Auth Mode must be used within an SpriteProvider")

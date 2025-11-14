@@ -17,7 +17,7 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 import { handleRoutes, navigation } from "./navigationSettings";
-import UserLoginPage from "../Auth/UserLoginPage";
+import AuthenticationPage from "../../pages/AuthenticationPage";
 import { useAuth } from "../../context/AuthContext";
 
 function NavBar() {
@@ -132,7 +132,7 @@ function NavBar() {
                 )}
 
                 {showLogin && (
-                  <UserLoginPage
+                  <AuthenticationPage
                     show={showLogin}
                     setShow={() => setShowLogin((prev) => !prev)}
                   />

@@ -1,6 +1,7 @@
 import AuthBase from "./AuthBase";
 import { toast } from "react-toastify";
 import { FirebaseError } from "firebase/app";
+import { UserAPI } from "../../api/userAPI";
 
 import {
     createUserWithEmailAndPassword,
@@ -8,11 +9,8 @@ import {
 } from "firebase/auth";
 import { auth } from "../../config/firebaseClient";
 
-export function SignUpPage() {
-    const handleSubmit = async (
-        email: string,
-        password: string,
-    ) => {
+export function SignUpForm() {
+    const handleSubmit = async (email: string, password: string, username?: string) => {
         try {
             const userCredential = await createUserWithEmailAndPassword(
                 auth,
@@ -25,17 +23,18 @@ export function SignUpPage() {
                 await sendEmailVerification(user);
                 toast.info(`A verification email has been sent to ${email}  `);
             }
+
+            UserAPI.createUser(username ?? "", user)
         } catch (error) {
             let errorMsg = "";
             if (error instanceof FirebaseError) {
                 errorMsg = error.message;
+            } else {
+                errorMsg = error as string
             }
             toast.error(`Could not create account ${errorMsg ?? ""}`);
         }
     };
-    return (
-        <div className="flex flex-col items-center justify-center">
-            <AuthBase state="signup" onSubmit={handleSubmit} />
-        </div>
-    );
+
+    return <AuthBase onSubmit={handleSubmit} />;
 }

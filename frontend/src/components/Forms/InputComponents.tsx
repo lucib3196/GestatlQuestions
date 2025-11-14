@@ -1,13 +1,12 @@
-
-
 type InputComponentProps = {
   id: string;
   type: React.HTMLInputTypeAttribute;
   name: string;
-  value:string
+  value: string;
   label: string;
   placeholder?: string;
   required?: boolean;
+  children?: React.ReactNode;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 export function InputTextForm({
@@ -17,6 +16,7 @@ export function InputTextForm({
   value,
   label,
   placeholder,
+  children,
   required,
   onChange,
 }: InputComponentProps) {
@@ -36,8 +36,8 @@ export function InputTextForm({
           onChange={onChange}
           className="block w-full  rounded-md bg-white/5 px-3 py-1.5 text-base text-black outline-1 outline-black placeholder:text-gray-500 focus:outline-2 focus:outline-indigo-500 sm:text-sm"
         />
+        {children}
       </div>
     </>
   );
 }
-

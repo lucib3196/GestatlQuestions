@@ -9,6 +9,7 @@ import Home from "../../pages/Home";
 import type { navigationType } from "../../types/navbarTypes";
 import UserPage from "../Auth/UserPage";
 import ChatPage from "../../pages/ChatPage";
+import AuthenticationPage from "../../pages/AuthenticationPage";
 
 export const navigation: navigationType[] = [
     {
