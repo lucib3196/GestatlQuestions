@@ -3,7 +3,7 @@ from uuid import UUID
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import select
-
+from src.utils import convert_uuid
 from src.api.core import logger
 from src.api.database import SessionDep
 from src.api.models import UserBase
@@ -28,6 +28,7 @@ def create_user(
 
 def get_user(id: str | UUID, session: SessionDep):
     try:
+        id = convert_uuid(id)
         stmt = select(User).where(User.id == id)
         user = session.exec(stmt).first()
         if user:

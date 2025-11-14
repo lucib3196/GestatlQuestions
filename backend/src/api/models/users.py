@@ -3,8 +3,8 @@ from pydantic import BaseModel
 
 
 class UserBase(BaseModel):
-    username: str | None
-    email: str | None
+    username: str
+    email: str
     role: UserRole = UserRole.STUDENT
-    fb_id: str | None = None
+    fb_id: str
     storage_path: str | None = None
