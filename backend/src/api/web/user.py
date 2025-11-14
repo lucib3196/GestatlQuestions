@@ -9,6 +9,8 @@ from src.api.core.logging import logger
 
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+
 @router.post("/")
 async def create_user(
     user_manager: UserManagerDependeny,
@@ -32,7 +34,7 @@ async def create_user(
         username=data.email,
     )
 
-    logger.info("User created successfully: uid='%s'", created_user.uid)
+    logger.info("User created successfully: uid='%s'", created_user.id)
     return created_user
 
 
@@ -55,7 +57,7 @@ async def get_user(
 
     user = user_manager.get_user(id)
 
-    logger.info("Retrieved user: uid='%s', email='%s'", user.uid, user.email)
+    logger.info("Retrieved user: uid='%s', email='%s'", user.id, user.email)
     return user
 
 
