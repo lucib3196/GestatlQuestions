@@ -9,8 +9,6 @@ import { useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
 
 
-
-
 export function LogInPage() {
   const { user } = useAuth();
   const [forgotPassword, setForgotPassword] = useState(false);
@@ -27,8 +25,13 @@ export function LogInPage() {
   };
 
   const handleSubmit = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
-    toast.success("Log In Successful");
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast.success("Log In Successful");
+    } catch (error) {
+      toast.error(`Could not Log In ${error as string}`)
+    }
+
   };
 
   // Handle user states

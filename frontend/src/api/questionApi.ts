@@ -1,97 +1,156 @@
+import type {
+  QuestionBase,
+  QuestionData,
+  QuestionMeta,
+} from "../types/questionTypes";
+import type { SuccessDataResponse } from "../types/responseModels";
+import type { FileData } from "../types/questionTypes";
 import api from "./client";
-import { toast } from "react-toastify";
 
-import type { FileName } from "../types/questionTypes";
+export class QuestionAPI {
+  private static readonly base = "/questions";
 
-export const questionApi = {
-  async getFileNames(id: string): Promise<FileName> {
-    const res = await api.get(`/questions/${encodeURIComponent(id)}/files`);
-    return res.data;
-  },
-  async uploadFiles(id: string, files: File[]): Promise<GeneralResponse> {
-    const formData = new FormData();
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-    const res = await api.post(
-      `/questions/${encodeURIComponent(id)}/files`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+  /** Create a new question */
+  static async create(payload: QuestionData): Promise<QuestionBase> {
+    const response = await api.post(this.base, payload);
+    return response.data;
+  }
+
+  /** Delete all questions (use carefully) */
+  static async deleteAll(): Promise<any> {
+    const response = await api.delete(this.base);
+    return response.data;
+  }
+
+  /** Get paginated questions */
+  static async getAll(offset: number, limit: number): Promise<QuestionBase[]> {
+    const response = await api.get(`${this.base}/${offset}/${limit}`);
+    return response.data;
+  }
+
+  /** Get a question (full data) by ID */
+  static async getQuestion(id: string | number): Promise<QuestionBase> {
+    const response = await api.get(`${this.base}/${encodeURIComponent(id)}`);
+    return response.data;
+  }
+
+  /** Get question metadata only by ID */
+  static async getQuestionMeta(id: string | number): Promise<QuestionMeta> {
+    const response = await api.get(
+      `${this.base}/${encodeURIComponent(id)}/all_data`
     );
-    return res.data;
-  },
+    return response.data;
+  }
 
-  async readQuestionFile(
-    id: string,
+  /** Get all question metadata (paginated) */
+  static async getAllQuestionsMeta(
+    offset: number,
+    limit: number
+  ): Promise<QuestionMeta[]> {
+    const response = await api.get(`${this.base}/${offset}/${limit}/all_data`);
+    return response.data;
+  }
+
+  /** Delete a specific question by ID */
+  static async deleteQuestion(id: string | number): Promise<any> {
+    const response = await api.delete(`${this.base}/${encodeURIComponent(id)}`);
+    return response.data;
+  }
+
+  /** Update an existing question by ID */
+  static async updateQuestion(
+    id: string | number,
+    updatePayload: QuestionData
+  ): Promise<QuestionMeta> {
+    const response = await api.put(
+      `${this.base}/${encodeURIComponent(id)}`,
+      updatePayload
+    );
+    return response.data;
+  }
+
+  /** Filter questions by given criteria */
+  static async filterQuestions(filter: QuestionData): Promise<QuestionMeta[]> {
+    const response = await api.post(`${this.base}/filter`, filter);
+    return response.data;
+  }
+
+  // Files
+  static async getQuestionFile(
+    questionId: string,
     filename: string
-  ): Promise<GeneralDataResponse> {
-    const response = await api.get<SuccessDataResponse>(
-      `/questions/${encodeURIComponent(id)}/files/${encodeURIComponent(
-        filename
+  ): Promise<SuccessDataResponse> {
+    const response = await api.get(
+      `${this.base}/files/${encodeURIComponent(
+        questionId
+      )}/${encodeURIComponent(filename)}`
+    );
+    return response.data;
+  }
+
+  static async getQuestionFiles(questionID: string): Promise<FileData[]> {
+    const response = await api.get(
+      `/questions/filedata/${encodeURIComponent(questionID)}`
+    );
+    return response.data;
+  }
+
+  static async updateFileContent(
+    questionId: string,
+    filename: string,
+    new_content: string
+  ) {
+    const response = await api.put(
+      `${this.base}/files/${encodeURIComponent(
+        questionId
+      )}/${encodeURIComponent(filename)}`,
+      new_content
+    );
+    return response.data;
+  }
+
+  static async uploadFiles(questionId: string, files: File[]) {
+    try {
+      const formData = new FormData();
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+      const response = await api.post(
+        `${this.base}/${encodeURIComponent(questionId)}/upload_files`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async deleteFile(
+    questionId: string,
+    filename: string
+  ): Promise<SuccessDataResponse> {
+    const response = await api.delete(
+      `${this.base}/files/${encodeURIComponent(
+        questionId
+      )}/${encodeURIComponent(filename)}`
+    );
+    return response.data;
+  }
+
+  static async runServer(
+    questionId: string,
+    language: "python" | "javascript"
+  ) {
+    const response = await api.post(
+      `run_server/${encodeURIComponent(questionId)}/${encodeURIComponent(
+        language
       )}`
     );
     return response.data;
-  },
-
-  async saveFileContent(
-    filename: string,
-    content: string,
-    id: string | null
-  ): Promise<boolean> {
-    await api.put("/questions/update_file", {
-      question_id: id,
-      filename,
-      new_content: content,
-    });
-    toast.success("Code Saved Successfully");
-    return true;
-  },
-};
-
-import type {
-  SuccessDataResponse,
-  SuccessFileResponse,
-} from "../types/responseModels";
-import type {
-  GeneralDataResponse,
-  GeneralResponse,
-} from "../types/responseTypes";
-
-type Settings = {
-  storage_type: "cloud" | "local";
-};
-export const getSettings = async () => {
-  try {
-    const response = await api.get<Settings>("/settings");
-    return response.data.storage_type;
-  } catch (error) {
-    console.error("Could not fetch question settings", error);
-  }
-};
-
-export const downloadStart = async () => {
-  try {
-    const data = await api.post("/questions/download_starter");
-    console.log(data);
-  } catch (error) {
-    console.log("There was an error", error);
-    toast.error("Could not download Starter Template");
-  }
-};
-
-export async function getFiles(id: string) {
-  try {
-    const res = await api.get<SuccessFileResponse>(
-      `/questions/${encodeURIComponent(id)}/files_data`
-    );
-    console.log("This is the response", res);
-    return Array.isArray(res.data.files) ? res.data.files : [];
-  } catch (error) {
-    console.log(error);
-    return [];
   }
 }

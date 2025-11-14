@@ -25,8 +25,6 @@ export default function AuthBase({ state, onSubmit, children }: AuthProps) {
         onSubmit(email, password, username);
     };
 
-
-
     return (
         <form
             onSubmit={handleSubmit}
