@@ -54,7 +54,7 @@ class UserManager:
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Could not retrieve user by fb id {e}",
+                detail=f"user not found  {e}",
             )
 
     def get_all_users(self, offset: int, limit: int) -> Sequence[User]:
