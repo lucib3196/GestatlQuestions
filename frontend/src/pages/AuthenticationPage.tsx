@@ -8,6 +8,8 @@ import { LogInForm } from "../components/Auth/LogInForm";
 import { SignUpForm } from "../components/Auth/SignUpPage";
 import VerifyAccount from "../components/Auth/VerifyAccount";
 import { TitleHeader } from "../components/Base/TitleHeader";
+
+
 // Handles wether the page is show
 type AuthenticationPageModel = {
     show: boolean;
