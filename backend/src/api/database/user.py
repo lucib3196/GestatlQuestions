@@ -98,7 +98,7 @@ def delete_user(id: str | UUID, session: SessionDep) -> None:
         logger.error(f"[DB] Failed to delete user: {e}")
 
 
-def update_user(id: str | UUID, data: UserBase, session: SessionDep):
+def update_user(id: str | UUID, data: UserBase, session: SessionDep) -> Optional[User]:
     try:
         user = get_user(id, session)
         update_data_dict = data.model_dump(exclude_unset=True)
