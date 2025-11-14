@@ -8,6 +8,7 @@ import TextGenerator from "../CodeGenerators/TextGenerator";
 import Home from "../../pages/Home";
 import type { navigationType } from "../../types/navbarTypes";
 import UserPage from "../Auth/UserPage";
+import ChatPage from "../../pages/ChatPage";
 
 export const navigation: navigationType[] = [
     {
@@ -26,6 +27,7 @@ export const navigation: navigationType[] = [
         requiresAccount: false,
         includeNavbar: true
     },
+
     {
         name: "Questions",
         href: "/questions",
@@ -61,6 +63,14 @@ export const navigation: navigationType[] = [
                 element: <ImageGenerator />,
             },
         ],
+    },
+    {
+        name: "Chat",
+        href: "/chat",
+        element: <ChatPage />,
+        current: false,
+        requiresAccount: false,
+        includeNavbar: true
     },
     {
         name: "My Account",
