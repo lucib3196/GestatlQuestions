@@ -23,8 +23,8 @@ export function SignUpForm() {
                 await sendEmailVerification(user);
                 toast.info(`A verification email has been sent to ${email}  `);
             }
-
-            UserAPI.createUser(username ?? "", user)
+            // Add the user to the database
+            await UserAPI.createUser(username ?? "", email, user)
         } catch (error) {
             let errorMsg = "";
             if (error instanceof FirebaseError) {

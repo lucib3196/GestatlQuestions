@@ -2,9 +2,9 @@ import type { User } from "firebase/auth";
 import { getIdToken } from "firebase/auth";
 import api from "./client";
 
-type UserRole = "admin" | "teacher" | "developer" | "student";
+export type UserRole = "admin" | "teacher" | "developer" | "student";
 
-type UserDB = {
+export type UserDB = {
   id?: string;
   username?: string;
   email?: string;
@@ -14,7 +14,7 @@ type UserDB = {
 };
 
 export class UserAPI {
-  private static readonly base = "/user";
+  private static readonly base = "/users";
 
   static async getCurrentUser(token: string): Promise<UserDB> {
     const response = await api.get<UserDB>(this.base, {
@@ -72,14 +72,10 @@ export class UserAPI {
     return response.data;
   }
 
-  static async updateUser(
-    user: User,
-    id: string,
-    data: UserDB
-  ): Promise<UserDB> {
+  static async updateUser(user: User, data: UserDB): Promise<UserDB> {
     const token = await getIdToken(user);
 
-    const response = await api.put<UserDB>(`${this.base}/${id}`, data, {
+    const response = await api.put<UserDB>(`${this.base}/`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

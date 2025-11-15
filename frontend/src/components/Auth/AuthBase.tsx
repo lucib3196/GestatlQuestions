@@ -105,7 +105,7 @@ export default function AuthBase({ onSubmit }: AuthProps) {
             )}
 
             <MyButton
-                btype="submit"
+                type="submit"
                 name={
                     mode === "login"
                         ? "Log In"
@@ -118,7 +118,7 @@ export default function AuthBase({ onSubmit }: AuthProps) {
             />
             {mode === "passwordReset" && (
                 <MyButton
-                    btype="button" // prevent form submission
+                    type="button" // prevent form submission
                     name="Go Back to Login"
                     onClick={() => setMode("login")}
                     size="md"

@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { LogInForm } from "../components/Auth/LogInForm";
-import { SignUpForm } from "../components/Auth/SignUpPage";
+import { SignUpForm } from "../components/Auth/SignUpForm";
 import VerifyAccount from "../components/Auth/VerifyAccount";
 import { TitleHeader } from "../components/Base/TitleHeader";
 
@@ -31,11 +31,10 @@ export default function AuthenticationPage({
     };
 
     const shouldShowToggle = !user; // Only show toggle if not logged in
-
     const showLogin = mode === "login" && (!user);
     const showSignup = mode === "signup";
     const showVerify = mode === "authenticate" || (user && !user.emailVerified);
-    console.log(showVerify)
+
     return (
         <SectionContainer id="AuthenticationPage">
             {show && (

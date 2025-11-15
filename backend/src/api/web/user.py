@@ -9,8 +9,10 @@ from src.api.core.logging import logger
 from src.api.dependencies import FireBaseToken
 from fastapi import HTTPException
 from starlette import status
+from src.firebase.core import initialize_firebase_app
 
 router = APIRouter(prefix="/users", tags=["users"])
+initialize_firebase_app()
 
 
 @router.post("/")
