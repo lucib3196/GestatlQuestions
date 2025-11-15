@@ -1,10 +1,10 @@
-import SectionContainer from "../Base/SectionContainer";
-import profilePic from "../../assets/react.svg";
-import AccountPageHeader from "./AccountPageHeader";
-import AccountProfilePic from "./AccountProfilePic";
-import AccountInformation from "./AccountInformation";
-import { useAuth } from "../../context/AuthContext";
-import AccountOptions from "./AccountOptions";
+import SectionContainer from "../components/Base/SectionContainer";
+import profilePic from "../assets/react.svg"
+import AccountPageHeader from "../components/Account/AccountPageHeader";
+import AccountProfilePic from "../components/Account/AccountProfilePic";
+import AccountInformation from "../components/Account/AccountInformation";
+import AccountOptions from "../components/Account/AccountOptions";
+import { useAuth } from "../context/AuthContext";
 
 export default function AccountPage() {
   const { user } = useAuth();

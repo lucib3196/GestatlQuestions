@@ -40,7 +40,8 @@ async def create_user(
             return existing_user
         # Other wise create a user
         logger.info(
-            "Creating user with email='%s' and fb_id='%s'", data.email, data.fb_id
+            "Creating user with email='%s' and fb_id='%s'",
+            data.email,
         )
         created_user = user_manager.create_user(
             uid=fb_token["uid"],

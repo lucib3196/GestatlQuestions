@@ -1,96 +1,100 @@
-// React Router
-import { Route } from "react-router-dom";
 
 // Types
-import { QuestionViewPage } from "../../pages/QuestionsPage";
-import ImageGenerator from "../CodeGenerators/ImageGenerator";
-import TextGenerator from "../CodeGenerators/TextGenerator";
+import type { NavigationItem } from "../../types/navbarTypes";
+
+// Pages
 import Home from "../../pages/Home";
-import type { navigationType } from "../../types/navbarTypes";
 import ChatPage from "../../pages/ChatPage";
-import AccountPage from "../Account/AccountPage";
+import AccountPage from "../../pages/AccountPage";
+import { QuestionViewPage } from "../../pages/QuestionsPage";
+
+// Generators
+import TextGenerator from "../CodeGenerators/TextGenerator";
+import ImageGenerator from "../CodeGenerators/ImageGenerator";
 
 
-export const navigation: navigationType[] = [
+
+export const Navigation: NavigationItem[] = [
+    //
+    // MAIN ROUTES
+    //
     {
+        type: "route",
         name: "Home",
         href: "/",
         element: <Home />,
-        current: false,
-        requiresAccount: false,
-        includeNavbar: false
+        includeNavBar: true,
+        requiresAuth: false,
+        allowedRoles: ["student", "developer", "teacher", "admin"]
     },
     {
+        type: "route",
         name: "Home",
         href: "/home",
         element: <Home />,
-        current: false,
-        requiresAccount: false,
-        includeNavbar: true
+        includeNavBar: false,
+        requiresAuth: false,
+        allowedRoles: ["student", "developer", "teacher", "admin"]
     },
-
     {
+        type: "route",
         name: "Questions",
         href: "/questions",
         element: <QuestionViewPage />,
-        current: false,
-        requiresAccount: false,
-        includeNavbar: true
+        includeNavBar: true,
+        requiresAuth: false,
+        allowedRoles: ["student", "developer", "teacher", "admin"]
     },
-    // {
-    //     name: "Create Question",
-    //     href: "/createQuestion",
-    //     element: <CreateQuestionPage />,
-    //     current: false,
-    //     requiresAccount: false,
-    //     includeNavbar: true
-    // },
+
+    //
+    // GENERATORS DROPDOWN
+    //
     {
+        type: "dropdown",
         name: "Generators",
-        href: "/generators",
-        current: false,
-        requiresAccount: true,
-        includeNavbar: true,
-        dropdown: true,
-        dropdownItems: [
+        includeNavBar: true,
+        requiresAuth: true,
+        allowedRoles: ["developer", "teacher", "admin"],
+        items: [
             {
                 name: "Text",
                 href: "/generators/text_generator",
                 element: <TextGenerator />,
+                allowedRoles: ["developer", "teacher", "admin"]
             },
             {
-                name: "ImageUpload",
+                name: "Image Upload",
                 href: "/generators/image_generator",
                 element: <ImageGenerator />,
+                allowedRoles: ["developer", "teacher", "admin"]
             },
         ],
     },
+
+    //
+    // CHAT
+    //
     {
+        type: "route",
         name: "Chat",
         href: "/chat",
         element: <ChatPage />,
-        current: false,
-        requiresAccount: false,
-        includeNavbar: true
+        includeNavBar: true,
+        requiresAuth: false,
+        allowedRoles: ["developer", "teacher", "admin"]
     },
+
+    //
+    // ACCOUNT PAGE
+    //
     {
+        type: "route",
         name: "My Account",
         href: "/account",
         element: <AccountPage />,
-        current: false,
-        requiresAccount: true,
-        includeNavbar: false
+        includeNavBar: false,   // Hidden from Navbar
+        requiresAuth: true,     // Protected route
+        allowedRoles: ["developer", "teacher", "admin", "student"]
     }
 ];
 
-export function handleRoutes(navigation: navigationType[]) {
-    return navigation.map((nav) =>
-        nav.dropdown ? (
-            nav.dropdownItems?.map((dI) => (
-                <Route path={dI.href} element={dI.element}></Route>
-            ))
-        ) : (
-            <Route path={nav.href} element={nav.element}></Route>
-        )
-    );
-}
