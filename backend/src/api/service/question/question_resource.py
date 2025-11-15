@@ -1,13 +1,16 @@
-from typing import List, Optional, Annotated
+from functools import lru_cache
+from typing import Annotated, List, Optional
 from fastapi import Depends
 from src.api.core import logger
 from src.api.dependencies import StorageType, StorageTypeDep
 from src.api.models import FileData, QuestionData
 from src.api.models.models import Question
-from src.api.service.question_manager import QuestionManager, QuestionManagerDependency
-from src.api.service.storage_manager import StorageService, StorageDependency
+from src.api.service.question.question_manager import (
+    QuestionManager,
+    QuestionManagerDependency,
+)
+from src.api.service.storage_manager import StorageDependency, StorageService
 from src.utils import safe_dir_name
-from functools import lru_cache
 
 
 class QuestionResourceService:
@@ -73,4 +76,6 @@ def get_question_resource(
     return QuestionResourceService(qm, storage, storage_type)
 
 
-QuestionResourceDepencency = Annotated[QuestionResourceService, Depends(get_question_resource)]
+QuestionResourceDepencency = Annotated[
+    QuestionResourceService, Depends(get_question_resource)
+]

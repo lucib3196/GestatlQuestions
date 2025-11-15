@@ -7,8 +7,9 @@ import ImageGenerator from "../CodeGenerators/ImageGenerator";
 import TextGenerator from "../CodeGenerators/TextGenerator";
 import Home from "../../pages/Home";
 import type { navigationType } from "../../types/navbarTypes";
-import UserPage from "../Auth/UserPage";
 import ChatPage from "../../pages/ChatPage";
+import AccountPage from "../Account/AccountPage";
+
 
 export const navigation: navigationType[] = [
     {
@@ -75,7 +76,7 @@ export const navigation: navigationType[] = [
     {
         name: "My Account",
         href: "/account",
-        element: <UserPage />,
+        element: <AccountPage />,
         current: false,
         requiresAccount: true,
         includeNavbar: false
