@@ -257,7 +257,7 @@ function QuestionCreationForm({ onFinish }: FormProps) {
 
                 {/* Submit */}
                 <div className="flex justify-center">
-                    <MyButton name="Create Question" btype="submit" />
+                    <MyButton name="Create Question" type="submit" />
                 </div>
             </form>
         </div>

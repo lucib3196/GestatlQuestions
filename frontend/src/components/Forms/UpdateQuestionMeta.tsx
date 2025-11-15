@@ -138,7 +138,7 @@ export default function QuestionUpdateForm() {
                     </label>
                 </div>
 
-                <MyButton name="Submit" btype="submit" />
+                <MyButton name="Submit" type="submit" />
             </form>
         </div>
     );
