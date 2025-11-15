@@ -3,6 +3,7 @@ import { getIdToken } from "firebase/auth";
 import api from "./client";
 
 export type UserRole = "admin" | "teacher" | "developer" | "student";
+export type AllowedRoles = readonly UserRole[];
 
 export type UserDB = {
   id?: string;
